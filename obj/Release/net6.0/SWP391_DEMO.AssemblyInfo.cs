@@ -12,9 +12,9 @@ using System;
 using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("SWP391_DEMO")]
-[assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
+[assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7b8b6dd22b91ce7da23f5b1e69fd24fb1492767b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+14c65d1e059cf3b6f15daca9a24c171b7837309f")]
 [assembly: System.Reflection.AssemblyProductAttribute("SWP391_DEMO")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SWP391_DEMO")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
