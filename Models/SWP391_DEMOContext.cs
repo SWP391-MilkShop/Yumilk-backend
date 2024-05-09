@@ -7,13 +7,15 @@ namespace SWP391_DEMO.Models
 {
     public partial class SWP391_DEMOContext : DbContext
     {
+        private readonly IConfiguration _configuration;
         public SWP391_DEMOContext()
         {
         }
 
-        public SWP391_DEMOContext(DbContextOptions<SWP391_DEMOContext> options)
+        public SWP391_DEMOContext(DbContextOptions<SWP391_DEMOContext> options, IConfiguration configuration)
             : base(options)
         {
+            _configuration = configuration;
         }
 
         public virtual DbSet<Cart> Carts { get; set; } = null!;
@@ -34,8 +36,7 @@ namespace SWP391_DEMO.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Data Source=PANHVU04\\SQLEXPRESS;User ID=sa;Password=12345;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False;Database=SWP391_DEMO");
+                optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
             }
         }
 
