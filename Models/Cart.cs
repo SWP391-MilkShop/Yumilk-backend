@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SWP391_DEMO.Models
+namespace SWP391_DEMO.Models;
+
+public partial class Cart
 {
-    public partial class Cart
-    {
-        public Cart()
-        {
-            CartItems = new HashSet<CartItem>();
-        }
+    public int Id { get; set; }
 
-        public int Id { get; set; }
-        public Guid? UserId { get; set; }
-        public DateTime? DeletedAt { get; set; }
+    public Guid? CustomerId { get; set; }
 
-        public virtual User? User { get; set; }
-        public virtual ICollection<CartItem> CartItems { get; set; }
-    }
+    public bool? IsActive { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
+
+    public virtual ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
+
+    public virtual Customer? Customer { get; set; }
 }

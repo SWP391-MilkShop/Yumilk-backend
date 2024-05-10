@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SWP391_DEMO.Models
+namespace SWP391_DEMO.Models;
+
+public partial class Role
 {
-    public partial class Role
-    {
-        public Role()
-        {
-            Users = new HashSet<User>();
-        }
+    public int Id { get; set; }
 
-        public int Id { get; set; }
-        public string? Name { get; set; }
+    public string Name { get; set; } = null!;
 
-        public virtual ICollection<User> Users { get; set; }
-    }
+    public string? Description { get; set; }
+
+    public bool? IsActive { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
+
+    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

@@ -1,31 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SWP391_DEMO.Models
+namespace SWP391_DEMO.Models;
+
+public partial class Product
 {
-    public partial class Product
-    {
-        public Product()
-        {
-            CartItems = new HashSet<CartItem>();
-            OrderItems = new HashSet<OrderItem>();
-            ProductImages = new HashSet<ProductImage>();
-        }
+    public Guid Id { get; set; }
 
-        public int Id { get; set; }
-        public string Name { get; set; } = null!;
-        public string? Description { get; set; }
-        public int? Quantity { get; set; }
-        public decimal? Price { get; set; }
-        public int? Discount { get; set; }
-        public int? CategoryId { get; set; }
-        public bool? IsActive { get; set; }
-        public DateTime? DeletedAt { get; set; }
+    public string? Name { get; set; }
 
-        public virtual Category? Category { get; set; }
-        public virtual ProductAnalytic? ProductAnalytic { get; set; }
-        public virtual ICollection<CartItem> CartItems { get; set; }
-        public virtual ICollection<OrderItem> OrderItems { get; set; }
-        public virtual ICollection<ProductImage> ProductImages { get; set; }
-    }
+    public string? Description { get; set; }
+
+    public int? Quantity { get; set; }
+
+    public decimal? OriginalPrice { get; set; }
+
+    public decimal? SalePrice { get; set; }
+
+    public int? CategoryId { get; set; }
+
+    public int? BrandId { get; set; }
+
+    public int? UnitId { get; set; }
+
+    public bool? IsActive { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
+
+    public virtual Brand? Brand { get; set; }
+
+    public virtual ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
+
+    public virtual Category? Category { get; set; }
+
+    public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
+    public virtual ICollection<ProductAnalytic> ProductAnalytics { get; set; } = new List<ProductAnalytic>();
+
+    public virtual ICollection<ProductAttributeValue> ProductAttributeValues { get; set; } = new List<ProductAttributeValue>();
+
+    public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
+
+    public virtual Unit? Unit { get; set; }
 }
