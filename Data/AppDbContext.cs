@@ -12,7 +12,7 @@ namespace SWP391_DEMO.Data {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             var configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.Development.json").Build();
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DBConnectionString"));
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
