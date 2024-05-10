@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SWP391_DEMO.Models;
+namespace SWP391_DEMO.Entities;
 
-public partial class Category
+public partial class Brand
 {
     public int Id { get; set; }
 

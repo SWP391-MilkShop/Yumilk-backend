@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SWP391_DEMO.Models;
+namespace SWP391_DEMO.Entities;
 
 public partial class Order
 {
