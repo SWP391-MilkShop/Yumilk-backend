@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace SWP391_DEMO.Entities;
-
+[Table("Products")]
 public partial class Product
 {
+    [Key]
     public Guid Id { get; set; }
 
     public string? Name { get; set; }

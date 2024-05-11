@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SWP391_DEMO.Entities;
-
+[Table("Brands")]
 public partial class Brand
 {
+    [Key]
     public int Id { get; set; }
 
     public string Name { get; set; } = null!;

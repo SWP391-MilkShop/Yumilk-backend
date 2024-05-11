@@ -1,6 +1,4 @@
 ﻿using Microsoft.OpenApi.Models;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using SWP391_DEMO.Data;
 using SWP391_DEMO.Infrastructure;
@@ -82,7 +80,6 @@ namespace SWP391_DEMO
 
         private void AddDI(IServiceCollection services)
         {
-
         }
     }
 }
