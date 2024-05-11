@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SWP391_DEMO.Entities;
-[Table("RefreshTokens")]
+[Table("roles")]
 public partial class Role
 {
     [Key]

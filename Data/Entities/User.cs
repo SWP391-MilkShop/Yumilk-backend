@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SWP391_DEMO.Entities;
-[Table("Users")]
+[Table("users")]
 public partial class User
 {
     [Key]
