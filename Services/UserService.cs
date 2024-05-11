@@ -7,6 +7,7 @@ namespace SWP391_DEMO.Service
     public interface IUserService
     {
         List<UserModel> GetAllUser();
+        UserModel? GetUserById(Guid id);
     }
     public class UserService : IUserService
     {
@@ -14,17 +15,6 @@ namespace SWP391_DEMO.Service
         public UserService(IUserRepository userRepository)
         {
             _userRepository = userRepository;
-        }
-        public List<UserModel> GetAllUser()
-        {
-            var users = _userRepository.GetAllUser();
-            var models = new List<UserModel>();
-            foreach (var user in users)
-            {
-                var model = ToUserModel(user);
-                models.Add(model);
-            }
-            return models;
         }
         /// <summary>
         /// This method is used to convert User to UserModel
@@ -41,6 +31,28 @@ namespace SWP391_DEMO.Service
                 VerificationToken = user.VerificationToken,
                 RoleId = user.RoleId
             };
+            return model;
+        }
+        public List<UserModel> GetAllUser()
+        {
+            var users = _userRepository.GetAllUser();
+            var models = new List<UserModel>();
+            foreach (var user in users)
+            {
+                var model = ToUserModel(user);
+                models.Add(model);
+            }
+            return models;
+        }
+        
+        public UserModel? GetUserById(Guid id)
+        {
+            var user = _userRepository.GetUserById(id);
+            if (user == null)
+            {
+                return null;
+            }
+            var model = ToUserModel(user);
             return model;
         }
     }
