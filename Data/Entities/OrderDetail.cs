@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿using System.ComponentModel.DataAnnotations.Schema;
 namespace SWP391_DEMO.Entities;
-
+[Table("OrderDetails")]
 public partial class OrderDetail
 {
     public Guid OrderId { get; set; }

@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SWP391_DEMO.Entities;
-
+[Table("RefreshTokens")]
 public partial class RefreshToken
 {
+    [Key]
     public int Id { get; set; }
 
     public string? Token { get; set; }
