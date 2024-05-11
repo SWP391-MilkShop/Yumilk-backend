@@ -3,38 +3,33 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using SWP391_DEMO.Data;
+using SWP391_DEMO.Repository;
+using SWP391_DEMO.Services;
 
-namespace SWP391_DEMO
-{
-    public class Startup
-    {
+namespace SWP391_DEMO {
+    public class Startup {
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _env;
 
-        public Startup(WebApplicationBuilder builder, IWebHostEnvironment env)
-        {
+        public Startup(WebApplicationBuilder builder, IWebHostEnvironment env) {
             _configuration = builder.Configuration;
             _env = env;
         }
 
-        public void ConfigureServices(IServiceCollection services)
-        {
+        public void ConfigureServices(IServiceCollection services) {
             services.AddControllers();
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen(o =>
-            {
+            services.AddSwaggerGen(o => {
                 o.SwaggerDoc("v1", new OpenApiInfo { Title = "SWP391_DEMO", Version = "v1" });
             });
 
-            services.Configure<RouteOptions>(options =>
-            {
+            services.Configure<RouteOptions>(options => {
                 options.AppendTrailingSlash = false;
                 options.LowercaseUrls = true;
                 options.LowercaseQueryStrings = false;
             });
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
-            if (connectionString == null)
-            {
+            if (connectionString == null) {
                 throw new InvalidOperationException("Could not find connection string 'DefaultConnection'");
             }
             AddDI(services);
@@ -52,18 +47,14 @@ namespace SWP391_DEMO
             //});
         }
 
-        public void Configure(WebApplication app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
+        public void Configure(WebApplication app, IWebHostEnvironment env) {
+            if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
             }
             var isUserSwagger = _configuration.GetValue<bool>("UseSwagger", false);
-            if (isUserSwagger)
-            {
+            if (isUserSwagger) {
                 app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
+                app.UseSwaggerUI(c => {
                     c.DefaultModelsExpandDepth(-1);
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "SWP391_DEMO v1");
                 });
@@ -78,9 +69,9 @@ namespace SWP391_DEMO
             //});
         }
 
-        private void AddDI(IServiceCollection services)
-        {
-
+        private void AddDI(IServiceCollection services) {
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IProductService, ProductService>();
         }
     }
 }
