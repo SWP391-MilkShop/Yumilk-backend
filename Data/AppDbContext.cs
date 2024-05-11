@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SWP391_DEMO.Entities;
 
 namespace SWP391_DEMO.Data {
     public class AppDbContext : DbContext {
@@ -12,6 +13,11 @@ namespace SWP391_DEMO.Data {
         public AppDbContext()
         {
         }
+
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<Customer> Customers { get; set; }
+        public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             if (optionsBuilder.IsConfigured)
