@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SWP391_DEMO.Entities;
-
+[Table("ProductAttributeValues")]
 public partial class ProductAttributeValue
 {
     public Guid ProductId { get; set; }

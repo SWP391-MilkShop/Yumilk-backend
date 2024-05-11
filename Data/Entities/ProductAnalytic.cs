@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SWP391_DEMO.Entities;
-
+[Table("ProductAnalytics")]
 public partial class ProductAnalytic
 {
+    [Key]
     public int Id { get; set; }
 
     public Guid? ProductId { get; set; }

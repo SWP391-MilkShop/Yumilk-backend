@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SWP391_DEMO.Entities;
-
+[Table("CartDetails")]
 public partial class CartDetail
 {
     public int CartId { get; set; }
-
     public Guid ProductId { get; set; }
 
     public int? Quantity { get; set; }
