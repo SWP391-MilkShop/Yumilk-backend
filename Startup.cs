@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using SWP391_DEMO.Data;
+using SWP391_DEMO.Infrastructure;
 
 namespace SWP391_DEMO
 {
@@ -39,6 +40,7 @@ namespace SWP391_DEMO
             }
             AddDI(services);
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+            services.AddExceptionHandler<GlobalExceptionHandler>();
             //services.AddAuthentication("Bearer").AddJwtBearer(o =>
             //{
             //    o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
