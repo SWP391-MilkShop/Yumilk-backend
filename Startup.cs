@@ -82,7 +82,7 @@ namespace SWP391_DEMO
             }
             app.MapControllers();
             app.UseRouting();
-            app.UseCors(); //luon dat truoc app.UseAuthorization()
+            app.UseCors("DefaultPolicy"); //luon dat truoc app.UseAuthorization()
             app.UseAuthorization();
             // ko biet sao cai nay no keu violate ASP0014, keu map route truc tiep trong api luon
             //app.UseEndpoints(endpoint =>
