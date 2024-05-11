@@ -1,3 +1,5 @@
+using Serilog;
+
 namespace SWP391_DEMO
 {
     public class Program
@@ -5,6 +7,9 @@ namespace SWP391_DEMO
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            // Write log
+            _ = builder.Host.UseSerilog((hostContext, loggerConfiguration) =>
+            _ = loggerConfiguration.ReadFrom.Configuration(builder.Configuration));
             // Add services to the container.
             var startup = new Startup(builder, builder.Environment);
             startup.ConfigureServices(builder.Services);
@@ -17,4 +22,4 @@ namespace SWP391_DEMO
         }
     }
 }
-   
+
