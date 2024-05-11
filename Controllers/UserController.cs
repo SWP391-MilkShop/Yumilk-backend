@@ -28,5 +28,13 @@ namespace SWP391_DEMO.Controller
             var result = _userService.GetUserById(id);
             return Ok(result);
         }
+        [HttpGet]
+        [Route("api/[controller]/role/{roleId}")]
+        public IActionResult GetUserByRoleId(int roleId)
+        {
+            _logger.LogInformation("Get user by role Id");
+            var result = _userService.GetUserByRoleId(roleId);
+            return Ok(result);
+        }
     }
 }

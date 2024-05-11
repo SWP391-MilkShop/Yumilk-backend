@@ -7,6 +7,7 @@ namespace SWP391_DEMO.Repository
     {
         List<User> GetAllUser();
         User? GetUserById(Guid id);
+        List<User> GetUserByRoleId(int roleId);
     }
     public class UserRepository : IUserRepository
     {
@@ -33,6 +34,18 @@ namespace SWP391_DEMO.Repository
             try
             {
                 return _context.Users.FirstOrDefault(x => x.Id == id);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public List<User> GetUserByRoleId(int roleId)
+        {
+            try
+            {
+                return _context.Users.Where(x => x.RoleId == roleId).ToList();
             }
             catch (Exception e)
             {

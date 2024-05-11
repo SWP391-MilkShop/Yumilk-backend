@@ -8,6 +8,7 @@ namespace SWP391_DEMO.Service
     {
         List<UserModel> GetAllUser();
         UserModel? GetUserById(Guid id);
+        List<UserModel> GetUserByRoleId(int roleId);
     }
     public class UserService : IUserService
     {
@@ -54,6 +55,18 @@ namespace SWP391_DEMO.Service
             }
             var model = ToUserModel(user);
             return model;
+        }
+
+        public List<UserModel> GetUserByRoleId(int roleId)
+        {
+            var users = _userRepository.GetUserByRoleId(roleId);
+            var models = new List<UserModel>();
+            foreach (var user in users)
+            {
+                var model = ToUserModel(user);
+                models.Add(model);
+            }
+            return models;
         }
     }
 }
