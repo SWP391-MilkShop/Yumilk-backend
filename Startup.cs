@@ -41,6 +41,16 @@ namespace SWP391_DEMO
             AddDI(services);
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
             services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddCors(services =>
+            {
+                services.AddPolicy("DefaultPolicy", builder =>
+                {
+                    //cho nay de domain web cua minh
+                    builder.WithOrigins("https://localhost:5000", "http://localhost:5001") // Allow only these origins
+                        .WithMethods("GET", "POST", "PUT", "DELETE") // Allow only these methods
+                        .AllowAnyHeader();
+                });
+            });
             //services.AddAuthentication("Bearer").AddJwtBearer(o =>
             //{
             //    o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
@@ -72,6 +82,7 @@ namespace SWP391_DEMO
             }
             app.MapControllers();
             app.UseRouting();
+            app.UseCors(); //luon dat truoc app.UseAuthorization()
             app.UseAuthorization();
             // ko biet sao cai nay no keu violate ASP0014, keu map route truc tiep trong api luon
             //app.UseEndpoints(endpoint =>
