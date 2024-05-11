@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SWP391_DEMO.Entities;
+
 [Table("ProductAttributes")]
 public partial class ProductAttribute
 {
@@ -18,5 +19,6 @@ public partial class ProductAttribute
 
     public DateTime? DeletedAt { get; set; }
 
-    public virtual ICollection<ProductAttributeValue> ProductAttributeValues { get; set; } = new List<ProductAttributeValue>();
+    public virtual ICollection<ProductAttributeValue> ProductAttributeValues { get; set; } =
+        new List<ProductAttributeValue>();
 }

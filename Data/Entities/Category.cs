@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SWP391_DEMO.Entities;
+
 [Table("Categories")]
 public partial class Category
 {

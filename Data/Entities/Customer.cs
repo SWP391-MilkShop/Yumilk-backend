@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SWP391_DEMO.Entities;
+
 [Table("Customers")]
 public partial class Customer
 {
@@ -20,7 +21,8 @@ public partial class Customer
 
     public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
 
-    public virtual ICollection<CustomerAddress> CustomerAddresses { get; set; } = new List<CustomerAddress>();
+    public virtual ICollection<CustomerAddress> CustomerAddresses { get; set; } =
+        new List<CustomerAddress>();
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 

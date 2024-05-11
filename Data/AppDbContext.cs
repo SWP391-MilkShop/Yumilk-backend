@@ -5,12 +5,12 @@ namespace SWP391_DEMO.Data
 {
     public class AppDbContext : DbContext
     {
-
         private readonly IConfiguration _configuration;
-        public AppDbContext()
-        {
-        }
-        public AppDbContext(DbContextOptions options, IConfiguration configuration) : base(options)
+
+        public AppDbContext() { }
+
+        public AppDbContext(DbContextOptions options, IConfiguration configuration)
+            : base(options)
         {
             _configuration = configuration;
         }
@@ -36,12 +36,13 @@ namespace SWP391_DEMO.Data
         public virtual DbSet<Voucher> Vouchers { get; set; }
         public virtual DbSet<UserVoucher> UserVouchers { get; set; }
 
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
+                optionsBuilder.UseSqlServer(
+                    _configuration.GetConnectionString("DefaultConnection")
+                );
             }
         }
 
@@ -49,954 +50,1018 @@ namespace SWP391_DEMO.Data
         {
             base.OnModelCreating(modelBuilder);
             ////////////////////////////////////////////////////////////////
-            modelBuilder.Entity("SWP391_DEMO.Entities.Brand", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Brand",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime?>("CreatedAt")
-                    .HasColumnName("created_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(2000)");
+                    b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<string>("Name")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(255)");
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("brands");
-            });
+                    b.ToTable("brands");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Cart", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Cart",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime?>("CreatedAt")
-                     .HasColumnName("created_at")
-                     .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<Guid?>("CustomerId")
-                    .HasColumnName("customer_id")
-                    .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnName("customer_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId");
 
-                b.ToTable("carts");
-            });
+                    b.ToTable("carts");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.CartDetail", b => {
-                b.Property<int>("CartId")
-                    .HasColumnName("cart_id")
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.CartDetail",
+                b =>
+                {
+                    b.Property<int>("CartId").HasColumnName("cart_id").HasColumnType("int");
 
-                b.Property<Guid>("ProductId")
-                    .HasColumnName("product_id")
-                    .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnName("product_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<int?>("Quantity")
-                    .HasColumnType("int");
+                    b.Property<int?>("Quantity").HasColumnType("int");
 
-                b.HasKey("CartId", "ProductId");
+                    b.HasKey("CartId", "ProductId");
 
-                b.HasIndex("ProductId");
+                    b.HasIndex("ProductId");
 
-                b.ToTable("cart_details");
-            });
+                    b.ToTable("cart_details");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Category", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Category",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime?>("CreatedAt")
-                    .HasColumnName("created_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(2000)");
+                    b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<string>("Name")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(255)");
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("categories");
-            });
+                    b.ToTable("categories");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Customer", b => {
-                b.Property<Guid>("UserId")
-                    .HasColumnName("user_id")
-                    .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Customer",
+                b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnName("user_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.Property<string>("Email")
-                    .HasColumnType("nvarchar(255)");
+                    b.Property<string>("Email").HasColumnType("nvarchar(255)");
 
-                b.Property<string>("GoogleId")
-                    .HasColumnName("google_id")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("GoogleId")
+                        .HasColumnName("google_id")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("PhoneNumber")
-                    .HasColumnName("phone_number")
-                    .HasColumnType("nvarchar(20)");
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnName("phone_number")
+                        .HasColumnType("nvarchar(20)");
 
-                b.Property<int?>("Points")
-                    .HasColumnType("int");
+                    b.Property<int?>("Points").HasColumnType("int");
 
-                b.Property<string>("ProfilePictureUrl")
-                    .HasColumnName("profile_picture_url")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasColumnName("profile_picture_url")
+                        .HasColumnType("nvarchar(max)");
 
-                b.HasKey("UserId");
+                    b.HasKey("UserId");
 
-                b.ToTable("customers");
-            });
+                    b.ToTable("customers");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.CustomerAddress", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.CustomerAddress",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<string>("Address")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Address").HasColumnType("nvarchar(max)");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("PhoneNumber")
-                    .HasColumnName("phone_number")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnName("phone_number")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<Guid?>("UserId")
-                    .HasColumnName("user_id")
-                    .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnName("user_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("UserId");
+                    b.HasIndex("UserId");
 
-                b.ToTable("customer_addresses");
-            });
+                    b.ToTable("customer_addresses");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Order", b => {
-                b.Property<Guid>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Order",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
 
-                b.Property<string>("Address")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Address").IsRequired().HasColumnType("nvarchar(max)");
 
-                b.Property<DateTime?>("CreatedAt")
-                    .HasColumnName("created_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<Guid?>("CustomerId")
-                    .HasColumnName("customer_id")
-                    .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnName("customer_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Note")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Note").HasColumnType("nvarchar(max)");
 
-                b.Property<string>("PhoneNumber")
-                    .IsRequired()
-                    .HasColumnName("phone_number")
-                    .HasColumnType("nvarchar(20)");
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnName("phone_number")
+                        .HasColumnType("nvarchar(20)");
 
-                b.Property<decimal?>("ShippingFee")
-                    .HasColumnName("shipping_fee")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("ShippingFee")
+                        .HasColumnName("shipping_fee")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<int?>("StatusId")
-                    .HasColumnName("status_id")
-                    .HasColumnType("int");
+                    b.Property<int?>("StatusId").HasColumnName("status_id").HasColumnType("int");
 
-                b.Property<decimal?>("TotalAmount")
-                    .HasColumnName("total_amount")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("TotalAmount")
+                        .HasColumnName("total_amount")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<decimal?>("TotalPrice")
-                    .HasColumnName("total_price")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("TotalPrice")
+                        .HasColumnName("total_price")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<int?>("VoucherId")
-                    .HasColumnName("voucher_id")
-                    .HasColumnType("int");
+                    b.Property<int?>("VoucherId").HasColumnName("voucher_id").HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId");
 
-                b.HasIndex("StatusId");
+                    b.HasIndex("StatusId");
 
-                b.HasIndex("VoucherId");
+                    b.HasIndex("VoucherId");
 
-                b.ToTable("orders");
-            });
+                    b.ToTable("orders");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.OrderDetail", b => {
-                b.Property<Guid>("OrderId")
-                    .HasColumnName("order_id")
-                    .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.OrderDetail",
+                b =>
+                {
+                    b.Property<Guid>("OrderId")
+                        .HasColumnName("order_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.Property<Guid>("ProductId")
-                    .HasColumnName("product_id")
-                    .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnName("product_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<decimal?>("ItemPrice")
-                    .HasColumnName("item_price")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("ItemPrice")
+                        .HasColumnName("item_price")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<string>("ProductName")
-                    .HasColumnName("product_name")
-                    .HasColumnType("nvarchar(255)");
+                    b.Property<string>("ProductName")
+                        .HasColumnName("product_name")
+                        .HasColumnType("nvarchar(255)");
 
-                b.Property<int?>("Quantity")
-                    .HasColumnType("int");
+                    b.Property<int?>("Quantity").HasColumnType("int");
 
-                b.Property<decimal?>("UnitPrice")
-                    .HasColumnName("unit_price")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("UnitPrice")
+                        .HasColumnName("unit_price")
+                        .HasColumnType("decimal(18,2)");
 
-                b.HasKey("OrderId", "ProductId");
+                    b.HasKey("OrderId", "ProductId");
 
-                b.HasIndex("ProductId");
+                    b.HasIndex("ProductId");
 
-                b.ToTable("order_details");
-            });
+                    b.ToTable("order_details");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.OrderStatus", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.OrderStatus",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime?>("CreatedAt")
-                    .HasColumnName("created_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(2000)");
+                    b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<string>("Name")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(255)");
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("order_statuses");
-            });
+                    b.ToTable("order_statuses");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Product", b => {
-                b.Property<Guid>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Product",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
 
-                b.Property<int?>("BrandId")
-                    .HasColumnName("brand_id")
-                    .HasColumnType("int");
+                    b.Property<int?>("BrandId").HasColumnName("brand_id").HasColumnType("int");
 
-                b.Property<int?>("CategoryId")
-                    .HasColumnName("category_id")
-                    .HasColumnType("int");
+                    b.Property<int?>("CategoryId")
+                        .HasColumnName("category_id")
+                        .HasColumnType("int");
 
-                b.Property<DateTime?>("CreatedAt")
-                    .HasColumnName("created_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(2000)");
+                    b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<string>("Name")
-                    .HasColumnType("nvarchar(255)");
+                    b.Property<string>("Name").HasColumnType("nvarchar(255)");
 
-                b.Property<decimal?>("OriginalPrice")
-                    .HasColumnName("original_price")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("OriginalPrice")
+                        .HasColumnName("original_price")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<int?>("Quantity")
-                    .HasColumnType("int");
+                    b.Property<int?>("Quantity").HasColumnType("int");
 
-                b.Property<decimal?>("SalePrice")
-                    .HasColumnName("sale_price")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("SalePrice")
+                        .HasColumnName("sale_price")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<int?>("UnitId")
-                    .HasColumnName("unit_id")
-                    .HasColumnType("int");
+                    b.Property<int?>("UnitId").HasColumnName("unit_id").HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("BrandId");
+                    b.HasIndex("BrandId");
 
-                b.HasIndex("CategoryId");
+                    b.HasIndex("CategoryId");
 
-                b.HasIndex("UnitId");
+                    b.HasIndex("UnitId");
 
-                b.ToTable("products");
-            });
+                    b.ToTable("products");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAnalytic", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.ProductAnalytic",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime?>("CreatedAt")
-                    .HasColumnName("created_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<Guid?>("ProductId")
-                    .HasColumnName("product_id")
-                    .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnName("product_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.Property<int?>("PurchaseCount")
-                    .HasColumnName("purchase_count")
-                    .HasColumnType("int");
+                    b.Property<int?>("PurchaseCount")
+                        .HasColumnName("purchase_count")
+                        .HasColumnType("int");
 
-                b.Property<int?>("ViewCount")
-                    .HasColumnName("view_count")
-                    .HasColumnType("int");
+                    b.Property<int?>("ViewCount").HasColumnName("view_count").HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("ProductId");
+                    b.HasIndex("ProductId");
 
-                b.ToTable("product_analytics");
-            });
+                    b.ToTable("product_analytics");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAttribute", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.ProductAttribute",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime?>("CreatedAt")
-                    .HasColumnName("created_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(2000)");
+                    b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<string>("Name")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(255)");
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("product_attributes");
-            });
+                    b.ToTable("product_attributes");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAttributeValue", b => {
-                b.Property<Guid>("ProductId")
-                    .HasColumnName("product_id")
-                    .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.ProductAttributeValue",
+                b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnName("product_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.Property<int>("AttributeId")
-                    .HasColumnName("attribute_id")
-                    .HasColumnType("int");
+                    b.Property<int>("AttributeId")
+                        .HasColumnName("attribute_id")
+                        .HasColumnType("int");
 
-                b.Property<string>("Value")
-                    .HasColumnType("nvarchar(2000)");
+                    b.Property<string>("Value").HasColumnType("nvarchar(2000)");
 
-                b.HasKey("ProductId", "AttributeId");
+                    b.HasKey("ProductId", "AttributeId");
 
-                b.HasIndex("AttributeId");
+                    b.HasIndex("AttributeId");
 
-                b.ToTable("product_attribute_values");
-            });
+                    b.ToTable("product_attribute_values");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductImage", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.ProductImage",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime?>("CreatedAt")
-                    .HasColumnName("created_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("ImageUrl")
-                    .IsRequired()
-                    .HasColumnName("image_url")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnName("image_url")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<Guid?>("ProductId")
-                    .HasColumnName("product_id")
-                    .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnName("product_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("ProductId");
+                    b.HasIndex("ProductId");
 
-                b.ToTable("product_images");
-            });
+                    b.ToTable("product_images");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.RefreshToken", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.RefreshToken",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime?>("CreatedAt")
-                    .HasColumnName("created_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("Expires")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("Expires").HasColumnType("datetime2");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<string>("Token")
-                    .HasColumnType("nvarchar(255)");
+                    b.Property<string>("Token").HasColumnType("nvarchar(255)");
 
-                b.Property<Guid?>("UserId")
-                    .HasColumnName("user_id")
-                    .HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnName("user_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("UserId");
+                    b.HasIndex("UserId");
 
-                b.ToTable("refresh_tokens");
-            });
+                    b.ToTable("refresh_tokens");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Role", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Role",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime?>("CreatedAt")
-                    .HasColumnName("created_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(2000)");
+                    b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<string>("Name")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(255)");
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("roles");
-            });
+                    b.ToTable("roles");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Unit", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Unit",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime?>("CreatedAt")
-                   .HasColumnName("created_at")
-                   .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(2000)");
+                    b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<string>("Name")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(255)");
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("units");
-            });
+                    b.ToTable("units");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.User", b => {
-                b.Property<Guid>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.User",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
 
-                b.Property<string>("AccessToken")
-                    .HasColumnName("access_token")
-                    .HasColumnType("nvarchar(255)");
+                    b.Property<string>("AccessToken")
+                        .HasColumnName("access_token")
+                        .HasColumnType("nvarchar(255)");
 
-                b.Property<DateTime?>("CreatedAt")
-                   .HasColumnName("created_at")
-                   .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("FirstName")
-                    .HasColumnName("first_name")
-                    .HasColumnType("nvarchar(50)");
+                    b.Property<string>("FirstName")
+                        .HasColumnName("first_name")
+                        .HasColumnType("nvarchar(50)");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<string>("LastName")
-                     .HasColumnName("last_name")
-                    .HasColumnType("nvarchar(50)");
+                    b.Property<string>("LastName")
+                        .HasColumnName("last_name")
+                        .HasColumnType("nvarchar(50)");
 
-                b.Property<string>("Password")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(50)");
+                    b.Property<string>("Password").IsRequired().HasColumnType("nvarchar(50)");
 
-                b.Property<int?>("RoleId")
-                    .HasColumnName("role_id")
-                    .HasColumnType("int");
+                    b.Property<int?>("RoleId").HasColumnName("role_id").HasColumnType("int");
 
-                b.Property<string>("Username")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(50)");
+                    b.Property<string>("Username").IsRequired().HasColumnType("nvarchar(50)");
 
-                b.Property<string>("VerificationToken")
-                    .HasColumnName("verification_token")
-                    .HasColumnType("nvarchar(6)");
+                    b.Property<string>("VerificationToken")
+                        .HasColumnName("verification_token")
+                        .HasColumnType("nvarchar(6)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("RoleId");
+                    b.HasIndex("RoleId");
 
-                b.ToTable("users");
-            });
+                    b.ToTable("users");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.UserVoucher", b => {
-                b.Property<Guid>("CustomerId")
-                    .HasColumnName("customer_id")
-                    .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.UserVoucher",
+                b =>
+                {
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnName("customer_id")
+                        .HasColumnType("uniqueidentifier");
 
-                b.Property<int>("VoucherId")
-                    .HasColumnName("voucher_id")
-                    .HasColumnType("int");
+                    b.Property<int>("VoucherId").HasColumnName("voucher_id").HasColumnType("int");
 
-                b.Property<DateTime?>("CreatedAt")
-                   .HasColumnName("created_at")
-                   .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.HasKey("CustomerId", "VoucherId");
+                    b.HasKey("CustomerId", "VoucherId");
 
-                b.HasIndex("VoucherId");
+                    b.HasIndex("VoucherId");
 
-                b.ToTable("user_vouchers");
-            });
+                    b.ToTable("user_vouchers");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Voucher", b => {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Voucher",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<string>("Code")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(50)");
+                    b.Property<string>("Code").IsRequired().HasColumnType("nvarchar(50)");
 
-                b.Property<DateTime?>("CreatedAt")
-                   .HasColumnName("created_at")
-                   .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnName("created_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnName("deleted_at")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnName("deleted_at")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(2000)");
+                    b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                b.Property<decimal?>("DiscountPercent")
-                    .HasColumnName("discount_percent")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("DiscountPercent")
+                        .HasColumnName("discount_percent")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<DateTime?>("EndDate")
-                    .HasColumnName("end_date")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnName("end_date")
+                        .HasColumnType("datetime2");
 
-                b.Property<bool?>("IsActive")
-                    .HasColumnName("is_active")
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                b.Property<decimal?>("MaxDiscountAmount")
-                    .HasColumnName("max_discount_amount")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("MaxDiscountAmount")
+                        .HasColumnName("max_discount_amount")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<decimal?>("MinOrderValue")
-                    .HasColumnName("min_order_value")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("MinOrderValue")
+                        .HasColumnName("min_order_value")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<DateTime?>("StartDate")
-                    .HasColumnName("start_date")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnName("start_date")
+                        .HasColumnType("datetime2");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("vouchers");
-            });
+                    b.ToTable("vouchers");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Cart", b => {
-                b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
-                    .WithMany("Carts")
-                    .HasForeignKey("CustomerId");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Cart",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
+                        .WithMany("Carts")
+                        .HasForeignKey("CustomerId");
 
-                b.Navigation("Customer");
-            });
+                    b.Navigation("Customer");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.CartDetail", b => {
-                b.HasOne("SWP391_DEMO.Entities.Cart", "Cart")
-                    .WithMany("CartDetails")
-                    .HasForeignKey("CartId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.CartDetail",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.Cart", "Cart")
+                        .WithMany("CartDetails")
+                        .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.HasOne("SWP391_DEMO.Entities.Product", "Product")
-                    .WithMany("CartDetails")
-                    .HasForeignKey("ProductId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                        .WithMany("CartDetails")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("Cart");
+                    b.Navigation("Cart");
 
-                b.Navigation("Product");
-            });
+                    b.Navigation("Product");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Customer", b => {
-                b.HasOne("SWP391_DEMO.Entities.User", "User")
-                    .WithOne("Customer")
-                    .HasForeignKey("SWP391_DEMO.Entities.Customer", "UserId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Customer",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.User", "User")
+                        .WithOne("Customer")
+                        .HasForeignKey("SWP391_DEMO.Entities.Customer", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("User");
-            });
+                    b.Navigation("User");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.CustomerAddress", b => {
-                b.HasOne("SWP391_DEMO.Entities.Customer", "User")
-                    .WithMany("CustomerAddresses")
-                    .HasForeignKey("UserId");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.CustomerAddress",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.Customer", "User")
+                        .WithMany("CustomerAddresses")
+                        .HasForeignKey("UserId");
 
-                b.Navigation("User");
-            });
+                    b.Navigation("User");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Order", b => {
-                b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
-                    .WithMany("Orders")
-                    .HasForeignKey("CustomerId");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Order",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
+                        .WithMany("Orders")
+                        .HasForeignKey("CustomerId");
 
-                b.HasOne("SWP391_DEMO.Entities.OrderStatus", "Status")
-                    .WithMany("Orders")
-                    .HasForeignKey("StatusId");
+                    b.HasOne("SWP391_DEMO.Entities.OrderStatus", "Status")
+                        .WithMany("Orders")
+                        .HasForeignKey("StatusId");
 
-                b.HasOne("SWP391_DEMO.Entities.Voucher", "Voucher")
-                    .WithMany("Orders")
-                    .HasForeignKey("VoucherId");
+                    b.HasOne("SWP391_DEMO.Entities.Voucher", "Voucher")
+                        .WithMany("Orders")
+                        .HasForeignKey("VoucherId");
 
-                b.Navigation("Customer");
+                    b.Navigation("Customer");
 
-                b.Navigation("Status");
+                    b.Navigation("Status");
 
-                b.Navigation("Voucher");
-            });
+                    b.Navigation("Voucher");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.OrderDetail", b => {
-                b.HasOne("SWP391_DEMO.Entities.Order", "Order")
-                    .WithMany("OrderDetails")
-                    .HasForeignKey("OrderId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.OrderDetail",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.Order", "Order")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.HasOne("SWP391_DEMO.Entities.Product", "Product")
-                    .WithMany("OrderDetails")
-                    .HasForeignKey("ProductId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("Order");
+                    b.Navigation("Order");
 
-                b.Navigation("Product");
-            });
+                    b.Navigation("Product");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Product", b => {
-                b.HasOne("SWP391_DEMO.Entities.Brand", "Brand")
-                    .WithMany("Products")
-                    .HasForeignKey("BrandId");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Product",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.Brand", "Brand")
+                        .WithMany("Products")
+                        .HasForeignKey("BrandId");
 
-                b.HasOne("SWP391_DEMO.Entities.Category", "Category")
-                    .WithMany("Products")
-                    .HasForeignKey("CategoryId");
+                    b.HasOne("SWP391_DEMO.Entities.Category", "Category")
+                        .WithMany("Products")
+                        .HasForeignKey("CategoryId");
 
-                b.HasOne("SWP391_DEMO.Entities.Unit", "Unit")
-                    .WithMany("Products")
-                    .HasForeignKey("UnitId");
+                    b.HasOne("SWP391_DEMO.Entities.Unit", "Unit")
+                        .WithMany("Products")
+                        .HasForeignKey("UnitId");
 
-                b.Navigation("Brand");
+                    b.Navigation("Brand");
 
-                b.Navigation("Category");
+                    b.Navigation("Category");
 
-                b.Navigation("Unit");
-            });
+                    b.Navigation("Unit");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAnalytic", b => {
-                b.HasOne("SWP391_DEMO.Entities.Product", "Product")
-                    .WithMany("ProductAnalytics")
-                    .HasForeignKey("ProductId");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.ProductAnalytic",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                        .WithMany("ProductAnalytics")
+                        .HasForeignKey("ProductId");
 
-                b.Navigation("Product");
-            });
+                    b.Navigation("Product");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAttributeValue", b => {
-                b.HasOne("SWP391_DEMO.Entities.ProductAttribute", "Attribute")
-                    .WithMany("ProductAttributeValues")
-                    .HasForeignKey("AttributeId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.ProductAttributeValue",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.ProductAttribute", "Attribute")
+                        .WithMany("ProductAttributeValues")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.HasOne("SWP391_DEMO.Entities.Product", "Product")
-                    .WithMany("ProductAttributeValues")
-                    .HasForeignKey("ProductId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                        .WithMany("ProductAttributeValues")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("Attribute");
+                    b.Navigation("Attribute");
 
-                b.Navigation("Product");
-            });
+                    b.Navigation("Product");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductImage", b => {
-                b.HasOne("SWP391_DEMO.Entities.Product", "Product")
-                    .WithMany("ProductImages")
-                    .HasForeignKey("ProductId");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.ProductImage",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                        .WithMany("ProductImages")
+                        .HasForeignKey("ProductId");
 
-                b.Navigation("Product");
-            });
+                    b.Navigation("Product");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.RefreshToken", b => {
-                b.HasOne("SWP391_DEMO.Entities.User", "User")
-                    .WithMany("RefreshTokens")
-                    .HasForeignKey("UserId");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.RefreshToken",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId");
 
-                b.Navigation("User");
-            });
+                    b.Navigation("User");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.User", b => {
-                b.HasOne("SWP391_DEMO.Entities.Role", "Role")
-                    .WithMany("Users")
-                    .HasForeignKey("RoleId");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.User",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId");
 
-                b.Navigation("Role");
-            });
+                    b.Navigation("Role");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.UserVoucher", b => {
-                b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
-                    .WithMany("UserVouchers")
-                    .HasForeignKey("CustomerId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.UserVoucher",
+                b =>
+                {
+                    b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
+                        .WithMany("UserVouchers")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.HasOne("SWP391_DEMO.Entities.Voucher", "Voucher")
-                    .WithMany("UserVouchers")
-                    .HasForeignKey("VoucherId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.HasOne("SWP391_DEMO.Entities.Voucher", "Voucher")
+                        .WithMany("UserVouchers")
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("Customer");
+                    b.Navigation("Customer");
 
-                b.Navigation("Voucher");
-            });
+                    b.Navigation("Voucher");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Brand", b => {
-                b.Navigation("Products");
-            });
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Brand",
+                b =>
+                {
+                    b.Navigation("Products");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Cart", b => {
-                b.Navigation("CartDetails");
-            });
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Cart",
+                b =>
+                {
+                    b.Navigation("CartDetails");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Category", b => {
-                b.Navigation("Products");
-            });
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Category",
+                b =>
+                {
+                    b.Navigation("Products");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Customer", b => {
-                b.Navigation("Carts");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Customer",
+                b =>
+                {
+                    b.Navigation("Carts");
 
-                b.Navigation("CustomerAddresses");
+                    b.Navigation("CustomerAddresses");
 
-                b.Navigation("Orders");
+                    b.Navigation("Orders");
 
-                b.Navigation("UserVouchers");
-            });
+                    b.Navigation("UserVouchers");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Order", b => {
-                b.Navigation("OrderDetails");
-            });
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Order",
+                b =>
+                {
+                    b.Navigation("OrderDetails");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.OrderStatus", b => {
-                b.Navigation("Orders");
-            });
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.OrderStatus",
+                b =>
+                {
+                    b.Navigation("Orders");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Product", b => {
-                b.Navigation("CartDetails");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Product",
+                b =>
+                {
+                    b.Navigation("CartDetails");
 
-                b.Navigation("OrderDetails");
+                    b.Navigation("OrderDetails");
 
-                b.Navigation("ProductAnalytics");
+                    b.Navigation("ProductAnalytics");
 
-                b.Navigation("ProductAttributeValues");
+                    b.Navigation("ProductAttributeValues");
 
-                b.Navigation("ProductImages");
-            });
+                    b.Navigation("ProductImages");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAttribute", b => {
-                b.Navigation("ProductAttributeValues");
-            });
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.ProductAttribute",
+                b =>
+                {
+                    b.Navigation("ProductAttributeValues");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Role", b => {
-                b.Navigation("Users");
-            });
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Role",
+                b =>
+                {
+                    b.Navigation("Users");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Unit", b => {
-                b.Navigation("Products");
-            });
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Unit",
+                b =>
+                {
+                    b.Navigation("Products");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.User", b => {
-                b.Navigation("Customer");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.User",
+                b =>
+                {
+                    b.Navigation("Customer");
 
-                b.Navigation("RefreshTokens");
-            });
+                    b.Navigation("RefreshTokens");
+                }
+            );
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Voucher", b => {
-                b.Navigation("Orders");
+            modelBuilder.Entity(
+                "SWP391_DEMO.Entities.Voucher",
+                b =>
+                {
+                    b.Navigation("Orders");
 
-                b.Navigation("UserVouchers");
-            });
+                    b.Navigation("UserVouchers");
+                }
+            );
         }
-        DbSet<User> User {  get; set; }
+
+        DbSet<User> User { get; set; }
         DbSet<Role> Role { get; set; }
         DbSet<RefreshToken> RefreshToken { get; set; }
         DbSet<Customer> Customer { get; set; }
@@ -1006,6 +1071,6 @@ namespace SWP391_DEMO.Data
         DbSet<Unit> Unit { get; set; }
         DbSet<Brand> Brand { get; set; }
         DbSet<ProductAttribute> ProductAttribute { get; set; }
-        DbSet<ProductAttributeValue> ProductAttributeValue { get; set; }     
+        DbSet<ProductAttributeValue> ProductAttributeValue { get; set; }
     }
 }

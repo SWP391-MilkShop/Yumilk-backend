@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
 namespace SWP391_DEMO.Entities;
+
 [Table("Products")]
 public partial class Product
 {
@@ -37,9 +39,11 @@ public partial class Product
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
-    public virtual ICollection<ProductAnalytic> ProductAnalytics { get; set; } = new List<ProductAnalytic>();
+    public virtual ICollection<ProductAnalytic> ProductAnalytics { get; set; } =
+        new List<ProductAnalytic>();
 
-    public virtual ICollection<ProductAttributeValue> ProductAttributeValues { get; set; } = new List<ProductAttributeValue>();
+    public virtual ICollection<ProductAttributeValue> ProductAttributeValues { get; set; } =
+        new List<ProductAttributeValue>();
 
     public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
 

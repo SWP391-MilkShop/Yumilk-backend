@@ -1,5 +1,5 @@
-﻿using Microsoft.OpenApi.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using SWP391_DEMO.Data;
 using SWP391_DEMO.Infrastructure;
 
@@ -34,7 +34,9 @@ namespace SWP391_DEMO
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
             if (connectionString == null)
             {
-                throw new InvalidOperationException("Could not find connection string 'DefaultConnection'");
+                throw new InvalidOperationException(
+                    "Could not find connection string 'DefaultConnection'"
+                );
             }
             AddDI(services);
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
@@ -78,9 +80,6 @@ namespace SWP391_DEMO
             //});
         }
 
-        private void AddDI(IServiceCollection services)
-        {
-        }
+        private void AddDI(IServiceCollection services) { }
     }
 }
-

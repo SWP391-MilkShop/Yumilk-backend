@@ -15,7 +15,8 @@ namespace SWP391_DEMO.Infrastructure
         public async ValueTask<bool> TryHandleAsync(
             HttpContext httpContext,
             Exception exception,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             _logger.LogError(exception, "Exception occured: {Message}", exception.Message);
             //prevent showing the actual exception message to the client
@@ -26,7 +27,10 @@ namespace SWP391_DEMO.Infrastructure
                 Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1"
             };
             httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken: cancellationToken);
+            await httpContext.Response.WriteAsJsonAsync(
+                problemDetails,
+                cancellationToken: cancellationToken
+            );
 
             return true;
         }
