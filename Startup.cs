@@ -1,8 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using SWP391_DEMO.Data;
-using SWP391_DEMO.Repository;
-using SWP391_DEMO.Service;
 
 namespace SWP391_DEMO
 {
@@ -80,8 +78,6 @@ namespace SWP391_DEMO
 
         private void AddDI(IServiceCollection services)
         {
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IUserService, UserService>();
         }
     }
 }
