@@ -124,5 +124,16 @@ namespace SWP391_DEMO.Data
                 b.HasKey("ProductId", "AttributeId");
             });
         }
+        DbSet<User> User {  get; set; }
+        DbSet<Role> Role { get; set; }
+        DbSet<RefreshToken> RefreshToken { get; set; }
+        DbSet<Customer> Customer { get; set; }
+        DbSet<CustomerAddress> CustomerAddress { get; set; }
+        DbSet<Product> Product { get; set; }
+        DbSet<Category> Category { get; set; }
+        DbSet<Unit> Unit { get; set; }
+        DbSet<Brand> Brand { get; set; }
+        DbSet<ProductAttribute> ProductAttribute { get; set; }
+        DbSet<ProductAttributeValue> ProductAttributeValue { get; set; }     
     }
 }
