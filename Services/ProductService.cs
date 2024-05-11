@@ -1,4 +1,5 @@
 ﻿using SWP391_DEMO.Entities;
+using SWP391_DEMO.Repository;
 
 namespace SWP391_DEMO.Services {
 
@@ -6,14 +7,14 @@ namespace SWP391_DEMO.Services {
         List<Product> GetAllProducts();
     }
     public class ProductService : IProductService {
-        private readonly IProductService _productService;
+        private readonly IProductRepository _productRepository;
 
-        public ProductService(IProductService productService) {
-            _productService = productService;
+        public ProductService(IProductRepository productService) {
+            _productRepository = productService;
         }
 
         public List<Product> GetAllProducts() {
-            return _productService.GetAllProducts();
+            return _productRepository.GetAllProducts();
         }
     }
 }
