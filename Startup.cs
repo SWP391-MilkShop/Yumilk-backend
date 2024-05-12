@@ -40,6 +40,7 @@ namespace SWP391_DEMO
             }
             AddDI(services);
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+            services.AddExceptionHandler<ExceptionLoggingHandler>();
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddCors(services =>
             {
@@ -50,7 +51,14 @@ namespace SWP391_DEMO
                         .WithMethods("GET", "POST", "PUT", "DELETE") // Allow only these methods
                         .AllowAnyHeader();
                 });
+                services.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
             });
+
             //services.AddAuthentication("Bearer").AddJwtBearer(o =>
             //{
             //    o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
@@ -80,15 +88,17 @@ namespace SWP391_DEMO
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "SWP391_DEMO v1");
                 });
             }
-            app.MapControllers();
+            
             app.UseRouting();
-            app.UseCors("DefaultPolicy"); //luon dat truoc app.UseAuthorization()
+            app.UseCors("AllowAll"); //luon dat truoc app.UseAuthorization()
             app.UseAuthorization();
+            app.UseExceptionHandler(options => { });
             // ko biet sao cai nay no keu violate ASP0014, keu map route truc tiep trong api luon
             //app.UseEndpoints(endpoint =>
             //{
             //    endpoint.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
             //});
+            app.MapControllers();
         }
 
         private void AddDI(IServiceCollection services) { }
