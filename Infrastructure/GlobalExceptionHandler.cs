@@ -53,7 +53,7 @@ namespace SWP391_DEMO.Infrastructure
             return exception switch
             {
                 ArgumentException => StatusCodes.Status400BadRequest,
-                TimeoutException => StatusCodes.Status408RequestTimeout,
+                TimeoutException => StatusCodes.Status504GatewayTimeout,
                 InvalidOperationException => StatusCodes.Status500InternalServerError,
                 KeyNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError
