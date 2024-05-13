@@ -40,6 +40,7 @@ namespace SWP391_DEMO.Infrastructure
                 TimeoutException => "https://tools.ietf.org/html/rfc7231#section-6.6.5",
                 InvalidOperationException => "https://tools.ietf.org/html/rfc7231#section-6.5.10",
                 KeyNotFoundException => "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                UnauthorizedAccessException => "https://tools.ietf.org/html/rfc7235#section-3.1",
                 _ => "https://tools.ietf.org/html/rfc7231#section-6.6"
             };
         }
@@ -56,6 +57,7 @@ namespace SWP391_DEMO.Infrastructure
                 TimeoutException => StatusCodes.Status504GatewayTimeout,
                 InvalidOperationException => StatusCodes.Status500InternalServerError,
                 KeyNotFoundException => StatusCodes.Status404NotFound,
+                UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
                 _ => StatusCodes.Status500InternalServerError
             };
         }
