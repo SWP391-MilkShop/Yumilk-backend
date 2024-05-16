@@ -1,8 +1,7 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SWP391_DEMO.Entities;
+namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("CustomerAddresses")]
 public partial class CustomerAddress
@@ -33,7 +32,7 @@ public partial class CustomerAddress
     [Column("is_default")]
     public bool IsDefault { get; set; }
     public Guid? UserId { get; set; }
-    [Column("created_at", TypeName ="datetime2")]
+    [Column("created_at", TypeName = "datetime2")]
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }

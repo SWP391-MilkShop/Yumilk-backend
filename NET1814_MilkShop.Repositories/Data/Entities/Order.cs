@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SWP391_DEMO.Entities;
+namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("Orders")]
 public partial class Order

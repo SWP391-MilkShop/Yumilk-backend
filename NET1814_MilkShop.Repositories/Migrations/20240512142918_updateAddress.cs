@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SWP391_DEMO.Migrations
+namespace NET1814_MilkShop.Repositories.Data.Migrations
 {
     /// <inheritdoc />
     public partial class updateAddress : Migration

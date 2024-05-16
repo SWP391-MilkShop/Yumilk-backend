@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SWP391_DEMO.Entities;
-
-namespace SWP391_DEMO.Data
+using NET1814_MilkShop.Repositories.Data.Entities;
+namespace NET1814_MilkShop.Repositories.Data
 {
     public class AppDbContext : DbContext
     {
@@ -33,6 +32,7 @@ namespace SWP391_DEMO.Data
         public virtual DbSet<ProductAttribute> ProductAttributes { get; set; }
         public virtual DbSet<ProductAttributeValue> ProductAttributeValues { get; set; }
         public virtual DbSet<ProductImage> ProductImages { get; set; }
+        public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
         public virtual DbSet<Voucher> Vouchers { get; set; }
         public virtual DbSet<UserVoucher> UserVouchers { get; set; }
 
@@ -51,7 +51,7 @@ namespace SWP391_DEMO.Data
             base.OnModelCreating(modelBuilder);
             ////////////////////////////////////////////////////////////////
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Brand",
+                "NET1814_MilkShop.Repositories.Data.Entities.Brand",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -79,7 +79,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Cart",
+                "NET1814_MilkShop.Repositories.Data.Entities.Cart",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -109,7 +109,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.CartDetail",
+                "NET1814_MilkShop.Repositories.Data.Entities.CartDetail",
                 b =>
                 {
                     b.Property<int>("CartId").HasColumnName("cart_id").HasColumnType("int");
@@ -131,7 +131,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Category",
+                "NET1814_MilkShop.Repositories.Data.Entities.Category",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -159,7 +159,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Customer",
+                "NET1814_MilkShop.Repositories.Data.Entities.Customer",
                 b =>
                 {
                     b.Property<Guid>("UserId")
@@ -189,7 +189,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.CustomerAddress",
+                "NET1814_MilkShop.Repositories.Data.Entities.CustomerAddress",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -219,7 +219,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Order",
+                "NET1814_MilkShop.Repositories.Data.Entities.Order",
                 b =>
                 {
                     b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
@@ -274,7 +274,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.OrderDetail",
+                "NET1814_MilkShop.Repositories.Data.Entities.OrderDetail",
                 b =>
                 {
                     b.Property<Guid>("OrderId")
@@ -314,7 +314,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.OrderStatus",
+                "NET1814_MilkShop.Repositories.Data.Entities.OrderStatus",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -342,7 +342,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Product",
+                "NET1814_MilkShop.Repositories.Data.Entities.Product",
                 b =>
                 {
                     b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
@@ -392,7 +392,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.ProductAnalytic",
+                "NET1814_MilkShop.Repositories.Data.Entities.ProductAnalytic",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -428,7 +428,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.ProductAttribute",
+                "NET1814_MilkShop.Repositories.Data.Entities.ProductAttribute",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -456,7 +456,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.ProductAttributeValue",
+                "NET1814_MilkShop.Repositories.Data.Entities.ProductAttributeValue",
                 b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -478,7 +478,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.ProductImage",
+                "NET1814_MilkShop.Repositories.Data.Entities.ProductImage",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -513,7 +513,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.RefreshToken",
+                "NET1814_MilkShop.Repositories.Data.Entities.RefreshToken",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -547,7 +547,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Role",
+                "NET1814_MilkShop.Repositories.Data.Entities.Role",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -575,7 +575,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Unit",
+                "NET1814_MilkShop.Repositories.Data.Entities.Unit",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -603,7 +603,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.User",
+                "NET1814_MilkShop.Repositories.Data.Entities.User",
                 b =>
                 {
                     b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
@@ -649,7 +649,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.UserVoucher",
+                "NET1814_MilkShop.Repositories.Data.Entities.UserVoucher",
                 b =>
                 {
                     b.Property<Guid>("CustomerId")
@@ -677,7 +677,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Voucher",
+                "NET1814_MilkShop.Repositories.Data.Entities.Voucher",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
@@ -725,10 +725,10 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Cart",
+                "NET1814_MilkShop.Repositories.Data.Entities.Cart",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Customer", "Customer")
                         .WithMany("Carts")
                         .HasForeignKey("CustomerId");
 
@@ -737,16 +737,16 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.CartDetail",
+                "NET1814_MilkShop.Repositories.Data.Entities.CartDetail",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Cart", "Cart")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Cart", "Cart")
                         .WithMany("CartDetails")
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Product", "Product")
                         .WithMany("CartDetails")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -759,12 +759,12 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Customer",
+                "NET1814_MilkShop.Repositories.Data.Entities.Customer",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.User", "User")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.User", "User")
                         .WithOne("Customer")
-                        .HasForeignKey("SWP391_DEMO.Entities.Customer", "UserId")
+                        .HasForeignKey("NET1814_MilkShop.Repositories.Data.Entities.Customer", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -773,10 +773,10 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.CustomerAddress",
+                "NET1814_MilkShop.Repositories.Data.Entities.CustomerAddress",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Customer", "User")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Customer", "User")
                         .WithMany("CustomerAddresses")
                         .HasForeignKey("UserId");
 
@@ -785,18 +785,18 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Order",
+                "NET1814_MilkShop.Repositories.Data.Entities.Order",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId");
 
-                    b.HasOne("SWP391_DEMO.Entities.OrderStatus", "Status")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.OrderStatus", "Status")
                         .WithMany("Orders")
                         .HasForeignKey("StatusId");
 
-                    b.HasOne("SWP391_DEMO.Entities.Voucher", "Voucher")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Voucher", "Voucher")
                         .WithMany("Orders")
                         .HasForeignKey("VoucherId");
 
@@ -809,16 +809,16 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.OrderDetail",
+                "NET1814_MilkShop.Repositories.Data.Entities.OrderDetail",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Order", "Order")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Order", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Product", "Product")
                         .WithMany("OrderDetails")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -831,18 +831,18 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Product",
+                "NET1814_MilkShop.Repositories.Data.Entities.Product",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Brand", "Brand")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Brand", "Brand")
                         .WithMany("Products")
                         .HasForeignKey("BrandId");
 
-                    b.HasOne("SWP391_DEMO.Entities.Category", "Category")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId");
 
-                    b.HasOne("SWP391_DEMO.Entities.Unit", "Unit")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Unit", "Unit")
                         .WithMany("Products")
                         .HasForeignKey("UnitId");
 
@@ -855,10 +855,10 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.ProductAnalytic",
+                "NET1814_MilkShop.Repositories.Data.Entities.ProductAnalytic",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Product", "Product")
                         .WithMany("ProductAnalytics")
                         .HasForeignKey("ProductId");
 
@@ -867,16 +867,16 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.ProductAttributeValue",
+                "NET1814_MilkShop.Repositories.Data.Entities.ProductAttributeValue",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.ProductAttribute", "Attribute")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.ProductAttribute", "Attribute")
                         .WithMany("ProductAttributeValues")
                         .HasForeignKey("AttributeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Product", "Product")
                         .WithMany("ProductAttributeValues")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -889,10 +889,10 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.ProductImage",
+                "NET1814_MilkShop.Repositories.Data.Entities.ProductImage",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Product", "Product")
                         .WithMany("ProductImages")
                         .HasForeignKey("ProductId");
 
@@ -901,10 +901,10 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.RefreshToken",
+                "NET1814_MilkShop.Repositories.Data.Entities.RefreshToken",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.User", "User")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId");
 
@@ -913,10 +913,10 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.User",
+                "NET1814_MilkShop.Repositories.Data.Entities.User",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Role", "Role")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId");
 
@@ -925,16 +925,16 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.UserVoucher",
+                "NET1814_MilkShop.Repositories.Data.Entities.UserVoucher",
                 b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Customer", "Customer")
                         .WithMany("UserVouchers")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SWP391_DEMO.Entities.Voucher", "Voucher")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Voucher", "Voucher")
                         .WithMany("UserVouchers")
                         .HasForeignKey("VoucherId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -947,7 +947,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Brand",
+                "NET1814_MilkShop.Repositories.Data.Entities.Brand",
                 b =>
                 {
                     b.Navigation("Products");
@@ -955,7 +955,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Cart",
+                "NET1814_MilkShop.Repositories.Data.Entities.Cart",
                 b =>
                 {
                     b.Navigation("CartDetails");
@@ -963,7 +963,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Category",
+                "NET1814_MilkShop.Repositories.Data.Entities.Category",
                 b =>
                 {
                     b.Navigation("Products");
@@ -971,7 +971,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Customer",
+                "NET1814_MilkShop.Repositories.Data.Entities.Customer",
                 b =>
                 {
                     b.Navigation("Carts");
@@ -985,7 +985,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Order",
+                "NET1814_MilkShop.Repositories.Data.Entities.Order",
                 b =>
                 {
                     b.Navigation("OrderDetails");
@@ -993,7 +993,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.OrderStatus",
+                "NET1814_MilkShop.Repositories.Data.Entities.OrderStatus",
                 b =>
                 {
                     b.Navigation("Orders");
@@ -1001,7 +1001,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Product",
+                "NET1814_MilkShop.Repositories.Data.Entities.Product",
                 b =>
                 {
                     b.Navigation("CartDetails");
@@ -1017,7 +1017,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.ProductAttribute",
+                "NET1814_MilkShop.Repositories.Data.Entities.ProductAttribute",
                 b =>
                 {
                     b.Navigation("ProductAttributeValues");
@@ -1025,7 +1025,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Role",
+                "NET1814_MilkShop.Repositories.Data.Entities.Role",
                 b =>
                 {
                     b.Navigation("Users");
@@ -1033,7 +1033,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Unit",
+                "NET1814_MilkShop.Repositories.Data.Entities.Unit",
                 b =>
                 {
                     b.Navigation("Products");
@@ -1041,7 +1041,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.User",
+                "NET1814_MilkShop.Repositories.Data.Entities.User",
                 b =>
                 {
                     b.Navigation("Customer");
@@ -1051,7 +1051,7 @@ namespace SWP391_DEMO.Data
             );
 
             modelBuilder.Entity(
-                "SWP391_DEMO.Entities.Voucher",
+                "NET1814_MilkShop.Repositories.Data.Entities.Voucher",
                 b =>
                 {
                     b.Navigation("Orders");

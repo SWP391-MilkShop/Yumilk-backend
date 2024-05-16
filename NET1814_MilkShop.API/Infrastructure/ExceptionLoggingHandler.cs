@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 
-namespace SWP391_DEMO.Infrastructure
+namespace NET1814_MilkShop.API.Infrastructure
 {
     public class ExceptionLoggingHandler : IExceptionHandler
     {

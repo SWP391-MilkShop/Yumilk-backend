@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using SWP391_DEMO.Data;
-using SWP391_DEMO.Infrastructure;
-
-namespace SWP391_DEMO
+using NET1814_MilkShop.API.Infrastructure;
+using NET1814_MilkShop.Repositories.Data;
+namespace NET1814_MilkShop.API
 {
     public class Startup
     {
@@ -22,7 +21,7 @@ namespace SWP391_DEMO
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(o =>
             {
-                o.SwaggerDoc("v1", new OpenApiInfo { Title = "SWP391_DEMO", Version = "v1" });
+                o.SwaggerDoc("v1", new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" });
             });
 
             services.Configure<RouteOptions>(options =>
@@ -85,10 +84,10 @@ namespace SWP391_DEMO
                 app.UseSwaggerUI(c =>
                 {
                     c.DefaultModelsExpandDepth(-1);
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "SWP391_DEMO v1");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "NET1814_MilkShop.API v1");
                 });
             }
-            
+
             app.UseRouting();
             app.UseCors("AllowAll"); //luon dat truoc app.UseAuthorization()
             app.UseAuthorization();

@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SWP391_DEMO.Entities;
+namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("CartDetails")]
 public partial class CartDetail

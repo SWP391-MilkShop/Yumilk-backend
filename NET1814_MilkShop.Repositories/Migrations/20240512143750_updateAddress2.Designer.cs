@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SWP391_DEMO.Data;
+using NET1814_MilkShop.Repositories.Data;
 
 #nullable disable
 
-namespace SWP391_DEMO.Migrations
+namespace NET1814_MilkShop.Repositories.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240512142918_updateAddress")]
-    partial class updateAddress
+    [Migration("20240512143750_updateAddress2")]
+    partial class updateAddress2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace SWP391_DEMO.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Brand", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesBrand", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -57,7 +57,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("brands", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Cart", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCart", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,7 +88,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("carts", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.CartDetail", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCartDetail", b =>
                 {
                     b.Property<int>("CartId")
                         .HasColumnType("int")
@@ -112,7 +112,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("cart_details", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Category", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCategory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -144,7 +144,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("categories", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Customer", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCustomer", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier")
@@ -173,7 +173,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("customers", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.CustomerAddress", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCustomerAddress", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -183,6 +183,10 @@ namespace SWP391_DEMO.Migrations
 
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2")
@@ -239,7 +243,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("customer_addresses", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Order", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesOrder", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -300,7 +304,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("orders", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.OrderDetail", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesOrderDetail", b =>
                 {
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier")
@@ -340,7 +344,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("order_details", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.OrderStatus", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesOrderStatus", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -372,7 +376,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("order_statuses", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Product", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesProduct", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -430,7 +434,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("products", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAnalytic", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesProductAnalytic", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -469,7 +473,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("product_analytics", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAttribute", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesProductAttribute", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -501,7 +505,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("product_attributes", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAttributeValue", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesProductAttributeValue", b =>
                 {
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier")
@@ -521,7 +525,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("product_attribute_values", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductImage", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesProductImage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -557,7 +561,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("product_images", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.RefreshToken", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesRefreshToken", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -594,7 +598,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Role", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesRole", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -626,7 +630,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("roles", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Unit", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesUnit", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -658,7 +662,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("units", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.User", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -711,7 +715,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.UserVoucher", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesUserVoucher", b =>
                 {
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier")
@@ -740,7 +744,7 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("user_vouchers", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Voucher", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesVoucher", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -792,24 +796,24 @@ namespace SWP391_DEMO.Migrations
                     b.ToTable("vouchers", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Cart", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCart", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesCustomer", "Customer")
                         .WithMany("Carts")
                         .HasForeignKey("CustomerId");
 
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.CartDetail", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCartDetail", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Cart", "Cart")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesCart", "Cart")
                         .WithMany("CartDetails")
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesProduct", "Product")
                         .WithMany("CartDetails")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -820,37 +824,37 @@ namespace SWP391_DEMO.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Customer", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCustomer", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.User", "User")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesUser", "User")
                         .WithOne("Customer")
-                        .HasForeignKey("SWP391_DEMO.Entities.Customer", "UserId")
+                        .HasForeignKey("NET1814_MilkShop.Repositories.Data.EntitiesCustomer", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.CustomerAddress", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCustomerAddress", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Customer", "User")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesCustomer", "User")
                         .WithMany("CustomerAddresses")
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Order", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesOrder", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesCustomer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId");
 
-                    b.HasOne("SWP391_DEMO.Entities.OrderStatus", "Status")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesOrderStatus", "Status")
                         .WithMany("Orders")
                         .HasForeignKey("StatusId");
 
-                    b.HasOne("SWP391_DEMO.Entities.Voucher", "Voucher")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesVoucher", "Voucher")
                         .WithMany("Orders")
                         .HasForeignKey("VoucherId");
 
@@ -861,15 +865,15 @@ namespace SWP391_DEMO.Migrations
                     b.Navigation("Voucher");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.OrderDetail", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesOrderDetail", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Order", "Order")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesOrder", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesProduct", "Product")
                         .WithMany("OrderDetails")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -880,17 +884,17 @@ namespace SWP391_DEMO.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Product", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesProduct", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Brand", "Brand")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesBrand", "Brand")
                         .WithMany("Products")
                         .HasForeignKey("BrandId");
 
-                    b.HasOne("SWP391_DEMO.Entities.Category", "Category")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesCategory", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId");
 
-                    b.HasOne("SWP391_DEMO.Entities.Unit", "Unit")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesUnit", "Unit")
                         .WithMany("Products")
                         .HasForeignKey("UnitId");
 
@@ -901,24 +905,24 @@ namespace SWP391_DEMO.Migrations
                     b.Navigation("Unit");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAnalytic", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesProductAnalytic", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesProduct", "Product")
                         .WithMany("ProductAnalytics")
                         .HasForeignKey("ProductId");
 
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAttributeValue", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesProductAttributeValue", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.ProductAttribute", "Attribute")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesProductAttribute", "Attribute")
                         .WithMany("ProductAttributeValues")
                         .HasForeignKey("AttributeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesProduct", "Product")
                         .WithMany("ProductAttributeValues")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -929,42 +933,42 @@ namespace SWP391_DEMO.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductImage", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesProductImage", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Product", "Product")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesProduct", "Product")
                         .WithMany("ProductImages")
                         .HasForeignKey("ProductId");
 
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.RefreshToken", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesRefreshToken", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.User", "User")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesUser", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.User", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesUser", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Role", "Role")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesRole", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId");
 
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.UserVoucher", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesUserVoucher", b =>
                 {
-                    b.HasOne("SWP391_DEMO.Entities.Customer", "Customer")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesCustomer", "Customer")
                         .WithMany("UserVouchers")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SWP391_DEMO.Entities.Voucher", "Voucher")
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.EntitiesVoucher", "Voucher")
                         .WithMany("UserVouchers")
                         .HasForeignKey("VoucherId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -975,22 +979,22 @@ namespace SWP391_DEMO.Migrations
                     b.Navigation("Voucher");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Brand", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesBrand", b =>
                 {
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Cart", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCart", b =>
                 {
                     b.Navigation("CartDetails");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Category", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCategory", b =>
                 {
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Customer", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesCustomer", b =>
                 {
                     b.Navigation("Carts");
 
@@ -1001,17 +1005,17 @@ namespace SWP391_DEMO.Migrations
                     b.Navigation("UserVouchers");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Order", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesOrder", b =>
                 {
                     b.Navigation("OrderDetails");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.OrderStatus", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesOrderStatus", b =>
                 {
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Product", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesProduct", b =>
                 {
                     b.Navigation("CartDetails");
 
@@ -1024,29 +1028,29 @@ namespace SWP391_DEMO.Migrations
                     b.Navigation("ProductImages");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.ProductAttribute", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesProductAttribute", b =>
                 {
                     b.Navigation("ProductAttributeValues");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Role", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesRole", b =>
                 {
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Unit", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesUnit", b =>
                 {
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.User", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesUser", b =>
                 {
                     b.Navigation("Customer");
 
                     b.Navigation("RefreshTokens");
                 });
 
-            modelBuilder.Entity("SWP391_DEMO.Entities.Voucher", b =>
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.EntitiesVoucher", b =>
                 {
                     b.Navigation("Orders");
 

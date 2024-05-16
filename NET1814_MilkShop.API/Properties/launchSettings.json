@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "SWP391_DEMO": {
+    "NET1814_MilkShop.API": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

@@ -1,6 +1,6 @@
 using Serilog;
 
-namespace SWP391_DEMO
+namespace NET1814_MilkShop.API
 {
     public class Program
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-namespace SWP391_DEMO.Infrastructure
+namespace NET1814_MilkShop.API.Infrastructure
 {
     public class GlobalExceptionHandler : IExceptionHandler
     {
