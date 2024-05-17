@@ -2,6 +2,7 @@
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Services.Services;
 using Serilog;
+using System.Net.WebSockets;
 using ILogger = Serilog.ILogger;
 
 namespace NET1814_MilkShop.API.Controllers
@@ -12,13 +13,11 @@ namespace NET1814_MilkShop.API.Controllers
     {
         private readonly ILogger _logger;
         private readonly IAuthenticationService _authenticationService;
-        private readonly IEmailService _emailService;
 
         public AuthenticationController(ILogger logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _authenticationService = serviceProvider.GetRequiredService<IAuthenticationService>();
-            _emailService = serviceProvider.GetRequiredService<IEmailService>(); 
         }
 
         [HttpPost("create-user")]
@@ -40,12 +39,22 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Sign up");
             var response = await _authenticationService.SignUpAsync(model);
-            var token = await _authenticationService.GetVerificationTokenAsync(model.Username);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-            _emailService.SendVerificationEmail(model.Email,token);
+            return Ok(response);
+        }
+
+        [HttpGet("verify")]
+        public async Task<IActionResult> VerifyAsync(string token)
+        {
+            _logger.Information("verify");
+            var response = await _authenticationService.VerifyTokenAsync(token);
+            if(response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
             return Ok(response);
         }
 
@@ -54,6 +63,30 @@ namespace NET1814_MilkShop.API.Controllers
         {
             var res = await _authenticationService.LoginAsync(model);
             return Ok(res);
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordModel request)
+        {
+            _logger.Information("ForgotPassword");
+            var response = await _authenticationService.ForgotPasswordAsync(request);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);    
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordModel request)
+        {
+            _logger.Information("ResetPassword");
+            var response = await _authenticationService.RestPasswordAsync(request);
+            if(response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
         }
     }
 }
