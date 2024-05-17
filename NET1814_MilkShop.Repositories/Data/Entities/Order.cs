@@ -11,13 +11,13 @@ public partial class Order
 
     public Guid? CustomerId { get; set; }
 
-    public decimal? TotalPrice { get; set; }
+    public decimal TotalPrice { get; set; }
 
-    public decimal? ShippingFee { get; set; }
+    public decimal ShippingFee { get; set; }
 
-    public decimal? TotalAmount { get; set; }
+    public decimal TotalAmount { get; set; }
 
-    public int? VoucherId { get; set; }
+    public int VoucherId { get; set; }
 
     public string Address { get; set; } = null!;
 
@@ -28,7 +28,7 @@ public partial class Order
     public string? PaymentMethod { get; set; }
     [Column("payment_date", TypeName = "datetime2")]
     public DateTime? PaymentDate { get; set; }
-    public int? StatusId { get; set; }
+    public int StatusId { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
@@ -36,7 +36,7 @@ public partial class Order
 
     public virtual Customer? Customer { get; set; }
 
-    public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+    public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
 
     public virtual OrderStatus? Status { get; set; }
 

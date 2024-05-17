@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
@@ -11,13 +12,14 @@ public partial class Cart
 
     public Guid? CustomerId { get; set; }
 
-    public bool? IsActive { get; set; }
+    [DefaultValue(false)]
+    public bool IsActive { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
 
-    public virtual ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
+    public virtual ICollection<CartDetail> CartDetails { get; set; } = [];
 
     public virtual Customer? Customer { get; set; }
 }

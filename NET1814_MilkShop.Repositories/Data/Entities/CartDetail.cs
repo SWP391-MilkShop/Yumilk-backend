@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
@@ -8,9 +9,10 @@ public partial class CartDetail
     public int CartId { get; set; }
     public Guid ProductId { get; set; }
 
-    public int? Quantity { get; set; }
+    public int Quantity { get; set; }
 
-    public bool? IsActive { get; set; }
+    [DefaultValue(false)]
+    public bool IsActive { get; set; }
 
     public virtual Cart Cart { get; set; } = null!;
 

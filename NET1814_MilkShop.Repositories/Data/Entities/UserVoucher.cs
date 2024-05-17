@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
@@ -9,7 +10,8 @@ public partial class UserVoucher
 
     public Guid CustomerId { get; set; }
 
-    public bool? IsActive { get; set; }
+    [DefaultValue(false)]
+    public bool IsActive { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 

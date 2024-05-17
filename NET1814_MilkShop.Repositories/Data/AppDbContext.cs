@@ -70,7 +70,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
@@ -96,7 +96,7 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("deleted_at")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<Guid?>("CustomerId")
                         .HasColumnName("customer_id")
@@ -120,9 +120,9 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("product_id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                    b.Property<int?>("Quantity").HasColumnType("int");
+                    b.Property<int>("Quantity").HasColumnType("int");
 
                     b.HasKey("CartId", "ProductId");
 
@@ -150,7 +150,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
@@ -178,7 +178,7 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("phone_number")
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int?>("Points").HasColumnType("int");
+                    b.Property<int>("Points").HasColumnType("int");
 
                     b.Property<string>("ProfilePictureUrl")
                         .HasColumnName("profile_picture_url")
@@ -247,21 +247,21 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("phone_number")
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<decimal?>("ShippingFee")
+                    b.Property<decimal>("ShippingFee")
                         .HasColumnName("shipping_fee")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("StatusId").HasColumnName("status_id").HasColumnType("int");
+                    b.Property<int>("StatusId").HasColumnName("status_id").HasColumnType("int");
 
-                    b.Property<decimal?>("TotalAmount")
+                    b.Property<decimal>("TotalAmount")
                         .HasColumnName("total_amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("TotalPrice")
+                    b.Property<decimal>("TotalPrice")
                         .HasColumnName("total_price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("VoucherId").HasColumnName("voucher_id").HasColumnType("int");
+                    b.Property<int>("VoucherId").HasColumnName("voucher_id").HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -291,9 +291,9 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("deleted_at")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                    b.Property<decimal?>("ItemPrice")
+                    b.Property<decimal>("ItemPrice")
                         .HasColumnName("item_price")
                         .HasColumnType("decimal(18,2)");
 
@@ -301,9 +301,9 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("product_name")
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int?>("Quantity").HasColumnType("int");
+                    b.Property<int>("Quantity").HasColumnType("int");
 
-                    b.Property<decimal?>("UnitPrice")
+                    b.Property<decimal>("UnitPrice")
                         .HasColumnName("unit_price")
                         .HasColumnType("decimal(18,2)");
 
@@ -333,7 +333,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
@@ -349,9 +349,9 @@ namespace NET1814_MilkShop.Repositories.Data
                 {
                     b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("BrandId").HasColumnName("brand_id").HasColumnType("int");
+                    b.Property<int>("BrandId").HasColumnName("brand_id").HasColumnType("int");
 
-                    b.Property<int?>("CategoryId")
+                    b.Property<int>("CategoryId")
                         .HasColumnName("category_id")
                         .HasColumnType("int");
 
@@ -365,21 +365,21 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<string>("Name").HasColumnType("nvarchar(255)");
 
-                    b.Property<decimal?>("OriginalPrice")
+                    b.Property<decimal>("OriginalPrice")
                         .HasColumnName("original_price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("Quantity").HasColumnType("int");
+                    b.Property<int>("Quantity").HasColumnType("int");
 
-                    b.Property<decimal?>("SalePrice")
+                    b.Property<decimal>("SalePrice")
                         .HasColumnName("sale_price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("UnitId").HasColumnName("unit_id").HasColumnType("int");
+                    b.Property<int>("UnitId").HasColumnName("unit_id").HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -409,17 +409,17 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("deleted_at")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<Guid?>("ProductId")
                         .HasColumnName("product_id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("PurchaseCount")
+                    b.Property<int>("PurchaseCount")
                         .HasColumnName("purchase_count")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ViewCount").HasColumnName("view_count").HasColumnType("int");
+                    b.Property<int>("ViewCount").HasColumnName("view_count").HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -447,7 +447,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
@@ -500,7 +500,7 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("image_url")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<Guid?>("ProductId")
                         .HasColumnName("product_id")
@@ -532,7 +532,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<DateTime?>("Expires").HasColumnType("datetime2");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<string>("Token").HasColumnType("nvarchar(255)");
 
@@ -566,7 +566,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
@@ -594,7 +594,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)");
 
@@ -622,7 +622,7 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("first_name")
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasColumnName("last_name")
@@ -630,7 +630,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Password").IsRequired().HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("RoleId").HasColumnName("role_id").HasColumnType("int");
+                    b.Property<int>("RoleId").HasColumnName("role_id").HasColumnType("int");
 
                     b.Property<string>("Username").IsRequired().HasColumnType("nvarchar(50)");
 
@@ -664,7 +664,7 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("deleted_at")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
                     b.HasKey("CustomerId", "VoucherId");
 
@@ -694,7 +694,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Description").HasColumnType("nvarchar(2000)");
 
-                    b.Property<decimal?>("DiscountPercent")
+                    b.Property<decimal>("DiscountPercent")
                         .HasColumnName("discount_percent")
                         .HasColumnType("decimal(18,2)");
 
@@ -702,13 +702,13 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("end_date")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool?>("IsActive").HasColumnName("is_active").HasColumnType("bit");
+                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                    b.Property<decimal?>("MaxDiscountAmount")
+                    b.Property<decimal>("MaxDiscountAmount")
                         .HasColumnName("max_discount_amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("MinOrderValue")
+                    b.Property<decimal>("MinOrderValue")
                         .HasColumnName("min_order_value")
                         .HasColumnType("decimal(18,2)");
 
@@ -1058,17 +1058,5 @@ namespace NET1814_MilkShop.Repositories.Data
                 }
             );
         }
-
-        DbSet<User> User { get; set; }
-        DbSet<Role> Role { get; set; }
-        DbSet<RefreshToken> RefreshToken { get; set; }
-        DbSet<Customer> Customer { get; set; }
-        DbSet<CustomerAddress> CustomerAddress { get; set; }
-        DbSet<Product> Product { get; set; }
-        DbSet<Category> Category { get; set; }
-        DbSet<Unit> Unit { get; set; }
-        DbSet<Brand> Brand { get; set; }
-        DbSet<ProductAttribute> ProductAttribute { get; set; }
-        DbSet<ProductAttributeValue> ProductAttributeValue { get; set; }
     }
 }
