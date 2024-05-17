@@ -133,6 +133,7 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IEmailService,EmailService>();
+            services.AddScoped<ICustomerService, CustomerService>();
         }
     }
 }
