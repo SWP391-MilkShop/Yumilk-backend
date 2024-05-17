@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NET1814_MilkShop.API.Infrastructure;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Services.Services;
+using System.Text;
 namespace NET1814_MilkShop.API
 {
     public class Startup
@@ -60,17 +62,17 @@ namespace NET1814_MilkShop.API
                 });
             });
 
-            //services.AddAuthentication("Bearer").AddJwtBearer(o =>
-            //{
-            //    o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-            //    {
-            //        ValidateIssuer = false,
-            //        ValidateAudience = false,
-            //        ValidateLifetime = false,
-            //        ValidateIssuerSigningKey = true,
-            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]))
-            //    };
-            //});
+            services.AddAuthentication("Bearer").AddJwtBearer(o =>
+            {
+                o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]))
+                };
+            });
         }
 
         public void Configure(WebApplication app, IWebHostEnvironment env)
@@ -108,6 +110,10 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IUserService, UserService>();
             //Add DI for repositories
             services.AddScoped<IUserRepository, UserRepository>();
+            //Add DI
+            services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
         }
     }
 }
