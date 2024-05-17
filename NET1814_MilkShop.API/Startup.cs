@@ -120,19 +120,17 @@ namespace NET1814_MilkShop.API
 
         private void AddDI(IServiceCollection services)
         {
-            //Add DI for services
-            services.AddScoped<IUserService, UserService>();
-            //Add DI for repositories
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+
             services.AddScoped<IUserRepository, UserRepository>();
-            //Add DI
-            services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
-            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-            services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IUserService, UserService>();
 
             services.AddScoped<IAuthenticationService, AuthenticationService>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+
         }
     }
 }
