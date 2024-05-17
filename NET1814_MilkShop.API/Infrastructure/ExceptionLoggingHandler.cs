@@ -16,7 +16,7 @@ namespace NET1814_MilkShop.API.Infrastructure
             )
         {
             var exceptionMessage = exception.Message;
-            _logger.LogError("Message with TraceId : {TraceId} failed with message: {exceptionMessage}", httpContext.TraceIdentifier, exceptionMessage);
+            _logger.LogError("Message with TraceId : {TraceId} failed with message: {exceptionMessage}\nInnerException: {InnerException}", httpContext.TraceIdentifier, exceptionMessage, exception.InnerException);
             return ValueTask.FromResult(false);
         }
     }
