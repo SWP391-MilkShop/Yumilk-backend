@@ -13,9 +13,9 @@ namespace NET1814_MilkShop.Repositories.CoreHelpers.Validation
                 return new ValidationResult("Password is required.");
             }
 
-            if (password.Length < 7 || password.Length > 12)
+            if (password.Length < 8 || password.Length > 255)
             {
-                return new ValidationResult("Password must be 7-12 characters long.");
+                return new ValidationResult("Password must be 8-255 characters long.");
             }
 
             if (!password.Any(char.IsUpper))
