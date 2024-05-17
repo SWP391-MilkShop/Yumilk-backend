@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NET1814_MilkShop.API.Infrastructure;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Services.Services;
-using System.Text;
+
 namespace NET1814_MilkShop.API
 {
     public class Startup
@@ -25,7 +26,10 @@ namespace NET1814_MilkShop.API
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(o =>
             {
-                o.SwaggerDoc("v1", new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" });
+                o.SwaggerDoc(
+                    "v1",
+                    new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" }
+                );
             });
 
             services.Configure<RouteOptions>(options =>
@@ -47,32 +51,42 @@ namespace NET1814_MilkShop.API
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddCors(services =>
             {
-                services.AddPolicy("DefaultPolicy", builder =>
-                {
-                    //cho nay de domain web cua minh
-                    builder.WithOrigins("https://localhost:5000", "http://localhost:5001") // Allow only these origins
-                        .WithMethods("GET", "POST", "PUT", "DELETE") // Allow only these methods
-                        .AllowAnyHeader();
-                });
-                services.AddPolicy("AllowAll", builder =>
-                {
-                    builder.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-                });
+                services.AddPolicy(
+                    "DefaultPolicy",
+                    builder =>
+                    {
+                        //cho nay de domain web cua minh
+                        builder
+                            .WithOrigins("https://localhost:5000", "http://localhost:5001") // Allow only these origins
+                            .WithMethods("GET", "POST", "PUT", "DELETE") // Allow only these methods
+                            .AllowAnyHeader();
+                    }
+                );
+                services.AddPolicy(
+                    "AllowAll",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    }
+                );
             });
 
-            services.AddAuthentication("Bearer").AddJwtBearer(o =>
-            {
-                o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            services
+                .AddAuthentication("Bearer")
+                .AddJwtBearer(o =>
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = false,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]))
-                };
-            });
+                    o.TokenValidationParameters =
+                        new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                        {
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
+                            )
+                        };
+                });
         }
 
         public void Configure(WebApplication app, IWebHostEnvironment env)

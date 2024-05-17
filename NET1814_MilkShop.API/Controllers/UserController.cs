@@ -15,6 +15,7 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _userService = userService;
         }
+
         [HttpGet]
         public async Task<IActionResult> GetUsersAsync()
         {
@@ -37,6 +38,5 @@ namespace NET1814_MilkShop.API.Controllers
         //public void Put(int id, [FromBody] string value)
         //{
         //}
-
     }
 }
