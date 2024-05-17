@@ -2,7 +2,9 @@
 using Microsoft.OpenApi.Models;
 using NET1814_MilkShop.API.Infrastructure;
 using NET1814_MilkShop.Repositories.Data;
+using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Repositories;
+using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.Services;
 namespace NET1814_MilkShop.API
 {
@@ -39,10 +41,16 @@ namespace NET1814_MilkShop.API
                     "Could not find connection string 'DefaultConnection'"
                 );
             }
+            //Add Dependency Injection
             AddDI(services);
+            //Add Email Setting
+            services.Configure<EmailSettingModel>(_configuration.GetSection("EmailSetting"));
+            //Add Database
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+            //Add Exception Handler
             services.AddExceptionHandler<ExceptionLoggingHandler>();
             services.AddExceptionHandler<GlobalExceptionHandler>();
+            //Add Cors
             services.AddCors(services =>
             {
                 services.AddPolicy("DefaultPolicy", builder =>
@@ -102,12 +110,17 @@ namespace NET1814_MilkShop.API
             app.MapControllers();
         }
 
-        private void AddDI(IServiceCollection services)
+        private static void AddDI(IServiceCollection services)
         {
-            //Add DI for services
-            services.AddScoped<IUserService, UserService>();
-            //Add DI for repositories
+
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserService, UserService>();
+
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
     }
 }

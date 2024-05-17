@@ -628,7 +628,7 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("last_name")
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("Password").IsRequired().HasColumnType("nvarchar(50)");
+                    b.Property<string>("Password").IsRequired().HasColumnType("nvarchar(255)");
 
                     b.Property<int>("RoleId").HasColumnName("role_id").HasColumnType("int");
 

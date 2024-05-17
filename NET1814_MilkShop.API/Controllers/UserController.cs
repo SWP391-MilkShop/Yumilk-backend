@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Services.Services;
-
+using Serilog;
+using ILogger = Serilog.ILogger;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace NET1814_MilkShop.API.Controllers
@@ -9,15 +10,18 @@ namespace NET1814_MilkShop.API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+        private readonly ILogger _logger;
         private readonly IUserService _userService;
 
-        public UserController(IUserService userService)
+        public UserController(ILogger logger, IServiceProvider serviceProvider)
         {
-            _userService = userService;
+            _logger = logger;
+            _userService = serviceProvider.GetRequiredService<IUserService>();
         }
         [HttpGet]
         public async Task<IActionResult> GetUsersAsync()
         {
+            _logger.Information("Get all users");
             var users = await _userService.GetUsersAsync();
             return Ok(users);
         }

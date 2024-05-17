@@ -11,7 +11,7 @@ public partial class User
     public Guid Id { get; set; }
 
     public string Username { get; set; } = null!;
-    [Column(TypeName = "varchar(255)")]
+    [Column(TypeName = "nvarchar(255)")]
     public string Password { get; set; } = null!;
 
     public string? FirstName { get; set; }
