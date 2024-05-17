@@ -12,11 +12,13 @@ namespace NET1814_MilkShop.API.Controllers
     {
         private readonly ILogger _logger;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IEmailService _emailService;
 
         public AuthenticationController(ILogger logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _authenticationService = serviceProvider.GetRequiredService<IAuthenticationService>();
+            _emailService = serviceProvider.GetRequiredService<IEmailService>(); 
         }
 
         [HttpPost("create-user")]
@@ -38,12 +40,12 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Sign up");
             var response = await _authenticationService.SignUpAsync(model);
-
+            var token = await _authenticationService.GetVerificationTokenAsync(model.Username);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-
+            _emailService.SendVerificationEmail(model.Email,token);
             return Ok(response);
         }
 

@@ -15,6 +15,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> SignUpAsync(SignUpModel model);
         Task<ResponseModel> CreateUserAsync(CreateUserModel model);
         Task<ResponseLoginModel> LoginAsync(RequestLoginModel model);
+        Task<string> GetVerificationTokenAsync(string userName);
     }
 
     public sealed class AuthenticationService : IAuthenticationService
@@ -96,6 +97,16 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return new ResponseModel { Status = "Error", Message = "Email đã tồn tại!" };
             }
+            Random res = new Random();
+            string str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            int size = 32;
+            string token = "";
+            for (int i = 0; i < size; i++)
+            {
+                // Chon index ngau nhien tren str
+                int x = res.Next(str.Length);
+                token = token + str[x];
+            }
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -104,18 +115,20 @@ namespace NET1814_MilkShop.Services.Services
                 LastName = model.LastName,
                 Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
                 RoleId = 1,
+                VerificationToken = token,
                 IsActive = false,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                DeletedAt = DateTime.UtcNow.AddHours(2)
             };
-            var customer = new Customer
-            {
-                UserId = user.Id,
-                Points = 0,
-                Email = model.Email,
-                PhoneNumber = model.PhoneNumber
-            };
+            //var customer = new Customer
+            //{
+            //    UserId = user.Id,
+            //    Points = 0,
+            //    Email = model.Email,
+            //    PhoneNumber = model.PhoneNumber
+            //};
             _userRepository.Add(user);
-            _customerRepository.Add(customer);
+            //_customerRepository.Add(customer); // Khong nen add vao customer khi chua verify
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
@@ -189,6 +202,16 @@ namespace NET1814_MilkShop.Services.Services
             };
             var token = tokenHandler.CreateToken(tokenDescription);
             return tokenHandler.WriteToken(token);
+        }
+
+        public async Task<string> GetVerificationTokenAsync(string userName)
+        {
+            var verifyToken = await _userRepository.GetVerificationTokenAsync(userName);
+            if(verifyToken is null)
+            {
+                throw new ArgumentException();
+            }
+            return verifyToken;
         }
     }
 }
