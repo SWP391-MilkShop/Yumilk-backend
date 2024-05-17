@@ -13,17 +13,18 @@ namespace NET1814_MilkShop.Repositories.Repositories
         void Update(User user);
         void Remove(User user);
     }
+
     public sealed class UserRepository : Repository<User>, IUserRepository
     {
         public UserRepository(AppDbContext context)
-            : base(context)
-        {
-        }
+            : base(context) { }
 
         public async Task<User?> GetByUsernameAsync(string username)
         {
+            //not case-sensitive, need fix
             return await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
         }
+
         /// <summary>
         /// Get all active users
         /// </summary>

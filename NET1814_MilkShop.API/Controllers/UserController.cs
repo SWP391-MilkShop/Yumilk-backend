@@ -2,6 +2,7 @@
 using NET1814_MilkShop.Services.Services;
 using Serilog;
 using ILogger = Serilog.ILogger;
+
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace NET1814_MilkShop.API.Controllers
@@ -18,6 +19,7 @@ namespace NET1814_MilkShop.API.Controllers
             _logger = logger;
             _userService = serviceProvider.GetRequiredService<IUserService>();
         }
+
         [HttpGet]
         public async Task<IActionResult> GetUsersAsync()
         {
@@ -41,6 +43,5 @@ namespace NET1814_MilkShop.API.Controllers
         //public void Put(int id, [FromBody] string value)
         //{
         //}
-
     }
 }

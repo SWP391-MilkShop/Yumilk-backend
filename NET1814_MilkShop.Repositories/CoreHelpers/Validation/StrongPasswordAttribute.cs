@@ -4,7 +4,10 @@ namespace NET1814_MilkShop.Repositories.CoreHelpers.Validation
 {
     internal class StrongPasswordAttribute : ValidationAttribute
     {
-        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+        protected override ValidationResult? IsValid(
+            object? value,
+            ValidationContext validationContext
+        )
         {
             var password = value as string;
 
@@ -35,7 +38,9 @@ namespace NET1814_MilkShop.Repositories.CoreHelpers.Validation
 
             if (password.IndexOfAny("!@#$%^&*()".ToCharArray()) == -1)
             {
-                return new ValidationResult("Password must contain at least one special character.");
+                return new ValidationResult(
+                    "Password must contain at least one special character."
+                );
             }
 
             return ValidationResult.Success;

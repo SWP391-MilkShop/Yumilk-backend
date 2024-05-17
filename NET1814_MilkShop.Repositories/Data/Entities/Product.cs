@@ -21,10 +21,12 @@ public partial class Product
     public decimal SalePrice { get; set; }
 
     public int CategoryId { get; set; }
+
     [Column("brand_id")]
     public int BrandId { get; set; }
 
     public int UnitId { get; set; }
+
     [Column("status_id")]
     [ForeignKey("ProductStatus")]
     public int StatusId { get; set; }

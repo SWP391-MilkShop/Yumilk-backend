@@ -13,7 +13,7 @@
         public int Port { get; set; }
         public string EmailAddress { get; set; } = null!;
         public string Password { get; set; } = null!;
-        public bool EnableSsl { get; set; } 
+        public bool EnableSsl { get; set; }
         public bool UseCredential { get; set; }
     }
 }

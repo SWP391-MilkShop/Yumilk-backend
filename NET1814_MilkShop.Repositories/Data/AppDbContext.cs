@@ -351,9 +351,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<int>("BrandId").HasColumnName("brand_id").HasColumnType("int");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnName("category_id")
-                        .HasColumnType("int");
+                    b.Property<int>("CategoryId").HasColumnName("category_id").HasColumnType("int");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnName("created_at")
@@ -762,7 +760,10 @@ namespace NET1814_MilkShop.Repositories.Data
                 {
                     b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.User", "User")
                         .WithOne("Customer")
-                        .HasForeignKey("NET1814_MilkShop.Repositories.Data.Entities.Customer", "UserId")
+                        .HasForeignKey(
+                            "NET1814_MilkShop.Repositories.Data.Entities.Customer",
+                            "UserId"
+                        )
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -868,7 +869,10 @@ namespace NET1814_MilkShop.Repositories.Data
                 "NET1814_MilkShop.Repositories.Data.Entities.ProductAttributeValue",
                 b =>
                 {
-                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.ProductAttribute", "Attribute")
+                    b.HasOne(
+                            "NET1814_MilkShop.Repositories.Data.Entities.ProductAttribute",
+                            "Attribute"
+                        )
                         .WithMany("ProductAttributeValues")
                         .HasForeignKey("AttributeId")
                         .OnDelete(DeleteBehavior.Cascade)

@@ -1,7 +1,7 @@
-﻿using NET1814_MilkShop.Repositories.Models;
+﻿using System.Net;
 using System.Net.Mail;
-using System.Net;
 using Microsoft.Extensions.Options;
+using NET1814_MilkShop.Repositories.Models;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -10,13 +10,16 @@ namespace NET1814_MilkShop.Services.Services
         void SendPasswordResetEmail(CustomerModel user);
         void SendVerificationEmail(CustomerModel user);
     }
+
     public class EmailService : IEmailService
     {
         private readonly EmailSettingModel _emailSettingModel;
+
         public EmailService(IOptions<EmailSettingModel> options)
         {
             _emailSettingModel = options.Value;
         }
+
         private void SendMail(SendMailModel model)
         {
             var fromEmailAddress = _emailSettingModel.FromEmailAddress;
@@ -41,17 +44,21 @@ namespace NET1814_MilkShop.Services.Services
                 Host = _emailSettingModel.Smtp.Host,
                 Port = _emailSettingModel.Smtp.Port,
             };
-            var network = new NetworkCredential(_emailSettingModel.Smtp.EmailAddress, _emailSettingModel.Smtp.Password);
+            var network = new NetworkCredential(
+                _emailSettingModel.Smtp.EmailAddress,
+                _emailSettingModel.Smtp.Password
+            );
             smtp.Credentials = network;
             //Send mail
             smtp.Send(mailMessage);
         }
+
         public void SendPasswordResetEmail(CustomerModel user)
         {
             var model = new SendMailModel
             {
                 Receiver = user.Email,
-                Subject = "Password Reset", 
+                Subject = "Password Reset",
                 Body = "Please click the link below to reset your password" //nay chua co link nha ae
             };
             SendMail(model);

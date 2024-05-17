@@ -11,12 +11,12 @@ namespace NET1814_MilkShop.Repositories.Repositories
         void Update(Customer customer);
         void Remove(Customer customer);
     }
+
     public sealed class CustomerRepository : Repository<Customer>, ICustomerRepository
     {
         public CustomerRepository(AppDbContext context)
-            : base(context)
-        {
-        }
+            : base(context) { }
+
         public async Task<Customer?> GetByEmailAsync(string email)
         {
             return await _context.Customers.FirstOrDefaultAsync(x => x.Email == email);

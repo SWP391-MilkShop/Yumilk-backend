@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+
 namespace NET1814_MilkShop.API.Infrastructure
 {
     public class GlobalExceptionHandler : IExceptionHandler
@@ -26,6 +27,7 @@ namespace NET1814_MilkShop.API.Infrastructure
             );
             return true;
         }
+
         /// <summary>
         /// Get help link based on the exception type
         /// </summary>
@@ -44,6 +46,7 @@ namespace NET1814_MilkShop.API.Infrastructure
                 _ => "https://tools.ietf.org/html/rfc7231#section-6.6"
             };
         }
+
         /// <summary>
         /// Get status code based on the exception type
         /// </summary>

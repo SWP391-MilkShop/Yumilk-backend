@@ -11,18 +11,20 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> SignUpAsync(SignUpModel model);
         Task<ResponseModel> CreateUserAsync(CreateUserModel model);
     }
+
     public sealed class AuthenticationService : IAuthenticationService
     {
-
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserRepository _userRepository;
         private readonly ICustomerRepository _customerRepository;
+
         public AuthenticationService(IServiceProvider serviceProvider)
         {
             _unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
             _userRepository = serviceProvider.GetRequiredService<IUserRepository>();
             _customerRepository = serviceProvider.GetRequiredService<ICustomerRepository>();
         }
+
         /// <summary>
         /// Admin có thể tạo tài khoản cho nhân viên hoặc admin khác
         /// </summary>
@@ -60,12 +62,9 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Tạo tài khoản thành công!"
                 };
             }
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Tạo tài khoản thất bại"
-            };
+            return new ResponseModel { Status = "Error", Message = "Tạo tài khoản thất bại" };
         }
+
         /// <summary>
         /// Người dùng đăng ký tài khoản
         /// </summary>
@@ -85,11 +84,7 @@ namespace NET1814_MilkShop.Services.Services
             var existingCustomer = await _customerRepository.GetByEmailAsync(model.Email);
             if (existingCustomer != null)
             {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Email đã tồn tại!"
-                };
+                return new ResponseModel { Status = "Error", Message = "Email đã tồn tại!" };
             }
             var user = new User
             {
@@ -117,14 +112,11 @@ namespace NET1814_MilkShop.Services.Services
                 return new ResponseModel
                 {
                     Status = "Success",
-                    Message = "Đăng ký tài khoản thành công, vui lòng kiểm tra email để xác thực tài khoản!"
+                    Message =
+                        "Đăng ký tài khoản thành công, vui lòng kiểm tra email để xác thực tài khoản!"
                 };
             }
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Đăng ký tài khoản thất bại"
-            };
+            return new ResponseModel { Status = "Error", Message = "Đăng ký tài khoản thất bại" };
         }
     }
 }

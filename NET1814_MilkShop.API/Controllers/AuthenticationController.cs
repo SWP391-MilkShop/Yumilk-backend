@@ -3,6 +3,7 @@ using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Services.Services;
 using Serilog;
 using ILogger = Serilog.ILogger;
+
 namespace NET1814_MilkShop.API.Controllers
 {
     [ApiController]
@@ -11,11 +12,13 @@ namespace NET1814_MilkShop.API.Controllers
     {
         private readonly ILogger _logger;
         private readonly IAuthenticationService _authenticationService;
+
         public AuthenticationController(ILogger logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _authenticationService = serviceProvider.GetRequiredService<IAuthenticationService>();
         }
+
         [HttpPost("create-user")]
         public async Task<IActionResult> CreateUserAsync([FromBody] CreateUserModel model)
         {
