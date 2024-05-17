@@ -48,7 +48,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return new ResponseLoginModel
                 {
-                    Message = "Tên đăng nhập hoặc mật khẩu sai"
+                    Message = "Tên đăng nhập hoặc mật khẩu sai " + BCrypt.Net.BCrypt.HashPassword("string")
                 };
             }
         }
@@ -59,7 +59,7 @@ namespace NET1814_MilkShop.Services.Services
             var token = Convert.ToBase64String(randomByte);
             var refreshToken = new RefreshToken
             {
-                Id = int.Parse(Guid.NewGuid().ToString()),
+                Id = new Random().Next(0,10000000),
                 Token = token,
                 Expires = DateTime.UtcNow.AddDays(3),
                 UserId = isUserExisted.Id,
@@ -82,7 +82,7 @@ namespace NET1814_MilkShop.Services.Services
                 Issuer = "",
                 Subject = new ClaimsIdentity(new[] {
                     new Claim("UserID", isUserExisted.Id.ToString()),
-                    new Claim(ClaimTypes.Role, isUserExisted.Role.Name)
+                    new Claim(ClaimTypes.Role, isUserExisted.RoleId.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(5),
                 SigningCredentials = credential,
