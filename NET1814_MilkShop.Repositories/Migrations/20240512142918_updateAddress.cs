@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace NET1814_MilkShop.Repositories.Data.Migrations
+namespace NET1814_MilkShop.Repositories.Migrations
 {
     /// <inheritdoc />
     public partial class updateAddress : Migration

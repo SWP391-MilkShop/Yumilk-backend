@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using NET1814_MilkShop.Repositories.Data.Entities;
+
 namespace NET1814_MilkShop.Repositories.Data
 {
     public class AppDbContext : DbContext
@@ -607,10 +609,6 @@ namespace NET1814_MilkShop.Repositories.Data
                 b =>
                 {
                     b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccessToken")
-                        .HasColumnName("access_token")
-                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnName("created_at")

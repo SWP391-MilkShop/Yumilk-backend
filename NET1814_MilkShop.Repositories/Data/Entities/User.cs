@@ -19,8 +19,6 @@ public partial class User
 
     public string? VerificationToken { get; set; }
 
-    public string? AccessToken { get; set; }
-
     public int? RoleId { get; set; }
 
     public bool? IsActive { get; set; }

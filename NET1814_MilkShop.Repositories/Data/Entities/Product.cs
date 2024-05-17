@@ -20,10 +20,13 @@ public partial class Product
     public decimal? SalePrice { get; set; }
 
     public int? CategoryId { get; set; }
-
+    [Column("brand_id")]
     public int? BrandId { get; set; }
 
     public int? UnitId { get; set; }
+    [Column("status_id")]
+    [ForeignKey("ProductStatus")]
+    public int? StatusId { get; set; }
 
     public bool? IsActive { get; set; }
 
@@ -47,5 +50,6 @@ public partial class Product
 
     public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
 
+    public virtual ProductStatus? ProductStatus { get; set; }
     public virtual Unit? Unit { get; set; }
 }
