@@ -14,15 +14,14 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 name: "created_at",
                 table: "customer_addresses",
                 type: "datetime2",
-                nullable: true);
+                nullable: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "created_at",
-                table: "customer_addresses");
+            migrationBuilder.DropColumn(name: "created_at", table: "customer_addresses");
         }
     }
 }

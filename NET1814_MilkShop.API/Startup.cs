@@ -2,8 +2,11 @@
 using Microsoft.OpenApi.Models;
 using NET1814_MilkShop.API.Infrastructure;
 using NET1814_MilkShop.Repositories.Data;
+using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Repositories;
+using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.Services;
+
 namespace NET1814_MilkShop.API
 {
     public class Startup
@@ -23,7 +26,10 @@ namespace NET1814_MilkShop.API
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(o =>
             {
-                o.SwaggerDoc("v1", new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" });
+                o.SwaggerDoc(
+                    "v1",
+                    new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" }
+                );
             });
 
             services.Configure<RouteOptions>(options =>
@@ -39,25 +45,36 @@ namespace NET1814_MilkShop.API
                     "Could not find connection string 'DefaultConnection'"
                 );
             }
+            //Add Dependency Injection
             AddDI(services);
+            //Add Email Setting
+            services.Configure<EmailSettingModel>(_configuration.GetSection("EmailSetting"));
+            //Add Database
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+            //Add Exception Handler
             services.AddExceptionHandler<ExceptionLoggingHandler>();
             services.AddExceptionHandler<GlobalExceptionHandler>();
+            //Add Cors
             services.AddCors(services =>
             {
-                services.AddPolicy("DefaultPolicy", builder =>
-                {
-                    //cho nay de domain web cua minh
-                    builder.WithOrigins("https://localhost:5000", "http://localhost:5001") // Allow only these origins
-                        .WithMethods("GET", "POST", "PUT", "DELETE") // Allow only these methods
-                        .AllowAnyHeader();
-                });
-                services.AddPolicy("AllowAll", builder =>
-                {
-                    builder.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-                });
+                services.AddPolicy(
+                    "DefaultPolicy",
+                    builder =>
+                    {
+                        //cho nay de domain web cua minh
+                        builder
+                            .WithOrigins("https://localhost:5000", "http://localhost:5001") // Allow only these origins
+                            .WithMethods("GET", "POST", "PUT", "DELETE") // Allow only these methods
+                            .AllowAnyHeader();
+                    }
+                );
+                services.AddPolicy(
+                    "AllowAll",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    }
+                );
             });
 
             //services.AddAuthentication("Bearer").AddJwtBearer(o =>
@@ -102,12 +119,16 @@ namespace NET1814_MilkShop.API
             app.MapControllers();
         }
 
-        private void AddDI(IServiceCollection services)
+        private static void AddDI(IServiceCollection services)
         {
-            //Add DI for services
-            services.AddScoped<IUserService, UserService>();
-            //Add DI for repositories
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserService, UserService>();
+
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
     }
 }

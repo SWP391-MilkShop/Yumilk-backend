@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
@@ -15,7 +16,8 @@ public partial class RefreshToken
 
     public Guid? UserId { get; set; }
 
-    public bool? IsActive { get; set; }
+    [DefaultValue(false)]
+    public bool IsActive { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
