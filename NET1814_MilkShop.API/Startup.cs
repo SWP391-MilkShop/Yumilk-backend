@@ -2,6 +2,8 @@
 using Microsoft.OpenApi.Models;
 using NET1814_MilkShop.API.Infrastructure;
 using NET1814_MilkShop.Repositories.Data;
+using NET1814_MilkShop.Repositories.Repositories;
+using NET1814_MilkShop.Services.Services;
 namespace NET1814_MilkShop.API
 {
     public class Startup
@@ -100,6 +102,12 @@ namespace NET1814_MilkShop.API
             app.MapControllers();
         }
 
-        private void AddDI(IServiceCollection services) { }
+        private void AddDI(IServiceCollection services)
+        {
+            //Add DI for services
+            services.AddScoped<IUserService, UserService>();
+            //Add DI for repositories
+            services.AddScoped<IUserRepository, UserRepository>();
+        }
     }
 }

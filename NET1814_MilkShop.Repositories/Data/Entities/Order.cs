@@ -24,9 +24,9 @@ public partial class Order
     public string PhoneNumber { get; set; } = null!;
 
     public string? Note { get; set; }
-    [Column("payment_method",TypeName = "varchar(255)")]
+    [Column("payment_method", TypeName = "varchar(255)")]
     public string? PaymentMethod { get; set; }
-    [Column("payment_date",TypeName ="datetime2")]
+    [Column("payment_date", TypeName = "datetime2")]
     public DateTime? PaymentDate { get; set; }
     public int? StatusId { get; set; }
 
