@@ -10,15 +10,17 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             _context = context;
         }
-        public virtual void Add(TEntity entity)
+        public void Add(TEntity entity)
         {
             _context.Set<TEntity>().Add(entity);
         }
-        public virtual void Update(TEntity entity)
+
+        public void Update(TEntity entity)
         {
             _context.Set<TEntity>().Update(entity);
         }
-        public virtual void Remove(TEntity entity)
+
+        public void Remove(TEntity entity)
         {
             _context.Set<TEntity>().Remove(entity);
         }
