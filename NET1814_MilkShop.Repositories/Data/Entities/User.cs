@@ -18,8 +18,10 @@ public partial class User
     public string? FirstName { get; set; }
 
     public string? LastName { get; set; }
-
-    public string? VerificationToken { get; set; }
+    [Column("verification_code",TypeName = "nvarchar(6)")]
+    public string? VerificationCode { get; set; }
+    [Column("reset_password_code",TypeName = "nvarchar(6)")]
+    public string? ResetPasswordCode { get; set; }
 
     public int RoleId { get; set; }
 

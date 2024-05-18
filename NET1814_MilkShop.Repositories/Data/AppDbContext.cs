@@ -640,8 +640,8 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Username").IsRequired().HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("VerificationToken")
-                        .HasColumnName("verification_token")
+                    b.Property<string>("VerificationCode")
+                        .HasColumnName("verification_code")
                         .HasColumnType("nvarchar(6)");
 
                     b.HasKey("Id");

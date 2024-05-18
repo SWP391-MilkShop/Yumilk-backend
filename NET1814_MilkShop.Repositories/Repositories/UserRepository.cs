@@ -41,7 +41,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             {
                 return null;
             }
-            return user.VerificationToken;
+            return user.VerificationCode;
         }
     }
 }
