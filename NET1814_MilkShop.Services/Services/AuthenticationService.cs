@@ -155,7 +155,7 @@ namespace NET1814_MilkShop.Services.Services
                     new Claim("UserID", isUserExisted.Id.ToString()),
                     new Claim("Token", userToken)
                 }),
-                Expires = DateTime.UtcNow.AddSeconds(5),
+                Expires = DateTime.UtcNow.AddSeconds(30),
                 SigningCredentials = credential,
             };
             var token = tokenHandler.CreateToken(tokenDescription);
@@ -173,7 +173,7 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     Status = "Success",
                     Message = "Đăng nhập thành công",
-                    Data = token,
+                    Data = token + " ||||||| " + refreshToken,
                 };
             }
             return new ResponseModel
@@ -189,15 +189,14 @@ namespace NET1814_MilkShop.Services.Services
             var token = Convert.ToBase64String(randomByte);
             var refreshToken = new RefreshToken
             {
-                Id = new Random().Next(0, 10000000),
                 Token = token,
                 Expires = DateTime.UtcNow.AddDays(3),
                 UserId = isUserExisted.Id,
+                IsActive = true,
                 CreatedAt = DateTime.UtcNow,
-                DeletedAt = DateTime.UtcNow.AddDays(3),
-                IsActive = true
+                DeletedAt = DateTime.UtcNow.AddDays(3)
             };
-            _refreshTokenRepository.Add(refreshToken);
+            _refreshTokenRepository.AddToken(refreshToken);
             return token;
         }
         /// <summary>
