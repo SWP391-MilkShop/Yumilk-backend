@@ -16,8 +16,8 @@ namespace NET1814_MilkShop.Services.Services
     {
         Task<ResponseModel> SignUpAsync(SignUpModel model);
         Task<ResponseModel> CreateUserAsync(CreateUserModel model);
-        Task<ResponseLoginModel> LoginAsync(RequestLoginModel model);
-        Task<ResponseModel> VerifyAccountAsync(VerifyAccountModel model);
+        Task<ResponseModel> LoginAsync(RequestLoginModel model);
+        Task<ResponseModel> VerifyAccountAsync(string token);
         Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request);
         Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
     }
@@ -136,9 +136,10 @@ namespace NET1814_MilkShop.Services.Services
             _userRepository.Add(user);
             _customerRepository.Add(customer); // Khong nen add vao customer khi chua verify
             var result = await _unitOfWork.SaveChangesAsync();
+            var jwtVeriryToken = CreateVerifyJwtToken(user, token);
             if (result > 0)
             {
-                _emailService.SendVerificationEmail(model.Email, token);
+                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken);
                 return new ResponseModel
                 {
                     Status = "Success",
@@ -148,25 +149,45 @@ namespace NET1814_MilkShop.Services.Services
             }
             return new ResponseModel { Status = "Error", Message = "Đăng ký tài khoản thất bại" };
         }
-        public async Task<ResponseLoginModel> LoginAsync(RequestLoginModel model)
+        private string CreateVerifyJwtToken(User isUserExisted, string userToken)
+        {
+            var key = Encoding.UTF8.GetBytes(Key);
+            var securityKey = new SymmetricSecurityKey(key);
+            var credential = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescription = new SecurityTokenDescriptor
+            {
+                Audience = "",
+                Issuer = "",
+                Subject = new ClaimsIdentity(new[] {
+                    new Claim("UserID", isUserExisted.Id.ToString()),
+                    new Claim("Token", userToken)
+                }),
+                Expires = DateTime.UtcNow.AddSeconds(5),
+                SigningCredentials = credential,
+            };
+            var token = tokenHandler.CreateToken(tokenDescription);
+            return tokenHandler.WriteToken(token);
+        }
+
+        public async Task<ResponseModel> LoginAsync(RequestLoginModel model)
         {
             var existingUser = await _authenticationRepository.GetUserByUserNameNPassword(model.UserName, model.Password);
             if (existingUser != null)
             {
                 var token = CreateJwtToken(existingUser);
                 var refreshToken = CreateJwtRefreshToken(existingUser);
-                return new ResponseLoginModel
+                return new ResponseModel
                 {
-                    FirstName = existingUser.FirstName,
-                    LastName = existingUser.LastName,
-                    Token = token,
-                    RefreshToken = refreshToken,
-                    Message = "Đăng nhập thành công"
+                    Status = "Success",
+                    Message = "Đăng nhập thành công",
+                    Data = token,
                 };
             }
-            return new ResponseLoginModel
+            return new ResponseModel
             {
-                Message = "Tên đăng nhập hoặc mật khẩu sai " + BCrypt.Net.BCrypt.HashPassword("string")
+                Status = "Error",
+                Message = "Tên đăng nhập hoặc mật khẩu sai "
             };
         }
 
@@ -212,30 +233,41 @@ namespace NET1814_MilkShop.Services.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public async Task<ResponseModel> VerifyAccountAsync(VerifyAccountModel model)
+
+        public async Task<ResponseModel> VerifyAccountAsync(string token)
         {
-            var customer = await _customerRepository.GetByEmailAsync(model.email);
-            var user = await _userRepository.GetById(customer.UserId);
-            if (model.token.Equals(user.VerificationToken))
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token);
+            var tokenS = jsonToken as JwtSecurityToken;
+            var userID = tokenS.Claims.First(claim => claim.Type == "UserID").Value;
+            var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
+            var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
+            var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
+            var isExist = await _userRepository.GetById(Guid.Parse(userID));
+            if (expirationTime < DateTime.UtcNow)
             {
-                user.IsActive = true;
-                user.VerificationToken = null;
-                user.DeletedAt = null;
-                _userRepository.Update(user);
+                return new ResponseModel { Status = "Error", Message = "Hết hạn" };
+            }
+            if (verifyToken.Equals(isExist.VerificationToken))
+            {
+                isExist.IsActive = true;
+                isExist.VerificationToken = null;
+                isExist.DeletedAt = null;
+                _userRepository.Update(isExist);
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
                 {
                     return new ResponseModel { Status = "Success", Message = "Xác thực tài khoản thành công" };
                 }
             }
-                /*                var customer = new Customer
-                                {
-                                    UserId = user.Id,
-                                    Points = 0,
-                                    Email = user.email,
-                                    PhoneNumber = user.PhoneNumber
-             };*/// Lẽ ra khúc này add customer nhưng lại không lấy được mail và phoneNumber
-                 //tại khi lưu user, user không có email và phonenumber -> không lấy lại user và add vô customer được 
+            /*                var customer = new Customer
+                            {
+                                UserId = user.Id,
+                                Points = 0,
+                                Email = user.email,
+                                PhoneNumber = user.PhoneNumber
+         };*/// Lẽ ra khúc này add customer nhưng lại không lấy được mail và phoneNumber
+             //tại khi lưu user, user không có email và phonenumber -> không lấy lại user và add vô customer được 
             return new ResponseModel { Status = "Error", Message = "Có lỗi xảy ra trong quá trình xác thực hoặc link đã được dùng rồi" };
         }
 
@@ -247,7 +279,7 @@ namespace NET1814_MilkShop.Services.Services
                 var user = await _userRepository.GetById(customer.UserId);
                 Random res = new Random();
                 string str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-                int size = 32;
+                int size = 6;
                 string token = "";
                 for (int i = 0; i < size; i++)
                 {
@@ -258,9 +290,10 @@ namespace NET1814_MilkShop.Services.Services
                 user.VerificationToken = token;
                 _userRepository.Update(user);
                 var result = await _unitOfWork.SaveChangesAsync();
+                var verifyToken = CreateVerifyJwtToken(user, token);
                 if (result > 0)
                 {
-                    _emailService.SendPasswordResetEmail(customer.Email, token);//Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken);//Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return new ResponseModel { Status = "Success", Message = "Đã gửi link reset password vui lòng kiểm tra email" };
                 }
             }
@@ -269,13 +302,23 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request)
         {
-            var user = await _userRepository.GetUsersAsync();
-            var validTokenUser = user.FirstOrDefault(x => x.VerificationToken == request.token);
-            if (validTokenUser != null)
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(request.token);
+            var tokenS = jsonToken as JwtSecurityToken;
+            var userID = tokenS.Claims.First(claim => claim.Type == "UserID").Value;
+            var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
+            var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
+            var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
+            var isExist = await _userRepository.GetById(Guid.Parse(userID));
+            if (expirationTime < DateTime.UtcNow)
             {
-                validTokenUser.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
-                validTokenUser.VerificationToken = null;
-                _userRepository.Update(validTokenUser);
+                return new ResponseModel { Status = "Error", Message = "Hết hạn" };
+            }
+            if (isExist != null)
+            {
+                isExist.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                isExist.VerificationToken = null;
+                _userRepository.Update(isExist);
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
                 {

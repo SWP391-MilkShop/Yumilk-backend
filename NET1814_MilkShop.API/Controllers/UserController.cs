@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Services.Services;
 using Serilog;
 using ILogger = Serilog.ILogger;
@@ -21,6 +22,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = "1")]
         public async Task<IActionResult> GetUsersAsync()
         {
             _logger.Information("Get all users");

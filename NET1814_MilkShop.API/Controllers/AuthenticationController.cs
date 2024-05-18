@@ -46,12 +46,12 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("verify")]
-        public async Task<IActionResult> VerifyAccount(VerifyAccountModel model)
+        [HttpGet("verify")]
+        public async Task<IActionResult> VerifyAccount(string token)
         {
             _logger.Information("Verify Account");
-            var response = await _authenticationService.VerifyAccountAsync(model);
-            if(response.Status == "Error")
+            var response = await _authenticationService.VerifyAccountAsync(token);
+            if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
@@ -63,11 +63,15 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Login");
             var res = await _authenticationService.LoginAsync(model);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
             return Ok(res);
         }
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordModel request)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel request)
         {
             _logger.Information("Forgot Password");
             var response = await _authenticationService.ForgotPasswordAsync(request);
@@ -75,15 +79,15 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
-            return Ok(response);    
+            return Ok(response);
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordModel request)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel request)
         {
             _logger.Information("Reset Password");
             var response = await _authenticationService.ResetPasswordAsync(request);
-            if(response.Status == "Error")
+            if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
