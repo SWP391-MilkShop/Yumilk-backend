@@ -20,6 +20,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> VerifyAccountAsync(string token);
         Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request);
         Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
+        Task<ResponseModel> RefreshTokenAsync(string token);
     }
 
     public sealed class AuthenticationService : IAuthenticationService
@@ -194,6 +195,7 @@ namespace NET1814_MilkShop.Services.Services
                 UserId = isUserExisted.Id,
                 CreatedAt = DateTime.UtcNow,
                 DeletedAt = DateTime.UtcNow.AddDays(3),
+                IsActive = true
             };
             _refreshTokenRepository.Add(refreshToken);
             return token;
@@ -322,6 +324,37 @@ namespace NET1814_MilkShop.Services.Services
                 token = token + str[x];
             }
             return token;
+        }
+
+        public async Task<ResponseModel> RefreshTokenAsync(string token)
+        {
+            var isExist = await _refreshTokenRepository.GetRefreshTokenAsync(token);
+            if (isExist == null)
+            {
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Không tồn tại token hoặc token đã hết hạn"
+                };
+            }
+            var isExistUser = await _userRepository.GetById(isExist.UserId);
+            if (isExistUser == null)
+            {
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Không tồn tại người dùng"
+                };
+            }
+            var newToken = CreateJwtToken(isExistUser);
+            var newRefreshToken = CreateJwtRefreshToken(isExistUser);
+            return new ResponseModel
+            {
+                Status = "Success",
+                Message = "Cập nhật token thành công",
+                Data = newToken
+            };
+
         }
     }
 }

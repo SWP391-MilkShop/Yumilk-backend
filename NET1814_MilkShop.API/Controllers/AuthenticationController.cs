@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net.WebSockets;
+using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Services.Services;
 using Serilog;
-using System.Net.WebSockets;
 using ILogger = Serilog.ILogger;
 
 namespace NET1814_MilkShop.API.Controllers
@@ -92,6 +92,18 @@ namespace NET1814_MilkShop.API.Controllers
                 return BadRequest(response);
             }
             return Ok(response);
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken(string token)
+        {
+            _logger.Information("Refresh Token");
+            var res = await _authenticationService.RefreshTokenAsync(token);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+            return Ok(res);
         }
     }
 }

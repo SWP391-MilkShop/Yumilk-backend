@@ -1,4 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
 
 namespace NET1814_MilkShop.Repositories.Repositories
@@ -6,6 +7,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
     public interface IRefreshTokenRepository
     {
         void Add(RefreshToken token);
+        Task<RefreshToken?> GetRefreshTokenAsync(string token);
     }
     public class RefreshTokenRepository : Repository<RefreshToken>, IRefreshTokenRepository
     {
@@ -13,5 +15,24 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
         }
 
+        public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
+        {
+            SetActiveToken(token);
+            return await _context.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(x => x.Token == token && x.IsActive == true);
+        }
+
+        private int SetActiveToken(string token)
+        {
+            var isExist = _context.RefreshTokens.AsNoTracking().FirstOrDefault(x => x.Token == token);
+            if (isExist == null)
+            {
+                return 0;
+            }
+            if (isExist.Expires < DateTime.UtcNow)
+            {
+                isExist.IsActive = false;
+            }
+            return _context.SaveChanges();
+        }
     }
 }
