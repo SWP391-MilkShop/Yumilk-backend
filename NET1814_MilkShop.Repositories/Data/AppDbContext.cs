@@ -542,7 +542,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Token").HasColumnType("nvarchar(255)");
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnName("user_id")
                         .HasColumnType("uniqueidentifier");
 
