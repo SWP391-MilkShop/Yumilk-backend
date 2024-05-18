@@ -103,16 +103,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return new ResponseModel { Status = "Error", Message = "Email đã tồn tại!" };
             }
-            Random res = new Random();
-            string str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            int size = 6;
-            string token = "";
-            for (int i = 0; i < size; i++)
-            {
-                // Chon index ngau nhien tren str
-                int x = res.Next(str.Length);
-                token = token + str[x];
-            }
+            string token = CreateVerifyToken();
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -121,7 +112,7 @@ namespace NET1814_MilkShop.Services.Services
                 LastName = model.LastName,
                 Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
                 RoleId = 1,
-                VerificationToken = token,
+                VerificationCode = token,
                 IsActive = false,
                 CreatedAt = DateTime.UtcNow,
                 DeletedAt = DateTime.UtcNow.AddHours(2)
@@ -248,10 +239,10 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return new ResponseModel { Status = "Error", Message = "Hết hạn" };
             }
-            if (verifyToken.Equals(isExist.VerificationToken))
+            if (isExist != null && verifyToken.Equals(isExist.VerificationCode))
             {
                 isExist.IsActive = true;
-                isExist.VerificationToken = null;
+                isExist.VerificationCode = null;
                 isExist.DeletedAt = null;
                 _userRepository.Update(isExist);
                 var result = await _unitOfWork.SaveChangesAsync();
@@ -260,14 +251,6 @@ namespace NET1814_MilkShop.Services.Services
                     return new ResponseModel { Status = "Success", Message = "Xác thực tài khoản thành công" };
                 }
             }
-            /*                var customer = new Customer
-                            {
-                                UserId = user.Id,
-                                Points = 0,
-                                Email = user.email,
-                                PhoneNumber = user.PhoneNumber
-         };*/// Lẽ ra khúc này add customer nhưng lại không lấy được mail và phoneNumber
-             //tại khi lưu user, user không có email và phonenumber -> không lấy lại user và add vô customer được 
             return new ResponseModel { Status = "Error", Message = "Có lỗi xảy ra trong quá trình xác thực hoặc link đã được dùng rồi" };
         }
 
@@ -277,17 +260,8 @@ namespace NET1814_MilkShop.Services.Services
             if (customer != null)
             {
                 var user = await _userRepository.GetById(customer.UserId);
-                Random res = new Random();
-                string str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-                int size = 6;
-                string token = "";
-                for (int i = 0; i < size; i++)
-                {
-                    // Chon index ngau nhien tren str
-                    int x = res.Next(str.Length);
-                    token = token + str[x];
-                }
-                user.VerificationToken = token;
+                string token = CreateVerifyToken();
+                user.ResetPasswordCode = token;
                 _userRepository.Update(user);
                 var result = await _unitOfWork.SaveChangesAsync();
                 var verifyToken = CreateVerifyJwtToken(user, token);
@@ -314,10 +288,10 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return new ResponseModel { Status = "Error", Message = "Hết hạn" };
             }
-            if (isExist != null)
+            if (isExist != null && verifyToken.Equals(isExist.ResetPasswordCode))
             {
                 isExist.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
-                isExist.VerificationToken = null;
+                isExist.ResetPasswordCode = null;
                 _userRepository.Update(isExist);
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
@@ -330,6 +304,24 @@ namespace NET1814_MilkShop.Services.Services
                 }
             }
             return new ResponseModel() { Status = "Error", Message = "Token không hợp lệ" };
+        }
+        /// <summary>
+        /// Tạo mã xác thực ngẫu nhiên 6 ký tự
+        /// </summary>
+        /// <returns></returns>
+        private static string CreateVerifyToken()
+        {
+            Random res = new Random();
+            string str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            int size = 6;
+            string token = "";
+            for (int i = 0; i < size; i++)
+            {
+                // Chon index ngau nhien tren str
+                int x = res.Next(str.Length);
+                token = token + str[x];
+            }
+            return token;
         }
     }
 }
