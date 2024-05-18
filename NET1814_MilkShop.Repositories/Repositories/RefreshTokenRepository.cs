@@ -6,13 +6,19 @@ namespace NET1814_MilkShop.Repositories.Repositories
 {
     public interface IRefreshTokenRepository
     {
-        void Add(RefreshToken token);
+        void AddToken(RefreshToken token);
         Task<RefreshToken?> GetRefreshTokenAsync(string token);
     }
     public class RefreshTokenRepository : Repository<RefreshToken>, IRefreshTokenRepository
     {
         public RefreshTokenRepository(AppDbContext context) : base(context)
         {
+        }
+
+        public void AddToken(RefreshToken token)
+        {
+            _context.RefreshTokens.Add(token);
+            _context.SaveChanges();
         }
 
         public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
