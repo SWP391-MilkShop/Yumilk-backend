@@ -12,12 +12,12 @@ public partial class RefreshToken
 
     public string? Token { get; set; }
 
-    public DateTime? Expires { get; set; }
+    public DateTime? Expires { get; set; } 
 
-    public Guid? UserId { get; set; }
+    public Guid UserId { get; set; }
 
     [DefaultValue(false)]
-    public bool IsActive { get; set; }
+    public bool IsActive { get; set; } 
 
     public DateTime? CreatedAt { get; set; }
 
