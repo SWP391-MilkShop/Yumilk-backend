@@ -8,7 +8,7 @@ public partial class CustomerAddress
 {
     [Key]
     public int Id { get; set; }
-
+    [Column("address",TypeName = "nvarchar(2000)")]
     public string? Address { get; set; }
 
     [Column("province_id")]
