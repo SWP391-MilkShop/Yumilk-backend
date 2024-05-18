@@ -7,8 +7,8 @@ namespace NET1814_MilkShop.Services.Services
 {
     public interface IEmailService
     {
-        void SendPasswordResetEmail(CustomerModel user);
-        void SendVerificationEmail(CustomerModel user);
+        void SendPasswordResetEmail(string receiveEmail,string token);
+        void SendVerificationEmail(string receiveEmail, string token);
     }
 
     public class EmailService : IEmailService
@@ -20,7 +20,7 @@ namespace NET1814_MilkShop.Services.Services
             _emailSettingModel = options.Value;
         }
 
-        private void SendMail(SendMailModel model)
+        public void SendMail(SendMailModel model)
         {
             var fromEmailAddress = _emailSettingModel.FromEmailAddress;
             var fromDisplayName = _emailSettingModel.FromDisplayName;
@@ -30,7 +30,7 @@ namespace NET1814_MilkShop.Services.Services
             }
             MailMessage mailMessage = new MailMessage()
             {
-                Subject = "",
+                Subject = model.Subject,
                 Body = model.Body,
                 //có thể dùng html format để làm mail đẹp hơn
                 IsBodyHtml = false,
@@ -53,24 +53,26 @@ namespace NET1814_MilkShop.Services.Services
             smtp.Send(mailMessage);
         }
 
-        public void SendPasswordResetEmail(CustomerModel user)
+        public void SendPasswordResetEmail(/*CustomerModel user*/ string receiveEmail, string token)
         {
             var model = new SendMailModel
             {
-                Receiver = user.Email,
+                Receiver = receiveEmail,
                 Subject = "Password Reset",
-                Body = "Please click the link below to reset your password" //nay chua co link nha ae
+                Body = "Please click the link below to reset your password\n\n" +
+                $"https://localhost:5000/api/authentication/reset-password?token={token}" //nay chua co link nha ae
             };
             SendMail(model);
         }
 
-        public void SendVerificationEmail(CustomerModel user)
+        public void SendVerificationEmail(/*CustomerModel user*/ string receiveEmail, string token)
         {
             var model = new SendMailModel
             {
-                Receiver = user.Email,
+                Receiver = receiveEmail,
                 Subject = "Verification",
-                Body = "Please click the link below to verify your account"
+                Body = "Please click the link below to verify your account\n\n" +
+                $"https://localhost:5000/api/authentication/verify?token={token}"
             };
             SendMail(model);
         }

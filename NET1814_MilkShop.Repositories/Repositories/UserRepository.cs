@@ -9,6 +9,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<List<User>> GetUsersAsync();
         Task<User?> GetByUsernameAsync(string username);
         Task<string?> GetVerificationTokenAsync(string username);
+        Task<User?> VerifyTokenAsync(string token);
         void Add(User user);
         void Update(User user);
         void Remove(User user);
@@ -43,5 +44,21 @@ namespace NET1814_MilkShop.Repositories.Repositories
             }
             return user.VerificationToken;
         }
+
+        public async Task<User?> VerifyTokenAsync(string token)
+        {
+           var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.VerificationToken == token);
+           if (user is null)
+           {
+                return null;
+           }
+           user.DeletedAt = null;
+           user.IsActive = true;
+           user.VerificationToken = null;
+           _context.Update(user);
+           await _context.SaveChangesAsync();
+           return user;
+        }
+
     }
 }

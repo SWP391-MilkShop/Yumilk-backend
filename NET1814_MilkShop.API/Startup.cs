@@ -48,7 +48,7 @@ namespace NET1814_MilkShop.API
             //Add Dependency Injection
             AddDI(services);
             //Add Email Setting
-            services.Configure<EmailSettingModel>(_configuration.GetSection("EmailSetting"));
+            services.Configure<EmailSettingModel>(_configuration.GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
             //Add Database
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
             //Add Exception Handler
@@ -132,6 +132,8 @@ namespace NET1814_MilkShop.API
 
             services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<IEmailService,EmailService>();
+            services.AddScoped<ICustomerService, CustomerService>();
         }
     }
 }
