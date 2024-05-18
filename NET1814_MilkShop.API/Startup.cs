@@ -79,17 +79,22 @@ namespace NET1814_MilkShop.API
                 );
             });
 
-            services.AddAuthentication("Bearer").AddJwtBearer(o =>
-            {
-                o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            services
+                .AddAuthentication("Bearer")
+                .AddJwtBearer(o =>
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = false,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]))
-                };
-            });
+                    o.TokenValidationParameters =
+                        new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                        {
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
+                            )
+                        };
+                });
         }
 
         public void Configure(WebApplication app, IWebHostEnvironment env)
