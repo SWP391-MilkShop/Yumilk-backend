@@ -18,9 +18,5 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
         }
 
-        public void Add(RefreshToken entity)
-        {
-            base.Add(entity);
-        }
     }
 }

@@ -26,7 +26,6 @@ namespace NET1814_MilkShop.Services.Services
             var customer = await _customerRepository.GetByEmailAsync(email);
             var customerModel = new CustomerModel
             {
-                CustomerId = customer.UserId.ToString(), //trong model là string, entity là uid,
                 GoogleId = customer.GoogleId,
                 PhoneNumber = customer.PhoneNumber,
                 Email = customer.Email,
