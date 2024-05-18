@@ -10,13 +10,13 @@ public partial class Customer
     public Guid UserId { get; set; }
 
     public int Points { get; set; }
-
+    [Column(TypeName = "nvarchar(20)")]
     public string? PhoneNumber { get; set; }
-
+    [Column(TypeName = "nvarchar(255)")]
     public string? Email { get; set; }
-
+    [Column(TypeName = "nvarchar(255)")]
     public string? GoogleId { get; set; }
-
+    [Column(TypeName = "nvarchar(255)")]
     public string? ProfilePictureUrl { get; set; }
 
     public virtual ICollection<Cart> Carts { get; set; } = [];

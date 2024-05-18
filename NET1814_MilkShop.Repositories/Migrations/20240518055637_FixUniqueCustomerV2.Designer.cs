@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NET1814_MilkShop.Repositories.Data;
 
@@ -11,9 +12,11 @@ using NET1814_MilkShop.Repositories.Data;
 namespace NET1814_MilkShop.Repositories.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240518055637_FixUniqueCustomerV2")]
+    partial class FixUniqueCustomerV2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -193,7 +196,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("address");
 
                     b.Property<DateTime?>("CreatedAt")
@@ -218,7 +221,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnName("is_default");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("phone_number");
 
                     b.Property<int>("ProvinceId")
@@ -263,7 +266,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2")
@@ -570,7 +573,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("image_url");
 
                     b.Property<bool>("IsActive")
@@ -738,10 +741,6 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("ResetPasswordCode")
-                        .HasColumnType("nvarchar(6)")
-                        .HasColumnName("reset_password_code");
-
                     b.Property<int>("RoleId")
                         .HasColumnType("int")
                         .HasColumnName("role_id");
@@ -750,9 +749,9 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("VerificationCode")
+                    b.Property<string>("VerificationToken")
                         .HasColumnType("nvarchar(6)")
-                        .HasColumnName("verification_code");
+                        .HasColumnName("verification_token");
 
                     b.HasKey("Id");
 

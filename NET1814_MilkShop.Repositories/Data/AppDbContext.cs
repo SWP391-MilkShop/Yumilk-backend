@@ -168,21 +168,29 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("user_id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Email").HasColumnType("nvarchar(255)");
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("email");
+                    b.HasIndex("Email").IsUnique().HasFilter("[email] IS NOT NULL");
 
                     b.Property<string>("GoogleId")
                         .HasColumnName("google_id")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasIndex("GoogleId").IsUnique().HasFilter("[google_id] IS NOT NULL");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnName("phone_number")
                         .HasColumnType("nvarchar(20)");
+                    b.HasIndex("PhoneNumber").IsUnique().HasFilter("[phone_number] IS NOT NULL");
 
-                    b.Property<int>("Points").HasColumnType("int");
+                    b.Property<int>("Points")
+                        .HasColumnType("int")
+                        .HasColumnName("points");
 
                     b.Property<string>("ProfilePictureUrl")
                         .HasColumnName("profile_picture_url")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.HasKey("UserId");
 
@@ -198,7 +206,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address").HasColumnType("nvarchar(max)");
+                    b.Property<string>("Address").HasColumnType("nvarchar(2000)");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnName("deleted_at")
@@ -206,7 +214,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnName("phone_number")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnName("user_id")
@@ -226,7 +234,7 @@ namespace NET1814_MilkShop.Repositories.Data
                 {
                     b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<string>("Address").IsRequired().HasColumnType("nvarchar(2000)");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnName("created_at")
@@ -496,7 +504,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnName("image_url")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
@@ -632,8 +640,8 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Username").IsRequired().HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("VerificationToken")
-                        .HasColumnName("verification_token")
+                    b.Property<string>("VerificationCode")
+                        .HasColumnName("verification_code")
                         .HasColumnType("nvarchar(6)");
 
                     b.HasKey("Id");
