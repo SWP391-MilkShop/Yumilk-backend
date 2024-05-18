@@ -60,7 +60,7 @@ namespace NET1814_MilkShop.Services.Services
                 Receiver = receiveEmail,
                 Subject = "Password Reset",
                 Body = "Please click the link below to reset your password\n\n" +
-                $"https://localhost:5000/api/authentication/reset-password?token={token}" //nay chua co link nha ae
+                $"https://localhost:5000/api/authentication/reset-password?token={token}"
             };
             SendMail(model);
         }
@@ -70,7 +70,7 @@ namespace NET1814_MilkShop.Services.Services
             var model = new SendMailModel
             {
                 Receiver = receiveEmail,
-                Subject = "Verification",
+                Subject = "Account Verification",
                 Body = "Please click the link below to verify your account\n\n" +
                 $"https://localhost:5000/api/authentication/verify?token={token}"
             };

@@ -10,7 +10,8 @@ namespace NET1814_MilkShop.Repositories.Models
 {
     public class ResetPasswordModel
     {
-        public string token { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Token is required!")]
+        public string token { get; set; } = null!;
         [Required(ErrorMessage = "Password is required!")]
         [Display(Name = "Password")]
         [DataType(DataType.Password)]
