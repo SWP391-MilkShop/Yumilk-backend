@@ -17,10 +17,9 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> SignUpAsync(SignUpModel model);
         Task<ResponseModel> CreateUserAsync(CreateUserModel model);
         Task<ResponseLoginModel> LoginAsync(RequestLoginModel model);
-        Task<string> GetVerificationTokenAsync(string userName);
-        Task<ResponseModel> VerifyTokenAsync(string token);
+        Task<ResponseModel> VerifyAccountAsync(VerifyAccountModel model);
         Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request);
-        Task<ResponseModel> RestPasswordAsync(ResetPasswordModel request);
+        Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
     }
 
     public sealed class AuthenticationService : IAuthenticationService
@@ -106,7 +105,7 @@ namespace NET1814_MilkShop.Services.Services
             }
             Random res = new Random();
             string str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            int size = 32;
+            int size = 6;
             string token = "";
             for (int i = 0; i < size; i++)
             {
@@ -136,10 +135,10 @@ namespace NET1814_MilkShop.Services.Services
             };
             _userRepository.Add(user);
             _customerRepository.Add(customer); // Khong nen add vao customer khi chua verify
-            _emailService.SendVerificationEmail(model.Email,token);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
+                _emailService.SendVerificationEmail(model.Email, token);
                 return new ResponseModel
                 {
                     Status = "Success",
@@ -151,27 +150,24 @@ namespace NET1814_MilkShop.Services.Services
         }
         public async Task<ResponseLoginModel> LoginAsync(RequestLoginModel model)
         {
-            var isUserExisted = await _authenticationRepository.GetUserByUserNameNPassword(model.UserName, model.Password);
-            if (isUserExisted != null)
+            var existingUser = await _authenticationRepository.GetUserByUserNameNPassword(model.UserName, model.Password);
+            if (existingUser != null)
             {
-                var token = CreateJwtToken(isUserExisted);
-                var refreshToken = CreateJwtRefreshToken(isUserExisted);
+                var token = CreateJwtToken(existingUser);
+                var refreshToken = CreateJwtRefreshToken(existingUser);
                 return new ResponseLoginModel
                 {
-                    FirstName = isUserExisted.FirstName,
-                    LastName = isUserExisted.LastName,
+                    FirstName = existingUser.FirstName,
+                    LastName = existingUser.LastName,
                     Token = token,
                     RefreshToken = refreshToken,
                     Message = "Đăng nhập thành công"
                 };
             }
-            else
+            return new ResponseLoginModel
             {
-                return new ResponseLoginModel
-                {
-                    Message = "Tên đăng nhập hoặc mật khẩu sai " + BCrypt.Net.BCrypt.HashPassword("string")
-                };
-            }
+                Message = "Tên đăng nhập hoặc mật khẩu sai " + BCrypt.Net.BCrypt.HashPassword("string")
+            };
         }
 
         private string CreateJwtRefreshToken(User isUserExisted)
@@ -190,7 +186,11 @@ namespace NET1814_MilkShop.Services.Services
             _refreshTokenRepository.Add(refreshToken);
             return token;
         }
-
+        /// <summary>
+        /// Create JWT Token
+        /// </summary>
+        /// <param name="isUserExisted"></param>
+        /// <returns></returns>
         private string CreateJwtToken(User isUserExisted)
         {
             var key = Encoding.UTF8.GetBytes(Key);
@@ -212,21 +212,22 @@ namespace NET1814_MilkShop.Services.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public async Task<string> GetVerificationTokenAsync(string userName)
+        public async Task<ResponseModel> VerifyAccountAsync(VerifyAccountModel model)
         {
-            var verifyToken = await _userRepository.GetVerificationTokenAsync(userName);
-            if(verifyToken is null)
+            var customer = await _customerRepository.GetByEmailAsync(model.email);
+            var user = await _userRepository.GetById(customer.UserId);
+            if (model.token.Equals(user.VerificationToken))
             {
-                throw new ArgumentException();
+                user.IsActive = true;
+                user.VerificationToken = null;
+                user.DeletedAt = null;
+                _userRepository.Update(user);
+                var result = await _unitOfWork.SaveChangesAsync();
+                if (result > 0)
+                {
+                    return new ResponseModel { Status = "Success", Message = "Xác thực tài khoản thành công" };
+                }
             }
-            return verifyToken;
-        }
-
-        public async Task<ResponseModel> VerifyTokenAsync(string token)
-        {
-            var user = await _userRepository.VerifyTokenAsync(token);
-            if(user is not null)
-            {
                 /*                var customer = new Customer
                                 {
                                     UserId = user.Id,
@@ -234,19 +235,16 @@ namespace NET1814_MilkShop.Services.Services
                                     Email = user.email,
                                     PhoneNumber = user.PhoneNumber
              };*/// Lẽ ra khúc này add customer nhưng lại không lấy được mail và phoneNumber
-            //tại khi lưu user, user không có email và phonenumber -> không lấy lại user và add vô customer được 
-                return new ResponseModel { Status = "Success", Message = "Xác thực tài khoản thành công" };
-            }
-            return new ResponseModel {Status = "Error", Message = "Có lỗi xảy ra trong quá trình xác thực hoặc link đã được dùng rồi" };
+                 //tại khi lưu user, user không có email và phonenumber -> không lấy lại user và add vô customer được 
+            return new ResponseModel { Status = "Error", Message = "Có lỗi xảy ra trong quá trình xác thực hoặc link đã được dùng rồi" };
         }
 
         public async Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request)
         {
             var customer = await _customerRepository.GetByEmailAsync(request.Email);
-            if(customer is not null)
+            if (customer != null)
             {
-                var allUser = await _userRepository.GetUsersAsync();
-                var user = allUser.Where(x => x.Id == customer.UserId).FirstOrDefault();
+                var user = await _userRepository.GetById(customer.UserId);
                 Random res = new Random();
                 string str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
                 int size = 32;
@@ -259,14 +257,17 @@ namespace NET1814_MilkShop.Services.Services
                 }
                 user.VerificationToken = token;
                 _userRepository.Update(user);
-                _emailService.SendPasswordResetEmail(customer.Email, token);//Có link token ở header nhưng phải tự nhập ở swagger để change pass
-                await _unitOfWork.SaveChangesAsync();
-                return new ResponseModel { Status = "Success", Message = "Đã gửi link reset password vui lòng check mail" };
+                var result = await _unitOfWork.SaveChangesAsync();
+                if (result > 0)
+                {
+                    _emailService.SendPasswordResetEmail(customer.Email, token);//Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    return new ResponseModel { Status = "Success", Message = "Đã gửi link reset password vui lòng kiểm tra email" };
+                }
             }
-            return new ResponseModel { Status = "Error", Message = "Mail không tồn tại" };
+            return new ResponseModel { Status = "Error", Message = "Email không tồn tại" };
         }
 
-        public async Task<ResponseModel> RestPasswordAsync(ResetPasswordModel request)
+        public async Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request)
         {
             var user = await _userRepository.GetUsersAsync();
             var validTokenUser = user.FirstOrDefault(x => x.VerificationToken == request.token);
@@ -275,14 +276,17 @@ namespace NET1814_MilkShop.Services.Services
                 validTokenUser.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
                 validTokenUser.VerificationToken = null;
                 _userRepository.Update(validTokenUser);
-                await _unitOfWork.SaveChangesAsync();
-                return new ResponseModel
+                var result = await _unitOfWork.SaveChangesAsync();
+                if (result > 0)
                 {
-                    Status = "Success",
-                    Message = "Successfully change password"
-                };
+                    return new ResponseModel
+                    {
+                        Status = "Success",
+                        Message = "Đổi mật khẩu thành công"
+                    };
+                }
             }
-            return new ResponseModel() { Status = "Error", Message = "Token invalid" };
+            return new ResponseModel() { Status = "Error", Message = "Token không hợp lệ" };
         }
     }
 }

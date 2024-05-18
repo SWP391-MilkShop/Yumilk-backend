@@ -2,7 +2,6 @@
 {
     public class CustomerModel
     {
-        public string? CustomerId { get; set; }
         public int Points { get; set; }
 
         public string? PhoneNumber { get; set; }

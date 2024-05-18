@@ -46,11 +46,11 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("verify")]
-        public async Task<IActionResult> VerifyAccount(string token)
+        [HttpPost("verify")]
+        public async Task<IActionResult> VerifyAccount(VerifyAccountModel model)
         {
             _logger.Information("Verify Account");
-            var response = await _authenticationService.VerifyAccountAsync(token);
+            var response = await _authenticationService.VerifyAccountAsync(model);
             if(response.Status == "Error")
             {
                 return BadRequest(response);
