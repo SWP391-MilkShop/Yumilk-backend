@@ -61,6 +61,7 @@ namespace NET1814_MilkShop.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(RequestLoginModel model)
         {
+            _logger.Information("Login");
             var res = await _authenticationService.LoginAsync(model);
             return Ok(res);
         }
