@@ -29,7 +29,6 @@ namespace NET1814_MilkShop.Services.Services
         private readonly ICustomerRepository _customerRepository;
         private readonly string Key = "qwertyuiopasdfghjklzxcvbnmasdasdasdasdasdasdasdas";
         private readonly IAuthenticationRepository _authenticationRepository;
-        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IEmailService _emailService;
 
         public AuthenticationService(IServiceProvider serviceProvider)
@@ -38,7 +37,6 @@ namespace NET1814_MilkShop.Services.Services
             _userRepository = serviceProvider.GetRequiredService<IUserRepository>();
             _customerRepository = serviceProvider.GetRequiredService<ICustomerRepository>();
             _authenticationRepository = serviceProvider.GetRequiredService<IAuthenticationRepository>();
-            _refreshTokenRepository = serviceProvider.GetRequiredService<IRefreshTokenRepository>();
             _emailService = serviceProvider.GetRequiredService<IEmailService>();
         }
 
@@ -186,16 +184,16 @@ namespace NET1814_MilkShop.Services.Services
         {
             var randomByte = new Byte[64];
             var token = Convert.ToBase64String(randomByte);
-            var refreshToken = new RefreshToken
-            {
-                Id = new Random().Next(0, 10000000),
-                Token = token,
-                Expires = DateTime.UtcNow.AddDays(3),
-                UserId = isUserExisted.Id,
-                CreatedAt = DateTime.UtcNow,
-                DeletedAt = DateTime.UtcNow.AddDays(3),
-            };
-            _refreshTokenRepository.Add(refreshToken);
+            //var refreshToken = new RefreshToken
+            //{
+            //    Id = new Random().Next(0, 10000000),
+            //    Token = token,
+            //    Expires = DateTime.UtcNow.AddDays(3),
+            //    UserId = isUserExisted.Id,
+            //    CreatedAt = DateTime.UtcNow,
+            //    DeletedAt = DateTime.UtcNow.AddDays(3),
+            //};
+            //_refreshTokenRepository.Add(refreshToken);
             return token;
         }
         /// <summary>
