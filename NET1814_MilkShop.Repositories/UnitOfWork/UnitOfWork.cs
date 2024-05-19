@@ -1,4 +1,7 @@
-﻿using NET1814_MilkShop.Repositories.Data;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore;
+using NET1814_MilkShop.Repositories.Data;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.UnitOfWork
 {
@@ -20,7 +23,28 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
         {
             return await _context.SaveChangesAsync();
         }
+        private void UpdateAuditableEntities()
+        {
+            IEnumerable<EntityEntry<IAuditableEntity>> entries =
+                _context
+                    .ChangeTracker
+                    .Entries<IAuditableEntity>();
 
+            foreach (EntityEntry<IAuditableEntity> entityEntry in entries)
+            {
+                if (entityEntry.State == EntityState.Added)
+                {
+                    entityEntry.Property(a => a.CreatedAt)
+                        .CurrentValue = DateTime.UtcNow;
+                }
+
+                if (entityEntry.State == EntityState.Modified)
+                {
+                    entityEntry.Property(a => a.ModifiedAt)
+                        .CurrentValue = DateTime.UtcNow;
+                }
+            }
+        }
         public void Dispose()
         {
             _context.Dispose();

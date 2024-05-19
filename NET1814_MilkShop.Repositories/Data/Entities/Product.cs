@@ -1,11 +1,12 @@
-﻿using System.ComponentModel;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("Products")]
-public partial class Product
+public partial class Product : IAuditableEntity
 {
     [Key]
     public Guid Id { get; set; }
@@ -34,8 +35,11 @@ public partial class Product
     [DefaultValue(false)]
     public bool IsActive { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
-
+    [Column("created_at", TypeName = "datetime2")]
+    public DateTime CreatedAt { get; set; }
+    [Column("modified_at", TypeName = "datetime2")]
+    public DateTime? ModifiedAt { get; set; }
+    [Column("deleted_at", TypeName = "datetime2")]
     public DateTime? DeletedAt { get; set; }
 
     public virtual Brand? Brand { get; set; }

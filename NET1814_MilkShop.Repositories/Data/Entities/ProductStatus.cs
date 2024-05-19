@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("ProductStatuses")]
-public partial class ProductStatus
+public partial class ProductStatus : IAuditableEntity
 {
     [Key]
     public int Id { get; set; }
@@ -14,4 +15,11 @@ public partial class ProductStatus
 
     [Column(TypeName = "nvarchar(2000)")]
     public string? Description { get; set; }
+
+    [Column("created_at", TypeName = "datetime2")]
+    public DateTime CreatedAt { get; set; }
+    [Column("modified_at", TypeName = "datetime2")]
+    public DateTime? ModifiedAt { get; set; }
+    [Column("deleted_at", TypeName = "datetime2")]
+    public DateTime? DeletedAt { get; set; }
 }
