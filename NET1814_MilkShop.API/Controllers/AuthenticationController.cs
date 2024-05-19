@@ -93,5 +93,17 @@ namespace NET1814_MilkShop.API.Controllers
             }
             return Ok(response);
         }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] string token)
+        {
+            _logger.Information("Refresh Token");
+            var res = await _authenticationService.RefreshTokenAsync(token);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+            return Ok(res);
+        }
     }
 }
