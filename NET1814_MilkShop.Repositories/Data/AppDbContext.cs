@@ -20,7 +20,6 @@ namespace NET1814_MilkShop.Repositories.Data
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<CustomerAddress> CustomerAddresses { get; set; }
-        public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
         public virtual DbSet<Cart> Carts { get; set; }
         public virtual DbSet<CartDetail> CartDetails { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
@@ -60,7 +59,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -88,7 +87,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -140,7 +139,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -236,7 +235,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Address").IsRequired().HasColumnType("nvarchar(2000)");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -331,7 +330,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -361,7 +360,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<int>("CategoryId").HasColumnName("category_id").HasColumnType("int");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -407,7 +406,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -443,7 +442,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -493,7 +492,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -520,39 +519,7 @@ namespace NET1814_MilkShop.Repositories.Data
                 }
             );
 
-            modelBuilder.Entity(
-                "NET1814_MilkShop.Repositories.Data.Entities.RefreshToken",
-                b =>
-                {
-                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnName("created_at")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnName("deleted_at")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("Expires").HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
-
-                    b.Property<string>("Token").HasColumnType("nvarchar(255)");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnName("user_id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("refresh_tokens");
-                }
-            );
+            //Removed refresh token
 
             modelBuilder.Entity(
                 "NET1814_MilkShop.Repositories.Data.Entities.Role",
@@ -562,7 +529,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -590,7 +557,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -616,7 +583,7 @@ namespace NET1814_MilkShop.Repositories.Data
                 {
                     b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -662,7 +629,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<int>("VoucherId").HasColumnName("voucher_id").HasColumnType("int");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -690,7 +657,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<string>("Code").IsRequired().HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
@@ -910,17 +877,6 @@ namespace NET1814_MilkShop.Repositories.Data
                 }
             );
 
-            modelBuilder.Entity(
-                "NET1814_MilkShop.Repositories.Data.Entities.RefreshToken",
-                b =>
-                {
-                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.User", "User")
-                        .WithMany("RefreshTokens")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                }
-            );
 
             modelBuilder.Entity(
                 "NET1814_MilkShop.Repositories.Data.Entities.User",
@@ -1047,16 +1003,6 @@ namespace NET1814_MilkShop.Repositories.Data
                 b =>
                 {
                     b.Navigation("Products");
-                }
-            );
-
-            modelBuilder.Entity(
-                "NET1814_MilkShop.Repositories.Data.Entities.User",
-                b =>
-                {
-                    b.Navigation("Customer");
-
-                    b.Navigation("RefreshTokens");
                 }
             );
 

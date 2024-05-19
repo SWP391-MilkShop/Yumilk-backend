@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("Orders")]
-public partial class Order
+public partial class Order : IAuditableEntity
 {
     [Key]
     public Guid Id { get; set; }
@@ -32,8 +33,11 @@ public partial class Order
     public DateTime? PaymentDate { get; set; }
     public int StatusId { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
-
+    [Column("created_at", TypeName = "datetime2")]
+    public DateTime CreatedAt { get; set; }
+    [Column("modified_at", TypeName = "datetime2")]
+    public DateTime? ModifiedAt { get; set; }
+    [Column("deleted_at", TypeName = "datetime2")]
     public DateTime? DeletedAt { get; set; }
 
     public virtual Customer? Customer { get; set; }
