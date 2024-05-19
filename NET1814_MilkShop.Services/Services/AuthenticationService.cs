@@ -65,7 +65,6 @@ namespace NET1814_MilkShop.Services.Services
                 Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
                 RoleId = model.RoleId,
                 IsActive = true, //no activation required
-                CreatedAt = DateTime.UtcNow
             };
             _userRepository.Add(user);
             var result = await _unitOfWork.SaveChangesAsync();
@@ -112,8 +111,6 @@ namespace NET1814_MilkShop.Services.Services
                 RoleId = 1,
                 VerificationCode = token,
                 IsActive = false,
-                CreatedAt = DateTime.UtcNow,
-                DeletedAt = DateTime.UtcNow.AddHours(2)
             };
             var customer = new Customer
             {
@@ -241,7 +238,6 @@ namespace NET1814_MilkShop.Services.Services
             {
                 isExist.IsActive = true;
                 isExist.VerificationCode = null;
-                isExist.DeletedAt = null;
                 _userRepository.Update(isExist);
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
@@ -262,9 +258,9 @@ namespace NET1814_MilkShop.Services.Services
                 user.ResetPasswordCode = token;
                 _userRepository.Update(user);
                 var result = await _unitOfWork.SaveChangesAsync();
-                var verifyToken = CreateVerifyJwtToken(user, token);
                 if (result > 0)
                 {
+                    var verifyToken = CreateVerifyJwtToken(user, token);
                     _emailService.SendPasswordResetEmail(customer.Email, verifyToken);//Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return new ResponseModel { Status = "Success", Message = "Đã gửi link reset password vui lòng kiểm tra email" };
                 }
