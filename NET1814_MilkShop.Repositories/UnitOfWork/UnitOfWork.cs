@@ -21,6 +21,7 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
 
         public async Task<int> SaveChangesAsync()
         {
+            UpdateAuditableEntities();
             return await _context.SaveChangesAsync();
         }
         private void UpdateAuditableEntities()

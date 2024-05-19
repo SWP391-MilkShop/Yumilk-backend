@@ -8,8 +8,6 @@ using NET1814_MilkShop.Repositories.UnitOfWork;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-
 namespace NET1814_MilkShop.Services.Services
 {
     public interface IAuthenticationService
