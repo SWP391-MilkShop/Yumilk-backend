@@ -6,7 +6,7 @@ namespace NET1814_MilkShop.Services.Services
 {
     public interface IUserService
     {
-        Task<List<UserModel>> GetUsersAsync();
+        Task<ResponseModel> GetUsersAsync();
     }
 
     public sealed class UserService : IUserService
@@ -18,17 +18,23 @@ namespace NET1814_MilkShop.Services.Services
             _userRepository = userRepository;
         }
 
-        public async Task<List<UserModel>> GetUsersAsync()
+        public async Task<ResponseModel> GetUsersAsync()
         {
             var users = await _userRepository.GetUsersAsync();
             var models = users.Select(users => ToUserModel(users)).ToList();
-            return models;
+            return new ResponseModel
+            {
+                Data = models,
+                Message = "Get all users successfully",
+                Status = "Success"
+            };
         }
 
         private static UserModel ToUserModel(User user)
         {
             return new UserModel
             {
+                Id = user.Id.ToString(),
                 Username = user.Username,
                 FirstName = user.FirstName,
                 LastName = user.LastName,

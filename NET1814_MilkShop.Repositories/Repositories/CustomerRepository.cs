@@ -6,6 +6,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
 {
     public interface ICustomerRepository
     {
+        Task<List<Customer>> GetCustomersAsync();
         Task<Customer?> GetByEmailAsync(string email);
         Task<Customer?> GetById(Guid id);
         void Add(Customer customer);
@@ -18,10 +19,23 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public CustomerRepository(AppDbContext context)
             : base(context) { }
 
+
         public async Task<Customer?> GetByEmailAsync(string email)
         {
             //use AsNoTracking for read-only operations
-            return await _context.Customers.AsNoTracking().FirstOrDefaultAsync(x => email.Equals(x.Email));
+            return await _context.Customers.AsNoTracking().Include(x => x.User).FirstOrDefaultAsync(x => email.Equals(x.Email));
+        }
+        /// <summary>
+        /// Get all customers with user information included
+        /// </summary>
+        /// <returns></returns>
+        public Task<List<Customer>> GetCustomersAsync()
+        {
+            return _context.Customers.Include(x => x.User).ToListAsync();
+        }
+        public override async Task<Customer?> GetById(Guid id)
+        {
+            return await _context.Customers.Include(x => x.User).FirstOrDefaultAsync(x => x.UserId == id);
         }
     }
 }

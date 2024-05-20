@@ -1,15 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
-using NET1814_MilkShop.Services.CoreHelpers;
+using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 namespace NET1814_MilkShop.Services.Services
 {
     public interface IAuthenticationService
@@ -142,7 +138,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> LoginAsync(RequestLoginModel model)
         {
-            var existingUser = await _authenticationRepository.GetUserByUserNameNPassword(model.UserName, model.Password);
+            var existingUser = await _authenticationRepository.GetUserByUserNameNPassword(model.Username, model.Password);
             if (existingUser != null)
             {
                 var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
@@ -153,7 +149,7 @@ namespace NET1814_MilkShop.Services.Services
                     Username = existingUser.Username,
                     FirstName = existingUser.FirstName,
                     LastName = existingUser.LastName,
-                    RoleId = existingUser.RoleId.ToString(),
+                    RoleId = existingUser.RoleId,
                     AccessToken = token.ToString(),
                     RefreshToken = refreshToken.ToString()
                 };
@@ -213,14 +209,13 @@ namespace NET1814_MilkShop.Services.Services
             var customer = await _customerRepository.GetByEmailAsync(request.Email);
             if (customer != null)
             {
-                var user = await _userRepository.GetById(customer.UserId);
                 string token = _jwtTokenExtension.CreateVerifyCode();
-                user.ResetPasswordCode = token;
-                _userRepository.Update(user);
+                customer.User.ResetPasswordCode = token;
+                _userRepository.Update(customer.User);
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
                 {
-                    var verifyToken = _jwtTokenExtension.CreateJwtToken(user, TokenType.Authentication);
+                    var verifyToken = _jwtTokenExtension.CreateJwtToken(customer.User, TokenType.Authentication);
                     _emailService.SendPasswordResetEmail(customer.Email, verifyToken);//Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return new ResponseModel { Status = "Success", Message = "Đã gửi link reset password vui lòng kiểm tra email" };
                 }
