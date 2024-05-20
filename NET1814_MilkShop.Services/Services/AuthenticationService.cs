@@ -235,17 +235,7 @@ namespace NET1814_MilkShop.Services.Services
             var tokenS = jsonToken as JwtSecurityToken;
             var userID = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
             var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
-            var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
-            var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
             var isExist = await _userRepository.GetById(Guid.Parse(userID));
-            if (expirationTime < DateTime.UtcNow)
-            {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Token hết hạn"
-                };
-            }
             if (isExist != null && verifyToken.Equals(isExist.ResetPasswordCode))
             {
                 isExist.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -271,8 +261,6 @@ namespace NET1814_MilkShop.Services.Services
             var jsonToken = handler.ReadToken(token);
             var tokenS = jsonToken as JwtSecurityToken;
             var userId = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
-            var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
-            var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
             var userExisted = await _userRepository.GetById(Guid.Parse(userId));
             if (userExisted == null)
             {
@@ -280,14 +268,6 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     Status = "Error",
                     Message = "Không tồn tại người dùng"
-                };
-            }
-            if (expirationTime < DateTime.UtcNow)
-            {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Token hết hạn"
                 };
             }
             var newToken = _jwtTokenExtension.CreateJwtToken(userExisted, TokenType.Access);
