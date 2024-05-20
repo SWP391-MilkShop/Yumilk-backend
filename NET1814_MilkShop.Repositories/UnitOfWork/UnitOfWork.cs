@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Interfaces;
 
@@ -21,8 +21,16 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
 
         public async Task<int> SaveChangesAsync()
         {
-            UpdateAuditableEntities();
-            return await _context.SaveChangesAsync();
+            try
+            {
+                UpdateAuditableEntities();
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while saving changes", ex);
+            }
+
         }
         private void UpdateAuditableEntities()
         {

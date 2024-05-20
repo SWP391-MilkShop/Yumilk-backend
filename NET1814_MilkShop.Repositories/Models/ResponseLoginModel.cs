@@ -12,7 +12,7 @@
         public string? PhoneNumber { get; set; }
         public string? ProfilePictureUrl { get; set; }
         public string? GoogleId { get; set; }
-        public string? RoleId { get; set; }
+        public int RoleId { get; set; }
         public int Points { get; set; }
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }

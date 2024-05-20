@@ -2,14 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Services.Services;
-using Serilog;
-using System.Net.WebSockets;
 using ILogger = Serilog.ILogger;
 
 namespace NET1814_MilkShop.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/authentication")]
     public class AuthenticationController : Controller
     {
         private readonly ILogger _logger;

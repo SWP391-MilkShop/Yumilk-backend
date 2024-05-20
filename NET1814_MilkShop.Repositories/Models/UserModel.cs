@@ -2,6 +2,7 @@
 {
     public class UserModel
     {
+        public string Id { get; set; } = null!;
         public string Username { get; set; } = null!;
 
         public string? FirstName { get; set; }

@@ -5,7 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace NET1814_MilkShop.Services.CoreHelpers
+namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
 {
     public enum TokenType
     {
@@ -89,10 +89,10 @@ namespace NET1814_MilkShop.Services.CoreHelpers
             switch (tokenType)
             {
                 case TokenType.Access:
-                    expiry= int.Parse(_configuration["Jwt:AccessTokenLifeTime"]);
+                    expiry = int.Parse(_configuration["Jwt:AccessTokenLifeTime"]);
                     break;
                 case TokenType.Refresh:
-                    expiry= int.Parse(_configuration["Jwt:RefreshTokenLifeTime"]);
+                    expiry = int.Parse(_configuration["Jwt:RefreshTokenLifeTime"]);
                     break;
                 case TokenType.Authentication:
                     expiry = int.Parse(_configuration["Jwt:AuthenticationLifeTime"]);

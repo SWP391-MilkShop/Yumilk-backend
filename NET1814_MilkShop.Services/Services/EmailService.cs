@@ -1,13 +1,13 @@
-﻿using System.Net;
-using System.Net.Mail;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using NET1814_MilkShop.Repositories.Models;
+using System.Net;
+using System.Net.Mail;
 
 namespace NET1814_MilkShop.Services.Services
 {
     public interface IEmailService
     {
-        void SendPasswordResetEmail(string receiveEmail,string token);
+        void SendPasswordResetEmail(string receiveEmail, string token);
         void SendVerificationEmail(string receiveEmail, string token);
     }
 

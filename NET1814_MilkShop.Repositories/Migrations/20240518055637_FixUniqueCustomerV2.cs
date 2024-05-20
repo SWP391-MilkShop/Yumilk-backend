@@ -62,7 +62,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                name: "Address",
                table: "customer_addresses",
                newName: "address");
-            
+
         }
 
         /// <inheritdoc />
@@ -112,7 +112,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 table: "customer_addresses",
                 newName: "Address");
 
-            
+
         }
     }
 }

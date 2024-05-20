@@ -8,7 +8,6 @@ namespace NET1814_MilkShop.Repositories.Models
         Required(ErrorMessage = "Email is required!"),
         EmailAddress(ErrorMessage = "Must be email format!")
         ]
-        [Display(Name = "Email Address")]
         public string Email { get; set; } = null!;
     }
 }

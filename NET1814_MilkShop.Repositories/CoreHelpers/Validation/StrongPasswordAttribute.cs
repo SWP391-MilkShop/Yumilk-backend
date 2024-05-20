@@ -36,7 +36,7 @@ namespace NET1814_MilkShop.Repositories.CoreHelpers.Validation
                 return new ValidationResult("Password must contain at least one digit.");
             }
 
-            if (password.IndexOfAny("!@#$%^&*()".ToCharArray()) == -1)
+            if (password.IndexOfAny("!@#$%^&*()~`_+-={}|[]:;<>,.?/".ToCharArray()) == -1)
             {
                 return new ValidationResult(
                     "Password must contain at least one special character."

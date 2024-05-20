@@ -19,9 +19,9 @@ public partial class User : IAuditableEntity
     public string? FirstName { get; set; }
 
     public string? LastName { get; set; }
-    [Column("verification_code",TypeName = "nvarchar(6)")]
+    [Column("verification_code", TypeName = "nvarchar(6)")]
     public string? VerificationCode { get; set; }
-    [Column("reset_password_code",TypeName = "nvarchar(6)")]
+    [Column("reset_password_code", TypeName = "nvarchar(6)")]
     public string? ResetPasswordCode { get; set; }
 
     public int RoleId { get; set; }
