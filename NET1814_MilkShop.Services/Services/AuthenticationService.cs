@@ -112,7 +112,7 @@ namespace NET1814_MilkShop.Services.Services
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
-                RoleId = 1,
+                RoleId = 3,
                 VerificationCode = token,
                 IsActive = false,
             };
@@ -147,15 +147,30 @@ namespace NET1814_MilkShop.Services.Services
             {
                 var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
                 var refreshToken = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Refresh);
+                var responseLogin = new ResponseLoginModel
+                {
+                    UserID = existingUser.Id.ToString(),
+                    Username = existingUser.Username,
+                    FirstName = existingUser.FirstName,
+                    LastName = existingUser.LastName,
+                    RoleId = existingUser.RoleId.ToString(),
+                    AccessToken = token.ToString(),
+                    RefreshToken = refreshToken.ToString()
+                };
+                var customer = await _customerRepository.GetById(existingUser.Id);
+                if (customer != null)
+                {
+                    responseLogin.Email = customer.Email;
+                    responseLogin.PhoneNumber = customer.PhoneNumber;
+                    responseLogin.ProfilePictureUrl = customer.ProfilePictureUrl;
+                    responseLogin.GoogleId = customer.GoogleId;
+                    responseLogin.Points = customer.Points;
+                }
                 return new ResponseModel
                 {
                     Status = "Success",
                     Message = "Đăng nhập thành công",
-                    Data = new
-                    {
-                        AccessToken = token,
-                        RefreshToken = refreshToken
-                    }
+                    Data = responseLogin
                 };
             }
             return new ResponseModel

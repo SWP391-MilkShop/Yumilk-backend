@@ -31,7 +31,7 @@ namespace NET1814_MilkShop.Repositories.Models
 
         [Required(ErrorMessage = "Role is required!")]
         [Display(Name = "Role")]
-        [Range(2, 3, ErrorMessage = "Choose role in range 1-3")]
+        [Range(1, 2, ErrorMessage = "Choose role in range 1-2")]
         public int RoleId { get; set; }
     }
 }
