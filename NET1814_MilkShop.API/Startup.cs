@@ -100,7 +100,7 @@ namespace NET1814_MilkShop.API
                 );
             });
 
-            services.AddAuthentication("Bearer").AddJwtBearer(o =>
+            services.AddAuthentication().AddJwtBearer("Access", o =>
             {
                 o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
@@ -110,7 +110,19 @@ namespace NET1814_MilkShop.API
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:AccessTokenKey"]))
                 };
+            })
+            .AddJwtBearer("Refresh", o =>
+            {
+                o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:RefreshTokenKey"]))
+                };
             });
+
         }
 
         public void Configure(WebApplication app, IWebHostEnvironment env)

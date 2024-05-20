@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Services.Services;
 using Serilog;
@@ -95,6 +96,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPost("refresh-token")]
+        [Authorize(AuthenticationSchemes = "Refresh")]
         public async Task<IActionResult> RefreshToken([FromBody] string token)
         {
             _logger.Information("Refresh Token");

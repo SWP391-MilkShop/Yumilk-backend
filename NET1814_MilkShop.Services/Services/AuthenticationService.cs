@@ -225,7 +225,11 @@ namespace NET1814_MilkShop.Services.Services
             var isExist = await _userRepository.GetById(Guid.Parse(userID));
             if (expirationTime < DateTime.UtcNow)
             {
-                return new ResponseModel { Status = "Error", Message = "Hết hạn" };
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Token hết hạn"
+                };
             }
             if (isExist != null && verifyToken.Equals(isExist.ResetPasswordCode))
             {

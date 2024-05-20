@@ -22,7 +22,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(AuthenticationSchemes = "Bearer", Roles = "1")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         public async Task<IActionResult> GetUsersAsync()
         {
             _logger.Information("Get all users");
