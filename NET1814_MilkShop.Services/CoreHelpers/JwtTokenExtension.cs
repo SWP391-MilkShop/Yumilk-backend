@@ -51,7 +51,7 @@ namespace NET1814_MilkShop.Services.CoreHelpers
             switch (tokenType)
             {
                 case TokenType.Access:
-                    claims.Add(new Claim("Role", user.RoleId.ToString()));
+                    claims.Add(new Claim(ClaimTypes.Role, user.RoleId.ToString()));
                     break;
                 case TokenType.Refresh:
                     break;
