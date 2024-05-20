@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using NET1814_MilkShop.Repositories.Data.Entities;
@@ -18,24 +19,27 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> VerifyAccountAsync(string token);
         Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request);
         Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
+        Task<ResponseModel> RefreshTokenAsync(string token);
     }
 
     public sealed class AuthenticationService : IAuthenticationService
     {
+        private readonly IConfiguration _configuration;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserRepository _userRepository;
         private readonly ICustomerRepository _customerRepository;
-        private readonly string Key = "qwertyuiopasdfghjklzxcvbnmasdasdasdasdasdasdasdas";
         private readonly IAuthenticationRepository _authenticationRepository;
         private readonly IEmailService _emailService;
 
         public AuthenticationService(IServiceProvider serviceProvider)
         {
+            _configuration = serviceProvider.GetRequiredService<IConfiguration>();
             _unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
             _userRepository = serviceProvider.GetRequiredService<IUserRepository>();
             _customerRepository = serviceProvider.GetRequiredService<ICustomerRepository>();
             _authenticationRepository = serviceProvider.GetRequiredService<IAuthenticationRepository>();
             _emailService = serviceProvider.GetRequiredService<IEmailService>();
+
         }
 
         /// <summary>
@@ -135,7 +139,7 @@ namespace NET1814_MilkShop.Services.Services
         }
         private string CreateVerifyJwtToken(User isUserExisted, string userToken)
         {
-            var key = Encoding.UTF8.GetBytes(Key);
+            var key = Encoding.UTF8.GetBytes(_configuration["AuthenticationKey"]);
             var securityKey = new SymmetricSecurityKey(key);
             var credential = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -147,7 +151,7 @@ namespace NET1814_MilkShop.Services.Services
                     new Claim("UserID", isUserExisted.Id.ToString()),
                     new Claim("Token", userToken)
                 }),
-                Expires = DateTime.UtcNow.AddSeconds(5),
+                Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["AuthenticationLifeTime"])),
                 SigningCredentials = credential,
             };
             var token = tokenHandler.CreateToken(tokenDescription);
@@ -165,7 +169,7 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     Status = "Success",
                     Message = "Đăng nhập thành công",
-                    Data = token,
+                    Data = token + "||||" + refreshToken,
                 };
             }
             return new ResponseModel
@@ -177,19 +181,22 @@ namespace NET1814_MilkShop.Services.Services
 
         private string CreateJwtRefreshToken(User isUserExisted)
         {
-            var randomByte = new Byte[64];
-            var token = Convert.ToBase64String(randomByte);
-            //var refreshToken = new RefreshToken
-            //{
-            //    Id = new Random().Next(0, 10000000),
-            //    Token = token,
-            //    Expires = DateTime.UtcNow.AddDays(3),
-            //    UserId = isUserExisted.Id,
-            //    CreatedAt = DateTime.UtcNow,
-            //    DeletedAt = DateTime.UtcNow.AddDays(3),
-            //};
-            //_refreshTokenRepository.Add(refreshToken);
-            return token;
+            var key = Encoding.UTF8.GetBytes(_configuration["RefreshTokenKey"]);
+            var securityKey = new SymmetricSecurityKey(key);
+            var credential = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescription = new SecurityTokenDescriptor
+            {
+                Audience = "",
+                Issuer = "",
+                Subject = new ClaimsIdentity(new[] {
+                    new Claim("UserID", isUserExisted.Id.ToString()),
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["RefreshTokenLifeTime"])),
+                SigningCredentials = credential,
+            };
+            var token = tokenHandler.CreateToken(tokenDescription);
+            return tokenHandler.WriteToken(token);
         }
         /// <summary>
         /// Create JWT Token
@@ -198,7 +205,7 @@ namespace NET1814_MilkShop.Services.Services
         /// <returns></returns>
         private string CreateJwtToken(User isUserExisted)
         {
-            var key = Encoding.UTF8.GetBytes(Key);
+            var key = Encoding.UTF8.GetBytes(_configuration["AccessTokenKey"]);
             var securityKey = new SymmetricSecurityKey(key);
             var credential = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -210,7 +217,7 @@ namespace NET1814_MilkShop.Services.Services
                     new Claim("UserID", isUserExisted.Id.ToString()),
                     new Claim(ClaimTypes.Role, isUserExisted.RoleId.ToString())
                 }),
-                Expires = DateTime.UtcNow.AddMinutes(5),
+                Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["AccessTokenLifeTime"])),
                 SigningCredentials = credential,
             };
             var token = tokenHandler.CreateToken(tokenDescription);
@@ -314,6 +321,40 @@ namespace NET1814_MilkShop.Services.Services
                 token = token + str[x];
             }
             return token;
+        }
+
+        public async Task<ResponseModel> RefreshTokenAsync(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token);
+            var tokenS = jsonToken as JwtSecurityToken;
+            var userId = tokenS.Claims.First(claim => claim.Type == "UserID").Value;
+            var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
+            var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
+            var userExisted = await _userRepository.GetById(Guid.Parse(userId));
+            if (userExisted == null)
+            {
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Không tồn tại người dùng"
+                };
+            }
+            if (expirationTime < DateTime.UtcNow)
+            {
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Token hết hạn"
+                };
+            }
+            var newToken = CreateJwtToken(userExisted);
+            return new ResponseModel
+            {
+                Status = "Success",
+                Message = "Tạo access token mới thành công",
+                Data = newToken.ToString()
+            };
         }
     }
 }
