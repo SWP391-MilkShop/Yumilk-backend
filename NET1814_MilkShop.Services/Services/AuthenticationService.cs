@@ -6,6 +6,7 @@ using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
+using NET1814_MilkShop.Services.CoreHelpers;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -30,7 +31,7 @@ namespace NET1814_MilkShop.Services.Services
         private readonly ICustomerRepository _customerRepository;
         private readonly IAuthenticationRepository _authenticationRepository;
         private readonly IEmailService _emailService;
-
+        private readonly IJwtTokenExtension _jwtTokenExtension;
         public AuthenticationService(IServiceProvider serviceProvider)
         {
             _configuration = serviceProvider.GetRequiredService<IConfiguration>();
@@ -39,6 +40,7 @@ namespace NET1814_MilkShop.Services.Services
             _customerRepository = serviceProvider.GetRequiredService<ICustomerRepository>();
             _authenticationRepository = serviceProvider.GetRequiredService<IAuthenticationRepository>();
             _emailService = serviceProvider.GetRequiredService<IEmailService>();
+            _jwtTokenExtension = serviceProvider.GetRequiredService<IJwtTokenExtension>();
 
         }
 
@@ -102,7 +104,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return new ResponseModel { Status = "Error", Message = "Email đã tồn tại!" };
             }
-            string token = CreateVerifyToken();
+            string token = _jwtTokenExtension.CreateVerifyCode();
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -124,7 +126,7 @@ namespace NET1814_MilkShop.Services.Services
             _userRepository.Add(user);
             _customerRepository.Add(customer); // Khong nen add vao customer khi chua verify
             var result = await _unitOfWork.SaveChangesAsync();
-            var jwtVeriryToken = CreateVerifyJwtToken(user, token);
+            var jwtVeriryToken = _jwtTokenExtension.CreateJwtToken(user, TokenType.Authentication);
             if (result > 0)
             {
                 _emailService.SendVerificationEmail(model.Email, jwtVeriryToken);
@@ -137,39 +139,23 @@ namespace NET1814_MilkShop.Services.Services
             }
             return new ResponseModel { Status = "Error", Message = "Đăng ký tài khoản thất bại" };
         }
-        private string CreateVerifyJwtToken(User isUserExisted, string userToken)
-        {
-            var key = Encoding.UTF8.GetBytes(_configuration["AuthenticationKey"]);
-            var securityKey = new SymmetricSecurityKey(key);
-            var credential = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var tokenDescription = new SecurityTokenDescriptor
-            {
-                Audience = "",
-                Issuer = "",
-                Subject = new ClaimsIdentity(new[] {
-                    new Claim("UserID", isUserExisted.Id.ToString()),
-                    new Claim("Token", userToken)
-                }),
-                Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["AuthenticationLifeTime"])),
-                SigningCredentials = credential,
-            };
-            var token = tokenHandler.CreateToken(tokenDescription);
-            return tokenHandler.WriteToken(token);
-        }
 
         public async Task<ResponseModel> LoginAsync(RequestLoginModel model)
         {
             var existingUser = await _authenticationRepository.GetUserByUserNameNPassword(model.UserName, model.Password);
             if (existingUser != null)
             {
-                var token = CreateJwtToken(existingUser);
-                var refreshToken = CreateJwtRefreshToken(existingUser);
+                var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
+                var refreshToken = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Refresh);
                 return new ResponseModel
                 {
                     Status = "Success",
                     Message = "Đăng nhập thành công",
-                    Data = token + "||||" + refreshToken,
+                    Data = new
+                    {
+                        AccessToken = token,
+                        RefreshToken = refreshToken
+                    }
                 };
             }
             return new ResponseModel
@@ -179,58 +165,12 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        private string CreateJwtRefreshToken(User isUserExisted)
-        {
-            var key = Encoding.UTF8.GetBytes(_configuration["RefreshTokenKey"]);
-            var securityKey = new SymmetricSecurityKey(key);
-            var credential = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var tokenDescription = new SecurityTokenDescriptor
-            {
-                Audience = "",
-                Issuer = "",
-                Subject = new ClaimsIdentity(new[] {
-                    new Claim("UserID", isUserExisted.Id.ToString()),
-                }),
-                Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["RefreshTokenLifeTime"])),
-                SigningCredentials = credential,
-            };
-            var token = tokenHandler.CreateToken(tokenDescription);
-            return tokenHandler.WriteToken(token);
-        }
-        /// <summary>
-        /// Create JWT Token
-        /// </summary>
-        /// <param name="isUserExisted"></param>
-        /// <returns></returns>
-        private string CreateJwtToken(User isUserExisted)
-        {
-            var key = Encoding.UTF8.GetBytes(_configuration["AccessTokenKey"]);
-            var securityKey = new SymmetricSecurityKey(key);
-            var credential = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var tokenDescription = new SecurityTokenDescriptor
-            {
-                Audience = "",
-                Issuer = "",
-                Subject = new ClaimsIdentity(new[] {
-                    new Claim("UserID", isUserExisted.Id.ToString()),
-                    new Claim(ClaimTypes.Role, isUserExisted.RoleId.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["AccessTokenLifeTime"])),
-                SigningCredentials = credential,
-            };
-            var token = tokenHandler.CreateToken(tokenDescription);
-            return tokenHandler.WriteToken(token);
-        }
-
-
         public async Task<ResponseModel> VerifyAccountAsync(string token)
         {
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(token);
             var tokenS = jsonToken as JwtSecurityToken;
-            var userID = tokenS.Claims.First(claim => claim.Type == "UserID").Value;
+            var userID = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
             var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
             var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
             var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
@@ -259,13 +199,13 @@ namespace NET1814_MilkShop.Services.Services
             if (customer != null)
             {
                 var user = await _userRepository.GetById(customer.UserId);
-                string token = CreateVerifyToken();
+                string token = _jwtTokenExtension.CreateVerifyCode();
                 user.ResetPasswordCode = token;
                 _userRepository.Update(user);
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
                 {
-                    var verifyToken = CreateVerifyJwtToken(user, token);
+                    var verifyToken = _jwtTokenExtension.CreateJwtToken(user, TokenType.Authentication);
                     _emailService.SendPasswordResetEmail(customer.Email, verifyToken);//Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return new ResponseModel { Status = "Success", Message = "Đã gửi link reset password vui lòng kiểm tra email" };
                 }
@@ -278,7 +218,7 @@ namespace NET1814_MilkShop.Services.Services
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(request.token);
             var tokenS = jsonToken as JwtSecurityToken;
-            var userID = tokenS.Claims.First(claim => claim.Type == "UserID").Value;
+            var userID = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
             var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
             var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
             var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
@@ -304,31 +244,14 @@ namespace NET1814_MilkShop.Services.Services
             }
             return new ResponseModel() { Status = "Error", Message = "Token không hợp lệ" };
         }
-        /// <summary>
-        /// Tạo mã xác thực ngẫu nhiên 6 ký tự
-        /// </summary>
-        /// <returns></returns>
-        private static string CreateVerifyToken()
-        {
-            Random res = new Random();
-            string str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            int size = 6;
-            string token = "";
-            for (int i = 0; i < size; i++)
-            {
-                // Chon index ngau nhien tren str
-                int x = res.Next(str.Length);
-                token = token + str[x];
-            }
-            return token;
-        }
+
 
         public async Task<ResponseModel> RefreshTokenAsync(string token)
         {
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(token);
             var tokenS = jsonToken as JwtSecurityToken;
-            var userId = tokenS.Claims.First(claim => claim.Type == "UserID").Value;
+            var userId = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
             var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
             var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
             var userExisted = await _userRepository.GetById(Guid.Parse(userId));
@@ -348,7 +271,7 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Token hết hạn"
                 };
             }
-            var newToken = CreateJwtToken(userExisted);
+            var newToken = _jwtTokenExtension.CreateJwtToken(userExisted, TokenType.Access);
             return new ResponseModel
             {
                 Status = "Success",

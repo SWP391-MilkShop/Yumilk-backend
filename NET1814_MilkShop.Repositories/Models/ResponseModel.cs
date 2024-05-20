@@ -5,6 +5,6 @@
         public string Status { get; set; } = null!;
         public string Message { get; set; } = null!;
 
-        public string Data { get; set; }
+        public object? Data { get; set; }
     }
 }

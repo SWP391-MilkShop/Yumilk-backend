@@ -6,6 +6,7 @@ using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
+using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.Services;
 using System.Text;
 
@@ -155,6 +156,8 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ICustomerService, CustomerService>();
+
+            services.AddScoped<IJwtTokenExtension, JwtTokenExtension>();
         }
     }
 }
