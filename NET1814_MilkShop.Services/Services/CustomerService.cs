@@ -9,8 +9,9 @@ namespace NET1814_MilkShop.Services.Services
     {
         Task<ResponseModel> GetCustomersAsync();
         Task<ResponseModel> GetByEmailAsync(string email);
-        Task<ResponseModel> GetById(Guid id);
-        Task<ResponseModel> ChangeInfoAsync(string userId, ChangeUserInfoModel changeUserInfoModel);
+        Task<ResponseModel> GetByIdAsync(Guid id);
+        Task<ResponseModel> ChangeInfoAsync(Guid userId, ChangeUserInfoModel changeUserInfoModel);
+        Task<bool> IsExistAsync(Guid id);
     }
     public sealed class CustomerService : ICustomerService
     {
@@ -74,7 +75,7 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> GetById(Guid id)
+        public async Task<ResponseModel> GetByIdAsync(Guid id)
         {
             var customer = await _customerRepository.GetById(id);
             if (customer == null)
@@ -95,9 +96,9 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> ChangeInfoAsync(string userId, ChangeUserInfoModel changeUserInfoModel)
+        public async Task<ResponseModel> ChangeInfoAsync(Guid userId, ChangeUserInfoModel changeUserInfoModel)
         {
-            var customer = await _customerRepository.GetById(Guid.Parse(userId));
+            var customer = await _customerRepository.GetById(userId);
             if (customer == null)
             {
                 return new ResponseModel
@@ -130,6 +131,11 @@ namespace NET1814_MilkShop.Services.Services
                 Message = "Change user info failed",
                 Status = "Error"
             };
+        }
+
+        public async Task<bool> IsExistAsync(Guid id)
+        {
+            return await _customerRepository.IsExistAsync(id);
         }
     }
 }

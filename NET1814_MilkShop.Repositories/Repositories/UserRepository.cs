@@ -10,6 +10,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<User?> GetByUsernameAsync(string username);
         Task<string?> GetVerificationTokenAsync(string username);
         Task<User?> GetById(Guid id);
+        Task<bool> IsExistAsync(Guid id);
         void Add(User user);
         void Update(User user);
         void Remove(User user);
@@ -42,6 +43,10 @@ namespace NET1814_MilkShop.Repositories.Repositories
                 return null;
             }
             return user.VerificationCode;
+        }
+        public async Task<bool> IsExistAsync(Guid id)
+        {
+            return await _context.Users.AnyAsync(e => e.Id == id);
         }
     }
 }

@@ -7,6 +7,7 @@ namespace NET1814_MilkShop.Services.Services
     public interface IUserService
     {
         Task<ResponseModel> GetUsersAsync();
+        Task<bool> IsExistAsync(Guid id);
     }
 
     public sealed class UserService : IUserService
@@ -41,6 +42,11 @@ namespace NET1814_MilkShop.Services.Services
                 RoleId = user.RoleId,
                 IsActive = user.IsActive
             };
+        }
+
+        public async Task<bool> IsExistAsync(Guid id)
+        {
+            return await _userRepository.IsExistAsync(id);
         }
     }
 }

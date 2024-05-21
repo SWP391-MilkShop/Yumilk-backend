@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
 using NET1814_MilkShop.API.Infrastructure;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Models;
@@ -170,8 +171,10 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ICustomerService, CustomerService>();
-
+            //Add Extensions
             services.AddScoped<IJwtTokenExtension, JwtTokenExtension>();
+            //Add Filters
+            services.AddScoped<UserExistsFilter>();
         }
     }
 }
