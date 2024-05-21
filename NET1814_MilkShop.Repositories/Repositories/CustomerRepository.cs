@@ -9,6 +9,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<List<Customer>> GetCustomersAsync();
         Task<Customer?> GetByEmailAsync(string email);
         Task<Customer?> GetById(Guid id);
+        Task<bool> IsExistAsync(Guid id);
         void Add(Customer customer);
         void Update(Customer customer);
         void Remove(Customer customer);
@@ -36,6 +37,10 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public override async Task<Customer?> GetById(Guid id)
         {
             return await _context.Customers.Include(x => x.User).FirstOrDefaultAsync(x => x.UserId == id);
+        }
+        public async Task<bool> IsExistAsync(Guid id)
+        {
+            return await _context.Customers.AnyAsync(e => e.UserId == id);
         }
     }
 }
