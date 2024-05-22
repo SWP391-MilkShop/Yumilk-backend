@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
-using NET1814_MilkShop.Repositories.Models;
+using NET1814_MilkShop.Repositories.Models.MailModels;
 using System.Net;
 using System.Net.Mail;
 

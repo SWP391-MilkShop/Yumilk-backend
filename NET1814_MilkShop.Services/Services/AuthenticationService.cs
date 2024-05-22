@@ -1,7 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
+using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
@@ -21,23 +20,20 @@ namespace NET1814_MilkShop.Services.Services
 
     public sealed class AuthenticationService : IAuthenticationService
     {
-        private readonly IConfiguration _configuration;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserRepository _userRepository;
         private readonly ICustomerRepository _customerRepository;
         private readonly IAuthenticationRepository _authenticationRepository;
         private readonly IEmailService _emailService;
         private readonly IJwtTokenExtension _jwtTokenExtension;
-        public AuthenticationService(IServiceProvider serviceProvider)
+        public AuthenticationService(IUnitOfWork unitOfWork, IUserRepository userRepository, ICustomerRepository customerRepository, IAuthenticationRepository authenticationRepository, IEmailService emailService, IJwtTokenExtension jwtTokenExtension)
         {
-            _configuration = serviceProvider.GetRequiredService<IConfiguration>();
-            _unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
-            _userRepository = serviceProvider.GetRequiredService<IUserRepository>();
-            _customerRepository = serviceProvider.GetRequiredService<ICustomerRepository>();
-            _authenticationRepository = serviceProvider.GetRequiredService<IAuthenticationRepository>();
-            _emailService = serviceProvider.GetRequiredService<IEmailService>();
-            _jwtTokenExtension = serviceProvider.GetRequiredService<IJwtTokenExtension>();
-
+            _unitOfWork = unitOfWork;
+            _userRepository = userRepository;
+            _customerRepository = customerRepository;
+            _authenticationRepository = authenticationRepository;
+            _emailService = emailService;
+            _jwtTokenExtension = jwtTokenExtension;
         }
 
         /// <summary>

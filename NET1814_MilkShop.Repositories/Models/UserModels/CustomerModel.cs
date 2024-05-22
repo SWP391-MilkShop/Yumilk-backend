@@ -1,12 +1,10 @@
-﻿namespace NET1814_MilkShop.Repositories.Models
+﻿namespace NET1814_MilkShop.Repositories.Models.UserModels
 {
-    public class ResponseLoginModel
+    public class CustomerModel
     {
         public string UserID { get; set; } = null!;
         public string Username { get; set; } = null!;
-
         public string? FirstName { get; set; }
-
         public string? LastName { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
@@ -14,8 +12,5 @@
         public string? GoogleId { get; set; }
         public int RoleId { get; set; }
         public int Points { get; set; }
-        public string? AccessToken { get; set; }
-        public string? RefreshToken { get; set; }
-
     }
 }

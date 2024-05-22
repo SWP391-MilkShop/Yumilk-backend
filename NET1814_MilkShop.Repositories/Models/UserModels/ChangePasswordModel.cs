@@ -1,7 +1,7 @@
 ﻿using NET1814_MilkShop.Repositories.CoreHelpers.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace NET1814_MilkShop.Repositories.Models
+namespace NET1814_MilkShop.Repositories.Models.UserModels
 {
     public class ChangePasswordModel
     {
@@ -15,6 +15,6 @@ namespace NET1814_MilkShop.Repositories.Models
         [Required(ErrorMessage = "Confirm password is required")]
         [DataType(DataType.Password)]
         [Compare("NewPassword", ErrorMessage = "Password and confirm password do not match")]
-        public string ConfirmPassword { get; set;} = null!;
+        public string ConfirmPassword { get; set; } = null!;
     }
 }

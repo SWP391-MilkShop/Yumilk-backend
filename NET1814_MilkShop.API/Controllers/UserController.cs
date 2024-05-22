@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
-using NET1814_MilkShop.Repositories.Models;
+using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
 

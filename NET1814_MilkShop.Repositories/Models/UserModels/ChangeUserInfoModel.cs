@@ -1,4 +1,4 @@
-﻿namespace NET1814_MilkShop.Repositories.Models
+﻿namespace NET1814_MilkShop.Repositories.Models.UserModels
 {
     public class ChangeUserInfoModel
     {

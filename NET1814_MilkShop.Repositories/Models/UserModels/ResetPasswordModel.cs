@@ -1,7 +1,7 @@
 ﻿using NET1814_MilkShop.Repositories.CoreHelpers.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace NET1814_MilkShop.Repositories.Models
+namespace NET1814_MilkShop.Repositories.Models.UserModels
 {
     public class ResetPasswordModel
     {
