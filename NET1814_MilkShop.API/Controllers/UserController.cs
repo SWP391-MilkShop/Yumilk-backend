@@ -28,10 +28,10 @@ namespace NET1814_MilkShop.API.Controllers
         [Route("api/users")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         [ServiceFilter(typeof(UserExistsFilter))]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery] UserQueryModel request)
         {
             _logger.Information("Get all users");
-            var response = await _userService.GetUsersAsync();
+            var response = await _userService.GetUsersAsync(request);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
@@ -42,10 +42,10 @@ namespace NET1814_MilkShop.API.Controllers
         [Route("api/customers")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         [ServiceFilter(typeof(UserExistsFilter))]
-        public async Task<IActionResult> GetCustomers()
+        public async Task<IActionResult> GetCustomers([FromQuery]CustomerQueryModel request)
         {
             _logger.Information("Get all customers");
-            var response = await _customerService.GetCustomersAsync();
+            var response = await _customerService.GetCustomersAsync(request);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
