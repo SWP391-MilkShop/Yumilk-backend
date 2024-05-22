@@ -1,5 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.CoreHelpers.Validation;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using NET1814_MilkShop.Repositories.CoreHelpers.Validation;
 
 namespace NET1814_MilkShop.Repositories.Models.UserModels
 {
@@ -7,6 +7,7 @@ namespace NET1814_MilkShop.Repositories.Models.UserModels
     {
         [Required(ErrorMessage = "Token is required!")]
         public string token { get; set; } = null!;
+
         [Required(ErrorMessage = "Password is required!")]
         [DataType(DataType.Password)]
         [StrongPassword]

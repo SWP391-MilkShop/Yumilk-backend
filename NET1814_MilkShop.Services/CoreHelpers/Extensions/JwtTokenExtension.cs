@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using NET1814_MilkShop.Repositories.Data.Entities;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using NET1814_MilkShop.Repositories.Data.Entities;
 
 namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
 {
@@ -13,19 +13,24 @@ namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
         Refresh,
         Authentication
     }
+
     public interface IJwtTokenExtension
     {
         string CreateJwtToken(User user, TokenType tokenType);
         string CreateVerifyCode();
     }
+
     public class JwtTokenExtension : IJwtTokenExtension
     {
         private readonly IConfiguration _configuration;
-        private readonly string str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        private readonly string str =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
         public JwtTokenExtension(IConfiguration configuration)
         {
             _configuration = configuration;
         }
+
         public string CreateJwtToken(User user, TokenType tokenType)
         {
             var claims = GetClaims(user, tokenType);
@@ -38,16 +43,15 @@ namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
                 issuer: _configuration["Jwt:Issuer"],
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(GetExpiry(tokenType)),
-                signingCredentials: creds);
+                signingCredentials: creds
+            );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
         private List<Claim> GetClaims(User user, TokenType tokenType)
         {
-            var claims = new List<Claim>
-            {
-                new Claim("UserId", user.Id.ToString())
-            };
+            var claims = new List<Claim> { new Claim("UserId", user.Id.ToString()) };
             switch (tokenType)
             {
                 case TokenType.Access:
@@ -63,6 +67,7 @@ namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
             }
             return claims;
         }
+
         private string GetKey(TokenType tokenType)
         {
             string key = "";
@@ -102,6 +107,7 @@ namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
             }
             return expiry;
         }
+
         /// <summary>
         /// Tạo mã xác thực ngẫu nhiên 6 ký tự
         /// </summary>

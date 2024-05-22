@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Options;
-using NET1814_MilkShop.Repositories.Models.MailModels;
-using System.Net;
+﻿using System.Net;
 using System.Net.Mail;
+using Microsoft.Extensions.Options;
+using NET1814_MilkShop.Repositories.Models.MailModels;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -53,26 +53,34 @@ namespace NET1814_MilkShop.Services.Services
             smtp.Send(mailMessage);
         }
 
-        public void SendPasswordResetEmail(/*CustomerModel user*/ string receiveEmail, string token)
+        public void SendPasswordResetEmail( /*CustomerModel user*/
+            string receiveEmail,
+            string token
+        )
         {
             var model = new SendMailModel
             {
                 Receiver = receiveEmail,
                 Subject = "Password Reset",
-                Body = "Please click the link below to reset your password\n\n" +
-                $"https://localhost:5000/api/authentication/reset-password?token={token}"
+                Body =
+                    "Please click the link below to reset your password\n\n"
+                    + $"https://localhost:5000/api/authentication/reset-password?token={token}"
             };
             SendMail(model);
         }
 
-        public void SendVerificationEmail(/*CustomerModel user*/ string receiveEmail, string token)
+        public void SendVerificationEmail( /*CustomerModel user*/
+            string receiveEmail,
+            string token
+        )
         {
             var model = new SendMailModel
             {
                 Receiver = receiveEmail,
                 Subject = "Account Verification",
-                Body = "Please click the link below to verify your account\n\n" +
-                $"https://localhost:5000/api/authentication/verify?token={token}"
+                Body =
+                    "Please click the link below to verify your account\n\n"
+                    + $"https://localhost:5000/api/authentication/verify?token={token}"
             };
             SendMail(model);
         }

@@ -12,15 +12,12 @@ namespace NET1814_MilkShop.Repositories.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_products_ProductStatuses_status_id",
-                table: "products");
+                table: "products"
+            );
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_ProductStatuses",
-                table: "ProductStatuses");
+            migrationBuilder.DropPrimaryKey(name: "PK_ProductStatuses", table: "ProductStatuses");
 
-            migrationBuilder.RenameTable(
-                name: "ProductStatuses",
-                newName: "product_statuses");
+            migrationBuilder.RenameTable(name: "ProductStatuses", newName: "product_statuses");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Password",
@@ -28,7 +25,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 type: "nvarchar(255)",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(50)");
+                oldType: "nvarchar(50)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -38,7 +36,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -48,12 +47,14 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_product_statuses",
                 table: "product_statuses",
-                column: "Id");
+                column: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_products_product_statuses_status_id",
@@ -61,7 +62,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 column: "status_id",
                 principalTable: "product_statuses",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
 
         /// <inheritdoc />
@@ -69,15 +71,12 @@ namespace NET1814_MilkShop.Repositories.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_products_product_statuses_status_id",
-                table: "products");
+                table: "products"
+            );
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_product_statuses",
-                table: "product_statuses");
+            migrationBuilder.DropPrimaryKey(name: "PK_product_statuses", table: "product_statuses");
 
-            migrationBuilder.RenameTable(
-                name: "product_statuses",
-                newName: "ProductStatuses");
+            migrationBuilder.RenameTable(name: "product_statuses", newName: "ProductStatuses");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Password",
@@ -85,7 +84,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 type: "nvarchar(50)",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(255)");
+                oldType: "nvarchar(255)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -93,7 +93,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 type: "nvarchar(255)",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(255)");
+                oldType: "nvarchar(255)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -101,12 +102,14 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 type: "nvarchar(255)",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(255)");
+                oldType: "nvarchar(255)"
+            );
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_ProductStatuses",
                 table: "ProductStatuses",
-                column: "Id");
+                column: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_products_ProductStatuses_status_id",
@@ -114,7 +117,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 column: "status_id",
                 principalTable: "ProductStatuses",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
     }
 }

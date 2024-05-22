@@ -21,12 +21,15 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public CustomerRepository(AppDbContext context)
             : base(context) { }
 
-
         public async Task<Customer?> GetByEmailAsync(string email)
         {
             //use AsNoTracking for read-only operations
-            return await _context.Customers.AsNoTracking().Include(x => x.User).FirstOrDefaultAsync(x => email.Equals(x.Email));
+            return await _context
+                .Customers.AsNoTracking()
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => email.Equals(x.Email));
         }
+
         /// <summary>
         /// Get all customers with user information included
         /// </summary>
@@ -37,14 +40,17 @@ namespace NET1814_MilkShop.Repositories.Repositories
         }*/
         public IQueryable<Customer> GetCustomersQuery()
         {
-            var query = _context.Customers.Include(u => u.User)
-                .AsNoTracking();
+            var query = _context.Customers.Include(u => u.User).AsNoTracking();
             return query;
         }
+
         public override async Task<Customer?> GetById(Guid id)
         {
-            return await _context.Customers.Include(x => x.User).FirstOrDefaultAsync(x => x.UserId == id);
+            return await _context
+                .Customers.Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.UserId == id);
         }
+
         public async Task<bool> IsExistAsync(Guid id)
         {
             return await _context.Customers.AnyAsync(e => e.UserId == id);

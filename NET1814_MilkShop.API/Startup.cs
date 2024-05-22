@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
@@ -9,7 +10,6 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using NET1814_MilkShop.Services.Services;
-using System.Text;
 
 namespace NET1814_MilkShop.API
 {
@@ -30,30 +30,38 @@ namespace NET1814_MilkShop.API
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(o =>
             {
-                o.SwaggerDoc("v1", new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" });
-                o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    In = ParameterLocation.Header,
-                    Description = "Please enter a valid token",
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    BearerFormat = "JWT",
-                    Scheme = "Bearer"
-                });
-                o.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+                o.SwaggerDoc(
+                    "v1",
+                    new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" }
+                );
+                o.AddSecurityDefinition(
+                    "Bearer",
+                    new OpenApiSecurityScheme
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type=ReferenceType.SecurityScheme,
-                                Id="Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
+                        In = ParameterLocation.Header,
+                        Description = "Please enter a valid token",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.Http,
+                        BearerFormat = "JWT",
+                        Scheme = "Bearer"
                     }
-                });
+                );
+                o.AddSecurityRequirement(
+                    new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            },
+                            Array.Empty<string>()
+                        }
+                    }
+                );
             });
 
             services.Configure<RouteOptions>(options =>
@@ -101,31 +109,44 @@ namespace NET1814_MilkShop.API
                 );
             });
             //Add Authentication
-            services.AddAuthentication().AddJwtBearer("Access", o =>
-            {
-                o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ValidIssuer = _configuration["Jwt:Issuer"],
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:AccessTokenKey"]))
-                };
-            })
-            .AddJwtBearer("Refresh", o =>
-            {
-                o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ValidIssuer = _configuration["Jwt:Issuer"],
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:RefreshTokenKey"]))
-                };
-            });
-
+            services
+                .AddAuthentication()
+                .AddJwtBearer(
+                    "Access",
+                    o =>
+                    {
+                        o.TokenValidationParameters =
+                            new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                            {
+                                ValidateIssuer = true,
+                                ValidateAudience = false,
+                                ValidateLifetime = true,
+                                ValidIssuer = _configuration["Jwt:Issuer"],
+                                ValidateIssuerSigningKey = true,
+                                IssuerSigningKey = new SymmetricSecurityKey(
+                                    Encoding.UTF8.GetBytes(_configuration["Jwt:AccessTokenKey"])
+                                )
+                            };
+                    }
+                )
+                .AddJwtBearer(
+                    "Refresh",
+                    o =>
+                    {
+                        o.TokenValidationParameters =
+                            new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                            {
+                                ValidateIssuer = true,
+                                ValidateAudience = false,
+                                ValidateLifetime = true,
+                                ValidIssuer = _configuration["Jwt:Issuer"],
+                                ValidateIssuerSigningKey = true,
+                                IssuerSigningKey = new SymmetricSecurityKey(
+                                    Encoding.UTF8.GetBytes(_configuration["Jwt:RefreshTokenKey"])
+                                )
+                            };
+                    }
+                );
         }
 
         public void Configure(WebApplication app, IWebHostEnvironment env)

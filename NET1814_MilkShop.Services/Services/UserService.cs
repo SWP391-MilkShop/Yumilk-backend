@@ -13,6 +13,7 @@ namespace NET1814_MilkShop.Services.Services
     public interface IUserService
     {
         Task<ResponseModel> ChangePasswordAsync(Guid userId, ChangePasswordModel model);
+
         /*Task<ResponseModel> GetUsersAsync();*/
         Task<ResponseModel> GetUsersAsync(UserQueryModel request);
         Task<bool> IsExistAsync(Guid id);
@@ -59,9 +60,11 @@ namespace NET1814_MilkShop.Services.Services
             //filter
             if (!string.IsNullOrEmpty(request.SearchTerm))
             {
-                query = query.Where(u => u.Username.Contains(request.SearchTerm)
-                                         || u.FirstName!.Contains(request.SearchTerm)
-                                         || u.LastName!.Contains(request.SearchTerm));
+                query = query.Where(u =>
+                    u.Username.Contains(request.SearchTerm)
+                    || u.FirstName!.Contains(request.SearchTerm)
+                    || u.LastName!.Contains(request.SearchTerm)
+                );
             }
             if (!string.IsNullOrEmpty(request.Role))
             {
@@ -72,8 +75,9 @@ namespace NET1814_MilkShop.Services.Services
                 query = query.Where(u => u.IsActive == request.IsActive);
             }
             //sort
-            query = "desc".Equals(request.SortOrder?.ToLower()) ? query.OrderByDescending(GetSortProperty(request))
-                     : query.OrderBy(GetSortProperty(request));
+            query = "desc".Equals(request.SortOrder?.ToLower())
+                ? query.OrderByDescending(GetSortProperty(request))
+                : query.OrderBy(GetSortProperty(request));
             var result = query.Select(u => new UserModel
             {
                 Id = u.Id.ToString(),
@@ -84,7 +88,11 @@ namespace NET1814_MilkShop.Services.Services
                 IsActive = u.IsActive
             });
             //page
-            var users = await PagedList<UserModel>.CreateAsync(result, request.Page, request.PageSize);
+            var users = await PagedList<UserModel>.CreateAsync(
+                result,
+                request.Page,
+                request.PageSize
+            );
             return new ResponseModel()
             {
                 Data = users,
@@ -125,11 +133,7 @@ namespace NET1814_MilkShop.Services.Services
             var user = await _userRepository.GetById(userId);
             if (user == null)
             {
-                return new ResponseModel
-                {
-                    Message = "User not found",
-                    Status = "Error"
-                };
+                return new ResponseModel { Message = "User not found", Status = "Error" };
             }
             if (!BCrypt.Net.BCrypt.Verify(model.OldPassword, user.Password))
             {
@@ -150,11 +154,7 @@ namespace NET1814_MilkShop.Services.Services
                     Status = "Success"
                 };
             }
-            return new ResponseModel
-            {
-                Message = "Change password failed",
-                Status = "Error"
-            };
+            return new ResponseModel { Message = "Change password failed", Status = "Error" };
         }
     }
 }

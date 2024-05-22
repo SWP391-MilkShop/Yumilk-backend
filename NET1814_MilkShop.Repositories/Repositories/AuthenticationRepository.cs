@@ -7,16 +7,18 @@ namespace NET1814_MilkShop.Repositories.Repositories
     public interface IAuthenticationRepository
     {
         Task<User?> GetUserByUserNameNPassword(string username, string password);
-
     }
+
     public sealed class AuthenticationRepository : Repository<User>, IAuthenticationRepository
     {
-        public AuthenticationRepository(AppDbContext context) : base(context)
-        {
-        }
+        public AuthenticationRepository(AppDbContext context)
+            : base(context) { }
+
         public async Task<User?> GetUserByUserNameNPassword(string username, string password)
         {
-            var userName = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Username.Equals(username) && x.IsActive == true);
+            var userName = await _context
+                .Users.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Username.Equals(username) && x.IsActive == true);
             if (userName != null && BCrypt.Net.BCrypt.Verify(password, userName.Password))
             {
                 return userName;

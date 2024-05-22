@@ -30,30 +30,27 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
             {
                 throw new Exception("An error occurred while saving changes", ex);
             }
-
         }
+
         private void UpdateAuditableEntities()
         {
             IEnumerable<EntityEntry<IAuditableEntity>> entries =
-                _context
-                    .ChangeTracker
-                    .Entries<IAuditableEntity>();
+                _context.ChangeTracker.Entries<IAuditableEntity>();
 
             foreach (EntityEntry<IAuditableEntity> entityEntry in entries)
             {
                 if (entityEntry.State == EntityState.Added)
                 {
-                    entityEntry.Property(a => a.CreatedAt)
-                        .CurrentValue = DateTime.UtcNow;
+                    entityEntry.Property(a => a.CreatedAt).CurrentValue = DateTime.UtcNow;
                 }
 
                 if (entityEntry.State == EntityState.Modified)
                 {
-                    entityEntry.Property(a => a.ModifiedAt)
-                        .CurrentValue = DateTime.UtcNow;
+                    entityEntry.Property(a => a.ModifiedAt).CurrentValue = DateTime.UtcNow;
                 }
             }
         }
+
         public void Dispose()
         {
             _context.Dispose();

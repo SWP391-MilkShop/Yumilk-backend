@@ -25,14 +25,15 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public IQueryable<User> GetUsersQuery()
         {
-            var query = _context.Users.Include(u => u.Role)
-                .AsNoTracking();
+            var query = _context.Users.Include(u => u.Role).AsNoTracking();
             return query;
         }
 
         public async Task<User?> GetByUsernameAsync(string username)
         {
-            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => username.Equals(x.Username));
+            return await _context
+                .Users.AsNoTracking()
+                .FirstOrDefaultAsync(x => username.Equals(x.Username));
         }
 
         /// <summary>
@@ -53,6 +54,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             }
             return user.VerificationCode;
         }
+
         public async Task<bool> IsExistAsync(Guid id)
         {
             return await _context.Users.AnyAsync(e => e.Id == id);
