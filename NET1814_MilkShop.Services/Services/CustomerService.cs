@@ -1,14 +1,17 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
+using NET1814_MilkShop.Services.CoreHelpers;
 
 namespace NET1814_MilkShop.Services.Services
 {
     public interface ICustomerService
     {
-        Task<ResponseModel> GetCustomersAsync();
+        /*Task<ResponseModel> GetCustomersAsync();*/
+        Task<ResponseModel> GetCustomersAsync(CustomerQueryModel request);
         Task<ResponseModel> GetByEmailAsync(string email);
         Task<ResponseModel> GetByIdAsync(Guid id);
         Task<ResponseModel> ChangeInfoAsync(Guid userId, ChangeUserInfoModel changeUserInfoModel);
@@ -35,10 +38,65 @@ namespace NET1814_MilkShop.Services.Services
                 PhoneNumber = customer.PhoneNumber,
                 Email = customer.Email,
                 Points = customer.Points,
-                RoleId = user.RoleId,
                 ProfilePictureUrl = customer.ProfilePictureUrl,
             };
         }
+
+        public async Task<ResponseModel> GetCustomersAsync(CustomerQueryModel request)
+        {
+            var query = _customerRepository.GetCustomersQuery();
+            //filter
+            if(!string.IsNullOrWhiteSpace(request.SearchTerm))
+            {
+                query = query.Where(c => c.User.Username.Contains(request.SearchTerm)
+                                         || c.Email!.Contains(request.SearchTerm)
+                                         || c.PhoneNumber!.Contains(request.SearchTerm)
+                                         || c.User.FirstName!.Contains(request.SearchTerm)
+                                         || c.User.LastName!.Contains(request.SearchTerm));
+            }
+            if(request.IsActive != null)
+            {
+                query = query.Where(c => c.User.IsActive == request.IsActive);
+            }
+            //sort
+            query = "desc".Equals(request.SortOrder?.ToLower()) ? query.OrderByDescending(GetSortProperty(request))
+                : query.OrderBy(GetSortProperty(request));
+            var result = query.Select(c => new CustomerModel()
+            {
+                 UserID = c.UserId.ToString(),
+                 FirstName = c.User.FirstName,
+                 LastName = c.User.LastName,
+                 IsActive = c.User.IsActive,
+                 Email = c.Email,
+                 Points = c.Points,
+                 Username = c.User.Username,
+                 PhoneNumber = c.PhoneNumber,
+                 ProfilePictureUrl = c.ProfilePictureUrl,
+                 GoogleId = c.GoogleId
+            });
+            var customers = await PagedList<CustomerModel>.CreateAsync(result, request.Page, request.PageSize);
+            return new ResponseModel()
+            {
+               Data = customers,
+               Message = customers.TotalCount > 0 ? "Get customers successfully" : "No customers found",
+               Status = "success"
+            };
+        }
+        
+        private static Expression<Func<Customer, object>> GetSortProperty(CustomerQueryModel request)
+        {
+            Expression<Func<Customer, object>> keySelector = request.SortColumn?.ToLower() switch
+            {
+                "point" => customer => customer.Points,
+                "email" => customer => customer.Email!,
+                "isActive" => customer => customer.User.IsActive,
+                "firstName" => customer => customer.User.FirstName!,
+                "lastName" => customer => customer.User.LastName!,
+                _ => customer => customer.UserId
+            };
+            return keySelector;
+        }
+
         public async Task<ResponseModel> GetByEmailAsync(string email)
         {
             var customer = await _customerRepository.GetByEmailAsync(email);
@@ -60,7 +118,7 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> GetCustomersAsync()
+        /*public async Task<ResponseModel> GetCustomersAsync()
         {
             var customers = await _customerRepository.GetCustomersAsync();
             var list = new List<CustomerModel>();
@@ -74,7 +132,7 @@ namespace NET1814_MilkShop.Services.Services
                 Message = "Get all customers successfully",
                 Status = "Success"
             };
-        }
+        }*/
 
         public async Task<ResponseModel> GetByIdAsync(Guid id)
         {
