@@ -75,7 +75,7 @@ namespace NET1814_MilkShop.Services.Services
             return new ResponseModel
             {
                 Data = products,
-                Message = "Get products successfully",
+                Message = products.TotalCount > 0 ? "Get products successfully" : "No products found",
                 Status = "Success"
             };
         }
