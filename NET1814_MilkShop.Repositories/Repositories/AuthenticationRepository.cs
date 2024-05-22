@@ -9,7 +9,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<User?> GetUserByUserNameNPassword(string username, string password);
 
     }
-    public class AuthenticationRepository : Repository<User>, IAuthenticationRepository
+    public sealed class AuthenticationRepository : Repository<User>, IAuthenticationRepository
     {
         public AuthenticationRepository(AppDbContext context) : base(context)
         {

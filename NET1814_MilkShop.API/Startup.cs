@@ -4,7 +4,7 @@ using Microsoft.OpenApi.Models;
 using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
 using NET1814_MilkShop.API.Infrastructure;
 using NET1814_MilkShop.Repositories.Data;
-using NET1814_MilkShop.Repositories.Models;
+using NET1814_MilkShop.Repositories.Models.MailModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
@@ -159,18 +159,21 @@ namespace NET1814_MilkShop.API
 
         private static void AddDI(IServiceCollection services)
         {
-            services.AddScoped<ICustomerRepository, CustomerRepository>();
-
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserService, UserService>();
 
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<ICustomerService, CustomerService>();
+
+            services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IProductService, ProductService>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<ICustomerService, CustomerService>();
             //Add Extensions
             services.AddScoped<IJwtTokenExtension, JwtTokenExtension>();
             //Add Filters
