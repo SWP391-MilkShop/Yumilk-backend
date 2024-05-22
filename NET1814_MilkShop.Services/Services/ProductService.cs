@@ -1,10 +1,10 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
-using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -12,10 +12,12 @@ namespace NET1814_MilkShop.Services.Services
     {
         Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel);
     }
+
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
         private readonly IUnitOfWork _unitOfWork;
+
         public ProductService(IProductRepository productRepository, IUnitOfWork unitOfWork)
         {
             _productRepository = productRepository;
@@ -71,20 +73,27 @@ namespace NET1814_MilkShop.Services.Services
             });
             // paging
             var products = await PagedList<ProductModel>.CreateAsync(
-                productModelQuery, queryModel.Page, queryModel.PageSize);
+                productModelQuery,
+                queryModel.Page,
+                queryModel.PageSize
+            );
             return new ResponseModel
             {
                 Data = products,
-                Message = "Get products successfully",
+                Message =
+                    products.TotalCount > 0 ? "Get products successfully" : "No products found",
                 Status = "Success"
             };
         }
+
         /// <summary>
         /// Get sort property as expression
         /// </summary>
         /// <param name="queryModel"></param>
         /// <returns></returns>
-        private static Expression<Func<Product, object>> GetSortProperty(ProductQueryModel queryModel) =>
+        private static Expression<Func<Product, object>> GetSortProperty(
+            ProductQueryModel queryModel
+        ) =>
             queryModel.SortColumn?.ToLower() switch
             {
                 "name" => product => product.Name,

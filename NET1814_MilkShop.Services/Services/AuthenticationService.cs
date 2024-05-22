@@ -1,10 +1,11 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using System.IdentityModel.Tokens.Jwt;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
-using System.IdentityModel.Tokens.Jwt;
+
 namespace NET1814_MilkShop.Services.Services
 {
     public interface IAuthenticationService
@@ -26,7 +27,15 @@ namespace NET1814_MilkShop.Services.Services
         private readonly IAuthenticationRepository _authenticationRepository;
         private readonly IEmailService _emailService;
         private readonly IJwtTokenExtension _jwtTokenExtension;
-        public AuthenticationService(IUnitOfWork unitOfWork, IUserRepository userRepository, ICustomerRepository customerRepository, IAuthenticationRepository authenticationRepository, IEmailService emailService, IJwtTokenExtension jwtTokenExtension)
+
+        public AuthenticationService(
+            IUnitOfWork unitOfWork,
+            IUserRepository userRepository,
+            ICustomerRepository customerRepository,
+            IAuthenticationRepository authenticationRepository,
+            IEmailService emailService,
+            IJwtTokenExtension jwtTokenExtension
+        )
         {
             _unitOfWork = unitOfWork;
             _userRepository = userRepository;
@@ -134,11 +143,17 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> LoginAsync(RequestLoginModel model)
         {
-            var existingUser = await _authenticationRepository.GetUserByUserNameNPassword(model.Username, model.Password);
+            var existingUser = await _authenticationRepository.GetUserByUserNameNPassword(
+                model.Username,
+                model.Password
+            );
             if (existingUser != null)
             {
                 var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
-                var refreshToken = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Refresh);
+                var refreshToken = _jwtTokenExtension.CreateJwtToken(
+                    existingUser,
+                    TokenType.Refresh
+                );
                 var responseLogin = new ResponseLoginModel
                 {
                     UserID = existingUser.Id.ToString(),
@@ -194,10 +209,18 @@ namespace NET1814_MilkShop.Services.Services
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
                 {
-                    return new ResponseModel { Status = "Success", Message = "Xác thực tài khoản thành công" };
+                    return new ResponseModel
+                    {
+                        Status = "Success",
+                        Message = "Xác thực tài khoản thành công"
+                    };
                 }
             }
-            return new ResponseModel { Status = "Error", Message = "Có lỗi xảy ra trong quá trình xác thực hoặc link đã được dùng rồi" };
+            return new ResponseModel
+            {
+                Status = "Error",
+                Message = "Có lỗi xảy ra trong quá trình xác thực hoặc link đã được dùng rồi"
+            };
         }
 
         public async Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request)
@@ -211,9 +234,16 @@ namespace NET1814_MilkShop.Services.Services
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
                 {
-                    var verifyToken = _jwtTokenExtension.CreateJwtToken(customer.User, TokenType.Authentication);
-                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken);//Có link token ở header nhưng phải tự nhập ở swagger để change pass
-                    return new ResponseModel { Status = "Success", Message = "Đã gửi link reset password vui lòng kiểm tra email" };
+                    var verifyToken = _jwtTokenExtension.CreateJwtToken(
+                        customer.User,
+                        TokenType.Authentication
+                    );
+                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    return new ResponseModel
+                    {
+                        Status = "Success",
+                        Message = "Đã gửi link reset password vui lòng kiểm tra email"
+                    };
                 }
             }
             return new ResponseModel { Status = "Error", Message = "Email không tồn tại" };
@@ -245,7 +275,6 @@ namespace NET1814_MilkShop.Services.Services
             return new ResponseModel() { Status = "Error", Message = "Token không hợp lệ" };
         }
 
-
         public async Task<ResponseModel> RefreshTokenAsync(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -255,11 +284,7 @@ namespace NET1814_MilkShop.Services.Services
             var userExisted = await _userRepository.GetById(Guid.Parse(userId));
             if (userExisted == null)
             {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Không tồn tại người dùng"
-                };
+                return new ResponseModel { Status = "Error", Message = "Không tồn tại người dùng" };
             }
             var newToken = _jwtTokenExtension.CreateJwtToken(userExisted, TokenType.Access);
             return new ResponseModel

@@ -26,10 +26,12 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             _context.Set<TEntity>().Remove(entity);
         }
+
         public virtual async Task<TEntity?> GetById(Guid id)
         {
             return await _context.Set<TEntity>().FindAsync(id);
         }
+
         public virtual async Task<TEntity?> GetById(int id)
         {
             return await _context.Set<TEntity>().FindAsync(id);

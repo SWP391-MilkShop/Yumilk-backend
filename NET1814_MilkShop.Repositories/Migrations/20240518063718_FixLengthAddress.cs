@@ -16,7 +16,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 type: "nvarchar(255)",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "nvarchar(max)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Address",
@@ -24,7 +25,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 type: "nvarchar(2000)",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "nvarchar(max)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "phone_number",
@@ -33,7 +35,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "address",
@@ -42,7 +45,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
 
         /// <inheritdoc />
@@ -54,7 +58,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 type: "nvarchar(max)",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(255)");
+                oldType: "nvarchar(255)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Address",
@@ -62,7 +67,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 type: "nvarchar(max)",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(2000)");
+                oldType: "nvarchar(2000)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "phone_number",
@@ -71,7 +77,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(20)",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "address",
@@ -80,7 +87,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(2000)",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
     }
 }

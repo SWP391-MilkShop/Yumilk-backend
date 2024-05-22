@@ -9,7 +9,6 @@ using ILogger = Serilog.ILogger;
 
 namespace NET1814_MilkShop.API.Controllers
 {
-
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -28,30 +27,32 @@ namespace NET1814_MilkShop.API.Controllers
         [Route("api/users")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         [ServiceFilter(typeof(UserExistsFilter))]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery] UserQueryModel request)
         {
             _logger.Information("Get all users");
-            var response = await _userService.GetUsersAsync();
+            var response = await _userService.GetUsersAsync(request);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
             return Ok(response);
         }
+
         [HttpGet]
         [Route("api/customers")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         [ServiceFilter(typeof(UserExistsFilter))]
-        public async Task<IActionResult> GetCustomers()
+        public async Task<IActionResult> GetCustomers([FromQuery] CustomerQueryModel request)
         {
             _logger.Information("Get all customers");
-            var response = await _customerService.GetCustomersAsync();
+            var response = await _customerService.GetCustomersAsync(request);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
             return Ok(response);
         }
+
         [HttpGet]
         [Route("api/customers/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
@@ -66,6 +67,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
             return Ok(response);
         }
+
         [HttpGet]
         [Route("api/user/me")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
@@ -81,6 +83,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
             return Ok(response);
         }
+
         [HttpPut]
         [Route("api/user/change-info")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
@@ -96,6 +99,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
             return Ok(response);
         }
+
         [HttpPut]
         [Route("api/user/change-password")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]

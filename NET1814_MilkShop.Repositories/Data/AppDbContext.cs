@@ -183,9 +183,7 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnType("nvarchar(20)");
                     b.HasIndex("PhoneNumber").IsUnique().HasFilter("[phone_number] IS NOT NULL");
 
-                    b.Property<int>("Points")
-                        .HasColumnType("int")
-                        .HasColumnName("points");
+                    b.Property<int>("Points").HasColumnType("int").HasColumnName("points");
 
                     b.Property<string>("ProfilePictureUrl")
                         .HasColumnName("profile_picture_url")
@@ -876,7 +874,6 @@ namespace NET1814_MilkShop.Repositories.Data
                     b.Navigation("Product");
                 }
             );
-
 
             modelBuilder.Entity(
                 "NET1814_MilkShop.Repositories.Data.Entities.User",

@@ -8,16 +8,16 @@ namespace NET1814_MilkShop.Repositories.Repositories
     {
         IQueryable<Product> GetProductsQuery();
     }
+
     public sealed class ProductRepository : Repository<Product>, IProductRepository
     {
-        public ProductRepository(AppDbContext context) : base(context)
-        {
-        }
+        public ProductRepository(AppDbContext context)
+            : base(context) { }
 
         public IQueryable<Product> GetProductsQuery()
         {
-            return _context.Products
-                .Include(p => p.Brand)
+            return _context
+                .Products.Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.Unit)
                 .AsNoTracking();
