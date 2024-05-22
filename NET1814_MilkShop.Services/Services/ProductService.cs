@@ -24,7 +24,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel)
         {
-            var query = _productRepository.GetProductsQuery();
+            var query = _productRepository.GetProductsQuery().Where(p => p.IsActive == queryModel.IsActive);
             // filter
             if (!string.IsNullOrEmpty(queryModel.SearchTerm))
             {

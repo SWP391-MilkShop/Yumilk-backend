@@ -6,5 +6,6 @@
         public string? Brand { get; set; }
         public string? Unit { get; set; }
         public string? Status { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

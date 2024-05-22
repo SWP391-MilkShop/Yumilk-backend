@@ -1,15 +1,9 @@
 ﻿using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
-using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Services.CoreHelpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NET1814_MilkShop.Services.Services
 {
