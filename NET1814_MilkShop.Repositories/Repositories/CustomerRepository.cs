@@ -6,7 +6,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
 {
     public interface ICustomerRepository
     {
-        Task<List<Customer>> GetCustomersAsync();
+        /*Task<List<Customer>> GetCustomersAsync();*/
+        IQueryable<Customer> GetCustomersQuery();
         Task<Customer?> GetByEmailAsync(string email);
         Task<Customer?> GetById(Guid id);
         Task<bool> IsExistAsync(Guid id);
@@ -30,9 +31,15 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// Get all customers with user information included
         /// </summary>
         /// <returns></returns>
-        public Task<List<Customer>> GetCustomersAsync()
+        /*public Task<List<Customer>> GetCustomersAsync()
         {
             return _context.Customers.Include(x => x.User).ToListAsync();
+        }*/
+        public IQueryable<Customer> GetCustomersQuery()
+        {
+            var query = _context.Customers.Include(u => u.User)
+                .AsNoTracking();
+            return query;
         }
         public override async Task<Customer?> GetById(Guid id)
         {
