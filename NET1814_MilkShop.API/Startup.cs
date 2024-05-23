@@ -16,12 +16,10 @@ namespace NET1814_MilkShop.API
     public class Startup
     {
         private readonly IConfiguration _configuration;
-        private readonly IWebHostEnvironment _env;
 
         public Startup(WebApplicationBuilder builder, IWebHostEnvironment env)
         {
             _configuration = builder.Configuration;
-            _env = env;
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -171,10 +169,10 @@ namespace NET1814_MilkShop.API
             app.UseAuthorization();
             app.UseExceptionHandler(options => { });
             // ko biet sao cai nay no keu violate ASP0014, keu map route truc tiep trong api luon
-            //app.UseEndpoints(endpoint =>
-            //{
-            //    endpoint.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
-            //});
+            app.UseEndpoints(endpoint =>
+            {
+                endpoint.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
             app.MapControllers();
         }
 
