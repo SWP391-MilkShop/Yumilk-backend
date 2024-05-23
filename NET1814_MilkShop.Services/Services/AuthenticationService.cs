@@ -162,7 +162,8 @@ namespace NET1814_MilkShop.Services.Services
                     LastName = existingUser.LastName,
                     RoleId = existingUser.RoleId,
                     AccessToken = token.ToString(),
-                    RefreshToken = refreshToken.ToString()
+                    RefreshToken = refreshToken.ToString(),
+                    IsActive = existingUser.IsActive
                 };
                 var customer = await _customerRepository.GetById(existingUser.Id);
                 if (customer != null)
