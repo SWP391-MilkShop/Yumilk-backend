@@ -1,9 +1,9 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Services.CoreHelpers;
-using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -11,6 +11,7 @@ namespace NET1814_MilkShop.Services.Services
     {
         Task<ResponseModel> GetOrderAsync(OrderQueryModel model);
     }
+
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
@@ -71,7 +72,11 @@ namespace NET1814_MilkShop.Services.Services
             });
 
             #region(paging)
-            var orders = await PagedList<OrderModel>.CreateAsync(orderModelQuery, model.Page, model.PageSize);
+            var orders = await PagedList<OrderModel>.CreateAsync(
+                orderModelQuery,
+                model.Page,
+                model.PageSize
+            );
             return new ResponseModel
             {
                 Data = orders,
@@ -81,13 +86,15 @@ namespace NET1814_MilkShop.Services.Services
             #endregion
         }
 
-        private static Expression<Func<Order, object>> GetSortProperty(OrderQueryModel queryModel) =>
-          queryModel.SortColumn?.ToLower() switch
-          {
-              "totalamount" => order => order.TotalAmount,
-              "createdat" => order => order.CreatedAt,
-              "paymentdate" => order => order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
-              _ => order => order.Id, //chưa biết mặc định sort theo cái gì nên để tạm là id
-          };
+        private static Expression<Func<Order, object>> GetSortProperty(
+            OrderQueryModel queryModel
+        ) =>
+            queryModel.SortColumn?.ToLower() switch
+            {
+                "totalamount" => order => order.TotalAmount,
+                "createdat" => order => order.CreatedAt,
+                "paymentdate" => order => order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
+                _ => order => order.Id, //chưa biết mặc định sort theo cái gì nên để tạm là id
+            };
     }
 }

@@ -19,6 +19,5 @@ namespace NET1814_MilkShop.Repositories.Models.OrderModels
 
         public DateTime? CreatedDate { get; set; }
         public DateTime? PaymentDate { get; set; }
-
     }
 }
