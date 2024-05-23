@@ -20,7 +20,8 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+        [Route("/api/dashboard/orders")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> GetOrders([FromQuery] OrderQueryModel queryModel)
         {
             _logger.Information("Get all orders");
