@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
@@ -19,6 +20,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         public async Task<IActionResult> GetOrders([FromQuery] OrderQueryModel queryModel)
         {
             _logger.Information("Get all orders");
