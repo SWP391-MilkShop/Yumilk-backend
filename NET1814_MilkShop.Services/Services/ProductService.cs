@@ -13,6 +13,7 @@ namespace NET1814_MilkShop.Services.Services
     {
         Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel);
         Task<ResponseModel> GetBrandsAsync(BrandQueryModel queryModel);
+        Task<ResponseModel> AddBrandAsync(BrandModel model);
     }
 
     public class ProductService : IProductService
@@ -186,6 +187,43 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
+        public async Task<ResponseModel> AddBrandAsync(BrandModel model)
+        {
+            // var isExistId = await _brandRepository.GetById(model.Id);
+            // if (isExistId != null) //không cần check vì brandid tự tăng và không được nhập
+            // {
+            //     return new ResponseModel
+            //     {
+            //         Message = "BrandId is existed",
+            //         Status = "Error"
+            //     };
+            // }
+            var isExistName = await _brandRepository.GetBrandByName(model.Name);
+            if (isExistName != null)
+            {
+                return new ResponseModel
+                {
+                    Message = "Brand name is existed! Add new brand fail!",
+                    Status = "Error"
+                };
+            }
+
+            var entity = new Brand
+            {
+                Name = model.Name,
+                Description = model.Description,
+                IsActive = true
+            };
+            _brandRepository.Add(entity);
+            await _unitOfWork.SaveChangesAsync();
+            return new ResponseModel
+            {
+                Status = "Success",
+                Data = entity,
+                Message = "Add new brand successfully"
+            };
+        }
+        
         /// <summary>
         /// Get sort property as expression
         /// </summary>
