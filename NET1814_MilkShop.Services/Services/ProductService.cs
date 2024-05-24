@@ -5,12 +5,18 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using System.Linq.Expressions;
+using Azure.Core;
 
 namespace NET1814_MilkShop.Services.Services
 {
     public interface IProductService
     {
         Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel);
+        Task<ResponseModel> GetUnitsAsync(UnitQueryModel request);
+        Task<ResponseModel> GetUnitByIdAsync(int id);
+        Task<ResponseModel> CreateUnitAsync(UnitModel unitModel);
+        Task<ResponseModel> UpdateUnitAsync(int id, UnitModel unitModel);
+        Task<ResponseModel> DeleteUnitAsync(int id);
     }
 
     public class ProductService : IProductService
@@ -117,6 +123,153 @@ namespace NET1814_MilkShop.Services.Services
                 Status = "Success"
             };
         }
+        
+
+        public async Task<ResponseModel> GetUnitsAsync(UnitQueryModel request)
+        {
+            var query = _unitRepository.GetUnitsQuery().Where(c=>c.IsActive);
+            if (!string.IsNullOrEmpty(request.SearchTerm))
+            {
+                query = query.Where(u => u.Name.Contains(request.SearchTerm)
+                    || u.Description!.Contains(request.SearchTerm));
+            }
+            #region sort
+            query = "desc".Equals(request.SortOrder?.ToLower()) ? query.OrderByDescending(GetSortProperty(request)) : query.OrderBy(GetSortProperty(request));
+            #endregion
+            var result = query.Select(u => new UnitModel
+            {
+                Name = u.Name,
+                Description = u.Description!
+            });
+            #region page
+               var units = await PagedList<UnitModel>.CreateAsync(
+                    result,
+                    request.Page,
+                    request.PageSize
+                );
+            
+
+            #endregion            
+            return new ResponseModel
+            {
+                Data = units,
+                Message = units.TotalCount > 0 ? "Get units successfully" : "No units found",
+                Status = "Success"
+            };
+        }
+
+        public async Task<ResponseModel> GetUnitByIdAsync(int id)
+        {
+            var unit = await _unitRepository.GetExistIsActiveId(id);
+            if (unit == null)
+                return new ResponseModel
+                {
+                    Status = "failed",
+                    Message = "Unit not found"
+                };
+            var result = new UnitModel
+            {
+                Name = unit!.Name,
+                Description = unit.Description!
+            };
+            return new ResponseModel
+            {
+                Data = result,
+                Status = "success",
+                Message = "Get unit successfully",
+            };
+        }
+        
+        public async Task<ResponseModel> CreateUnitAsync(UnitModel unitModel)
+        {
+            var unit = new Unit
+            {
+                Name = unitModel.Name,
+                Description = unitModel.Description,
+                IsActive = true
+            };
+            _unitRepository.Add(unit);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return new ResponseModel
+                {
+                    Data = unitModel,
+                    Status = "success",
+                    Message = "Create unit successfully"
+                };
+            }
+
+            return new ResponseModel
+            {
+                Status = "Error",
+                Message = "An error occured while creating unit"
+            };
+        }
+
+        public async Task<ResponseModel> UpdateUnitAsync(int id, UnitModel unitModel)
+        {
+            var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
+            if(isExistUnit == null)
+            {
+                return new ResponseModel
+                {
+                    Status = "failed",
+                    Message = "Unit not found"
+                };
+            }
+            isExistUnit.Name = unitModel.Name;
+            isExistUnit.Description = unitModel.Description;
+            _unitRepository.Update(isExistUnit);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return new ResponseModel()
+                {
+                    Data = unitModel,
+                    Status = "success",
+                    Message = "Update unit successfully"
+                };
+            }
+
+            return new ResponseModel()
+            {
+                Status = "Error",
+                Message = "An error occured while updating unit"
+            };
+        }
+
+        public async Task<ResponseModel> DeleteUnitAsync(int id)
+        {
+            var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
+            if (isExistUnit == null)
+            {
+                return new ResponseModel
+                {
+                    Status = "failed",
+                    Message = "Unit not found"
+                };
+            }
+
+            isExistUnit.IsActive = false;
+            isExistUnit.DeletedAt = DateTime.Now;
+            _unitRepository.Update(isExistUnit);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return new ResponseModel
+                {
+                    Status = "success",
+                    Message = "Delete unit successfully"
+                };
+            }
+
+            return new ResponseModel
+            {
+                Status = "Error",
+                Message = "An error occured while deleting unit"
+            };
+        }
 
         /// <summary>
         /// Get sort property as expression
@@ -133,5 +286,15 @@ namespace NET1814_MilkShop.Services.Services
                 "quantity" => product => product.Quantity,
                 _ => product => product.Id,
             };
+        
+        private static Expression<Func<Unit,object>> GetSortProperty(UnitQueryModel request)
+        {
+            return request.SortColumn?.ToLower() switch
+            {
+                "name" => unit => unit.Name,
+                "description" => unit => unit.Description!,
+                _ => unit => unit.Id
+            };
+        }
     }
 }
