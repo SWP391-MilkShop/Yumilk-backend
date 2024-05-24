@@ -69,7 +69,7 @@ namespace NET1814_MilkShop.API.Controllers
         
         [HttpPost("units")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> CreateUnitAsync([FromBody] UnitModel model)
+        public async Task<IActionResult> CreateUnitAsync([FromBody] CreateUnitModel model)
         {
             _logger.Information("Create unit");
             var response = await _productService.CreateUnitAsync(model);
