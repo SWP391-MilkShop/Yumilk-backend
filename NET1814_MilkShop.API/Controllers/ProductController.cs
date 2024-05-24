@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models;
+using NET1814_MilkShop.Repositories.Models.BrandModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
@@ -32,11 +33,26 @@ namespace NET1814_MilkShop.API.Controllers
                 };
                 return BadRequest(responseError);
             }
+
             var response = await _productService.GetProductsAsync(queryModel);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
+
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("/api/products/brands")]
+        public async Task<IActionResult> GetBrands([FromQuery] BrandQueryModel queryModel)
+        {
+            var response = await _productService.GetBrandsAsync(queryModel);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+
             return Ok(response);
         }
     }
