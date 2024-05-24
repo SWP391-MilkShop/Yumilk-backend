@@ -136,7 +136,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> GetBrandsAsync(BrandQueryModel queryModel)
         {
-            var query = _brandRepository.GetBrandsQuery().AsQueryable();
+            var query = _brandRepository.GetBrandsQuery();
 
             #region filter
 
