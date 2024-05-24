@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Services.Services;
@@ -33,6 +34,71 @@ namespace NET1814_MilkShop.API.Controllers
                 return BadRequest(responseError);
             }
             var response = await _productService.GetProductsAsync(queryModel);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+        
+        [HttpGet("units")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> GetUnits([FromQuery] UnitQueryModel request)
+        {
+            _logger.Information("Get all units");
+            var response = await _productService.GetUnitsAsync(request);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+        
+        [HttpGet("units/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> GetUnitById(int id)
+        {
+            _logger.Information("Get unit by id");
+            var response = await _productService.GetUnitByIdAsync(id);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+        
+        [HttpPost("units")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> CreateUnitAsync([FromBody] UnitModel model)
+        {
+            _logger.Information("Create unit");
+            var response = await _productService.CreateUnitAsync(model);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+        
+        [HttpPut("units/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> UpdateUnitAsync(int id, [FromBody] UnitModel model)
+        {
+            _logger.Information("Update unit");
+            var response = await _productService.UpdateUnitAsync(id, model);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+        
+        [HttpDelete("units/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> DeleteUnitAsync(int id)
+        {
+            _logger.Information("Delete unit");
+            var response = await _productService.DeleteUnitAsync(id);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
