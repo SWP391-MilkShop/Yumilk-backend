@@ -55,5 +55,19 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost]
+        [Route("/api/products/brands")]
+        public async Task<IActionResult> AddBrand([FromBody] BrandModel model)
+        {
+            _logger.Information("Add Brand");
+            var response = await _productService.AddBrandAsync(model);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }
