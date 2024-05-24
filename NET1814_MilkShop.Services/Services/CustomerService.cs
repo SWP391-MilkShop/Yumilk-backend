@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
@@ -154,7 +155,6 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return new ResponseModel
                 {
-                    Data = null,
                     Message = "Customer not found",
                     Status = "Error"
                 };
@@ -168,42 +168,54 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> ChangeInfoAsync(
-            Guid userId,
-            ChangeUserInfoModel changeUserInfoModel
-        )
+        public async Task<ResponseModel> ChangeInfoAsync(Guid userId, ChangeUserInfoModel changeUserInfoModel)
         {
             var customer = await _customerRepository.GetById(userId);
             if (customer == null)
             {
                 return new ResponseModel
                 {
-                    Data = null,
                     Message = "Customer not found",
                     Status = "Error"
                 };
             }
-            //Only change the info that is not null or whitespace
-            customer.User.Username = !string.IsNullOrWhiteSpace(changeUserInfoModel.Username)
-                ? changeUserInfoModel.Username
-                : customer.User.Username;
-            customer.User.FirstName = !string.IsNullOrWhiteSpace(changeUserInfoModel.FirstName)
-                ? changeUserInfoModel.FirstName
-                : customer.User.FirstName;
-            customer.User.LastName = !string.IsNullOrWhiteSpace(changeUserInfoModel.LastName)
-                ? changeUserInfoModel.LastName
-                : customer.User.LastName;
-            customer.Email = !string.IsNullOrWhiteSpace(changeUserInfoModel.Email)
-                ? changeUserInfoModel.Email
-                : customer.Email;
-            customer.PhoneNumber = !string.IsNullOrWhiteSpace(changeUserInfoModel.PhoneNumber)
-                ? changeUserInfoModel.PhoneNumber
-                : customer.PhoneNumber;
-            customer.ProfilePictureUrl = !string.IsNullOrWhiteSpace(
-                changeUserInfoModel.ProfilePictureUrl
-            )
-                ? changeUserInfoModel.ProfilePictureUrl
-                : customer.ProfilePictureUrl;
+
+            if (!string.IsNullOrWhiteSpace(changeUserInfoModel.PhoneNumber))
+            {
+                if (!Regex.IsMatch(changeUserInfoModel.PhoneNumber, @"^([0-9]{10})$"))
+                {
+                    return new ResponseModel
+                    {
+                        Message = "Invalid Phone Number!",
+                        Status = "Error"
+                    };
+                }
+                customer.PhoneNumber = changeUserInfoModel.PhoneNumber;
+            }
+
+            if (!string.IsNullOrWhiteSpace(changeUserInfoModel.ProfilePictureUrl))
+            {
+                if (!Uri.IsWellFormedUriString(changeUserInfoModel.ProfilePictureUrl, UriKind.Absolute))
+                {
+                    return new ResponseModel
+                    {
+                        Message = "Invalid URL!",
+                        Status = "Error"
+                    };
+                }
+                customer.ProfilePictureUrl = changeUserInfoModel.ProfilePictureUrl;
+            }
+
+            if (!string.IsNullOrWhiteSpace(changeUserInfoModel.FirstName))
+            {
+                customer.User.FirstName = changeUserInfoModel.FirstName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(changeUserInfoModel.LastName))
+            {
+                customer.User.LastName = changeUserInfoModel.LastName;
+            }
+
             _customerRepository.Update(customer);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
