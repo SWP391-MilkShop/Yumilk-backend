@@ -69,5 +69,18 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpPut]
+        [Route("/api/products/brands")]
+        public async Task<IActionResult> UpdateBrand([FromBody] BrandModel model)
+        {
+            _logger.Information("Update Brand");
+            var response = await _productService.UpdateBrandAsync(model);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
     }
 }
