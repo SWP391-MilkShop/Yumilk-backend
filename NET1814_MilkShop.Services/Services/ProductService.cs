@@ -271,6 +271,7 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Brand not found"
                 };
             }
+            isExist.DeletedAt = DateTime.Now;
             isExist.IsActive = false;
             await _unitOfWork.SaveChangesAsync();
             return new ResponseModel
