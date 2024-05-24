@@ -14,7 +14,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel);
         Task<ResponseModel> GetUnitsAsync(UnitQueryModel request);
         Task<ResponseModel> GetUnitByIdAsync(int id);
-        Task<ResponseModel> CreateUnitAsync(UnitModel unitModel);
+        Task<ResponseModel> CreateUnitAsync(CreateUnitModel createUnitModel);
         Task<ResponseModel> UpdateUnitAsync(int id, UnitModel unitModel);
         Task<ResponseModel> DeleteUnitAsync(int id);
     }
@@ -138,6 +138,7 @@ namespace NET1814_MilkShop.Services.Services
             #endregion
             var result = query.Select(u => new UnitModel
             {
+                Id = u.Id,
                 Name = u.Name,
                 Description = u.Description!
             });
@@ -167,7 +168,7 @@ namespace NET1814_MilkShop.Services.Services
                     Status = "failed",
                     Message = "Unit not found"
                 };
-            var result = new UnitModel
+            var result = new CreateUnitModel
             {
                 Name = unit!.Name,
                 Description = unit.Description!
@@ -180,12 +181,12 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
         
-        public async Task<ResponseModel> CreateUnitAsync(UnitModel unitModel)
+        public async Task<ResponseModel> CreateUnitAsync(CreateUnitModel createUnitModel)
         {
             var unit = new Unit
             {
-                Name = unitModel.Name,
-                Description = unitModel.Description,
+                Name = createUnitModel.Name,
+                Description = createUnitModel.Description,
                 IsActive = true
             };
             _unitRepository.Add(unit);
@@ -194,7 +195,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return new ResponseModel
                 {
-                    Data = unitModel,
+                    Data = createUnitModel,
                     Status = "success",
                     Message = "Create unit successfully"
                 };
@@ -218,6 +219,8 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Unit not found"
                 };
             }
+
+            isExistUnit.Id = unitModel.Id;
             isExistUnit.Name = unitModel.Name;
             isExistUnit.Description = unitModel.Description;
             _unitRepository.Update(isExistUnit);
