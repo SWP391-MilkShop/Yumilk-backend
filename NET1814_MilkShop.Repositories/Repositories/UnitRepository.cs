@@ -10,15 +10,12 @@ namespace NET1814_MilkShop.Repositories.Repositories
         void Add(Unit unit);
         void Update(Unit unit);
         Task<Unit?> GetExistIsActiveId(int id);
-
     }
 
     public class UnitRepository : Repository<Unit>, IUnitRepository
     {
-        public UnitRepository(AppDbContext context) : base(context)
-        {
-
-        }
+        public UnitRepository(AppDbContext context)
+            : base(context) { }
 
         public IQueryable<Unit> GetUnitsQuery() =>
             _context.Units.Where(x => x.IsActive).AsNoTracking();

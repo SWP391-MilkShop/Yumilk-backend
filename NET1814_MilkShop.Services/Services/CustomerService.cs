@@ -153,11 +153,7 @@ namespace NET1814_MilkShop.Services.Services
             var customer = await _customerRepository.GetById(id);
             if (customer == null)
             {
-                return new ResponseModel
-                {
-                    Message = "Customer not found",
-                    Status = "Error"
-                };
+                return new ResponseModel { Message = "Customer not found", Status = "Error" };
             }
             var customerModel = ToCustomerModel(customer, customer.User);
             return new ResponseModel
@@ -168,16 +164,15 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> ChangeInfoAsync(Guid userId, ChangeUserInfoModel changeUserInfoModel)
+        public async Task<ResponseModel> ChangeInfoAsync(
+            Guid userId,
+            ChangeUserInfoModel changeUserInfoModel
+        )
         {
             var customer = await _customerRepository.GetById(userId);
             if (customer == null)
             {
-                return new ResponseModel
-                {
-                    Message = "Customer not found",
-                    Status = "Error"
-                };
+                return new ResponseModel { Message = "Customer not found", Status = "Error" };
             }
 
             if (!string.IsNullOrWhiteSpace(changeUserInfoModel.PhoneNumber))
@@ -195,13 +190,14 @@ namespace NET1814_MilkShop.Services.Services
 
             if (!string.IsNullOrWhiteSpace(changeUserInfoModel.ProfilePictureUrl))
             {
-                if (!Uri.IsWellFormedUriString(changeUserInfoModel.ProfilePictureUrl, UriKind.Absolute))
+                if (
+                    !Uri.IsWellFormedUriString(
+                        changeUserInfoModel.ProfilePictureUrl,
+                        UriKind.Absolute
+                    )
+                )
                 {
-                    return new ResponseModel
-                    {
-                        Message = "Invalid URL!",
-                        Status = "Error"
-                    };
+                    return new ResponseModel { Message = "Invalid URL!", Status = "Error" };
                 }
                 customer.ProfilePictureUrl = changeUserInfoModel.ProfilePictureUrl;
             }

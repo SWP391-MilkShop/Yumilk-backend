@@ -40,7 +40,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
             return Ok(response);
         }
-        
+
         [HttpGet("units")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> GetUnits([FromQuery] UnitQueryModel request)
@@ -53,7 +53,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
             return Ok(response);
         }
-        
+
         [HttpGet("units/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> GetUnitById(int id)
@@ -66,7 +66,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
             return Ok(response);
         }
-        
+
         [HttpPost("units")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> CreateUnitAsync([FromBody] CreateUnitModel model)
@@ -79,7 +79,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
             return Ok(response);
         }
-        
+
         [HttpPut("units")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> UpdateUnitAsync([FromBody] UnitModel model)
@@ -92,7 +92,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
             return Ok(response);
         }
-        
+
         [HttpDelete("units/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> DeleteUnitAsync(int id)

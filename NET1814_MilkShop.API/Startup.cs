@@ -171,7 +171,10 @@ namespace NET1814_MilkShop.API
             // ko biet sao cai nay no keu violate ASP0014, keu map route truc tiep trong api luon
             app.UseEndpoints(endpoint =>
             {
-                endpoint.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoint.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}"
+                );
             });
             app.MapControllers();
         }

@@ -1,10 +1,10 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
-using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -25,11 +25,14 @@ namespace NET1814_MilkShop.Services.Services
         private readonly ICategoryRepository _categoryRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public ProductService(IProductRepository productRepository,
-                              IBrandRepository brandRepository,
-                              ICategoryRepository categoryRepository,
-                              IUnitRepository unitRepository,
-                              IUnitOfWork unitOfWork)
+
+        public ProductService(
+            IProductRepository productRepository,
+            IBrandRepository brandRepository,
+            ICategoryRepository categoryRepository,
+            IUnitRepository unitRepository,
+            IUnitOfWork unitOfWork
+        )
         {
             _productRepository = productRepository;
             _brandRepository = brandRepository;
@@ -44,20 +47,36 @@ namespace NET1814_MilkShop.Services.Services
             #region Filter, Search
             //thu gọn thành 1 where thôi
             query = query.Where(p =>
-            p.IsActive == queryModel.IsActive
-            //search theo name, description, brand, unit, category
-            && (string.IsNullOrEmpty(queryModel.SearchTerm) || p.Name.Contains(queryModel.SearchTerm)
-            || p.Description!.Contains(queryModel.SearchTerm)
-            || p.Brand!.Name.Contains(queryModel.SearchTerm)
-            || p.Unit!.Name.Contains(queryModel.SearchTerm)
-            || p.Category!.Name.Contains(queryModel.SearchTerm))
-            //filter theo brand, category, unit, status, minPrice, maxPrice
-            && (string.IsNullOrEmpty(queryModel.Brand) || string.Equals(p.Brand!.Name, queryModel.Brand))
-            && (string.IsNullOrEmpty(queryModel.Category) || string.Equals(p.Category!.Name, queryModel.Category))
-            && (string.IsNullOrEmpty(queryModel.Unit) || string.Equals(p.Unit!.Name, queryModel.Unit))
-            && (string.IsNullOrEmpty(queryModel.Status) || string.Equals(p.ProductStatus!.Name, queryModel.Status))
-            && (queryModel.MinPrice <= 0 || p.SalePrice >= queryModel.MinPrice)
-            && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice));
+                p.IsActive == queryModel.IsActive
+                //search theo name, description, brand, unit, category
+                && (
+                    string.IsNullOrEmpty(queryModel.SearchTerm)
+                    || p.Name.Contains(queryModel.SearchTerm)
+                    || p.Description!.Contains(queryModel.SearchTerm)
+                    || p.Brand!.Name.Contains(queryModel.SearchTerm)
+                    || p.Unit!.Name.Contains(queryModel.SearchTerm)
+                    || p.Category!.Name.Contains(queryModel.SearchTerm)
+                )
+                //filter theo brand, category, unit, status, minPrice, maxPrice
+                && (
+                    string.IsNullOrEmpty(queryModel.Brand)
+                    || string.Equals(p.Brand!.Name, queryModel.Brand)
+                )
+                && (
+                    string.IsNullOrEmpty(queryModel.Category)
+                    || string.Equals(p.Category!.Name, queryModel.Category)
+                )
+                && (
+                    string.IsNullOrEmpty(queryModel.Unit)
+                    || string.Equals(p.Unit!.Name, queryModel.Unit)
+                )
+                && (
+                    string.IsNullOrEmpty(queryModel.Status)
+                    || string.Equals(p.ProductStatus!.Name, queryModel.Status)
+                )
+                && (queryModel.MinPrice <= 0 || p.SalePrice >= queryModel.MinPrice)
+                && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice)
+            );
             /*if (!string.IsNullOrEmpty(queryModel.SearchTerm))
             {
                 query = query.Where(p => p.Name.Contains(queryModel.SearchTerm)
@@ -118,22 +137,26 @@ namespace NET1814_MilkShop.Services.Services
             return new ResponseModel
             {
                 Data = products,
-                Message = products.TotalCount > 0 ? "Get products successfully" : "No products found",
+                Message =
+                    products.TotalCount > 0 ? "Get products successfully" : "No products found",
                 Status = "Success"
             };
         }
-        
 
         public async Task<ResponseModel> GetUnitsAsync(UnitQueryModel request)
         {
-            var query = _unitRepository.GetUnitsQuery().Where(c=>c.IsActive);
+            var query = _unitRepository.GetUnitsQuery().Where(c => c.IsActive);
             if (!string.IsNullOrEmpty(request.SearchTerm))
             {
-                query = query.Where(u => u.Name.Contains(request.SearchTerm)
-                    || u.Description!.Contains(request.SearchTerm));
+                query = query.Where(u =>
+                    u.Name.Contains(request.SearchTerm)
+                    || u.Description!.Contains(request.SearchTerm)
+                );
             }
             #region sort
-            query = "desc".Equals(request.SortOrder?.ToLower()) ? query.OrderByDescending(GetSortProperty(request)) : query.OrderBy(GetSortProperty(request));
+            query = "desc".Equals(request.SortOrder?.ToLower())
+                ? query.OrderByDescending(GetSortProperty(request))
+                : query.OrderBy(GetSortProperty(request));
             #endregion
             var result = query.Select(u => new UnitModel
             {
@@ -142,14 +165,13 @@ namespace NET1814_MilkShop.Services.Services
                 Description = u.Description!
             });
             #region page
-               var units = await PagedList<UnitModel>.CreateAsync(
-                    result,
-                    request.Page,
-                    request.PageSize
-                );
-            
+            var units = await PagedList<UnitModel>.CreateAsync(
+                result,
+                request.Page,
+                request.PageSize
+            );
 
-            #endregion            
+            #endregion
             return new ResponseModel
             {
                 Data = units,
@@ -162,11 +184,7 @@ namespace NET1814_MilkShop.Services.Services
         {
             var unit = await _unitRepository.GetExistIsActiveId(id);
             if (unit == null)
-                return new ResponseModel
-                {
-                    Status = "failed",
-                    Message = "Unit not found"
-                };
+                return new ResponseModel { Status = "failed", Message = "Unit not found" };
             var result = new UnitModel
             {
                 Id = id,
@@ -180,7 +198,7 @@ namespace NET1814_MilkShop.Services.Services
                 Message = "Get unit successfully",
             };
         }
-        
+
         public async Task<ResponseModel> CreateUnitAsync(CreateUnitModel createUnitModel)
         {
             var unit = new Unit
@@ -211,13 +229,9 @@ namespace NET1814_MilkShop.Services.Services
         public async Task<ResponseModel> UpdateUnitAsync(UnitModel unitModel)
         {
             var isExistUnit = await _unitRepository.GetExistIsActiveId(unitModel.Id);
-            if(isExistUnit == null)
+            if (isExistUnit == null)
             {
-                return new ResponseModel
-                {
-                    Status = "failed",
-                    Message = "Unit not found"
-                };
+                return new ResponseModel { Status = "failed", Message = "Unit not found" };
             }
 
             isExistUnit.Id = unitModel.Id;
@@ -247,11 +261,7 @@ namespace NET1814_MilkShop.Services.Services
             var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
             if (isExistUnit == null)
             {
-                return new ResponseModel
-                {
-                    Status = "failed",
-                    Message = "Unit not found"
-                };
+                return new ResponseModel { Status = "failed", Message = "Unit not found" };
             }
 
             isExistUnit.IsActive = false;
@@ -289,8 +299,8 @@ namespace NET1814_MilkShop.Services.Services
                 "quantity" => product => product.Quantity,
                 _ => product => product.Id,
             };
-        
-        private static Expression<Func<Unit,object>> GetSortProperty(UnitQueryModel request)
+
+        private static Expression<Func<Unit, object>> GetSortProperty(UnitQueryModel request)
         {
             return request.SortColumn?.ToLower() switch
             {
