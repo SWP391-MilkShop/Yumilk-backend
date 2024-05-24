@@ -82,10 +82,10 @@ namespace NET1814_MilkShop.API.Controllers
         
         [HttpPut("units/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> UpdateUnitAsync(int id, [FromBody] UnitModel model)
+        public async Task<IActionResult> UpdateUnitAsync([FromBody] UnitModel model)
         {
             _logger.Information("Update unit");
-            var response = await _productService.UpdateUnitAsync(id, model);
+            var response = await _productService.UpdateUnitAsync(model);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
