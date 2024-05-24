@@ -80,7 +80,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
         
-        [HttpPut("units/{id}")]
+        [HttpPut("units")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> UpdateUnitAsync([FromBody] UnitModel model)
         {
