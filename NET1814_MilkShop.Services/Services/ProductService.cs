@@ -14,6 +14,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel);
         Task<ResponseModel> GetBrandsAsync(BrandQueryModel queryModel);
         Task<ResponseModel> AddBrandAsync(BrandModel model);
+        Task<ResponseModel> UpdateBrandAsync(BrandModel model);
     }
 
     public class ProductService : IProductService
@@ -223,7 +224,41 @@ namespace NET1814_MilkShop.Services.Services
                 Message = "Add new brand successfully"
             };
         }
-        
+
+        public async Task<ResponseModel> UpdateBrandAsync(BrandModel model)
+        {
+            var isExistId = await _brandRepository.GetById(model.Id);
+            if (isExistId == null)
+            {
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Brand not found"
+                };
+            }
+
+            var isExistName = await _brandRepository.GetBrandByName(model.Name);
+            if (isExistName != null)
+            {
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Brand name is existed! Update brand fail!"
+                };
+            }
+
+            isExistId.Name = model.Name;
+            isExistId.Description = model.Description;
+            _brandRepository.Update(isExistId);
+            await _unitOfWork.SaveChangesAsync();
+            return new ResponseModel
+            {
+                Status = "Success",
+                Message = "Update brand successfully",
+                Data = isExistId
+            };
+        }
+
         /// <summary>
         /// Get sort property as expression
         /// </summary>
