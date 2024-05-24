@@ -80,6 +80,21 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Route("/api/products/brands")]
+        public async Task<IActionResult> DeleteBrand([FromQuery] int id)
+        {
+            _logger.Information("Delete Brand");
+            var response = await _productService.DeleteBrandAsync(id);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+
             return Ok(response);
         }
     }
