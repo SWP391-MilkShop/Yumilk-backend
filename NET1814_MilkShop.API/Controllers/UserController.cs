@@ -70,7 +70,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         [HttpGet]
         [Route("api/user/me")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        [Authorize(AuthenticationSchemes = "Access")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> GetCurrentAuthUser()
         {
@@ -102,7 +102,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         [HttpPut]
         [Route("api/user/change-password")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        [Authorize(AuthenticationSchemes = "Access")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
         {
