@@ -16,11 +16,20 @@ namespace NET1814_MilkShop.Services.Services
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly IBrandRepository _brandRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IUnitRepository _unitRepository;
         private readonly IUnitOfWork _unitOfWork;
-
-        public ProductService(IProductRepository productRepository, IUnitOfWork unitOfWork)
+        public ProductService(IProductRepository productRepository,
+                              IBrandRepository brandRepository,
+                              ICategoryRepository categoryRepository,
+                              IUnitRepository unitRepository,
+                              IUnitOfWork unitOfWork)
         {
             _productRepository = productRepository;
+            _brandRepository = brandRepository;
+            _categoryRepository = categoryRepository;
+            _unitRepository = unitRepository;
             _unitOfWork = unitOfWork;
         }
 
