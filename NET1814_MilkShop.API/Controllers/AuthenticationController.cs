@@ -42,11 +42,12 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
 
         [HttpPost("verify")]
-        public async Task<IActionResult> VerifyAccount([FromQuery]string token)
+        public async Task<IActionResult> VerifyAccount([FromQuery] string token)
         {
             _logger.Information("Verify Account");
             var response = await _authenticationService.VerifyAccountAsync(token);
@@ -54,6 +55,7 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
 
@@ -66,6 +68,7 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(res);
             }
+
             return Ok(res);
         }
 
@@ -78,6 +81,7 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
 
@@ -90,19 +94,26 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
 
         [HttpPost("refresh-token")]
         [Authorize(AuthenticationSchemes = "Refresh")]
-        public async Task<IActionResult> RefreshToken([FromBody] string token)
+        public async Task<IActionResult> RefreshToken()
         {
             _logger.Information("Refresh Token");
+            if (!Request.Headers.TryGetValue("RefreshToken", out var token))
+            {
+                return BadRequest("Not found token");
+            }
+
             var res = await _authenticationService.RefreshTokenAsync(token);
             if (res.Status == "Error")
             {
                 return BadRequest(res);
             }
+
             return Ok(res);
         }
     }
