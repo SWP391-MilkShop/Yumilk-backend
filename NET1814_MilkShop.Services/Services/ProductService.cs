@@ -5,7 +5,6 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using System.Linq.Expressions;
-using Azure.Core;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -15,7 +14,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetUnitsAsync(UnitQueryModel request);
         Task<ResponseModel> GetUnitByIdAsync(int id);
         Task<ResponseModel> CreateUnitAsync(CreateUnitModel createUnitModel);
-        Task<ResponseModel> UpdateUnitAsync(int id, UnitModel unitModel);
+        Task<ResponseModel> UpdateUnitAsync(UnitModel unitModel);
         Task<ResponseModel> DeleteUnitAsync(int id);
     }
 
@@ -48,15 +47,15 @@ namespace NET1814_MilkShop.Services.Services
             p.IsActive == queryModel.IsActive
             //search theo name, description, brand, unit, category
             && (string.IsNullOrEmpty(queryModel.SearchTerm) || p.Name.Contains(queryModel.SearchTerm)
-            || p.Description.Contains(queryModel.SearchTerm)
-            || p.Brand.Name.Contains(queryModel.SearchTerm)
-            || p.Unit.Name.Contains(queryModel.SearchTerm)
-            || p.Category.Name.Contains(queryModel.SearchTerm))
+            || p.Description!.Contains(queryModel.SearchTerm)
+            || p.Brand!.Name.Contains(queryModel.SearchTerm)
+            || p.Unit!.Name.Contains(queryModel.SearchTerm)
+            || p.Category!.Name.Contains(queryModel.SearchTerm))
             //filter theo brand, category, unit, status, minPrice, maxPrice
-            && (string.IsNullOrEmpty(queryModel.Brand) || string.Equals(p.Brand.Name, queryModel.Brand))
-            && (string.IsNullOrEmpty(queryModel.Category) || string.Equals(p.Category.Name, queryModel.Category))
-            && (string.IsNullOrEmpty(queryModel.Unit) || string.Equals(p.Unit.Name, queryModel.Unit))
-            && (string.IsNullOrEmpty(queryModel.Status) || string.Equals(p.ProductStatus.Name, queryModel.Status))
+            && (string.IsNullOrEmpty(queryModel.Brand) || string.Equals(p.Brand!.Name, queryModel.Brand))
+            && (string.IsNullOrEmpty(queryModel.Category) || string.Equals(p.Category!.Name, queryModel.Category))
+            && (string.IsNullOrEmpty(queryModel.Unit) || string.Equals(p.Unit!.Name, queryModel.Unit))
+            && (string.IsNullOrEmpty(queryModel.Status) || string.Equals(p.ProductStatus!.Name, queryModel.Status))
             && (queryModel.MinPrice <= 0 || p.SalePrice >= queryModel.MinPrice)
             && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice));
             /*if (!string.IsNullOrEmpty(queryModel.SearchTerm))
@@ -170,7 +169,7 @@ namespace NET1814_MilkShop.Services.Services
                 };
             var result = new CreateUnitModel
             {
-                Name = unit!.Name,
+                Name = unit.Name,
                 Description = unit.Description!
             };
             return new ResponseModel
@@ -208,9 +207,9 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> UpdateUnitAsync(int id, UnitModel unitModel)
+        public async Task<ResponseModel> UpdateUnitAsync(UnitModel unitModel)
         {
-            var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
+            var isExistUnit = await _unitRepository.GetExistIsActiveId(unitModel.Id);
             if(isExistUnit == null)
             {
                 return new ResponseModel
