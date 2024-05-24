@@ -15,6 +15,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetBrandsAsync(BrandQueryModel queryModel);
         Task<ResponseModel> AddBrandAsync(BrandModel model);
         Task<ResponseModel> UpdateBrandAsync(BrandModel model);
+        Task<ResponseModel> DeleteBrandAsync(int id);
     }
 
     public class ProductService : IProductService
@@ -256,6 +257,26 @@ namespace NET1814_MilkShop.Services.Services
                 Status = "Success",
                 Message = "Update brand successfully",
                 Data = isExistId
+            };
+        }
+
+        public async Task<ResponseModel> DeleteBrandAsync(int id)
+        {
+            var isExist = await _brandRepository.GetById(id);
+            if (isExist == null)
+            {
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Brand not found"
+                };
+            }
+            isExist.IsActive = false;
+            await _unitOfWork.SaveChangesAsync();
+            return new ResponseModel
+            {
+                Status = "Success",
+                Message = "Delete brand successfully"
             };
         }
 
