@@ -21,7 +21,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         }
 
         public IQueryable<Unit> GetUnitsQuery() =>
-            _context.Units.AsNoTracking();
+            _context.Units.Where(x => x.IsActive).AsNoTracking();
 
         public Task<Unit?> GetExistIsActiveId(int id) =>
             _context.Units.FirstOrDefaultAsync(x => x.Id == id && x.IsActive);

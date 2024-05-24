@@ -167,8 +167,9 @@ namespace NET1814_MilkShop.Services.Services
                     Status = "failed",
                     Message = "Unit not found"
                 };
-            var result = new CreateUnitModel
+            var result = new UnitModel
             {
+                Id = id,
                 Name = unit.Name,
                 Description = unit.Description!
             };
