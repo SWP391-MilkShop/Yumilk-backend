@@ -1,10 +1,10 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace NET1814_MilkShop.Services.Services
 {

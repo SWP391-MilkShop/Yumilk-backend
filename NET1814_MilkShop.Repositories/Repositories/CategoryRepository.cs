@@ -7,6 +7,11 @@ namespace NET1814_MilkShop.Repositories.Repositories
     public interface ICategoryRepository
     {
         IQueryable<Category> GetCategoriesQuery();
+        Task<bool> IsExistAsync(string name);
+        Task<Category?> GetById(int id);
+        void Add(Category category);
+        void Update(Category category);
+
     }
     public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
@@ -18,6 +23,14 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             return _context.Categories.AsNoTracking();
         }
-
+        /// <summary>
+        /// Check if category name is exist
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public Task<bool> IsExistAsync(string name)
+        {
+            return _context.Categories.AnyAsync(e => string.Equals(e.Name, name) && e.IsActive);
+        }
     }
 }
