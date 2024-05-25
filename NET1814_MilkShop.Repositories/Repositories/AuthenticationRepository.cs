@@ -14,7 +14,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public AuthenticationRepository(AppDbContext context)
             : base(context) { }
         /// <summary>
-        /// Get by username and password where the username is active
+        /// Get by username and password for login
         /// </summary>
         /// <param name="username"></param>
         /// <param name="password"></param>
@@ -23,7 +23,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             var user = await _context
                 .Users.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Username.Equals(username) && x.IsActive);
+                .FirstOrDefaultAsync(x => x.Username.Equals(username));
             //check case sensitive
             if (username.Equals(user.Username, StringComparison.Ordinal))
             {

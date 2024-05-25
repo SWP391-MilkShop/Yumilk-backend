@@ -70,6 +70,7 @@ namespace NET1814_MilkShop.Services.Services
                 Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
                 RoleId = model.RoleId,
                 IsActive = true, //no activation required
+                IsBanned = false
             };
             _userRepository.Add(user);
             var result = await _unitOfWork.SaveChangesAsync();
@@ -149,6 +150,24 @@ namespace NET1814_MilkShop.Services.Services
             );
             if (existingUser != null)
             {
+                //check if user is banned
+                if (existingUser.IsBanned)
+                {
+                    return new ResponseModel
+                    {
+                        Status = "Error",
+                        Message = "Tài khoản của bạn đã bị khóa do hành vi không hợp lệ!"
+                    };
+                }
+                //check if user is not activated
+                if (existingUser.IsActive == false)
+                {
+                    return new ResponseModel
+                    {
+                        Status = "Error",
+                        Message = "Tài khoản của bạn chưa được xác thực!"
+                    };
+                }
                 var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
                 var refreshToken = _jwtTokenExtension.CreateJwtToken(
                     existingUser,
