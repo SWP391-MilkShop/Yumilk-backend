@@ -40,9 +40,12 @@ namespace NET1814_MilkShop.API.Controllers
             }
             return Ok(response);
         }
-
+        /// <summary>
+        /// Get all units search by name and description, sort by name, description (default is id ascending)
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpGet("units")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> GetUnits([FromQuery] UnitQueryModel request)
         {
             _logger.Information("Get all units");
@@ -55,7 +58,6 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpGet("units/{id}")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> GetUnitById(int id)
         {
             _logger.Information("Get unit by id");
@@ -80,11 +82,12 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
 
-        [HttpPut("units")]
+        [HttpPut("units/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> UpdateUnitAsync([FromBody] UnitModel model)
+        public async Task<IActionResult> UpdateUnitAsync(int id,[FromBody] UnitModel model)
         {
             _logger.Information("Update unit");
+            model.Id = id;
             var response = await _productService.UpdateUnitAsync(model);
             if (response.Status == "Error")
             {
