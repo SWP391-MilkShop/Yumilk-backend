@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NET1814_MilkShop.Repositories.Models.OrderModels
+﻿namespace NET1814_MilkShop.Repositories.Models.OrderModels
 {
     public class OrderModel
     {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Services.Services;
@@ -57,6 +58,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
         [HttpPost("categories")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1, 2")]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryModel model)
         {
             _logger.Information("Create category");
@@ -68,6 +70,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
         [HttpPut("categories/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1, 2")]
         public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryModel model)
         {
             _logger.Information("Update category");
@@ -80,6 +83,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
         [HttpDelete("categories/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1, 2")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             _logger.Information("Delete category");
