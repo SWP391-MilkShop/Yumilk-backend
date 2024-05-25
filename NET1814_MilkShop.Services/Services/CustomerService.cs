@@ -60,10 +60,7 @@ namespace NET1814_MilkShop.Services.Services
                     || c.User.LastName!.Contains(request.SearchTerm)
                 );
             }
-            if (request.IsActive != null)
-            {
-                query = query.Where(c => c.User.IsActive == request.IsActive);
-            }
+            query = query.Where(c => c.User.IsActive == request.IsActive && c.User.IsBanned == request.IsBanned);
             //sort
             query = "desc".Equals(request.SortOrder?.ToLower())
                 ? query.OrderByDescending(GetSortProperty(request))
@@ -79,7 +76,8 @@ namespace NET1814_MilkShop.Services.Services
                 Username = c.User.Username,
                 PhoneNumber = c.PhoneNumber,
                 ProfilePictureUrl = c.ProfilePictureUrl,
-                GoogleId = c.GoogleId
+                GoogleId = c.GoogleId,
+                IsBanned = c.User.IsBanned
             });
             var customers = await PagedList<CustomerModel>.CreateAsync(
                 result,

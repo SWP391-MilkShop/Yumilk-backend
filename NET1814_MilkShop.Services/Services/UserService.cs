@@ -70,10 +70,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 query = query.Where(u => string.Equals(u.Role!.Name, request.Role));
             }
-            if (request.IsActive != null)
-            {
-                query = query.Where(u => u.IsActive == request.IsActive);
-            }
+            query = query.Where(u => u.IsActive == request.IsActive && u.IsBanned == request.IsBanned);
             //sort
             query = "desc".Equals(request.SortOrder?.ToLower())
                 ? query.OrderByDescending(GetSortProperty(request))
@@ -85,7 +82,8 @@ namespace NET1814_MilkShop.Services.Services
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 Role = u.Role!.Name,
-                IsActive = u.IsActive
+                IsActive = u.IsActive,
+                IsBanned = u.IsBanned
             });
             //page
             var users = await PagedList<UserModel>.CreateAsync(
