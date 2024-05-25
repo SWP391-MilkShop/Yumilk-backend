@@ -9,6 +9,7 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using NET1814_MilkShop.Services.Services;
+using System.Reflection;
 using System.Text;
 
 namespace NET1814_MilkShop.API
@@ -28,10 +29,13 @@ namespace NET1814_MilkShop.API
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(o =>
             {
-                o.SwaggerDoc(
-                    "v1",
-                    new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" }
-                );
+                o.SwaggerDoc("v1", new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" });
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var APIXmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                o.IncludeXmlComments(APIXmlPath);
+                var repoXmlFile = "NET1814_MilkShop.Repositories.xml";
+                var repoXmlPath = Path.Combine(AppContext.BaseDirectory, repoXmlFile);
+                o.IncludeXmlComments(repoXmlPath);
                 o.AddSecurityDefinition(
                     "Bearer",
                     new OpenApiSecurityScheme
@@ -79,7 +83,7 @@ namespace NET1814_MilkShop.API
             AddDI(services);
             //Add Email Setting
             services.Configure<EmailSettingModel>(_configuration.GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
-            //Add Database
+                                                                                               //Add Database
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
             //Add Exception Handler
             services.AddExceptionHandler<ExceptionLoggingHandler>();
