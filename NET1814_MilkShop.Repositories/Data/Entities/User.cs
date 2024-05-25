@@ -30,6 +30,9 @@ public partial class User : IAuditableEntity
 
     [DefaultValue(false)]
     public bool IsActive { get; set; }
+    [Column("is_banned")]
+    [DefaultValue(false)]
+    public bool IsBanned { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
