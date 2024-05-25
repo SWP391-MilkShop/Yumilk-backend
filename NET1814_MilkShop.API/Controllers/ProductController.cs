@@ -43,9 +43,14 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// filter by description (default: filter by name)
+        /// </summary>
+        /// <param name="queryModel"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("/api/products/brands")]
-        public async Task<IActionResult> GetBrands([FromQuery] BrandQueryModel queryModel)
+        public async Task<IActionResult> GetBrands([FromQuery] QueryModel queryModel)
         {
             var response = await _productService.GetBrandsAsync(queryModel);
             if (response.Status == "Error")
