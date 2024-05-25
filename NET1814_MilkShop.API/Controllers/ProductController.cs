@@ -40,6 +40,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
             return Ok(response);
         }
+
         /// <summary>
         /// Get all units search by name and description, sort by name, description (default is id ascending)
         /// </summary>
@@ -84,7 +85,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         [HttpPut("units/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> UpdateUnitAsync(int id,[FromBody] UnitModel model)
+        public async Task<IActionResult> UpdateUnitAsync(int id, [FromBody] UnitModel model)
         {
             _logger.Information("Update unit");
             model.Id = id;
