@@ -30,9 +30,15 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public async Task<User?> GetByUsernameAsync(string username)
         {
-            return await _context
+            var user =  await _context
                 .Users.AsNoTracking()
                 .FirstOrDefaultAsync(x => username.Equals(x.Username));
+            //Check case sensitive
+            if (username.Equals(user.Username, StringComparison.Ordinal))
+            {
+                return user;
+            }
+            return null;
         }
 
         /// <summary>
