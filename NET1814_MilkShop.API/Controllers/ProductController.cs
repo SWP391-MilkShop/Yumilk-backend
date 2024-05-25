@@ -20,7 +20,11 @@ namespace NET1814_MilkShop.API.Controllers
             _productService = serviceProvider.GetRequiredService<IProductService>();
             _categoryService = serviceProvider.GetRequiredService<ICategoryService>();
         }
-
+        /// <summary>
+        /// Filter products by category, brand, unit, status, min price, max price
+        /// </summary>
+        /// <param name="queryModel"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetProducts([FromQuery] ProductQueryModel queryModel)
         {
