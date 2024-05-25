@@ -143,14 +143,16 @@ namespace NET1814_MilkShop.Services.Services
 
             #region filter
 
-            if (!string.IsNullOrEmpty(queryModel.SearchTerm))
+            if (queryModel.IsActive == false)
             {
-                query = query.Where(x => x.Name.Contains(queryModel.SearchTerm));
+                query = query.Where(x => x.IsActive == false);
             }
 
-            if (!string.IsNullOrEmpty(queryModel.Description))
+            if (!string.IsNullOrEmpty(queryModel.SearchTerm))
             {
-                query = query.Where(x => x.Description.Contains(queryModel.Description));
+                query = query.Where(x =>
+                    x.Name.Contains(queryModel.SearchTerm) ||
+                    x.Description.Contains(queryModel.SearchTerm));
             }
 
             #endregion
@@ -271,6 +273,7 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Brand not found"
                 };
             }
+
             isExist.DeletedAt = DateTime.Now;
             isExist.IsActive = false;
             await _unitOfWork.SaveChangesAsync();
@@ -301,8 +304,8 @@ namespace NET1814_MilkShop.Services.Services
             BrandQueryModel queryModel
         ) => queryModel.SortColumn?.ToLower() switch
         {
-            "description" => product => product.Description,
-            _ => product => product.Name
+            "name" => product => product.Name,
+            _ => product => product.Id
         };
     }
 }
