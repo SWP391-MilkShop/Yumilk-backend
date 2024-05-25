@@ -146,6 +146,8 @@ namespace NET1814_MilkShop.Services.Services
         public async Task<ResponseModel> GetUnitsAsync(UnitQueryModel request)
         {
             var query = _unitRepository.GetUnitsQuery().Where(c => c.IsActive);
+
+            #region Filter, Search
             if (!string.IsNullOrEmpty(request.SearchTerm))
             {
                 query = query.Where(u =>
@@ -153,17 +155,18 @@ namespace NET1814_MilkShop.Services.Services
                     || u.Description!.Contains(request.SearchTerm)
                 );
             }
+            #endregion
             #region sort
             query = "desc".Equals(request.SortOrder?.ToLower())
                 ? query.OrderByDescending(GetSortProperty(request))
                 : query.OrderBy(GetSortProperty(request));
-            #endregion
             var result = query.Select(u => new UnitModel
             {
                 Id = u.Id,
                 Name = u.Name,
                 Description = u.Description!
             });
+            #endregion
             #region page
             var units = await PagedList<UnitModel>.CreateAsync(
                 result,
@@ -299,7 +302,12 @@ namespace NET1814_MilkShop.Services.Services
                 "quantity" => product => product.Quantity,
                 _ => product => product.Id,
             };
-
+        
+        /// <summary>
+        /// Sort property for unit (name, description)
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         private static Expression<Func<Unit, object>> GetSortProperty(UnitQueryModel request)
         {
             return request.SortColumn?.ToLower() switch
