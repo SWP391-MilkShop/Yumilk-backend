@@ -163,7 +163,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         [HttpPut("units/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> UpdateUnit(int id, [FromQuery] UpdateUnitModel model)
+        public async Task<IActionResult> UpdateUnit(int id, [FromBody] UpdateUnitModel model)
         {
             _logger.Information("Update unit");
             var response = await _unitService.UpdateUnitAsync(id, model);
