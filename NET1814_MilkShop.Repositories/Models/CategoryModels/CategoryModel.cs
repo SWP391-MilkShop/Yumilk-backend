@@ -1,4 +1,4 @@
-﻿namespace NET1814_MilkShop.Repositories.Models.ProductModels
+﻿namespace NET1814_MilkShop.Repositories.Models.CategoryModels
 {
     public class CategoryModel
     {
