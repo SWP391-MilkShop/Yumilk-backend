@@ -129,6 +129,32 @@ public class BrandService : IBrandService
             };
         }
 
+        if (string.Equals(isExistId.Name, model.Name) && string.Equals(isExistId.Description, model.Description) &&
+            isExistId.IsActive == model.IsActive)
+        {
+            return new ResponseModel
+            {
+                Status = "Error",
+                Message = "No change"
+            };
+        }
+        
+        if (string.Equals(isExistId.Name, model.Name) && (!string.Equals(isExistId.Description, model.Description) ||
+            isExistId.IsActive != model.IsActive))
+        {
+            isExistId.IsActive = model.IsActive;
+            isExistId.Name = model.Name;
+            isExistId.Description = model.Description;
+            _brandRepository.Update(isExistId);
+            await _unitOfWork.SaveChangesAsync();
+            return new ResponseModel
+            {
+                Status = "Success",
+                Message = "Update brand successfully",
+                Data = isExistId
+            };
+        }
+
         var isExistName = await _brandRepository.GetBrandByName(model.Name);
         if (isExistName != null)
         {
