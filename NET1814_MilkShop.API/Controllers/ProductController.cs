@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.BrandModels;
+using NET1814_MilkShop.Repositories.Models.CategoryModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
+using NET1814_MilkShop.Repositories.Models.UnitModels;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
 
@@ -26,7 +28,9 @@ namespace NET1814_MilkShop.API.Controllers
             _unitService = serviceProvider.GetRequiredService<IUnitService>();
             _categoryService = serviceProvider.GetRequiredService<ICategoryService>();
         }
+
         #region Product
+
         /// <summary>
         /// Filter products by category, brand, unit, status, min price, max price
         /// </summary>
@@ -55,8 +59,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet]
-        [Route("/api/products/brands")]
+        [HttpGet("brands")]
         public async Task<IActionResult> GetBrands([FromQuery] BrandQueryModel queryModel)
         {
             var response = await _brandService.GetBrandsAsync(queryModel);
@@ -68,9 +71,8 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
-        [Route("/api/products/brands")]
-        public async Task<IActionResult> AddBrand([FromBody] BrandModel model)
+        [HttpPost("brands")]
+        public async Task<IActionResult> AddBrand([FromBody] CreateBrandModel model)
         {
             _logger.Information("Add Brand");
             var response = await _brandService.AddBrandAsync(model);
@@ -82,12 +84,11 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
 
-        [HttpPut]
-        [Route("/api/products/brands")]
-        public async Task<IActionResult> UpdateBrand([FromBody] BrandModel model)
+        [HttpPut("brands/{id}")]
+        public async Task<IActionResult> UpdateBrand(int id, [FromBody] CreateBrandModel model)
         {
             _logger.Information("Update Brand");
-            var response = await _brandService.UpdateBrandAsync(model);
+            var response = await _brandService.UpdateBrandAsync(id, model);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
@@ -96,9 +97,8 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
 
-        [HttpDelete]
-        [Route("/api/products/brands")]
-        public async Task<IActionResult> DeleteBrand([FromQuery] int id)
+        [HttpDelete("brands/{id}")]
+        public async Task<IActionResult> DeleteBrand(int id)
         {
             _logger.Information("Delete Brand");
             var response = await _brandService.DeleteBrandAsync(id);
@@ -109,8 +109,11 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+
         #endregion
+
         #region Unit
+
         /// <summary>
         /// Get all units search by name and description, sort by name, description (default is id ascending)
         /// </summary>
@@ -125,8 +128,10 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
+
         [HttpGet("units/{id}")]
         public async Task<IActionResult> GetUnitById(int id)
         {
@@ -136,8 +141,10 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
+
         [HttpPost("units")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> CreateUnit([FromBody] CreateUnitModel model)
@@ -148,8 +155,10 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
+
         [HttpPut("units/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> UpdateUnit(int id, [FromBody] CreateUnitModel model)
@@ -160,8 +169,10 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
+
         [HttpDelete("units/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> DeleteUnit(int id)
@@ -172,10 +183,14 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
+
         #endregion
+
         #region Category
+
         [HttpGet("categories")]
         public async Task<IActionResult> GetCategories([FromQuery] CategoryQueryModel queryModel)
         {
@@ -185,6 +200,7 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
 
@@ -198,6 +214,7 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
 
@@ -212,6 +229,7 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
 
@@ -225,8 +243,10 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
-        #endregion 
+
+        #endregion
     }
 }
