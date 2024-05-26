@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NET1814_MilkShop.Repositories.Models.ProductModels;
+namespace NET1814_MilkShop.Repositories.Models.UnitModels;
 
 public class CreateUnitModel
 {
