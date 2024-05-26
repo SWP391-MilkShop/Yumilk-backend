@@ -12,12 +12,14 @@ namespace NET1814_MilkShop.API.Controllers
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
+        private readonly IUnitService _unitService;
         private readonly ILogger _logger;
 
         public ProductController(ILogger logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _productService = serviceProvider.GetRequiredService<IProductService>();
+            _unitService = serviceProvider.GetRequiredService<IUnitService>();
         }
 
         [HttpGet]
@@ -50,7 +52,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> GetUnits([FromQuery] UnitQueryModel request)
         {
             _logger.Information("Get all units");
-            var response = await _productService.GetUnitsAsync(request);
+            var response = await _unitService.GetUnitsAsync(request);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
@@ -62,7 +64,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> GetUnitById(int id)
         {
             _logger.Information("Get unit by id");
-            var response = await _productService.GetUnitByIdAsync(id);
+            var response = await _unitService.GetUnitByIdAsync(id);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
@@ -75,7 +77,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> CreateUnitAsync([FromBody] CreateUnitModel model)
         {
             _logger.Information("Create unit");
-            var response = await _productService.CreateUnitAsync(model);
+            var response = await _unitService.CreateUnitAsync(model);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
@@ -85,11 +87,10 @@ namespace NET1814_MilkShop.API.Controllers
 
         [HttpPut("units/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> UpdateUnitAsync(int id, [FromBody] UnitModel model)
+        public async Task<IActionResult> UpdateUnitAsync(int id, [FromBody] CreateUnitModel model)
         {
             _logger.Information("Update unit");
-            model.Id = id;
-            var response = await _productService.UpdateUnitAsync(model);
+            var response = await _unitService.UpdateUnitAsync(id,model);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
@@ -102,7 +103,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> DeleteUnitAsync(int id)
         {
             _logger.Information("Delete unit");
-            var response = await _productService.DeleteUnitAsync(id);
+            var response = await _unitService.DeleteUnitAsync(id);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
