@@ -11,8 +11,8 @@ namespace NET1814_MilkShop.Services.Services;
 public interface IBrandService
 {
     Task<ResponseModel> GetBrandsAsync(BrandQueryModel queryModel);
-    Task<ResponseModel> AddBrandAsync(BrandModel model);
-    Task<ResponseModel> UpdateBrandAsync(BrandModel model);
+    Task<ResponseModel> AddBrandAsync(CreateBrandModel model);
+    Task<ResponseModel> UpdateBrandAsync(int id, CreateBrandModel model);
     Task<ResponseModel> DeleteBrandAsync(int id);
 }
 
@@ -62,7 +62,6 @@ public class BrandService : IBrandService
 
         var model = query.Select(x => new BrandModel()
         {
-            Id = x.Id,
             Name = x.Name,
             Description = x.Description
         });
@@ -81,7 +80,7 @@ public class BrandService : IBrandService
         };
     }
 
-    public async Task<ResponseModel> AddBrandAsync(BrandModel model)
+    public async Task<ResponseModel> AddBrandAsync(CreateBrandModel model)
     {
         // var isExistId = await _brandRepository.GetById(model.Id);
         // if (isExistId != null) //không cần check vì brandid tự tăng và không được nhập
@@ -118,9 +117,9 @@ public class BrandService : IBrandService
         };
     }
 
-    public async Task<ResponseModel> UpdateBrandAsync(BrandModel model)
+    public async Task<ResponseModel> UpdateBrandAsync(int id, CreateBrandModel model)
     {
-        var isExistId = await _brandRepository.GetById(model.Id);
+        var isExistId = await _brandRepository.GetById(id);
         if (isExistId == null)
         {
             return new ResponseModel
@@ -140,6 +139,7 @@ public class BrandService : IBrandService
             };
         }
 
+        isExistId.IsActive = model.IsActive;
         isExistId.Name = model.Name;
         isExistId.Description = model.Description;
         _brandRepository.Update(isExistId);
@@ -166,6 +166,7 @@ public class BrandService : IBrandService
 
         isExist.DeletedAt = DateTime.Now;
         isExist.IsActive = false;
+        _brandRepository.Remove(isExist);
         await _unitOfWork.SaveChangesAsync();
         return new ResponseModel
         {
