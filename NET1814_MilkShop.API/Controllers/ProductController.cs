@@ -58,6 +58,8 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+        #endregion
+        #region Brand
 
         [HttpGet("brands")]
         public async Task<IActionResult> GetBrands([FromQuery] BrandQueryModel queryModel)
@@ -203,7 +205,19 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+        [HttpGet("categories/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1, 2")]
+        public async Task<IActionResult> GetCategoryById(int id)
+        {
+            _logger.Information("Get category by id");
+            var response = await _categoryService.GetCategoryByIdAsync(id);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
 
+            return Ok(response);
+        }
         [HttpPost("categories")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1, 2")]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryModel model)
@@ -217,13 +231,17 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
-
+        /// <summary>
+        /// Leave the fields empty if you don't want to update
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPut("categories/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1, 2")]
-        public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryModel model)
+        public async Task<IActionResult> UpdateCategory(int id, [FromBody] UpdateCategoryModel model)
         {
             _logger.Information("Update category");
-            model.Id = id;
             var response = await _categoryService.UpdateCategoryAsync(id, model);
             if (response.Status == "Error")
             {

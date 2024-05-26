@@ -13,7 +13,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetCategoriesAsync(CategoryQueryModel queryModel);
         Task<ResponseModel> GetCategoryByIdAsync(int id);
         Task<ResponseModel> CreateCategoryAsync(CreateCategoryModel model);
-        Task<ResponseModel> UpdateCategoryAsync(int id, CategoryModel model);
+        Task<ResponseModel> UpdateCategoryAsync(int id, UpdateCategoryModel model);
         Task<ResponseModel> DeleteCategoryAsync(int id);
 
     }
@@ -73,6 +73,7 @@ namespace NET1814_MilkShop.Services.Services
                 };
             }
             category.IsActive = false;
+            category.DeletedAt = DateTime.Now;
             _categoryRepository.Update(category);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
@@ -134,7 +135,7 @@ namespace NET1814_MilkShop.Services.Services
         public async Task<ResponseModel> GetCategoryByIdAsync(int id)
         {
             var category = await _categoryRepository.GetById(id);
-            if (category == null)
+            if (category == null || !category.IsActive)
             {
                 return new ResponseModel
                 {
@@ -157,10 +158,11 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> UpdateCategoryAsync(int id, CategoryModel model)
+        public async Task<ResponseModel> UpdateCategoryAsync(int id, UpdateCategoryModel model)
         {
+            
             var existingCategory = await _categoryRepository.GetById(id);
-            if (existingCategory == null || existingCategory.IsActive == false)
+            if (existingCategory == null)
             {
                 return new ResponseModel
                 {
@@ -168,8 +170,24 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Category not found"
                 };
             }
-            existingCategory.Name = model.Name;
-            existingCategory.Description = model.Description;
+            if (!string.IsNullOrEmpty(model.Name))
+            {
+                // Check if category name is changed
+                if (!string.Equals(model.Name, existingCategory.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    var isExist = await _categoryRepository.IsExistAsync(model.Name);
+                    if (isExist)
+                    {
+                        return new ResponseModel
+                        {
+                            Status = "Error",
+                            Message = "Category already exists"
+                        };
+                    }
+                }
+                existingCategory.Name = model.Name;
+            }
+            existingCategory.Description = string.IsNullOrEmpty(model.Description) ? existingCategory.Description : model.Description;
             existingCategory.IsActive = model.IsActive;
             _categoryRepository.Update(existingCategory);
             var result = await _unitOfWork.SaveChangesAsync();
