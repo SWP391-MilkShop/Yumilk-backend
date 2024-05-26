@@ -1,4 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Repositories;
@@ -20,9 +21,6 @@ namespace NET1814_MilkShop.Services.Services
         private readonly IUnitOfWork _unitOfWork;
 
         public ProductService(IProductRepository productRepository,
-            IBrandRepository brandRepository,
-            ICategoryRepository categoryRepository,
-            IUnitRepository unitRepository,
             IUnitOfWork unitOfWork)
         {
             _productRepository = productRepository;
@@ -122,10 +120,13 @@ namespace NET1814_MilkShop.Services.Services
             return new ResponseModel
             {
                 Data = products,
-                Message = products.TotalCount > 0 ? "Get products successfully" : "No products found",
+                Message =
+                    products.TotalCount > 0 ? "Get products successfully" : "No products found",
                 Status = "Success"
             };
         }
+
+       
 
         /// <summary>
         /// Get sort property as expression
@@ -142,5 +143,7 @@ namespace NET1814_MilkShop.Services.Services
                 "quantity" => product => product.Quantity,
                 _ => product => product.Id,
             };
+
+
     }
 }

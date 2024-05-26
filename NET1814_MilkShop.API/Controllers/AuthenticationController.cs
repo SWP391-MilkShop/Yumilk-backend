@@ -20,6 +20,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPost("create-user")]
+        [Authorize(AuthenticationSchemes ="Access", Roles = "1")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserModel model)
         {
             _logger.Information("Create user");

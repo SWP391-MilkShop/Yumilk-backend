@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
-using NET1814_MilkShop.Repositories.Repositories;
 
 namespace NET1814_MilkShop.Repositories.Repositories
 {
