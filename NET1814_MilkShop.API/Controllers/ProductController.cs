@@ -13,11 +13,13 @@ namespace NET1814_MilkShop.API.Controllers
     {
         private readonly IProductService _productService;
         private readonly ILogger _logger;
+        private readonly IBrandService _brandService;
 
         public ProductController(ILogger logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _productService = serviceProvider.GetRequiredService<IProductService>();
+            _brandService = serviceProvider.GetRequiredService<IBrandService>();
         }
 
         [HttpGet]
@@ -47,7 +49,7 @@ namespace NET1814_MilkShop.API.Controllers
         [Route("/api/products/brands")]
         public async Task<IActionResult> GetBrands([FromQuery] BrandQueryModel queryModel)
         {
-            var response = await _productService.GetBrandsAsync(queryModel);
+            var response = await _brandService.GetBrandsAsync(queryModel);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
@@ -61,7 +63,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> AddBrand([FromBody] BrandModel model)
         {
             _logger.Information("Add Brand");
-            var response = await _productService.AddBrandAsync(model);
+            var response = await _brandService.AddBrandAsync(model);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
@@ -75,7 +77,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> UpdateBrand([FromBody] BrandModel model)
         {
             _logger.Information("Update Brand");
-            var response = await _productService.UpdateBrandAsync(model);
+            var response = await _brandService.UpdateBrandAsync(model);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
@@ -89,7 +91,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> DeleteBrand([FromQuery] int id)
         {
             _logger.Information("Delete Brand");
-            var response = await _productService.DeleteBrandAsync(id);
+            var response = await _brandService.DeleteBrandAsync(id);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
