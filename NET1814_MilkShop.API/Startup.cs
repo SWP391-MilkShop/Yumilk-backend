@@ -75,10 +75,13 @@ namespace NET1814_MilkShop.API
                     "Could not find connection string 'DefaultConnection'"
                 );
             }
+
             //Add Dependency Injection
             AddDI(services);
             //Add Email Setting
-            services.Configure<EmailSettingModel>(_configuration.GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
+            services.Configure<EmailSettingModel>(
+                _configuration
+                    .GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
             //Add Database
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
             //Add Exception Handler
@@ -100,10 +103,7 @@ namespace NET1814_MilkShop.API
                 );
                 services.AddPolicy(
                     "AllowAll",
-                    builder =>
-                    {
-                        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                    }
+                    builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }
                 );
             });
             //Add Authentication
@@ -153,6 +153,7 @@ namespace NET1814_MilkShop.API
             {
                 app.UseDeveloperExceptionPage();
             }
+
             var isUserSwagger = _configuration.GetValue<bool>("UseSwagger", false);
             if (isUserSwagger)
             {
@@ -190,6 +191,7 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IBrandRepository, BrandRepository>();
+            services.AddScoped<IBrandService, BrandService>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IUnitRepository, UnitRepository>();
 
