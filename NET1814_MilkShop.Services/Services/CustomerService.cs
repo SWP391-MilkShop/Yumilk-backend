@@ -43,6 +43,8 @@ namespace NET1814_MilkShop.Services.Services
                 Email = customer.Email,
                 Points = customer.Points,
                 ProfilePictureUrl = customer.ProfilePictureUrl,
+                IsActive = user.IsActive,
+                IsBanned = user.IsBanned
             };
         }
 
