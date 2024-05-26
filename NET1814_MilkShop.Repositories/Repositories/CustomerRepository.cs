@@ -24,10 +24,16 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public async Task<Customer?> GetByEmailAsync(string email)
         {
             //use AsNoTracking for read-only operations
-            return await _context
+            var customer = await _context
                 .Customers.AsNoTracking()
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => email.Equals(x.Email));
+            // check case sensitive
+            if (email.Equals(customer.Email, StringComparison.Ordinal))
+            {
+                return customer;
+            }
+            return null;
         }
 
         /// <summary>

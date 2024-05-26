@@ -15,5 +15,13 @@ namespace NET1814_MilkShop.Repositories.Models.ProductModels
         [Range(0, double.MaxValue)]
         public decimal MaxPrice { get; set; }
         public bool IsActive { get; set; } = true;
+        /// <summary>
+        /// Sort by id, name, quantity, sale price (default is id)
+        /// </summary>
+        public new string? SortColumn { get; set; }
+        /// <summary>
+        /// Search by name, description, brand, unit, category
+        /// </summary>
+        public new string? SearchTerm { get; set; }
     }
 }
