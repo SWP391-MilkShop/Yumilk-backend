@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Microsoft.IdentityModel.Tokens;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UnitModels;
@@ -13,7 +14,7 @@ public interface IUnitService
     Task<ResponseModel> GetUnitsAsync(UnitQueryModel request);
     Task<ResponseModel> GetUnitByIdAsync(int id);
     Task<ResponseModel> CreateUnitAsync(CreateUnitModel createUnitModel);
-    Task<ResponseModel> UpdateUnitAsync(int id, CreateUnitModel unitModel);
+    Task<ResponseModel> UpdateUnitAsync(int id, UpdateUnitModel unitModel);
     Task<ResponseModel> DeleteUnitAsync(int id);
 }
 
@@ -29,8 +30,8 @@ public class UnitService : IUnitService
        }
 
      public async Task<ResponseModel> GetUnitsAsync(UnitQueryModel request)
-        {
-            var query = _unitRepository.GetUnitsQuery().Where(c => c.IsActive);
+     {
+         var query = _unitRepository.GetUnitsQuery();
 
             #region Filter, Search
             if (!string.IsNullOrEmpty(request.SearchTerm))
@@ -39,6 +40,10 @@ public class UnitService : IUnitService
                     u.Name.Contains(request.SearchTerm)
                     || u.Description!.Contains(request.SearchTerm)
                 );
+            }
+            if(request.IsActive.HasValue)
+            {
+                query = query.Where(u => u.IsActive == request.IsActive);
             }
             #endregion
             #region sort
@@ -49,7 +54,8 @@ public class UnitService : IUnitService
             {
                 Id = u.Id,
                 Name = u.Name,
-                Description = u.Description!
+                Description = u.Description!,
+                IsActive = u.IsActive
             });
             #endregion
             #region page
@@ -77,7 +83,8 @@ public class UnitService : IUnitService
             {
                 Id = id,
                 Name = unit.Name,
-                Description = unit.Description!
+                Description = unit.Description!,
+                IsActive = unit.IsActive
             };
             return new ResponseModel
             {
@@ -114,15 +121,27 @@ public class UnitService : IUnitService
             };
         }
 
-        public async Task<ResponseModel> UpdateUnitAsync(int id,CreateUnitModel unitModel)
+        public async Task<ResponseModel> UpdateUnitAsync(int id,UpdateUnitModel unitModel)
         {
             var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
             if (isExistUnit == null)
             {
                 return new ResponseModel { Status = "failed", Message = "Unit not found" };
             }
-            isExistUnit.Name = unitModel.Name;
-            isExistUnit.Description = unitModel.Description;
+
+            if (!unitModel.Name.IsNullOrEmpty())
+            {
+                isExistUnit.Name = unitModel.Name;
+            }
+
+            if (!unitModel.Description.IsNullOrEmpty())
+            {
+                isExistUnit.Description = unitModel.Description;
+            }
+            if(unitModel.IsActive.HasValue)
+            {
+                isExistUnit.IsActive = unitModel.IsActive!.Value;
+            }
             _unitRepository.Update(isExistUnit);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
