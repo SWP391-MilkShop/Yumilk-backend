@@ -38,15 +38,15 @@ namespace NET1814_MilkShop.Services.Services
                 p.IsActive == queryModel.IsActive
                 //search theo name, description, brand, unit, category
                 && (string.IsNullOrEmpty(queryModel.SearchTerm) || p.Name.Contains(queryModel.SearchTerm)
-                                                                || p.Description.Contains(queryModel.SearchTerm)
-                                                                || p.Brand.Name.Contains(queryModel.SearchTerm)
-                                                                || p.Unit.Name.Contains(queryModel.SearchTerm)
-                                                                || p.Category.Name.Contains(queryModel.SearchTerm))
+                                                                || p.Description!.Contains(queryModel.SearchTerm)
+                                                                || p.Brand!.Name.Contains(queryModel.SearchTerm)
+                                                                || p.Unit!.Name.Contains(queryModel.SearchTerm)
+                                                                || p.Category!.Name.Contains(queryModel.SearchTerm))
                 //filter theo brand, category, unit, status, minPrice, maxPrice
-                && (string.IsNullOrEmpty(queryModel.Brand) || string.Equals(p.Brand.Name, queryModel.Brand))
-                && (string.IsNullOrEmpty(queryModel.Category) || string.Equals(p.Category.Name, queryModel.Category))
-                && (string.IsNullOrEmpty(queryModel.Unit) || string.Equals(p.Unit.Name, queryModel.Unit))
-                && (string.IsNullOrEmpty(queryModel.Status) || string.Equals(p.ProductStatus.Name, queryModel.Status))
+                && (string.IsNullOrEmpty(queryModel.Brand) || string.Equals(p.Brand!.Name, queryModel.Brand))
+                && (string.IsNullOrEmpty(queryModel.Category) || string.Equals(p.Category!.Name, queryModel.Category))
+                && (string.IsNullOrEmpty(queryModel.Unit) || string.Equals(p.Unit!.Name, queryModel.Unit))
+                && (string.IsNullOrEmpty(queryModel.Status) || string.Equals(p.ProductStatus!.Name, queryModel.Status))
                 && (queryModel.MinPrice <= 0 || p.SalePrice >= queryModel.MinPrice)
                 && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice));
             /*if (!string.IsNullOrEmpty(queryModel.SearchTerm))
