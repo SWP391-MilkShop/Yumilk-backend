@@ -20,7 +20,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPost("create-user")]
-        [Authorize(AuthenticationSchemes ="Access", Roles = "1")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserModel model)
         {
             _logger.Information("Create user");
@@ -72,7 +72,7 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(res);
         }
-        
+
         /// <summary>
         ///  Only Admin role can login, others will say wrong username or password.
         /// </summary>
