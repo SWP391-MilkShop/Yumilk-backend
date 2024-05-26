@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using NET1814_MilkShop.Repositories.CoreHelpers.Validation;
+﻿using NET1814_MilkShop.Repositories.CoreHelpers.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace NET1814_MilkShop.Repositories.Models.UserModels
 {
@@ -28,7 +28,9 @@ namespace NET1814_MilkShop.Repositories.Models.UserModels
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Password and confirmation does not match!")]
         public string ConfirmPassword { get; set; } = null!;
-
+        /// <summary>
+        /// Range 1-2
+        /// </summary>
         [Required(ErrorMessage = "Role is required!")]
         [Display(Name = "Role")]
         [Range(1, 2, ErrorMessage = "Choose role in range 1-2")]
