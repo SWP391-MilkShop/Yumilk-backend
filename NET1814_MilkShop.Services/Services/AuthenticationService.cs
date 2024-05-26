@@ -17,6 +17,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request);
         Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
         Task<ResponseModel> RefreshTokenAsync(string token);
+        Task<ResponseModel> AdminLoginAsync(RequestLoginModel model);
     }
 
     public sealed class AuthenticationService : IAuthenticationService
@@ -312,6 +313,71 @@ namespace NET1814_MilkShop.Services.Services
                 Status = "Success",
                 Message = "Tạo access token mới thành công",
                 Data = newToken.ToString()
+            };
+        }
+
+        public async Task<ResponseModel> AdminLoginAsync(RequestLoginModel model)
+        {
+            var existingUser = await _authenticationRepository.GetUserByUserNameNPassword(
+                model.Username,
+                model.Password
+            );
+            if (existingUser != null)
+            {
+                //only admin can login others will response wrong username or password
+                if (existingUser.RoleId != 1)
+                {
+                    return new ResponseModel
+                    {
+                        Status = "Error",
+                        Message = "Sai tên đăng nhập hoặc mật khẩu"
+                    };
+                }
+                //check if user is banned
+                if (existingUser.IsBanned)
+                {
+                    return new ResponseModel
+                    {
+                        Status = "Error",
+                        Message = "Tài khoản của bạn đã bị khóa"
+                    };
+                }
+                //check if user is not activated
+                if (existingUser.IsActive == false)
+                {
+                    return new ResponseModel
+                    {
+                        Status = "Error",
+                        Message = "Tài khoản của bạn chưa được xác thực!"
+                    };
+                }
+                var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
+                var refreshToken = _jwtTokenExtension.CreateJwtToken(
+                    existingUser,
+                    TokenType.Refresh
+                );
+                var responseLogin = new ResponseLoginModel
+                {
+                    UserID = existingUser.Id.ToString(),
+                    Username = existingUser.Username,
+                    FirstName = existingUser.FirstName,
+                    LastName = existingUser.LastName,
+                    RoleId = existingUser.RoleId,
+                    AccessToken = token.ToString(),
+                    RefreshToken = refreshToken.ToString(),
+                    IsActive = existingUser.IsActive
+                };
+                return new ResponseModel
+                {
+                    Status = "Success",
+                    Message = "Đăng nhập thành công",
+                    Data = responseLogin
+                };
+            }
+            return new ResponseModel
+            {
+                Status = "Error",
+                Message = "Sai tên đăng nhập hoặc mật khẩu"
             };
         }
     }
