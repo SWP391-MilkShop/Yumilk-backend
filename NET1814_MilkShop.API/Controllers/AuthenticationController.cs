@@ -72,6 +72,23 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(res);
         }
+        
+        /// <summary>
+        ///  Only Admin role can login, others will say wrong username or password.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost("admin/login")]
+        public async Task<IActionResult> AdminLogin(RequestLoginModel model)
+        {
+            _logger.Information("Login");
+            var response = await _authenticationService.AdminLoginAsync(model);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
 
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel request)
