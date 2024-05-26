@@ -90,7 +90,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> UpdateUnitAsync(int id, [FromBody] CreateUnitModel model)
         {
             _logger.Information("Update unit");
-            var response = await _unitService.UpdateUnitAsync(id,model);
+            var response = await _unitService.UpdateUnitAsync(id, model);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
