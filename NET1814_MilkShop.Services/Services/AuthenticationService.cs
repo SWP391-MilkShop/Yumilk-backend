@@ -408,16 +408,6 @@ namespace NET1814_MilkShop.Services.Services
                     };
                 }
 
-                //check if user is not activated
-                if (existingUser.IsActive == false)
-                {
-                    return new ResponseModel
-                    {
-                        Status = "Error",
-                        Message = "Tài khoản của bạn chưa được xác thực!"
-                    };
-                }
-
                 var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
                 var refreshToken = _jwtTokenExtension.CreateJwtToken(
                     existingUser,
