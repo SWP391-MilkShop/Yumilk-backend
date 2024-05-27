@@ -106,15 +106,33 @@ namespace NET1814_MilkShop.Services.Services
                 };
             }
 
-            var IsCustomerExist = await _customerRepository.IsCustomerExistAsync(model.Email, model.PhoneNumber);
-            if (IsCustomerExist)
+            /*var IsCustomerExist = await _customerRepository.IsCustomerExistAsync(model.Email, model.PhoneNumber);*/
+            var isPhoneNumberExist = await _customerRepository.IsExistPhoneNumberAsync(model.PhoneNumber);
+            if (isPhoneNumberExist)
+            {
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Số điện thoại đã tồn tại trong hệ thống!"
+                };
+            }
+            var isEmailExist = await _customerRepository.IsExistEmailAsync(model.Email);
+            if (isEmailExist)
+            {
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Email đã tồn tại trong hệ thống!"
+                };
+            }
+            /*if (IsCustomerExist)
             {
                 return new ResponseModel
                 {
                     Status = "Error",
                     Message = "Email hoặc số điện thoại đã tồn tại trong hệ thống!"
                 };
-            }
+            }*/
 
             string token = _jwtTokenExtension.CreateVerifyCode();
             var user = new User
