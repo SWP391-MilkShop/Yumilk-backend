@@ -9,7 +9,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         IQueryable<Brand> GetBrandsQuery();
         void Add(Brand b);
         void Update(Brand b);
-        void Remove(Brand b);
+        void Delete(Brand b);
         Task<Brand?> GetById(int id);
         Task<Brand?> GetBrandByName(string name);
     }

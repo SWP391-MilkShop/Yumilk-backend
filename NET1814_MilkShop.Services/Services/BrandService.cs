@@ -190,13 +190,20 @@ public class BrandService : IBrandService
             };
         }
 
-        isExist.DeletedAt = DateTime.Now;
-        _brandRepository.Remove(isExist);
-        await _unitOfWork.SaveChangesAsync();
+        _brandRepository.Delete(isExist);
+        var result = await _unitOfWork.SaveChangesAsync();
+        if(result > 0)
+        {
+            return new ResponseModel
+            {
+                Status = "Success",
+                Message = "Delete brand successfully"
+            };
+        }
         return new ResponseModel
         {
-            Status = "Success",
-            Message = "Delete brand successfully"
+            Status = "Error",
+            Message = "Delete brand fail"
         };
     }
 
