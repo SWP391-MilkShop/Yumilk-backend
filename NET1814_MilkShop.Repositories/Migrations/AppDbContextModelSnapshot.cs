@@ -52,7 +52,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")
-                        .UseCollation("Latin1_General_CS_AS");
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id");
 
@@ -449,7 +449,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")
-                        .UseCollation("Latin1_General_CS_AS");
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id");
 
@@ -600,7 +600,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")
-                        .UseCollation("Latin1_General_CS_AS");
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id");
 
@@ -777,7 +777,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")
-                        .UseCollation("Latin1_General_CS_AS");
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id");
 

@@ -71,7 +71,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CS_AS");
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id");
 
@@ -340,7 +340,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CS_AS");
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id");
 
@@ -452,7 +452,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CS_AS"); ;
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CI_AS"); ;
 
                     b.HasKey("Id");
 
@@ -567,7 +567,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CS_AS"); ;
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CI_AS"); ;
 
                     b.HasKey("Id");
 
