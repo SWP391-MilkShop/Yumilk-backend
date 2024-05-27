@@ -17,6 +17,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request);
         Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
         Task<ResponseModel> RefreshTokenAsync(string token);
+        Task<ResponseModel> ActivateAccountAsync(string email);
         Task<ResponseModel> DashBoardLoginAsync(RequestLoginModel model);
     }
 
@@ -62,6 +63,7 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Tên đăng nhập đã tồn tại!"
                 };
             }
+
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -83,6 +85,7 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Tạo tài khoản thành công!"
                 };
             }
+
             return new ResponseModel { Status = "Error", Message = "Tạo tài khoản thất bại" };
         }
 
@@ -102,6 +105,7 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Tên đăng nhập đã tồn tại!"
                 };
             }
+
             var IsCustomerExist = await _customerRepository.IsCustomerExistAsync(model.Email, model.PhoneNumber);
             if (IsCustomerExist)
             {
@@ -111,6 +115,7 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Email hoặc số điện thoại đã tồn tại trong hệ thống!"
                 };
             }
+
             string token = _jwtTokenExtension.CreateVerifyCode();
             var user = new User
             {
@@ -144,6 +149,7 @@ namespace NET1814_MilkShop.Services.Services
                         "Đăng ký tài khoản thành công, vui lòng kiểm tra email để xác thực tài khoản!"
                 };
             }
+
             return new ResponseModel { Status = "Error", Message = "Đăng ký tài khoản thất bại" };
         }
 
@@ -153,7 +159,8 @@ namespace NET1814_MilkShop.Services.Services
                 model.Username,
                 model.Password
             );
-            if (existingUser != null && existingUser.RoleId == 3) //Only customer can login, others will say wrong username or password
+            if (existingUser != null &&
+                existingUser.RoleId == 3) //Only customer can login, others will say wrong username or password
             {
                 //check if user is banned
                 if (existingUser.IsBanned)
@@ -164,6 +171,7 @@ namespace NET1814_MilkShop.Services.Services
                         Message = "Tài khoản của bạn đã bị khóa do hành vi không hợp lệ!"
                     };
                 }
+
                 var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
                 var refreshToken = _jwtTokenExtension.CreateJwtToken(
                     existingUser,
@@ -189,6 +197,7 @@ namespace NET1814_MilkShop.Services.Services
                     responseLogin.GoogleId = customer.GoogleId;
                     responseLogin.Points = customer.Points;
                 }
+
                 return new ResponseModel
                 {
                     Status = "Success",
@@ -196,6 +205,7 @@ namespace NET1814_MilkShop.Services.Services
                     Data = responseLogin
                 };
             }
+
             return new ResponseModel
             {
                 Status = "Error",
@@ -217,6 +227,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return new ResponseModel { Status = "Error", Message = "Hết hạn" };
             }
+
             if (isExist != null && verifyToken.Equals(isExist.VerificationCode))
             {
                 isExist.IsActive = true;
@@ -232,6 +243,7 @@ namespace NET1814_MilkShop.Services.Services
                     };
                 }
             }
+
             return new ResponseModel
             {
                 Status = "Error",
@@ -254,7 +266,8 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Reset
                     );
-                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendPasswordResetEmail(customer.Email,
+                        verifyToken); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return new ResponseModel
                     {
                         Status = "Success",
@@ -262,6 +275,7 @@ namespace NET1814_MilkShop.Services.Services
                     };
                 }
             }
+
             return new ResponseModel { Status = "Error", Message = "Email không tồn tại" };
         }
 
@@ -288,6 +302,7 @@ namespace NET1814_MilkShop.Services.Services
                     };
                 }
             }
+
             return new ResponseModel() { Status = "Error", Message = "Token không hợp lệ" };
         }
 
@@ -302,6 +317,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return new ResponseModel { Status = "Error", Message = "Không tồn tại người dùng" };
             }
+
             var newToken = _jwtTokenExtension.CreateJwtToken(userExisted, TokenType.Access);
             return new ResponseModel
             {
@@ -309,6 +325,41 @@ namespace NET1814_MilkShop.Services.Services
                 Message = "Tạo access token mới thành công",
                 Data = newToken.ToString()
             };
+        }
+
+        public async Task<ResponseModel> ActivateAccountAsync(string email)
+        {
+            var customer = await _customerRepository.GetByEmailAsync(email);
+            if (customer != null)
+            {
+                if (customer.User.IsActive != true)
+                {
+                    string token = _jwtTokenExtension.CreateVerifyCode();
+                    customer.User.VerificationCode = token;
+                    _userRepository.Update(customer.User);
+                    var result = await _unitOfWork.SaveChangesAsync();
+                    if (result > 0)
+                    {
+                        var verifyToken = _jwtTokenExtension.CreateJwtToken(
+                            customer.User,
+                            TokenType.Authentication
+                        );
+                        _emailService.SendVerificationEmail(customer.Email,
+                            verifyToken); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                        return new ResponseModel
+                        {
+                            Status = "Success",
+                            Message = "Đã gửi link kích hoạt tài khoản, vui lòng kiểm tra email"
+                        };
+                    }
+                }
+                else
+                {
+                    return new ResponseModel { Status = "Error", Message = "Tài khoản đã được kích hoạt" };
+                }
+            }
+
+            return new ResponseModel { Status = "Error", Message = "Email không tồn tại" };
         }
 
         public async Task<ResponseModel> DashBoardLoginAsync(RequestLoginModel model)
@@ -328,6 +379,7 @@ namespace NET1814_MilkShop.Services.Services
                         Message = "Sai tên đăng nhập hoặc mật khẩu"
                     };
                 }
+
                 //check if user is banned
                 if (existingUser.IsBanned)
                 {
@@ -337,6 +389,7 @@ namespace NET1814_MilkShop.Services.Services
                         Message = "Tài khoản của bạn đã bị khóa"
                     };
                 }
+
                 //check if user is not activated
                 if (existingUser.IsActive == false)
                 {
@@ -346,6 +399,7 @@ namespace NET1814_MilkShop.Services.Services
                         Message = "Tài khoản của bạn chưa được xác thực!"
                     };
                 }
+
                 var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
                 var refreshToken = _jwtTokenExtension.CreateJwtToken(
                     existingUser,
@@ -369,6 +423,7 @@ namespace NET1814_MilkShop.Services.Services
                     Data = responseLogin
                 };
             }
+
             return new ResponseModel
             {
                 Status = "Error",
