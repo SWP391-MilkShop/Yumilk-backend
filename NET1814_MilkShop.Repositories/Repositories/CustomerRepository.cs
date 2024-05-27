@@ -11,7 +11,9 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<Customer?> GetByEmailAsync(string email);
         Task<Customer?> GetById(Guid id);
         Task<bool> IsExistAsync(Guid id);
-        Task<bool> IsCustomerExistAsync(string email, string phoneNumber);
+        /*Task<bool> IsCustomerExistAsync(string email, string phoneNumber);*/
+        Task<bool> IsExistPhoneNumberAsync(string phoneNumber);
+        Task<bool> IsExistEmailAsync(string email);
         void Add(Customer customer);
         void Update(Customer customer);
         void Remove(Customer customer);
@@ -57,15 +59,28 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             return await _context.Customers.AnyAsync(e => e.UserId == id);
         }
-        /// <summary>
-        /// Check if customer with phone number or email already exists
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="phoneNumber"></param>
-        /// <returns></returns>
-        public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
+        // Tach PhoneNumber va Email de handle loi rieng tren frontend
+        public async Task<bool> IsExistPhoneNumberAsync(string phoneNumber)
+        {
+            return await _context.Customers.AnyAsync(e => e.PhoneNumber == phoneNumber);
+        }
+      
+        public async Task<bool> IsExistEmailAsync(string email)
+        {
+            return await _context.Customers.AnyAsync(e => e.Email == email);
+        }
+        // /// <summary>
+        // /// Check if customer with phone number or email already exists
+        // /// </summary>
+        // /// <param name="email"></param>
+        // /// <param name="phoneNumber"></param>
+        // /// <returns></returns>
+        /*public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
         {
             return await _context.Customers.AnyAsync(e => e.Email == email || e.PhoneNumber == phoneNumber);
-        }
+        }*/
+        
+        
+        
     }
 }
