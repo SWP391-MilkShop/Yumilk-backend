@@ -518,7 +518,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("int")
                         .HasColumnName("unit_id");
 
-                    b.Property<string>("thumbnail")
+                    b.Property<string>("Thumbnail")
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("thumbnail");
 

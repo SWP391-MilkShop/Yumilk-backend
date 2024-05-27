@@ -58,7 +58,59 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProductById(Guid id)
+        {
+            _logger.Information("Get product by id");
+            var response = await _productService.GetProductByIdAsync(id);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> CreateProduct([FromBody] CreateProductModel model)
+        {
+            _logger.Information("Create product");
+            var response = await _productService.CreateProductAsync(model);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+        [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] UpdateProductModel model)
+        {
+            _logger.Information("Update product");
+            var response = await _productService.UpdateProductAsync(id, model);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+        [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> DeleteProduct(Guid id)
+        {
+            _logger.Information("Delete product");
+            var response = await _productService.DeleteProductAsync(id);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
         #endregion
+
         #region Brand
 
         [HttpGet("brands")]

@@ -21,7 +21,7 @@ public partial class Product : IAuditableEntity
 
     public decimal SalePrice { get; set; }
     [Column("thumbnail", TypeName = "nvarchar(255)")]
-    public string? thumbnail { get; set; }
+    public string? Thumbnail { get; set; }
 
     public int CategoryId { get; set; }
 
