@@ -1,4 +1,5 @@
 ﻿using NET1814_MilkShop.Repositories.Data.Entities;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Repositories;
@@ -12,20 +13,47 @@ namespace NET1814_MilkShop.Services.Services
     public interface IProductService
     {
         Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel);
+        Task<ResponseModel> GetProductByIdAsync(Guid id);
+        Task<ResponseModel> CreateProductAsync(CreateProductModel model);
+        Task<ResponseModel> UpdateProductAsync(Guid id, UpdateProductModel model);
+        Task<ResponseModel> DeleteProductAsync(Guid id);
     }
 
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly IBrandRepository _brandRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IUnitRepository _unitRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public ProductService(IProductRepository productRepository,
-            IUnitOfWork unitOfWork)
+                              IBrandRepository brandRepository,
+                              ICategoryRepository categoryRepository,
+                              IUnitRepository unitRepository,
+                              IUnitOfWork unitOfWork)
         {
             _productRepository = productRepository;
+            _brandRepository = brandRepository;
+            _categoryRepository = categoryRepository;
+            _unitRepository = unitRepository;
             _unitOfWork = unitOfWork;
         }
-
+        private static ProductModel ToProductModel(Product product) =>
+            new ProductModel
+            {
+                Id = product.Id.ToString(),
+                Name = product.Name,
+                Description = product.Description,
+                Quantity = product.Quantity,
+                Brand = product.Brand!.Name,
+                Category = product.Category!.Name,
+                Unit = product.Unit!.Name,
+                OriginalPrice = product.OriginalPrice,
+                SalePrice = product.SalePrice,
+                Status = product.ProductStatus!.Name,
+                Thumbnail = product.Thumbnail
+            };
         public async Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel)
         {
             var query = _productRepository.GetProductsQuery();
@@ -53,30 +81,6 @@ namespace NET1814_MilkShop.Services.Services
                 && (string.IsNullOrEmpty(status) || string.Equals(p.ProductStatus!.Name.ToLower(), status))
                 && (queryModel.MinPrice <= 0 || p.SalePrice >= queryModel.MinPrice)
                 && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice));
-            /*if (!string.IsNullOrEmpty(queryModel.SearchTerm))
-            {
-                query = query.Where(p => p.Name.Contains(queryModel.SearchTerm)
-                        || p.Description!.Contains(queryModel.SearchTerm)
-                        || p.Brand!.Name.Contains(queryModel.SearchTerm)
-                        || p.Unit!.Name.Contains(queryModel.SearchTerm)
-                        || p.Category!.Name.Contains(queryModel.SearchTerm));
-            }
-            if (!string.IsNullOrEmpty(queryModel.Brand))
-            {
-                query = query.Where(p => string.Equals(p.Brand!.Name, queryModel.Brand));
-            }
-            if (!string.IsNullOrEmpty(queryModel.Category))
-            {
-                query = query.Where(p => string.Equals(p.Category!.Name, queryModel.Category));
-            }
-            if (!string.IsNullOrEmpty(queryModel.Unit))
-            {
-                query = query.Where(p => string.Equals(p.Unit!.Name, queryModel.Unit));
-            }
-            if (!string.IsNullOrEmpty(queryModel.Status))
-            {
-                query = query.Where(p => string.Equals(p.ProductStatus!.Name, queryModel.Status));
-            }*/
 
             #endregion
 
@@ -95,19 +99,7 @@ namespace NET1814_MilkShop.Services.Services
 
             #region Convert to ProductModel
 
-            var productModelQuery = query.Select(p => new ProductModel
-            {
-                Id = p.Id.ToString(),
-                Name = p.Name,
-                Description = p.Description,
-                Quantity = p.Quantity,
-                Brand = p.Brand!.Name,
-                Category = p.Category!.Name,
-                Unit = p.Unit!.Name,
-                OriginalPrice = p.OriginalPrice,
-                SalePrice = p.SalePrice,
-                Status = p.ProductStatus!.Name,
-            });
+            var productModelQuery = query.Select(p => ToProductModel(p));
 
             #endregion
 
@@ -130,8 +122,6 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-       
-
         /// <summary>
         /// Get sort property as expression
         /// </summary>
@@ -148,6 +138,200 @@ namespace NET1814_MilkShop.Services.Services
                 _ => product => product.Id,
             };
 
+        public async Task<ResponseModel> GetProductByIdAsync(Guid id)
+        {
+            var product = await _productRepository.GetById(id);
+            if (product == null)
+            {
+                return new ResponseModel
+                {
+                    Message = "Product not found",
+                    Status = "Error"
+                };
+            }
+            return new ResponseModel
+            {
+                Data = ToProductModel(product),
+                Message = "Get product successfully",
+                Status = "Success"
+            };
+        }
 
+        public async Task<ResponseModel> CreateProductAsync(CreateProductModel model)
+        {
+            #region Validate Brand, Category, Unit exist
+            var brand = await _brandRepository.GetById(model.BrandId);
+            if (brand == null)
+            {
+                return new ResponseModel
+                {
+                    Message = "Brand not found",
+                    Status = "Error"
+                };
+            }
+            var category = await _categoryRepository.GetById(model.CategoryId);
+            if (category == null)
+            {
+                return new ResponseModel
+                {
+                    Message = "Category not found",
+                    Status = "Error"
+                };
+            }
+            var unit = await _unitRepository.GetById(model.UnitId);
+            if (unit == null)
+            {
+                return new ResponseModel
+                {
+                    Message = "Unit not found",
+                    Status = "Error"
+                };
+            }
+            #endregion
+            var product = new Product
+            {
+                Name = model.Name,
+                Description = model.Description,
+                Quantity = model.Quantity,
+                OriginalPrice = model.OriginalPrice,
+                SalePrice = model.SalePrice,
+                BrandId = model.BrandId,
+                CategoryId = model.CategoryId,
+                UnitId = model.UnitId,
+                StatusId = 1, //default status
+                IsActive = true,
+                Thumbnail = model.Thumbnail
+            };
+            _productRepository.Add(product);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return new ResponseModel
+                {
+                    Message = "Create product successfully",
+                    Status = "Success"
+                };
+            }
+            return new ResponseModel
+            {
+                Message = "Create product fail",
+                Status = "Error"
+            };
+        }
+
+        public async Task<ResponseModel> UpdateProductAsync(Guid id, UpdateProductModel model)
+        {
+            var product = await _productRepository.GetById(id);
+            if (product == null)
+            {
+                return new ResponseModel
+                {
+                    Message = "Product not found",
+                    Status = "Error"
+                };
+            }
+            if (!string.IsNullOrEmpty(model.Name))
+            {
+                var productByName = await _productRepository.GetByNameAsync(model.Name);
+                if (productByName != null && productByName.Id != id)
+                {
+                    return new ResponseModel
+                    {
+                        Message = "Product name already exists",
+                        Status = "Error"
+                    };
+                }
+                product.Name = model.Name;
+            }
+            #region Validate Brand, Category, Unit exist
+            if (model.BrandId.HasValue)
+            {
+                var brand = await _brandRepository.GetById(model.BrandId.Value);
+                if (brand == null)
+                {
+                    return new ResponseModel
+                    {
+                        Message = "Brand not found",
+                        Status = "Error"
+                    };
+                }
+                product.BrandId = model.BrandId.Value;
+            }
+            if (model.CategoryId.HasValue)
+            {
+                var category = await _categoryRepository.GetById(model.CategoryId.Value);
+                if (category == null)
+                {
+                    return new ResponseModel
+                    {
+                        Message = "Category not found",
+                        Status = "Error"
+                    };
+                }
+                product.CategoryId = model.CategoryId.Value;
+            }
+            if (model.UnitId.HasValue)
+            {
+                var unit = await _unitRepository.GetById(model.UnitId.Value);
+                if (unit == null)
+                {
+                    return new ResponseModel
+                    {
+                        Message = "Unit not found",
+                        Status = "Error"
+                    };
+                }
+                product.UnitId = model.UnitId.Value;
+            }
+            #endregion
+            product.Description = model.Description ?? product.Description;
+            product.Quantity = model.Quantity ?? product.Quantity;
+            product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
+            product.SalePrice = model.SalePrice ?? product.SalePrice;
+            product.Thumbnail = model.Thumbnail ?? product.Thumbnail;
+            _productRepository.Update(product);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return new ResponseModel
+                {
+                    Message = "Update product successfully",
+                    Status = "Success"
+                };
+            }
+            return new ResponseModel
+            {
+                Message = "Update product fail",
+                Status = "Error"
+            };
+        }
+
+        public async Task<ResponseModel> DeleteProductAsync(Guid id)
+        {
+            var product = await _productRepository.GetById(id);
+            if (product == null)
+            {
+                return new ResponseModel
+                {
+                    Message = "Product not found",
+                    Status = "Error"
+                };
+            }
+            _productRepository.Delete(product);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return new ResponseModel
+                {
+                    Message = "Delete product successfully",
+                    Status = "Success"
+                };
+            }
+            return new ResponseModel
+            {
+                Message = "Delete product fail",
+                Status = "Error"
+            };
+        }
     }
 }
