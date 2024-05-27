@@ -257,7 +257,7 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     var verifyToken = _jwtTokenExtension.CreateJwtToken(
                         customer.User,
-                        TokenType.Authentication
+                        TokenType.Reset
                     );
                     _emailService.SendPasswordResetEmail(customer.Email, verifyToken); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return new ResponseModel
