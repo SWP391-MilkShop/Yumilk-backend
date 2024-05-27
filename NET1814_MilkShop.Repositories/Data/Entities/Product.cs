@@ -20,6 +20,8 @@ public partial class Product : IAuditableEntity
     public decimal OriginalPrice { get; set; }
 
     public decimal SalePrice { get; set; }
+    [Column("thumbnail", TypeName = "nvarchar(255)")]
+    public string? thumbnail { get; set; }
 
     public int CategoryId { get; set; }
 

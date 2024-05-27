@@ -14,6 +14,8 @@ public partial class Brand : IAuditableEntity
     public string Name { get; set; } = null!;
 
     public string? Description { get; set; }
+    [Column("logo", TypeName = "nvarchar(255)")] //url
+    public string? Logo { get; set; }
 
     [DefaultValue(false)]
     public bool IsActive { get; set; }
