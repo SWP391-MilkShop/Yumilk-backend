@@ -5,6 +5,7 @@ using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using System.Linq.Expressions;
 using NET1814_MilkShop.Repositories.Models.CategoryModels;
+using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -72,7 +73,6 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Category not found"
                 };
             }
-            category.IsActive = false;
             category.DeletedAt = DateTime.Now;
             _categoryRepository.Update(category);
             var result = await _unitOfWork.SaveChangesAsync();
@@ -94,9 +94,10 @@ namespace NET1814_MilkShop.Services.Services
         public async Task<ResponseModel> GetCategoriesAsync(CategoryQueryModel queryModel)
         {
             var query = _categoryRepository.GetCategoriesQuery();
+            var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
             query = query.Where(p =>
             p.IsActive == queryModel.IsActive
-            && (string.IsNullOrEmpty(queryModel.SearchTerm) || p.Name.Contains(queryModel.SearchTerm)));
+            && (string.IsNullOrEmpty(searchTerm) || p.Name.ToLower().Contains(searchTerm)));
             if ("desc".Equals(queryModel.SortOrder?.ToLower()))
             {
                 query = query.OrderByDescending(GetSortProperty(queryModel));

@@ -17,10 +17,14 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public UnitRepository(AppDbContext context)
             : base(context) { }
 
-        public IQueryable<Unit> GetUnitsQuery() =>
-            _context.Units.AsNoTracking();
+        public IQueryable<Unit> GetUnitsQuery()
+        {
+            return _query;
+        }
 
-        public Task<Unit?> GetExistIsActiveId(int id) =>
-            _context.Units.FirstOrDefaultAsync(x => x.Id == id);
+        public Task<Unit?> GetExistIsActiveId(int id)
+        {
+            return _query.FirstOrDefaultAsync(x => x.Id == id);
+        }
     }
 }

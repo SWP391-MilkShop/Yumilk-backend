@@ -168,8 +168,6 @@ public class UnitService : IUnitService
             {
                 return new ResponseModel { Status = "failed", Message = "Unit not found" };
             }
-
-            isExistUnit.IsActive = false;
             isExistUnit.DeletedAt = DateTime.Now;
             _unitRepository.Update(isExistUnit);
             var result = await _unitOfWork.SaveChangesAsync();

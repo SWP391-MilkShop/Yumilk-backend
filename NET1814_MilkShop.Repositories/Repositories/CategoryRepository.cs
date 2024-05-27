@@ -21,7 +21,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public IQueryable<Category> GetCategoriesQuery()
         {
-            return _context.Categories.AsNoTracking();
+            return _query;
         }
         /// <summary>
         /// Check if category name is exist
@@ -30,7 +30,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <returns></returns>
         public Task<bool> IsExistAsync(string name)
         {
-            return _context.Categories.AnyAsync(e => string.Equals(e.Name, name) && e.IsActive);
+            return _query.AnyAsync(x => x.Name.Equals(name));
         }
     }
 }

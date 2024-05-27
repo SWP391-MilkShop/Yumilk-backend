@@ -21,16 +21,14 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <returns></returns>
         public async Task<User?> GetUserByUserNameNPassword(string username, string password)
         {
-            var user = await _context
-                .Users.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Username.Equals(username));
+            var user = await _query.FirstOrDefaultAsync(x => x.Username.Equals(username));
+            //var user = await _context
+            //    .Users.AsNoTracking()
+            //    .FirstOrDefaultAsync(x => x.Username.Equals(username));
             //check case sensitive
-            if (username.Equals(user.Username, StringComparison.Ordinal))
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
-                {
-                    return user;
-                }
+                return user;
             }
             return null;
         }

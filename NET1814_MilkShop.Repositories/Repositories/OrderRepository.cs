@@ -16,7 +16,9 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public IQueryable<Order> GetOrdersQuery()
         {
-            return _context.Orders.Include(o => o.Status).Include(o => o.Customer).AsNoTracking();
+            //return _context.Orders.Include(o => o.Status).Include(o => o.Customer).AsNoTracking();
+            return _query.Include(o => o.Status)
+                         .Include(o => o.Customer);
         }
     }
 }

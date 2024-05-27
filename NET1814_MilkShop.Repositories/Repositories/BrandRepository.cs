@@ -22,12 +22,12 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public IQueryable<Brand> GetBrandsQuery()
         {
-            return _context.Brands.AsNoTracking();
+            return _query;
         }
 
         public async Task<Brand?> GetBrandByName(string name)
         {
-            return await _context.Brands.AsNoTracking().FirstOrDefaultAsync(x => string.Equals(x.Name, name));
+            return await _query.FirstOrDefaultAsync(x => x.Name.Equals(name));
         }
     }
 }

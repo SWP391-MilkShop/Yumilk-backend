@@ -16,11 +16,14 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public IQueryable<Product> GetProductsQuery()
         {
-            return _context
-                .Products.Include(p => p.Brand)
-                .Include(p => p.Category)
-                .Include(p => p.Unit)
-                .AsNoTracking();
+            //return _context
+            //    .Products.Include(p => p.Brand)
+            //    .Include(p => p.Category)
+            //    .Include(p => p.Unit)
+            //    .AsNoTracking();
+            return _query.Include(p => p.Brand)
+                         .Include(p => p.Category)
+                         .Include(p => p.Unit);
         }
     }
 }
