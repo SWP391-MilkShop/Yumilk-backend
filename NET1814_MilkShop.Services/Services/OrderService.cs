@@ -1,9 +1,9 @@
-﻿using System.Linq.Expressions;
-using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Services.CoreHelpers;
+using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -24,30 +24,40 @@ namespace NET1814_MilkShop.Services.Services
         public async Task<ResponseModel> GetOrderAsync(OrderQueryModel model)
         {
             var query = _orderRepository.GetOrdersQuery();
+
             #region(filter)
+
             if (!string.IsNullOrEmpty(model.SearchTerm))
             {
-                query = query.Where(o => o.Address.Contains(model.SearchTerm)); // chưa nghĩ ra search theo cái gì nên tạm thời để so với address
+                query = query.Where(o =>
+                    o.Address.Contains(model
+                        .SearchTerm)); // chưa nghĩ ra search theo cái gì nên tạm thời để so với address
             }
+
             if (!string.IsNullOrEmpty(model.Email))
             {
                 query = query.Where(o => string.Equals(o.Customer!.Email, model.Email));
             }
+
             if (model.TotalAmount > 0)
             {
                 query = query.Where(o => o.TotalAmount > model.TotalAmount);
             }
+
             if (model.ToOrderDate is not null)
             {
                 query = query.Where(o => o.CreatedAt <= model.ToOrderDate);
             }
+
             if (!string.IsNullOrEmpty(model.OrderStatus))
             {
                 query = query.Where(o => string.Equals(o.Status!.Name, model.OrderStatus));
             }
+
             #endregion
 
             #region(sorting)
+
             if ("desc".Equals(model.SortOrder?.ToLower()))
             {
                 query = query.OrderByDescending(GetSortProperty(model));
@@ -56,6 +66,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 query = query.OrderBy(GetSortProperty(model));
             }
+
             #endregion
 
             // chuyển về OrderModel
@@ -72,6 +83,7 @@ namespace NET1814_MilkShop.Services.Services
             });
 
             #region(paging)
+
             var orders = await PagedList<OrderModel>.CreateAsync(
                 orderModelQuery,
                 model.Page,
@@ -80,9 +92,10 @@ namespace NET1814_MilkShop.Services.Services
             return new ResponseModel
             {
                 Data = orders,
-                Message = "Get orders successfully",
+                Message = orders.TotalCount > 0 ? "Get orders successfully" : "No brands found",
                 Status = "Success"
             };
+
             #endregion
         }
 
@@ -93,7 +106,8 @@ namespace NET1814_MilkShop.Services.Services
             {
                 "totalamount" => order => order.TotalAmount,
                 "createdat" => order => order.CreatedAt,
-                "paymentdate" => order => order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
+                "paymentdate" => order =>
+                    order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
                 _ => order => order.Id, //chưa biết mặc định sort theo cái gì nên để tạm là id
             };
     }

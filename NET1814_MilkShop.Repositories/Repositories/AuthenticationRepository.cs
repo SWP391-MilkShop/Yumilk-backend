@@ -13,15 +13,22 @@ namespace NET1814_MilkShop.Repositories.Repositories
     {
         public AuthenticationRepository(AppDbContext context)
             : base(context) { }
-
+        /// <summary>
+        /// Get by username and password for login
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         public async Task<User?> GetUserByUserNameNPassword(string username, string password)
         {
-            var userName = await _context
-                .Users.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Username.Equals(username) && x.IsActive == true);
-            if (userName != null && BCrypt.Net.BCrypt.Verify(password, userName.Password))
+            var user = await _query.FirstOrDefaultAsync(x => x.Username.Equals(username));
+            //var user = await _context
+            //    .Users.AsNoTracking()
+            //    .FirstOrDefaultAsync(x => x.Username.Equals(username));
+            //check case sensitive
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                return userName;
+                return user;
             }
             return null;
         }

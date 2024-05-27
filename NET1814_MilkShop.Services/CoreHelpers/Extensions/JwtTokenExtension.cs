@@ -1,9 +1,9 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using NET1814_MilkShop.Repositories.Data.Entities;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
 {
@@ -11,7 +11,8 @@ namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
     {
         Access,
         Refresh,
-        Authentication
+        Authentication,
+        Reset
     }
 
     public interface IJwtTokenExtension
@@ -62,6 +63,9 @@ namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
                 case TokenType.Authentication:
                     claims.Add(new Claim("Token", user.VerificationCode));
                     break;
+                case TokenType.Reset:
+                    claims.Add(new Claim("Token", user.ResetPasswordCode));
+                    break;
                 default:
                     throw new ArgumentException("Invalid token type");
             }
@@ -82,6 +86,9 @@ namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
                 case TokenType.Authentication:
                     key = _configuration["Jwt:AuthenticationKey"];
                     break;
+                case TokenType.Reset:
+                    key = _configuration["Jwt:AuthenticationKey"];
+                    break;
                 default:
                     throw new ArgumentException("Invalid token type");
             }
@@ -100,6 +107,9 @@ namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
                     expiry = int.Parse(_configuration["Jwt:RefreshTokenLifeTime"]);
                     break;
                 case TokenType.Authentication:
+                    expiry = int.Parse(_configuration["Jwt:AuthenticationLifeTime"]);
+                    break;
+                case TokenType.Reset:
                     expiry = int.Parse(_configuration["Jwt:AuthenticationLifeTime"]);
                     break;
                 default:

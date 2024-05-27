@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using NET1814_MilkShop.Repositories.Data.Interfaces;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 

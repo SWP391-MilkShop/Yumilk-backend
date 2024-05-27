@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
@@ -10,6 +9,8 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using NET1814_MilkShop.Services.Services;
+using System.Reflection;
+using System.Text;
 
 namespace NET1814_MilkShop.API
 {
@@ -28,10 +29,13 @@ namespace NET1814_MilkShop.API
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(o =>
             {
-                o.SwaggerDoc(
-                    "v1",
-                    new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" }
-                );
+                o.SwaggerDoc("v1", new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" });
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var APIXmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                o.IncludeXmlComments(APIXmlPath);
+                var repoXmlFile = "NET1814_MilkShop.Repositories.xml";
+                var repoXmlPath = Path.Combine(AppContext.BaseDirectory, repoXmlFile);
+                o.IncludeXmlComments(repoXmlPath);
                 o.AddSecurityDefinition(
                     "Bearer",
                     new OpenApiSecurityScheme
@@ -75,11 +79,12 @@ namespace NET1814_MilkShop.API
                     "Could not find connection string 'DefaultConnection'"
                 );
             }
+
             //Add Dependency Injection
             AddDI(services);
             //Add Email Setting
             services.Configure<EmailSettingModel>(_configuration.GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
-            //Add Database
+                                                                                               //Add Database
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
             //Add Exception Handler
             services.AddExceptionHandler<ExceptionLoggingHandler>();
@@ -100,10 +105,7 @@ namespace NET1814_MilkShop.API
                 );
                 services.AddPolicy(
                     "AllowAll",
-                    builder =>
-                    {
-                        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                    }
+                    builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }
                 );
             });
             //Add Authentication
@@ -153,6 +155,7 @@ namespace NET1814_MilkShop.API
             {
                 app.UseDeveloperExceptionPage();
             }
+
             var isUserSwagger = _configuration.GetValue<bool>("UseSwagger", false);
             if (isUserSwagger)
             {
@@ -171,7 +174,10 @@ namespace NET1814_MilkShop.API
             // ko biet sao cai nay no keu violate ASP0014, keu map route truc tiep trong api luon
             app.UseEndpoints(endpoint =>
             {
-                endpoint.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoint.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}"
+                );
             });
             app.MapControllers();
         }
@@ -189,9 +195,15 @@ namespace NET1814_MilkShop.API
 
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();
+          
             services.AddScoped<IBrandRepository, BrandRepository>();
+            services.AddScoped<IBrandService, BrandService>();
+
             services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<ICategoryService, CategoryService>();
+
             services.AddScoped<IUnitRepository, UnitRepository>();
+            services.AddScoped<IUnitService, UnitService>();
 
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IOrderService, OrderService>();

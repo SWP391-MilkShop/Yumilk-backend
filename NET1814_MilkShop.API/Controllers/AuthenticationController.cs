@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Services.Services;
@@ -20,6 +21,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPost("create-user")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserModel model)
         {
             _logger.Information("Create user");
@@ -59,6 +61,11 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Only customer role can login, others will say wrong username or password.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login(RequestLoginModel model)
         {
@@ -70,6 +77,24 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(res);
+        }
+
+        /// <summary>
+        ///  Only Admin,Staff role can login, others will say wrong username or password.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost("dashboard/login")]
+        public async Task<IActionResult> AdminLogin(RequestLoginModel model)
+        {
+            _logger.Information("Login");
+            var response = await _authenticationService.DashBoardLoginAsync(model);
+            if (response.Status == "Error")
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
         }
 
         [HttpPost("forgot-password")]
@@ -109,6 +134,19 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             var res = await _authenticationService.RefreshTokenAsync(token);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
+        [HttpPost("activate-account")]
+        public async Task<IActionResult> ActivateAccount([FromBody] string email)
+        {
+            _logger.Information("Activate Account");
+            var res = await _authenticationService.ActivateAccountAsync(email);
             if (res.Status == "Error")
             {
                 return BadRequest(res);
