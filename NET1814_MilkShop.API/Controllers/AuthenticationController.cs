@@ -59,7 +59,11 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
-
+        /// <summary>
+        /// Only customer role can login, others will say wrong username or password.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login(RequestLoginModel model)
         {
@@ -74,15 +78,15 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         /// <summary>
-        ///  Only Admin role can login, others will say wrong username or password.
+        ///  Only Admin,Staff role can login, others will say wrong username or password.
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [HttpPost("admin/login")]
+        [HttpPost("dashboard/login")]
         public async Task<IActionResult> AdminLogin(RequestLoginModel model)
         {
             _logger.Information("Login");
-            var response = await _authenticationService.AdminLoginAsync(model);
+            var response = await _authenticationService.DashBoardLoginAsync(model);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
