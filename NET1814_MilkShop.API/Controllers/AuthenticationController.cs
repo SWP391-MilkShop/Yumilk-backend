@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Services.Services;
@@ -59,6 +60,7 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+
         /// <summary>
         /// Only customer role can login, others will say wrong username or password.
         /// </summary>
@@ -91,6 +93,7 @@ namespace NET1814_MilkShop.API.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
 
@@ -131,6 +134,19 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             var res = await _authenticationService.RefreshTokenAsync(token);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
+        [HttpPost("activate-account")]
+        public async Task<IActionResult> ActivateAccount([FromBody] string email)
+        {
+            _logger.Information("Activate Account");
+            var res = await _authenticationService.ActivateAccountAsync(email);
             if (res.Status == "Error")
             {
                 return BadRequest(res);
