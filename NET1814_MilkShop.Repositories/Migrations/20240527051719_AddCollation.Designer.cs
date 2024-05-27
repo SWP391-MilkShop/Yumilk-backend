@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NET1814_MilkShop.Repositories.Data;
 
@@ -11,9 +12,11 @@ using NET1814_MilkShop.Repositories.Data;
 namespace NET1814_MilkShop.Repositories.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240527051719_AddCollation")]
+    partial class AddCollation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,7 +55,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")
-                        .UseCollation("Latin1_General_CI_AS");
+                        .UseCollation("Latin1_General_CS_AS");
 
                     b.HasKey("Id");
 
@@ -449,7 +452,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")
-                        .UseCollation("Latin1_General_CI_AS");
+                        .UseCollation("Latin1_General_CS_AS");
 
                     b.HasKey("Id");
 
@@ -600,7 +603,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")
-                        .UseCollation("Latin1_General_CI_AS");
+                        .UseCollation("Latin1_General_CS_AS");
 
                     b.HasKey("Id");
 
@@ -777,7 +780,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")
-                        .UseCollation("Latin1_General_CI_AS");
+                        .UseCollation("Latin1_General_CS_AS");
 
                     b.HasKey("Id");
 

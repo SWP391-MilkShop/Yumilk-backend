@@ -1,12 +1,11 @@
-﻿using System.Linq.Expressions;
-using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
+using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using System.Linq.Expressions;
-using NET1814_MilkShop.Repositories.Models.BrandModels;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -30,23 +29,28 @@ namespace NET1814_MilkShop.Services.Services
         public async Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel)
         {
             var query = _productRepository.GetProductsQuery();
-
+            //Normalize search term, brand, category, unit, status
+            var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
+            var brand = StringExtension.Normalize(queryModel.Brand);
+            var category = StringExtension.Normalize(queryModel.Category);
+            var unit = StringExtension.Normalize(queryModel.Unit);
+            var status = StringExtension.Normalize(queryModel.Status);
             #region Filter, Search
 
             //thu gọn thành 1 where thôi
             query = query.Where(p =>
                 p.IsActive == queryModel.IsActive
                 //search theo name, description, brand, unit, category
-                && (string.IsNullOrEmpty(queryModel.SearchTerm) || p.Name.Contains(queryModel.SearchTerm)
-                                                                || p.Description!.Contains(queryModel.SearchTerm)
-                                                                || p.Brand!.Name.Contains(queryModel.SearchTerm)
-                                                                || p.Unit!.Name.Contains(queryModel.SearchTerm)
-                                                                || p.Category!.Name.Contains(queryModel.SearchTerm))
+                && (string.IsNullOrEmpty(searchTerm) || p.Name.ToLower().Contains(searchTerm)
+                                                                || p.Description!.ToLower().Contains(searchTerm)
+                                                                || p.Brand!.Name.ToLower().Contains(searchTerm)
+                                                                || p.Unit!.Name.ToLower().Contains(searchTerm)
+                                                                || p.Category!.Name.ToLower().Contains(searchTerm))
                 //filter theo brand, category, unit, status, minPrice, maxPrice
-                && (string.IsNullOrEmpty(queryModel.Brand) || string.Equals(p.Brand!.Name, queryModel.Brand))
-                && (string.IsNullOrEmpty(queryModel.Category) || string.Equals(p.Category!.Name, queryModel.Category))
-                && (string.IsNullOrEmpty(queryModel.Unit) || string.Equals(p.Unit!.Name, queryModel.Unit))
-                && (string.IsNullOrEmpty(queryModel.Status) || string.Equals(p.ProductStatus!.Name, queryModel.Status))
+                && (string.IsNullOrEmpty(brand) || string.Equals(p.Brand!.Name.ToLower(), brand))
+                && (string.IsNullOrEmpty(category) || string.Equals(p.Category!.Name.ToLower(), category))
+                && (string.IsNullOrEmpty(unit) || string.Equals(p.Unit!.Name.ToLower(), unit))
+                && (string.IsNullOrEmpty(status) || string.Equals(p.ProductStatus!.Name.ToLower(), status))
                 && (queryModel.MinPrice <= 0 || p.SalePrice >= queryModel.MinPrice)
                 && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice));
             /*if (!string.IsNullOrEmpty(queryModel.SearchTerm))
