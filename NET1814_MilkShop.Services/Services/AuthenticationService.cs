@@ -101,10 +101,14 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Tên đăng nhập đã tồn tại!"
                 };
             }
-            var existingCustomer = await _customerRepository.GetByEmailAsync(model.Email);
-            if (existingCustomer != null)
+            var IsCustomerExist = await _customerRepository.IsCustomerExistAsync(model.Email, model.PhoneNumber);
+            if (IsCustomerExist)
             {
-                return new ResponseModel { Status = "Error", Message = "Email đã tồn tại!" };
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Email hoặc số điện thoại đã tồn tại trong hệ thống!"
+                };
             }
             string token = _jwtTokenExtension.CreateVerifyCode();
             var user = new User
@@ -157,15 +161,6 @@ namespace NET1814_MilkShop.Services.Services
                     {
                         Status = "Error",
                         Message = "Tài khoản của bạn đã bị khóa do hành vi không hợp lệ!"
-                    };
-                }
-                //check if user is not activated
-                if (existingUser.IsActive == false)
-                {
-                    return new ResponseModel
-                    {
-                        Status = "Error",
-                        Message = "Tài khoản của bạn chưa được xác thực!"
                     };
                 }
                 var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);

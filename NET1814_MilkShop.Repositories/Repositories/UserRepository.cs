@@ -33,8 +33,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             var user = await _context
                 .Users.AsNoTracking()
                 .FirstOrDefaultAsync(x => username.Equals(x.Username));
-            //Check case sensitive
-            if (username.Equals(user.Username, StringComparison.Ordinal))
+            if(user != null && username.Equals(user.Username, StringComparison.Ordinal))
             {
                 return user;
             }

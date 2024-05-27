@@ -11,6 +11,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<Customer?> GetByEmailAsync(string email);
         Task<Customer?> GetById(Guid id);
         Task<bool> IsExistAsync(Guid id);
+        Task<bool> IsCustomerExistAsync(string email, string phoneNumber);
         void Add(Customer customer);
         void Update(Customer customer);
         void Remove(Customer customer);
@@ -27,13 +28,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
             var customer = await _context
                 .Customers.AsNoTracking()
                 .Include(x => x.User)
-                .FirstOrDefaultAsync(x => email.Equals(x.Email));
-            // check case sensitive
-            if (email.Equals(customer.Email, StringComparison.Ordinal))
-            {
-                return customer;
-            }
-            return null;
+                .FirstOrDefaultAsync(x => string.Equals(email, x.Email));
+            return customer;
         }
 
         /// <summary>
@@ -60,6 +56,16 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public async Task<bool> IsExistAsync(Guid id)
         {
             return await _context.Customers.AnyAsync(e => e.UserId == id);
+        }
+        /// <summary>
+        /// Check if customer with phone number or email already exists
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="phoneNumber"></param>
+        /// <returns></returns>
+        public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
+        {
+            return await _context.Customers.AnyAsync(e => e.Email == email || e.PhoneNumber == phoneNumber);
         }
     }
 }

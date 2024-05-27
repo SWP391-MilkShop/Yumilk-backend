@@ -17,6 +17,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetByIdAsync(Guid id);
         Task<ResponseModel> ChangeInfoAsync(Guid userId, ChangeUserInfoModel changeUserInfoModel);
         Task<bool> IsExistAsync(Guid id);
+        Task<bool> IsCustomerExistAsync(string email, string phoneNumber);
     }
 
     public sealed class CustomerService : ICustomerService
@@ -132,22 +133,6 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        /*public async Task<ResponseModel> GetCustomersAsync()
-        {
-            var customers = await _customerRepository.GetCustomersAsync();
-            var list = new List<CustomerModel>();
-            foreach (var customer in customers)
-            {
-                list.Add(ToCustomerModel(customer, customer.User));
-            }
-            return new ResponseModel
-            {
-                Data = list,
-                Message = "Get all customers successfully",
-                Status = "Success"
-            };
-        }*/
-
         public async Task<ResponseModel> GetByIdAsync(Guid id)
         {
             var customer = await _customerRepository.GetById(id);
@@ -229,6 +214,11 @@ namespace NET1814_MilkShop.Services.Services
         public async Task<bool> IsExistAsync(Guid id)
         {
             return await _customerRepository.IsExistAsync(id);
+        }
+
+        public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
+        {
+            return await _customerRepository.IsCustomerExistAsync(email, phoneNumber);
         }
     }
 }
