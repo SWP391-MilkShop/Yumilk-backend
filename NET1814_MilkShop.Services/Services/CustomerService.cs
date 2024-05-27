@@ -17,7 +17,9 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetByIdAsync(Guid id);
         Task<ResponseModel> ChangeInfoAsync(Guid userId, ChangeUserInfoModel changeUserInfoModel);
         Task<bool> IsExistAsync(Guid id);
-        Task<bool> IsCustomerExistAsync(string email, string phoneNumber);
+        /*Task<bool> IsCustomerExistAsync(string email, string phoneNumber);*/
+        Task<bool> IsExistPhoneNumberAsync(string phoneNumber);
+        Task<bool> IsExistEmailAsync(string email);
     }
 
     public sealed class CustomerService : ICustomerService
@@ -216,9 +218,19 @@ namespace NET1814_MilkShop.Services.Services
             return await _customerRepository.IsExistAsync(id);
         }
 
-        public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
+        public async Task<bool> IsExistPhoneNumberAsync(string phoneNumber)
+        {
+            return await _customerRepository.IsExistPhoneNumberAsync(phoneNumber);
+        }
+
+        public async Task<bool> IsExistEmailAsync(string email)
+        {
+            return await _customerRepository.IsExistEmailAsync(email);
+        }
+
+        /*public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
         {
             return await _customerRepository.IsCustomerExistAsync(email, phoneNumber);
-        }
+        }*/
     }
 }
