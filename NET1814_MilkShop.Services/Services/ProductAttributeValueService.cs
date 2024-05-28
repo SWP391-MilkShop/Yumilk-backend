@@ -15,6 +15,7 @@ public interface IProductAttributeValueService
     Task<ResponseModel> GetProductAttributeValue(ProductAttributeValueQueryModel queryModel);
     Task<ResponseModel> AddProductAttributeValue(Guid pid, int aid, CreateUpdatePavModel model);
     Task<ResponseModel> UpdateProductAttributeValue(Guid pid, int aid, CreateUpdatePavModel model);
+    Task<ResponseModel> DeleteProductAttributeValue(Guid pid, int aid);
 }
 
 public class ProductAttributeValueService : IProductAttributeValueService
@@ -183,7 +184,36 @@ public class ProductAttributeValueService : IProductAttributeValueService
         return new ResponseModel
         {
             Message = "Cập nhật giá trị thuộc tính thất bại",
-            Status = "Success"
+            Status = "Error"
+        };
+    }
+
+    public async Task<ResponseModel> DeleteProductAttributeValue(Guid pid, int aid)
+    {
+        var isExist = await _proAttValueRepository.GetProdAttValue(pid, aid);
+        if (isExist == null)
+        {
+            return new ResponseModel
+            {
+                Status = "Error",
+                Message = "Không tồn tại sản phẩm và thuộc tính"
+            };
+        }
+        isExist.DeletedAt = DateTime.Now;
+        _proAttValueRepository.Update(isExist);
+        var res = await _unitOfWork.SaveChangesAsync();
+        if (res > 0)
+        {
+            return new ResponseModel
+            {
+                Status = "Success",
+                Message = "Xóa giá trị của thuộc tính sản phẩm thành công"
+            };
+        }
+        return new ResponseModel
+        {
+            Status = "Error",
+            Message = "Xóa giá trị của thuộc tính sản phẩm thất bại"
         };
     }
 
