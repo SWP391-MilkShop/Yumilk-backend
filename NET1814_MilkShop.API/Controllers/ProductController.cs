@@ -294,6 +294,19 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
+        [HttpPost("/product_attributes")]
+        public async Task<IActionResult> AddProductAttribute([FromBody] CreateProductAttributeModel model)
+        {
+            _logger.Information("Add Product Attribute");
+            var res = await _productAttributeService.AddProductAttributeAsync(model);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
         #endregion
     }
 }
