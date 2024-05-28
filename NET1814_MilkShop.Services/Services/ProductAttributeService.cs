@@ -11,8 +11,8 @@ namespace NET1814_MilkShop.Services.Services
     public interface IProductAttributeService
     {
         Task<ResponseModel> GetProductAttributesAsync(ProductAttributeQueryModel queryModel);
-        Task<ResponseModel> AddProductAttributeAsync(CreateProductAttribute model);
-        Task<ResponseModel> UpdateProductAttributeAsync(int id, CreateProductAttribute model);
+        Task<ResponseModel> AddProductAttributeAsync(CreateProductAttributeModel model);
+        Task<ResponseModel> UpdateProductAttributeAsync(int id, CreateProductAttributeModel model);
     }
 
     public class ProductAttributeService : IProductAttributeService
@@ -75,7 +75,7 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> AddProductAttributeAsync(CreateProductAttribute model)
+        public async Task<ResponseModel> AddProductAttributeAsync(CreateProductAttributeModel model)
         {
             var isExistName = await _productAttribute.GetProductAttributeByName(model.Name);
             if (isExistName != null)
@@ -103,7 +103,7 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public Task<ResponseModel> UpdateProductAttributeAsync(int id, CreateProductAttribute model)
+        public Task<ResponseModel> UpdateProductAttributeAsync(int id, CreateProductAttributeModel model)
         {
             throw new NotImplementedException();
         }
