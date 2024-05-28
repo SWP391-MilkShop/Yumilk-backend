@@ -1,4 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Repositories;
@@ -64,7 +65,7 @@ namespace NET1814_MilkShop.Services.Services
 
             //thu gọn thành 1 where thôi
             query = query.Where(p =>
-                p.IsActive == queryModel.IsActive
+                (queryModel.IsActive.HasValue ? p.IsActive == queryModel.IsActive.Value : true)
                 //search theo name, description, brand, unit, category
                 && (string.IsNullOrEmpty(searchTerm) || p.Name.ToLower().Contains(searchTerm)
                                                                 || p.Description!.ToLower().Contains(searchTerm)
@@ -110,13 +111,14 @@ namespace NET1814_MilkShop.Services.Services
 
             #endregion
 
-            return new ResponseModel
+            if(products.TotalCount > 0)
             {
-                Data = products,
-                Message =
-                    products.TotalCount > 0 ? "Get products successfully" : "No products found",
-                Status = "Success"
-            };
+                return ResponseModel.Success(ResponseConstants.Get("sản phẩm", true), products);
+            }
+            else
+            {
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Sản phẩm"));
+            }
         }
 
         /// <summary>
@@ -140,18 +142,9 @@ namespace NET1814_MilkShop.Services.Services
             var product = await _productRepository.GetById(id);
             if (product == null)
             {
-                return new ResponseModel
-                {
-                    Message = "Product not found",
-                    Status = "Error"
-                };
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Sản phẩm"));
             }
-            return new ResponseModel
-            {
-                Data = ToProductModel(product),
-                Message = "Get product successfully",
-                Status = "Success"
-            };
+            return ResponseModel.Success(ResponseConstants.Get("sản phẩm", true), ToProductModel(product));
         }
 
         public async Task<ResponseModel> CreateProductAsync(CreateProductModel model)
@@ -160,29 +153,17 @@ namespace NET1814_MilkShop.Services.Services
             var brand = await _brandRepository.GetById(model.BrandId);
             if (brand == null)
             {
-                return new ResponseModel
-                {
-                    Message = "Brand not found",
-                    Status = "Error"
-                };
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Thương hiệu"));
             }
             var category = await _categoryRepository.GetById(model.CategoryId);
             if (category == null)
             {
-                return new ResponseModel
-                {
-                    Message = "Category not found",
-                    Status = "Error"
-                };
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Danh mục"));
             }
             var unit = await _unitRepository.GetById(model.UnitId);
             if (unit == null)
             {
-                return new ResponseModel
-                {
-                    Message = "Unit not found",
-                    Status = "Error"
-                };
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Đơn vị"));
             }
             #endregion
             var product = new Product
@@ -203,17 +184,9 @@ namespace NET1814_MilkShop.Services.Services
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return new ResponseModel
-                {
-                    Message = "Create product successfully",
-                    Status = "Success"
-                };
+                return ResponseModel.Success(ResponseConstants.Create("sản phẩm", true), null);
             }
-            return new ResponseModel
-            {
-                Message = "Create product fail",
-                Status = "Error"
-            };
+            return ResponseModel.Error(ResponseConstants.Create("sản phẩm", false));
         }
 
         public async Task<ResponseModel> UpdateProductAsync(Guid id, UpdateProductModel model)
@@ -221,22 +194,14 @@ namespace NET1814_MilkShop.Services.Services
             var product = await _productRepository.GetById(id);
             if (product == null)
             {
-                return new ResponseModel
-                {
-                    Message = "Product not found",
-                    Status = "Error"
-                };
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Sản phẩm"));
             }
             if (!string.IsNullOrEmpty(model.Name))
             {
                 var productByName = await _productRepository.GetByNameAsync(model.Name);
                 if (productByName != null && productByName.Id != id)
                 {
-                    return new ResponseModel
-                    {
-                        Message = "Product name already exists",
-                        Status = "Error"
-                    };
+                    return ResponseModel.Success(ResponseConstants.Exist("Tên sản phẩm"), null);
                 }
                 product.Name = model.Name;
             }
@@ -246,11 +211,7 @@ namespace NET1814_MilkShop.Services.Services
                 var brand = await _brandRepository.GetById(model.BrandId.Value);
                 if (brand == null)
                 {
-                    return new ResponseModel
-                    {
-                        Message = "Brand not found",
-                        Status = "Error"
-                    };
+                    return ResponseModel.NotFound(ResponseConstants.NotFound("Thương hiệu"));
                 }
                 product.BrandId = model.BrandId.Value;
             }
@@ -259,11 +220,7 @@ namespace NET1814_MilkShop.Services.Services
                 var category = await _categoryRepository.GetById(model.CategoryId.Value);
                 if (category == null)
                 {
-                    return new ResponseModel
-                    {
-                        Message = "Category not found",
-                        Status = "Error"
-                    };
+                    return ResponseModel.NotFound(ResponseConstants.NotFound("Danh mục"));
                 }
                 product.CategoryId = model.CategoryId.Value;
             }
@@ -272,11 +229,7 @@ namespace NET1814_MilkShop.Services.Services
                 var unit = await _unitRepository.GetById(model.UnitId.Value);
                 if (unit == null)
                 {
-                    return new ResponseModel
-                    {
-                        Message = "Unit not found",
-                        Status = "Error"
-                    };
+                    return ResponseModel.NotFound(ResponseConstants.NotFound("Đơn vị"));
                 }
                 product.UnitId = model.UnitId.Value;
             }
@@ -285,11 +238,7 @@ namespace NET1814_MilkShop.Services.Services
                 var status = await _productStatusRepository.GetById(model.StatusId.Value);
                 if (status == null)
                 {
-                    return new ResponseModel
-                    {
-                        Message = "Status not found",
-                        Status = "Error"
-                    };
+                    return ResponseModel.NotFound(ResponseConstants.NotFound("Trạng thái"));
                 }
                 product.StatusId = model.StatusId.Value;
             }
@@ -302,11 +251,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 if (!Uri.IsWellFormedUriString(model.Thumbnail, UriKind.Absolute))
                 {
-                    return new ResponseModel
-                    {
-                        Message = "Invalid URL!",
-                        Status = "Error"
-                    };
+                    return ResponseModel.BadRequest(ResponseConstants.WrongFormat("URL"));
                 }
                 product.Thumbnail = model.Thumbnail;
             }
@@ -315,17 +260,9 @@ namespace NET1814_MilkShop.Services.Services
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return new ResponseModel
-                {
-                    Message = "Update product successfully",
-                    Status = "Success"
-                };
+                return ResponseModel.Success(ResponseConstants.Update("sản phẩm", true), null);
             }
-            return new ResponseModel
-            {
-                Message = "Update product fail",
-                Status = "Error"
-            };
+            return ResponseModel.Error(ResponseConstants.Update("sản phẩm", false));
         }
 
         public async Task<ResponseModel> DeleteProductAsync(Guid id)
@@ -333,27 +270,15 @@ namespace NET1814_MilkShop.Services.Services
             var product = await _productRepository.GetById(id);
             if (product == null)
             {
-                return new ResponseModel
-                {
-                    Message = "Product not found",
-                    Status = "Error"
-                };
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Sản phẩm"));
             }
             _productRepository.Delete(product);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return new ResponseModel
-                {
-                    Message = "Delete product successfully",
-                    Status = "Success"
-                };
+                return ResponseModel.Success(ResponseConstants.Delete("sản phẩm", true), null);
             }
-            return new ResponseModel
-            {
-                Message = "Delete product fail",
-                Status = "Error"
-            };
+            return ResponseModel.Error(ResponseConstants.Delete("sản phẩm", false));
         }
     }
 }

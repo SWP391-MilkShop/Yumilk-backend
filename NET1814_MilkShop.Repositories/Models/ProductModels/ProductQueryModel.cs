@@ -14,7 +14,7 @@ namespace NET1814_MilkShop.Repositories.Models.ProductModels
 
         [Range(0, double.MaxValue, ErrorMessage = "Max price must be greater than 0")]
         public decimal MaxPrice { get; set; }
-        public bool IsActive { get; set; } = true;
+        public bool? IsActive { get; set; }
         /// <summary>
         /// Sort by id, name, quantity, sale price (default is id)
         /// </summary>
