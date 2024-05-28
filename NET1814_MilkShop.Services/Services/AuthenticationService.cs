@@ -341,7 +341,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 Status = "Success",
                 Message = "Tạo access token mới thành công",
-                Data = newToken.ToString()
+                Data = newToken
             };
         }
 
