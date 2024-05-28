@@ -93,7 +93,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPut("brands/{id}")]
-        public async Task<IActionResult> UpdateBrand(int id, [FromBody] CreateBrandModel model)
+        public async Task<IActionResult> UpdateBrand(int id, [FromBody] UpdateBrandModel model)
         {
             _logger.Information("Update Brand");
             var response = await _brandService.UpdateBrandAsync(id, model);
@@ -282,7 +282,7 @@ namespace NET1814_MilkShop.API.Controllers
         #region ProductAttribute
 
         [HttpGet("/product_attributes")]
-        public async Task<IActionResult> GetProductAttributes([FromQuery]ProductAttributeQueryModel queryModel)
+        public async Task<IActionResult> GetProductAttributes([FromQuery] ProductAttributeQueryModel queryModel)
         {
             _logger.Information("Get Product Attributes");
             var res = await _productAttributeService.GetProductAttributesAsync(queryModel);
