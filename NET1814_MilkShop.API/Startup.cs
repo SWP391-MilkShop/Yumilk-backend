@@ -83,8 +83,10 @@ namespace NET1814_MilkShop.API
             //Add Dependency Injection
             AddDI(services);
             //Add Email Setting
-            services.Configure<EmailSettingModel>(_configuration.GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
-                                                                                               //Add Database
+            services.Configure<EmailSettingModel>(
+                _configuration
+                    .GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
+            //Add Database
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
             //Add Exception Handler
             services.AddExceptionHandler<ExceptionLoggingHandler>();
@@ -195,7 +197,7 @@ namespace NET1814_MilkShop.API
 
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();
-          
+
             services.AddScoped<IBrandRepository, BrandRepository>();
             services.AddScoped<IBrandService, BrandService>();
 
@@ -207,6 +209,9 @@ namespace NET1814_MilkShop.API
 
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IOrderService, OrderService>();
+
+            services.AddScoped<IProductAttributeRepository, ProductAttributeRepository>();
+            services.AddScoped<IProductAttributeService, ProductAttributeService>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
