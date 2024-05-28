@@ -4,11 +4,12 @@ public class CustomerQueryModel : QueryModel
 {
     // SearchTerm se search firstName, lastName, email, phoneNumber
     /// <summary>
-    /// Default is true
+    ///     Default is true
     /// </summary>
     public bool IsActive { get; set; } = true;
+
     /// <summary>
-    /// Default is false
+    ///     Default is false
     /// </summary>
     public bool IsBanned { get; set; } = false;
 }

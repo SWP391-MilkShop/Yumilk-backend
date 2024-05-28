@@ -2,78 +2,79 @@
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
 
-namespace NET1814_MilkShop.Repositories.Repositories
+namespace NET1814_MilkShop.Repositories.Repositories;
+
+public interface ICustomerRepository
 {
-    public interface ICustomerRepository
+    /*Task<List<Customer>> GetCustomersAsync();*/
+    IQueryable<Customer> GetCustomersQuery();
+    Task<Customer?> GetByEmailAsync(string email);
+    Task<Customer?> GetById(Guid id);
+
+    Task<bool> IsExistAsync(Guid id);
+
+    /*Task<bool> IsCustomerExistAsync(string email, string phoneNumber);*/
+    Task<bool> IsExistPhoneNumberAsync(string phoneNumber);
+    Task<bool> IsExistEmailAsync(string email);
+    void Add(Customer customer);
+    void Update(Customer customer);
+    void Remove(Customer customer);
+}
+
+public sealed class CustomerRepository : Repository<Customer>, ICustomerRepository
+{
+    public CustomerRepository(AppDbContext context)
+        : base(context)
     {
-        /*Task<List<Customer>> GetCustomersAsync();*/
-        IQueryable<Customer> GetCustomersQuery();
-        Task<Customer?> GetByEmailAsync(string email);
-        Task<Customer?> GetById(Guid id);
-        Task<bool> IsExistAsync(Guid id);
-        /*Task<bool> IsCustomerExistAsync(string email, string phoneNumber);*/
-        Task<bool> IsExistPhoneNumberAsync(string phoneNumber);
-        Task<bool> IsExistEmailAsync(string email);
-        void Add(Customer customer);
-        void Update(Customer customer);
-        void Remove(Customer customer);
     }
 
-    public sealed class CustomerRepository : Repository<Customer>, ICustomerRepository
+    public async Task<Customer?> GetByEmailAsync(string email)
     {
-        public CustomerRepository(AppDbContext context)
-            : base(context) { }
-
-        public async Task<Customer?> GetByEmailAsync(string email)
-        {
-            //use AsNoTracking for read-only operations
-            //var customer = await _context
-            //    .Customers.AsNoTracking()
-            //    .Include(x => x.User)
-            //    .FirstOrDefaultAsync(x => string.Equals(email, x.Email));
-            var customer = await _query.Include(x => x.User)
-                                       .FirstOrDefaultAsync(x => string.Equals(email, x.Email));
-            return customer;
-        }
-
-        public IQueryable<Customer> GetCustomersQuery()
-        {
-            var query = _query.Include(x => x.User);
-            return query;
-        }
-
-        public override async Task<Customer?> GetById(Guid id)
-        {
-            //return await _context
-            //    .Customers.Include(x => x.User)
-            //    .FirstOrDefaultAsync(x => x.UserId == id);
-            return await _query.Include(x => x.User)
-                               .FirstOrDefaultAsync(x => x.UserId == id);
-        }
-
-        public async Task<bool> IsExistAsync(Guid id)
-        {
-            //return await _context.Customers.AnyAsync(e => e.UserId == id);
-            return await _query.AnyAsync(e => e.UserId == id);
-        }
-        // Tach PhoneNumber va Email de handle loi rieng tren frontend
-        public async Task<bool> IsExistPhoneNumberAsync(string phoneNumber)
-        {
-            //return await _context.Customers.AnyAsync(e => e.PhoneNumber == phoneNumber);
-            return await _query.AnyAsync(e => e.PhoneNumber == phoneNumber);
-        }
-
-        public async Task<bool> IsExistEmailAsync(string email)
-        {
-            //return await _context.Customers.AnyAsync(e => e.Email == email);
-            return await _query.AnyAsync(e => e.Email == email);
-        }
-        /*public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
-        {
-            return await _context.Customers.AnyAsync(e => e.Email == email || e.PhoneNumber == phoneNumber);
-        }*/
-
-
-
+        //use AsNoTracking for read-only operations
+        //var customer = await _context
+        //    .Customers.AsNoTracking()
+        //    .Include(x => x.User)
+        //    .FirstOrDefaultAsync(x => string.Equals(email, x.Email));
+        var customer = await _query.Include(x => x.User)
+            .FirstOrDefaultAsync(x => string.Equals(email, x.Email));
+        return customer;
     }
+
+    public IQueryable<Customer> GetCustomersQuery()
+    {
+        var query = _query.Include(x => x.User);
+        return query;
+    }
+
+    public override async Task<Customer?> GetById(Guid id)
+    {
+        //return await _context
+        //    .Customers.Include(x => x.User)
+        //    .FirstOrDefaultAsync(x => x.UserId == id);
+        return await _query.Include(x => x.User)
+            .FirstOrDefaultAsync(x => x.UserId == id);
+    }
+
+    public async Task<bool> IsExistAsync(Guid id)
+    {
+        //return await _context.Customers.AnyAsync(e => e.UserId == id);
+        return await _query.AnyAsync(e => e.UserId == id);
+    }
+
+    // Tach PhoneNumber va Email de handle loi rieng tren frontend
+    public async Task<bool> IsExistPhoneNumberAsync(string phoneNumber)
+    {
+        //return await _context.Customers.AnyAsync(e => e.PhoneNumber == phoneNumber);
+        return await _query.AnyAsync(e => e.PhoneNumber == phoneNumber);
+    }
+
+    public async Task<bool> IsExistEmailAsync(string email)
+    {
+        //return await _context.Customers.AnyAsync(e => e.Email == email);
+        return await _query.AnyAsync(e => e.Email == email);
+    }
+    /*public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
+    {
+        return await _context.Customers.AnyAsync(e => e.Email == email || e.PhoneNumber == phoneNumber);
+    }*/
 }

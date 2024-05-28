@@ -1,20 +1,18 @@
-﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("users")]
-public partial class User : IAuditableEntity
+public class User : IAuditableEntity
 {
-    [Key]
-    public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; }
 
     public string Username { get; set; } = null!;
 
-    [Column(TypeName = "nvarchar(255)")]
-    public string Password { get; set; } = null!;
+    [Column(TypeName = "nvarchar(255)")] public string Password { get; set; } = null!;
 
     public string? FirstName { get; set; }
 
@@ -28,11 +26,15 @@ public partial class User : IAuditableEntity
 
     public int RoleId { get; set; }
 
-    [DefaultValue(false)]
-    public bool IsActive { get; set; }
+    [DefaultValue(false)] public bool IsActive { get; set; }
+
     [Column("is_banned")]
     [DefaultValue(false)]
     public bool IsBanned { get; set; }
+
+    public virtual Customer? Customer { get; set; }
+
+    public virtual Role? Role { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
@@ -42,8 +44,4 @@ public partial class User : IAuditableEntity
 
     [Column("deleted_at", TypeName = "datetime2")]
     public DateTime? DeletedAt { get; set; }
-
-    public virtual Customer? Customer { get; set; }
-
-    public virtual Role? Role { get; set; }
 }

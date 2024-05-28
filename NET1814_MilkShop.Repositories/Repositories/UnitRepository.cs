@@ -2,29 +2,30 @@
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
 
-namespace NET1814_MilkShop.Repositories.Repositories
+namespace NET1814_MilkShop.Repositories.Repositories;
+
+public interface IUnitRepository
 {
-    public interface IUnitRepository
+    IQueryable<Unit> GetUnitsQuery();
+    void Add(Unit unit);
+    void Update(Unit unit);
+    Task<Unit?> GetExistIsActiveId(int id);
+}
+
+public class UnitRepository : Repository<Unit>, IUnitRepository
+{
+    public UnitRepository(AppDbContext context)
+        : base(context)
     {
-        IQueryable<Unit> GetUnitsQuery();
-        void Add(Unit unit);
-        void Update(Unit unit);
-        Task<Unit?> GetExistIsActiveId(int id);
     }
 
-    public class UnitRepository : Repository<Unit>, IUnitRepository
+    public IQueryable<Unit> GetUnitsQuery()
     {
-        public UnitRepository(AppDbContext context)
-            : base(context) { }
+        return _query;
+    }
 
-        public IQueryable<Unit> GetUnitsQuery()
-        {
-            return _query;
-        }
-
-        public Task<Unit?> GetExistIsActiveId(int id)
-        {
-            return _query.FirstOrDefaultAsync(x => x.Id == id);
-        }
+    public Task<Unit?> GetExistIsActiveId(int id)
+    {
+        return _query.FirstOrDefaultAsync(x => x.Id == id);
     }
 }

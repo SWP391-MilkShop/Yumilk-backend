@@ -1,22 +1,22 @@
-﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("ProductImages")]
-public partial class ProductImage : IAuditableEntity
+public class ProductImage : IAuditableEntity
 {
-    [Key]
-    public int Id { get; set; }
+    [Key] public int Id { get; set; }
 
     public Guid? ProductId { get; set; }
 
     public string ImageUrl { get; set; } = null!;
 
-    [DefaultValue(false)]
-    public bool IsActive { get; set; }
+    [DefaultValue(false)] public bool IsActive { get; set; }
+
+    public virtual Product? Product { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
@@ -26,6 +26,4 @@ public partial class ProductImage : IAuditableEntity
 
     [Column("deleted_at", TypeName = "datetime2")]
     public DateTime? DeletedAt { get; set; }
-
-    public virtual Product? Product { get; set; }
 }

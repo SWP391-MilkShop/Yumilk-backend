@@ -1,59 +1,53 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Interfaces;
 
-namespace NET1814_MilkShop.Repositories.UnitOfWork
+namespace NET1814_MilkShop.Repositories.UnitOfWork;
+
+public interface IUnitOfWork : IDisposable
 {
-    public interface IUnitOfWork : IDisposable
+    Task<int> SaveChangesAsync();
+}
+
+public class UnitOfWork : IUnitOfWork
+{
+    private readonly AppDbContext _context;
+
+    public UnitOfWork(AppDbContext context)
     {
-        Task<int> SaveChangesAsync();
+        _context = context;
     }
 
-    public class UnitOfWork : IUnitOfWork
+    public async Task<int> SaveChangesAsync()
     {
-        private readonly AppDbContext _context;
-
-        public UnitOfWork(AppDbContext context)
+        try
         {
-            _context = context;
+            UpdateAuditableEntities();
+            return await _context.SaveChangesAsync();
         }
-
-        public async Task<int> SaveChangesAsync()
+        catch (Exception ex)
         {
-            try
-            {
-                UpdateAuditableEntities();
-                return await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("An error occurred while saving changes", ex);
-            }
+            throw new Exception("An error occurred while saving changes", ex);
         }
+    }
 
-        private void UpdateAuditableEntities()
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
+
+    private void UpdateAuditableEntities()
+    {
+        var entries =
+            _context.ChangeTracker.Entries<IAuditableEntity>();
+
+        foreach (var entityEntry in entries)
         {
-            IEnumerable<EntityEntry<IAuditableEntity>> entries =
-                _context.ChangeTracker.Entries<IAuditableEntity>();
+            if (entityEntry.State == EntityState.Added)
+                entityEntry.Property(a => a.CreatedAt).CurrentValue = DateTime.UtcNow;
 
-            foreach (EntityEntry<IAuditableEntity> entityEntry in entries)
-            {
-                if (entityEntry.State == EntityState.Added)
-                {
-                    entityEntry.Property(a => a.CreatedAt).CurrentValue = DateTime.UtcNow;
-                }
-
-                if (entityEntry.State == EntityState.Modified)
-                {
-                    entityEntry.Property(a => a.ModifiedAt).CurrentValue = DateTime.UtcNow;
-                }
-            }
-        }
-
-        public void Dispose()
-        {
-            _context.Dispose();
+            if (entityEntry.State == EntityState.Modified)
+                entityEntry.Property(a => a.ModifiedAt).CurrentValue = DateTime.UtcNow;
         }
     }
 }

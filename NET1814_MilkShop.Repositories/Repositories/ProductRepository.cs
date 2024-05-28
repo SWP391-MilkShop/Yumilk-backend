@@ -2,28 +2,29 @@
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
 
-namespace NET1814_MilkShop.Repositories.Repositories
+namespace NET1814_MilkShop.Repositories.Repositories;
+
+public interface IProductRepository
 {
-    public interface IProductRepository
+    IQueryable<Product> GetProductsQuery();
+}
+
+public sealed class ProductRepository : Repository<Product>, IProductRepository
+{
+    public ProductRepository(AppDbContext context)
+        : base(context)
     {
-        IQueryable<Product> GetProductsQuery();
     }
 
-    public sealed class ProductRepository : Repository<Product>, IProductRepository
+    public IQueryable<Product> GetProductsQuery()
     {
-        public ProductRepository(AppDbContext context)
-            : base(context) { }
-
-        public IQueryable<Product> GetProductsQuery()
-        {
-            //return _context
-            //    .Products.Include(p => p.Brand)
-            //    .Include(p => p.Category)
-            //    .Include(p => p.Unit)
-            //    .AsNoTracking();
-            return _query.Include(p => p.Brand)
-                         .Include(p => p.Category)
-                         .Include(p => p.Unit);
-        }
+        //return _context
+        //    .Products.Include(p => p.Brand)
+        //    .Include(p => p.Category)
+        //    .Include(p => p.Unit)
+        //    .AsNoTracking();
+        return _query.Include(p => p.Brand)
+            .Include(p => p.Category)
+            .Include(p => p.Unit);
     }
 }
