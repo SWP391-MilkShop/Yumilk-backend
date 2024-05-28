@@ -307,6 +307,19 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
+        [HttpPut("/product_attributes/{id}")]
+        public async Task<IActionResult> UpdateProductAttribute(int id, [FromBody] CreateProductAttributeModel model)
+        {
+            _logger.Information("Update Product Attribute");
+            var res = await _productAttributeService.UpdateProductAttributeAsync(id, model);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
         #endregion
     }
 }
