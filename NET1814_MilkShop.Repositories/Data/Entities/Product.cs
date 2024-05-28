@@ -1,14 +1,15 @@
-﻿using System.ComponentModel;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("Products")]
-public class Product : IAuditableEntity
+public partial class Product : IAuditableEntity
 {
-    [Key] public Guid Id { get; set; }
+    [Key]
+    public Guid Id { get; set; }
 
     public string Name { get; set; } = null!;
 
@@ -22,7 +23,8 @@ public class Product : IAuditableEntity
 
     public int CategoryId { get; set; }
 
-    [Column("brand_id")] public int BrandId { get; set; }
+    [Column("brand_id")]
+    public int BrandId { get; set; }
 
     public int UnitId { get; set; }
 
@@ -30,7 +32,17 @@ public class Product : IAuditableEntity
     [ForeignKey("ProductStatus")]
     public int StatusId { get; set; }
 
-    [DefaultValue(false)] public bool IsActive { get; set; }
+    [DefaultValue(false)]
+    public bool IsActive { get; set; }
+
+    [Column("created_at", TypeName = "datetime2")]
+    public DateTime CreatedAt { get; set; }
+
+    [Column("modified_at", TypeName = "datetime2")]
+    public DateTime? ModifiedAt { get; set; }
+
+    [Column("deleted_at", TypeName = "datetime2")]
+    public DateTime? DeletedAt { get; set; }
 
     public virtual Brand? Brand { get; set; }
 
@@ -48,13 +60,4 @@ public class Product : IAuditableEntity
 
     public virtual ProductStatus? ProductStatus { get; set; }
     public virtual Unit? Unit { get; set; }
-
-    [Column("created_at", TypeName = "datetime2")]
-    public DateTime CreatedAt { get; set; }
-
-    [Column("modified_at", TypeName = "datetime2")]
-    public DateTime? ModifiedAt { get; set; }
-
-    [Column("deleted_at", TypeName = "datetime2")]
-    public DateTime? DeletedAt { get; set; }
 }

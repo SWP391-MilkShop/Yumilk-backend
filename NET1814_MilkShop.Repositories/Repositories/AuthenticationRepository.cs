@@ -2,34 +2,35 @@
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
 
-namespace NET1814_MilkShop.Repositories.Repositories;
-
-public interface IAuthenticationRepository
+namespace NET1814_MilkShop.Repositories.Repositories
 {
-    Task<User?> GetUserByUserNameNPassword(string username, string password);
-}
-
-public sealed class AuthenticationRepository : Repository<User>, IAuthenticationRepository
-{
-    public AuthenticationRepository(AppDbContext context)
-        : base(context)
+    public interface IAuthenticationRepository
     {
+        Task<User?> GetUserByUserNameNPassword(string username, string password);
     }
 
-    /// <summary>
-    ///     Get by username and password for login
-    /// </summary>
-    /// <param name="username"></param>
-    /// <param name="password"></param>
-    /// <returns></returns>
-    public async Task<User?> GetUserByUserNameNPassword(string username, string password)
+    public sealed class AuthenticationRepository : Repository<User>, IAuthenticationRepository
     {
-        var user = await _query.FirstOrDefaultAsync(x => x.Username.Equals(username));
-        //var user = await _context
-        //    .Users.AsNoTracking()
-        //    .FirstOrDefaultAsync(x => x.Username.Equals(username));
-        //check case sensitive
-        if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password)) return user;
-        return null;
+        public AuthenticationRepository(AppDbContext context)
+            : base(context) { }
+        /// <summary>
+        /// Get by username and password for login
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public async Task<User?> GetUserByUserNameNPassword(string username, string password)
+        {
+            var user = await _query.FirstOrDefaultAsync(x => x.Username.Equals(username));
+            //var user = await _context
+            //    .Users.AsNoTracking()
+            //    .FirstOrDefaultAsync(x => x.Username.Equals(username));
+            //check case sensitive
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
+            {
+                return user;
+            }
+            return null;
+        }
     }
 }

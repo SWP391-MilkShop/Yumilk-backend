@@ -1,10 +1,11 @@
-﻿namespace NET1814_MilkShop.Repositories.Data.Interfaces;
-
-public interface IAuditableEntity
+﻿namespace NET1814_MilkShop.Repositories.Data.Interfaces
 {
-    DateTime CreatedAt { get; set; }
+    public interface IAuditableEntity
+    {
+        DateTime CreatedAt { get; set; }
 
-    DateTime? ModifiedAt { get; set; }
+        DateTime? ModifiedAt { get; set; }
 
-    DateTime? DeletedAt { get; set; }
+        DateTime? DeletedAt { get; set; }
+    }
 }

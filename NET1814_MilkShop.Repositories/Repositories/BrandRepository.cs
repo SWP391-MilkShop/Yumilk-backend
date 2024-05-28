@@ -2,31 +2,32 @@
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
 
-namespace NET1814_MilkShop.Repositories.Repositories;
-
-public interface IBrandRepository
+namespace NET1814_MilkShop.Repositories.Repositories
 {
-    IQueryable<Brand> GetBrandsQuery();
-    void Add(Brand b);
-    void Update(Brand b);
-    void Remove(Brand b);
-    Task<Brand?> GetById(int id);
-    Task<Brand?> GetBrandByName(string name);
-}
-
-public class BrandRepository : Repository<Brand>, IBrandRepository
-{
-    public BrandRepository(AppDbContext context) : base(context)
+    public interface IBrandRepository
     {
+        IQueryable<Brand> GetBrandsQuery();
+        void Add(Brand b);
+        void Update(Brand b);
+        void Remove(Brand b);
+        Task<Brand?> GetById(int id);
+        Task<Brand?> GetBrandByName(string name);
     }
 
-    public IQueryable<Brand> GetBrandsQuery()
+    public class BrandRepository : Repository<Brand>, IBrandRepository
     {
-        return _query;
-    }
+        public BrandRepository(AppDbContext context) : base(context)
+        {
+        }
 
-    public async Task<Brand?> GetBrandByName(string name)
-    {
-        return await _query.FirstOrDefaultAsync(x => x.Name.Equals(name));
+        public IQueryable<Brand> GetBrandsQuery()
+        {
+            return _query;
+        }
+
+        public async Task<Brand?> GetBrandByName(string name)
+        {
+            return await _query.FirstOrDefaultAsync(x => x.Name.Equals(name));
+        }
     }
 }

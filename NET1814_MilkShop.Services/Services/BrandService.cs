@@ -33,25 +33,34 @@ public class BrandService : IBrandService
 
         #region filter
 
-        if (queryModel.IsActive == false) query = query.Where(x => x.IsActive == false);
+        if (queryModel.IsActive == false)
+        {
+            query = query.Where(x => x.IsActive == false);
+        }
 
         if (!string.IsNullOrEmpty(queryModel.SearchTerm))
+        {
             query = query.Where(x =>
                 x.Name.Contains(queryModel.SearchTerm) ||
                 x.Description.Contains(queryModel.SearchTerm));
+        }
 
         #endregion
 
         #region sort
 
         if ("desc".Equals(queryModel.SortOrder))
+        {
             query = query.OrderByDescending(GetSortBrandProperty(queryModel));
+        }
         else
+        {
             query = query.OrderBy(GetSortBrandProperty(queryModel));
+        }
 
         #endregion
 
-        var model = query.Select(x => new BrandModel
+        var model = query.Select(x => new BrandModel()
         {
             Name = x.Name,
             Description = x.Description
@@ -63,7 +72,7 @@ public class BrandService : IBrandService
 
         #endregion
 
-        return new ResponseModel
+        return new ResponseModel()
         {
             Data = brands,
             Message = brands.TotalCount > 0 ? "Get brands successfully" : "No brands found",
@@ -84,11 +93,13 @@ public class BrandService : IBrandService
         // }
         var isExistName = await _brandRepository.GetBrandByName(model.Name);
         if (isExistName != null)
+        {
             return new ResponseModel
             {
                 Message = "Brand name is existed! Add new brand fail!",
                 Status = "Error"
             };
+        }
 
         var entity = new Brand
         {
@@ -110,22 +121,26 @@ public class BrandService : IBrandService
     {
         var isExistId = await _brandRepository.GetById(id);
         if (isExistId == null)
+        {
             return new ResponseModel
             {
                 Status = "Error",
                 Message = "Brand not found"
             };
+        }
 
         if (string.Equals(isExistId.Name, model.Name) && string.Equals(isExistId.Description, model.Description) &&
             isExistId.IsActive == model.IsActive)
+        {
             return new ResponseModel
             {
                 Status = "Error",
                 Message = "No change"
             };
-
+        }
+        
         if (string.Equals(isExistId.Name, model.Name) && (!string.Equals(isExistId.Description, model.Description) ||
-                                                          isExistId.IsActive != model.IsActive))
+            isExistId.IsActive != model.IsActive))
         {
             isExistId.IsActive = model.IsActive;
             isExistId.Name = model.Name;
@@ -142,11 +157,13 @@ public class BrandService : IBrandService
 
         var isExistName = await _brandRepository.GetBrandByName(model.Name);
         if (isExistName != null)
+        {
             return new ResponseModel
             {
                 Status = "Error",
                 Message = "Brand name is existed! Update brand fail!"
             };
+        }
 
         isExistId.IsActive = model.IsActive;
         isExistId.Name = model.Name;
@@ -165,11 +182,13 @@ public class BrandService : IBrandService
     {
         var isExist = await _brandRepository.GetById(id);
         if (isExist == null)
+        {
             return new ResponseModel
             {
                 Status = "Error",
                 Message = "Brand not found"
             };
+        }
 
         isExist.DeletedAt = DateTime.Now;
         _brandRepository.Remove(isExist);
@@ -184,12 +203,9 @@ public class BrandService : IBrandService
 
     private static Expression<Func<Brand, object>> GetSortBrandProperty(
         BrandQueryModel queryModel
-    )
+    ) => queryModel.SortColumn?.ToLower() switch
     {
-        return queryModel.SortColumn?.ToLower() switch
-        {
-            "name" => product => product.Name,
-            _ => product => product.Id
-        };
-    }
+        "name" => product => product.Name,
+        _ => product => product.Id
+    };
 }

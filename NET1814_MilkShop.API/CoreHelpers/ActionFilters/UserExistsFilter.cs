@@ -1,63 +1,62 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using NET1814_MilkShop.Services.Services;
+using System.Security.Claims;
 
-namespace NET1814_MilkShop.API.CoreHelpers.ActionFilters;
-
-public class UserExistsFilter : IAsyncActionFilter
+namespace NET1814_MilkShop.API.CoreHelpers.ActionFilters
 {
-    private readonly ICustomerService _customerService;
-    private readonly IUserService _userService;
-
-    public UserExistsFilter(IServiceProvider serviceProvider)
+    public class UserExistsFilter : IAsyncActionFilter
     {
-        _customerService = serviceProvider.GetRequiredService<ICustomerService>();
-        _userService = serviceProvider.GetRequiredService<IUserService>();
-    }
+        private readonly ICustomerService _customerService;
+        private readonly IUserService _userService;
 
-    public async Task OnActionExecutionAsync(
-        ActionExecutingContext context,
-        ActionExecutionDelegate next
-    )
-    {
-        // Get the user id from the claims
-        var userIdStr = context
-            .HttpContext.User.Claims.FirstOrDefault(c => "UserId".Equals(c.Type))
-            ?.Value;
-        if (userIdStr == null)
+        public UserExistsFilter(IServiceProvider serviceProvider)
         {
-            context.Result = new BadRequestObjectResult("UserId not found");
-            return;
+            _customerService = serviceProvider.GetRequiredService<ICustomerService>();
+            _userService = serviceProvider.GetRequiredService<IUserService>();
         }
 
-        var userId = Guid.Parse(userIdStr);
-        var roleId = context
-            .HttpContext.User.Claims.FirstOrDefault(c => ClaimTypes.Role.Equals(c.Type))
-            ?.Value;
-        if (roleId == "1" || roleId == "2")
+        public async Task OnActionExecutionAsync(
+            ActionExecutingContext context,
+            ActionExecutionDelegate next
+        )
         {
-            // Check if the admin or staff exists
-            var isExist = await _userService.IsExistAsync(userId);
-            if (!isExist)
+            // Get the user id from the claims
+            var userIdStr = context
+                .HttpContext.User.Claims.FirstOrDefault(c => "UserId".Equals(c.Type))
+                ?.Value;
+            if (userIdStr == null)
             {
-                context.Result = new NotFoundObjectResult("User not found");
+                context.Result = new BadRequestObjectResult("UserId not found");
                 return;
             }
-        }
-        else if (roleId == "3")
-        {
-            // Check if the customer exists
-            var isExist = await _customerService.IsExistAsync(userId);
-            if (!isExist)
+            var userId = Guid.Parse(userIdStr);
+            var roleId = context
+                .HttpContext.User.Claims.FirstOrDefault(c => ClaimTypes.Role.Equals(c.Type))
+                ?.Value;
+            if (roleId == "1" || roleId == "2")
             {
-                context.Result = new NotFoundObjectResult("User not found");
-                return;
+                // Check if the admin or staff exists
+                bool isExist = await _userService.IsExistAsync(userId);
+                if (!isExist)
+                {
+                    context.Result = new NotFoundObjectResult("User not found");
+                    return;
+                }
             }
+            else if (roleId == "3")
+            {
+                // Check if the customer exists
+                bool isExist = await _customerService.IsExistAsync(userId);
+                if (!isExist)
+                {
+                    context.Result = new NotFoundObjectResult("User not found");
+                    return;
+                }
+            }
+            context.HttpContext.Items.Add("UserId", userId);
+            // If the user exists, continue with the next action
+            await next();
         }
-
-        context.HttpContext.Items.Add("UserId", userId);
-        // If the user exists, continue with the next action
-        await next();
     }
 }

@@ -1,11 +1,11 @@
-﻿using System.ComponentModel;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("OrderDetails")]
-public class OrderDetail : IAuditableEntity
+public partial class OrderDetail : IAuditableEntity
 {
     public Guid OrderId { get; set; }
 
@@ -19,11 +19,8 @@ public class OrderDetail : IAuditableEntity
 
     public decimal ItemPrice { get; set; }
 
-    [DefaultValue(false)] public bool IsActive { get; set; }
-
-    public virtual Order Order { get; set; } = null!;
-
-    public virtual Product Product { get; set; } = null!;
+    [DefaultValue(false)]
+    public bool IsActive { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
@@ -33,4 +30,8 @@ public class OrderDetail : IAuditableEntity
 
     [Column("deleted_at", TypeName = "datetime2")]
     public DateTime? DeletedAt { get; set; }
+
+    public virtual Order Order { get; set; } = null!;
+
+    public virtual Product Product { get; set; } = null!;
 }

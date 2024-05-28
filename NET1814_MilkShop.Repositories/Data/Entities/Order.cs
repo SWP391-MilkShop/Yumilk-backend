@@ -1,13 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("Orders")]
-public class Order : IAuditableEntity
+public partial class Order : IAuditableEntity
 {
-    [Key] public Guid Id { get; set; }
+    [Key]
+    public Guid Id { get; set; }
 
     public Guid? CustomerId { get; set; }
 
@@ -30,16 +31,7 @@ public class Order : IAuditableEntity
 
     [Column("payment_date", TypeName = "datetime2")]
     public DateTime? PaymentDate { get; set; }
-
     public int StatusId { get; set; }
-
-    public virtual Customer? Customer { get; set; }
-
-    public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
-
-    public virtual OrderStatus? Status { get; set; }
-
-    public virtual Voucher? Voucher { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
@@ -49,4 +41,12 @@ public class Order : IAuditableEntity
 
     [Column("deleted_at", TypeName = "datetime2")]
     public DateTime? DeletedAt { get; set; }
+
+    public virtual Customer? Customer { get; set; }
+
+    public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
+
+    public virtual OrderStatus? Status { get; set; }
+
+    public virtual Voucher? Voucher { get; set; }
 }

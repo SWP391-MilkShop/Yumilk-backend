@@ -5,12 +5,12 @@ public class BrandQueryModel : QueryModel
     public bool IsActive { get; set; } = true;
 
     /// <summary>
-    ///     Search by name or description
+    /// Search by name or description
     /// </summary>
     public new string? SearchTerm { get; set; }
 
     /// <summary>
-    ///     Sort by id or name (default is id)
+    /// Sort by id or name (default is id)
     /// </summary>
     public new string? SortColumn { get; set; }
 }
