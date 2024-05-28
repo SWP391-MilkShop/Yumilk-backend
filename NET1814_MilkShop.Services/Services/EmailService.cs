@@ -8,7 +8,7 @@ namespace NET1814_MilkShop.Services.Services
     public interface IEmailService
     {
         void SendPasswordResetEmail(string receiveEmail, string token);
-        void SendVerificationEmail(string receiveEmail, string token);
+        void SendVerificationEmail(string receiveEmail, string token, string environment);
     }
 
     public class EmailService : IEmailService
@@ -28,6 +28,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 throw new ArgumentException("FromEmailAddress is not set in EmailSettingModel");
             }
+
             MailMessage mailMessage = new MailMessage()
             {
                 Subject = model.Subject,
@@ -71,18 +72,34 @@ namespace NET1814_MilkShop.Services.Services
 
         public void SendVerificationEmail( /*CustomerModel user*/
             string receiveEmail,
-            string token
+            string token,
+            string environment
         )
         {
-            var model = new SendMailModel
+            if (environment == "Development")
             {
-                Receiver = receiveEmail,
-                Subject = "Account Verification",
-                Body =
-                    "Please click the link below to verify your account\n\n"
-                    + $"https://localhost:5000/api/authentication/verify?token={token}"
-            };
-            SendMail(model);
+                var model = new SendMailModel
+                {
+                    Receiver = receiveEmail,
+                    Subject = "Account Verification",
+                    Body =
+                        "Please click the link below to verify your account\n\n"
+                        + $"https://localhost:5000/api/authentication/verify?token={token}"
+                };
+                SendMail(model);
+            } 
+            else if (environment == "Production")
+            {
+                var model = new SendMailModel
+                {
+                    Receiver = receiveEmail,
+                    Subject = "Account Verification",
+                    Body =
+                        "Please click the link below to verify your account\n\n"
+                        + $"https://milkshop.com/api/authentication/verify?token={token}"
+                };
+                SendMail(model);
+            } 
         }
     }
 }
