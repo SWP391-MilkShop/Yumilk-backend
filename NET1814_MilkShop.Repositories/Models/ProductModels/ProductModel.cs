@@ -23,5 +23,7 @@
         public string Unit { get; set; } = null!;
 
         public string Status { get; set; } = null!;
+
+        public bool IsActive { get; set; }
     }
 }
