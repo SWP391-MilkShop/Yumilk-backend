@@ -12,7 +12,7 @@ public interface IBrandService
 {
     Task<ResponseModel> GetBrandsAsync(BrandQueryModel queryModel);
     Task<ResponseModel> AddBrandAsync(CreateBrandModel model);
-    Task<ResponseModel> UpdateBrandAsync(int id, CreateBrandModel model);
+    Task<ResponseModel> UpdateBrandAsync(int id, UpdateBrandModel model);
     Task<ResponseModel> DeleteBrandAsync(int id);
 }
 
@@ -33,9 +33,9 @@ public class BrandService : IBrandService
 
         #region filter
 
-        if (queryModel.IsActive == false)
+        if (queryModel.IsActive.HasValue)
         {
-            query = query.Where(x => x.IsActive == false);
+            query = query.Where(x => x.IsActive == queryModel.IsActive);
         }
 
         if (!string.IsNullOrEmpty(queryModel.SearchTerm))
@@ -117,7 +117,7 @@ public class BrandService : IBrandService
         };
     }
 
-    public async Task<ResponseModel> UpdateBrandAsync(int id, CreateBrandModel model)
+    public async Task<ResponseModel> UpdateBrandAsync(int id, UpdateBrandModel model)
     {
         var isExistId = await _brandRepository.GetById(id);
         if (isExistId == null)
@@ -125,56 +125,42 @@ public class BrandService : IBrandService
             return new ResponseModel
             {
                 Status = "Error",
-                Message = "Brand not found"
+                Message = "Không tìm thấy thương hiệu"
             };
         }
 
-        if (string.Equals(isExistId.Name, model.Name) && string.Equals(isExistId.Description, model.Description) &&
-            isExistId.IsActive == model.IsActive)
+        if (!string.IsNullOrEmpty(model.Name))
         {
-            return new ResponseModel
+            var isExistName = await _brandRepository.GetBrandByName(model.Name);
+            if (isExistName != null)
             {
-                Status = "Error",
-                Message = "No change"
-            };
-        }
-        
-        if (string.Equals(isExistId.Name, model.Name) && (!string.Equals(isExistId.Description, model.Description) ||
-            isExistId.IsActive != model.IsActive))
-        {
-            isExistId.IsActive = model.IsActive;
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Tên thương hiệu đã tồn tại"
+                };
+            }
+
             isExistId.Name = model.Name;
-            isExistId.Description = model.Description;
-            _brandRepository.Update(isExistId);
-            await _unitOfWork.SaveChangesAsync();
+        }
+
+        isExistId.Description = string.IsNullOrEmpty(model.Description) ? isExistId.Description : model.Description;
+        isExistId.IsActive = model.IsActive;
+        _brandRepository.Update(isExistId);
+        var res = await _unitOfWork.SaveChangesAsync();
+        if (res > 0)
+        {
             return new ResponseModel
             {
                 Status = "Success",
-                Message = "Update brand successfully",
-                Data = isExistId
+                Message = "Cập nhật thương hiệu thành công",
             };
         }
 
-        var isExistName = await _brandRepository.GetBrandByName(model.Name);
-        if (isExistName != null)
-        {
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Brand name is existed! Update brand fail!"
-            };
-        }
-
-        isExistId.IsActive = model.IsActive;
-        isExistId.Name = model.Name;
-        isExistId.Description = model.Description;
-        _brandRepository.Update(isExistId);
-        await _unitOfWork.SaveChangesAsync();
         return new ResponseModel
         {
             Status = "Success",
-            Message = "Update brand successfully",
-            Data = isExistId
+            Message = "Cập nhật thương hiệu thất bại",
         };
     }
 
