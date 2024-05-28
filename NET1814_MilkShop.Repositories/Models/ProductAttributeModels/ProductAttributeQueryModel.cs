@@ -2,7 +2,7 @@ namespace NET1814_MilkShop.Repositories.Models.ProductAttributeModels;
 
 public class ProductAttributeQueryModel : QueryModel
 {
-    public bool IsActive { get; set; } = true;
+    public bool? IsActive { get; set; }
 
     /// <summary>
     /// Search by name or description
