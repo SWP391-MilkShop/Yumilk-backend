@@ -125,14 +125,9 @@ namespace NET1814_MilkShop.API.Controllers
 
         [HttpPost("refresh-token")]
         [Authorize(AuthenticationSchemes = "Refresh")]
-        public async Task<IActionResult> RefreshToken()
+        public async Task<IActionResult> RefreshToken([FromQuery] string token)
         {
             _logger.Information("Refresh Token");
-            if (!Request.Headers.TryGetValue("RefreshToken", out var token))
-            {
-                return BadRequest("Not found token");
-            }
-
             var res = await _authenticationService.RefreshTokenAsync(token);
             if (res.Status == "Error")
             {
