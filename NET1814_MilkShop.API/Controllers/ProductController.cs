@@ -353,7 +353,18 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
+        [HttpPost("/product_attribute_values/{pid}/{aid}")]
+        public async Task<IActionResult> AddProAttValues(Guid pid, int aid, [FromBody] CreateUpdatePavModel model)
+        {
+            _logger.Information("Add Product Attribute Value");
+            var res = await _productAttributeValueService.AddProductAttributeValue(pid, aid, model);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
 
+            return Ok(res);
+        }
 
         #endregion
     }
