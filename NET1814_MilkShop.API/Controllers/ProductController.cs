@@ -83,7 +83,7 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] UpdateProductModel model)
         {
