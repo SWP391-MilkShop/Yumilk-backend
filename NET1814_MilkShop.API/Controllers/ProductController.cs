@@ -308,7 +308,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPut("/product_attributes/{id}")]
-        public async Task<IActionResult> UpdateProductAttribute(int id, [FromBody] CreateProductAttributeModel model)
+        public async Task<IActionResult> UpdateProductAttribute(int id, [FromBody] UpdateProductAttributeModel model)
         {
             _logger.Information("Update Product Attribute");
             var res = await _productAttributeService.UpdateProductAttributeAsync(id, model);
@@ -320,7 +320,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpDelete("/product_attributes")]
+        [HttpDelete("/product_attributes/{id}")]
         public async Task<IActionResult> DeleteProductAttribute(int id)
         {
             _logger.Information("Delete Product Attribute");
