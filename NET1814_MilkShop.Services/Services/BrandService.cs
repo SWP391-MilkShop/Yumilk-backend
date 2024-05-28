@@ -177,7 +177,7 @@ public class BrandService : IBrandService
         }
 
         isExist.DeletedAt = DateTime.Now;
-        _brandRepository.Remove(isExist);
+        _brandRepository.Update(isExist);
         await _unitOfWork.SaveChangesAsync();
         return new ResponseModel
         {
