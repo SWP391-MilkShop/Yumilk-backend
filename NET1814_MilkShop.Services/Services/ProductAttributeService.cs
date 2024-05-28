@@ -13,6 +13,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetProductAttributesAsync(ProductAttributeQueryModel queryModel);
         Task<ResponseModel> AddProductAttributeAsync(CreateProductAttributeModel model);
         Task<ResponseModel> UpdateProductAttributeAsync(int id, CreateProductAttributeModel model);
+        Task<ResponseModel> DeleteProductAttributeAsync(int id);
     }
 
     public class ProductAttributeService : IProductAttributeService
@@ -148,6 +149,37 @@ namespace NET1814_MilkShop.Services.Services
             {
                 Message = "Cập nhật thuộc tính sản phẩm thất bại",
                 Status = "Error"
+            };
+        }
+
+        public async Task<ResponseModel> DeleteProductAttributeAsync(int id)
+        {
+            var isExistId = await _productAttribute.GetProductAttributeById(id);
+            if (isExistId == null)
+            {
+                return new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "Xóa thuộc tính sản phẩm thất bại"
+                };
+            }
+
+            isExistId.DeletedAt = DateTime.Now;
+            _productAttribute.Update(isExistId);
+            var res = await _unitOfWork.SaveChangesAsync();
+            if (res > 0)
+            {
+                return new ResponseModel
+                {
+                    Status = "Success",
+                    Message = "Xóa thuộc tính sản phẩm thành công"
+                };
+            }
+
+            return new ResponseModel
+            {
+                Status = "Success",
+                Message = "Xóa thuộc tính sản phẩm thất bại"
             };
         }
 
