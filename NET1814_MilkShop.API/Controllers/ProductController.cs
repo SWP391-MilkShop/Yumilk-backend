@@ -282,7 +282,7 @@ namespace NET1814_MilkShop.API.Controllers
         #region ProductAttribute
 
         [HttpGet("/product_attributes")]
-        public async Task<IActionResult> GetProductAttributes(ProductAttributeQueryModel queryModel)
+        public async Task<IActionResult> GetProductAttributes([FromQuery]ProductAttributeQueryModel queryModel)
         {
             _logger.Information("Get Product Attributes");
             var res = await _productAttributeService.GetProductAttributesAsync(queryModel);
