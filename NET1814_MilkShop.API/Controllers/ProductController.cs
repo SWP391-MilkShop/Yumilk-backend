@@ -366,6 +366,19 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
+        [HttpPut("/product_attribute_values/{pid}/{aid}")]
+        public async Task<IActionResult> UpdateProAttValues(Guid pid, int aid, [FromBody] CreateUpdatePavModel model)
+        {
+            _logger.Information("Update Product Attribute Value");
+            var res = await _productAttributeValueService.UpdateProductAttributeValue(pid, aid, model);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
         #endregion
     }
 }
