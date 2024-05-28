@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.BrandModels;
 using NET1814_MilkShop.Repositories.Models.CategoryModels;
+using NET1814_MilkShop.Repositories.Models.ProductAttributeModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Models.UnitModels;
+using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
 
@@ -19,6 +21,7 @@ namespace NET1814_MilkShop.API.Controllers
         private readonly ICategoryService _categoryService;
         private readonly ILogger _logger;
         private readonly IBrandService _brandService;
+        private readonly IProductAttributeService _productAttributeService;
 
         public ProductController(ILogger logger, IServiceProvider serviceProvider)
         {
@@ -27,6 +30,7 @@ namespace NET1814_MilkShop.API.Controllers
             _brandService = serviceProvider.GetRequiredService<IBrandService>();
             _unitService = serviceProvider.GetRequiredService<IUnitService>();
             _categoryService = serviceProvider.GetRequiredService<ICategoryService>();
+            _productAttributeService = serviceProvider.GetRequiredService<IProductAttributeService>();
         }
 
         #region Product
@@ -58,7 +62,9 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+
         #endregion
+
         #region Brand
 
         [HttpGet("brands")]
@@ -269,6 +275,23 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);
+        }
+
+        #endregion
+
+        #region ProductAttribute
+
+        [HttpGet("/product_attributes")]
+        public async Task<IActionResult> GetProductAttributes(ProductAttributeQueryModel queryModel)
+        {
+            _logger.Information("Get Product Attributes");
+            var res = await _productAttributeService.GetProductAttributesAsync(queryModel);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
         }
 
         #endregion
