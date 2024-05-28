@@ -1,10 +1,10 @@
-using System.Linq.Expressions;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.BrandModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
+using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services;
 
@@ -138,7 +138,7 @@ public class BrandService : IBrandService
                 Message = "No change"
             };
         }
-        
+
         if (string.Equals(isExistId.Name, model.Name) && (!string.Equals(isExistId.Description, model.Description) ||
             isExistId.IsActive != model.IsActive))
         {
@@ -192,7 +192,7 @@ public class BrandService : IBrandService
 
         _brandRepository.Delete(isExist);
         var result = await _unitOfWork.SaveChangesAsync();
-        if(result > 0)
+        if (result > 0)
         {
             return new ResponseModel
             {

@@ -1,5 +1,4 @@
 ﻿using NET1814_MilkShop.Repositories.Data.Entities;
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Repositories;
@@ -25,18 +24,15 @@ namespace NET1814_MilkShop.Services.Services
         private readonly IBrandRepository _brandRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IUnitRepository _unitRepository;
+        private readonly IProductStatusRepository _productStatusRepository;
         private readonly IUnitOfWork _unitOfWork;
-
-        public ProductService(IProductRepository productRepository,
-                              IBrandRepository brandRepository,
-                              ICategoryRepository categoryRepository,
-                              IUnitRepository unitRepository,
-                              IUnitOfWork unitOfWork)
+        public ProductService(IProductRepository productRepository, IBrandRepository brandRepository, ICategoryRepository categoryRepository, IUnitRepository unitRepository, IProductStatusRepository productStatusRepository, IUnitOfWork unitOfWork)
         {
             _productRepository = productRepository;
             _brandRepository = brandRepository;
             _categoryRepository = categoryRepository;
             _unitRepository = unitRepository;
+            _productStatusRepository = productStatusRepository;
             _unitOfWork = unitOfWork;
         }
         private static ProductModel ToProductModel(Product product) =>
@@ -52,7 +48,8 @@ namespace NET1814_MilkShop.Services.Services
                 OriginalPrice = product.OriginalPrice,
                 SalePrice = product.SalePrice,
                 Status = product.ProductStatus!.Name,
-                Thumbnail = product.Thumbnail
+                Thumbnail = product.Thumbnail,
+                IsActive = product.IsActive
             };
         public async Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel)
         {
@@ -243,7 +240,7 @@ namespace NET1814_MilkShop.Services.Services
                 }
                 product.Name = model.Name;
             }
-            #region Validate Brand, Category, Unit exist
+            #region Validate Brand, Category, Unit, Status exist
             if (model.BrandId.HasValue)
             {
                 var brand = await _brandRepository.GetById(model.BrandId.Value);
@@ -283,12 +280,37 @@ namespace NET1814_MilkShop.Services.Services
                 }
                 product.UnitId = model.UnitId.Value;
             }
+            if (model.StatusId.HasValue)
+            {
+                var status = await _productStatusRepository.GetById(model.StatusId.Value);
+                if (status == null)
+                {
+                    return new ResponseModel
+                    {
+                        Message = "Status not found",
+                        Status = "Error"
+                    };
+                }
+                product.StatusId = model.StatusId.Value;
+            }
             #endregion
-            product.Description = model.Description ?? product.Description;
+            product.Description = string.IsNullOrEmpty(model.Description) ? product.Description : model.Description;
             product.Quantity = model.Quantity ?? product.Quantity;
             product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
             product.SalePrice = model.SalePrice ?? product.SalePrice;
-            product.Thumbnail = model.Thumbnail ?? product.Thumbnail;
+            if (!string.IsNullOrEmpty(model.Thumbnail))
+            {
+                if (!Uri.IsWellFormedUriString(model.Thumbnail, UriKind.Absolute))
+                {
+                    return new ResponseModel
+                    {
+                        Message = "Invalid URL!",
+                        Status = "Error"
+                    };
+                }
+                product.Thumbnail = model.Thumbnail;
+            }
+            product.IsActive = model.IsActive;
             _productRepository.Update(product);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
