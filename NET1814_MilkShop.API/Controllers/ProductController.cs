@@ -4,6 +4,7 @@ using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.BrandModels;
 using NET1814_MilkShop.Repositories.Models.CategoryModels;
 using NET1814_MilkShop.Repositories.Models.ProductAttributeModels;
+using NET1814_MilkShop.Repositories.Models.ProductAttributeValueModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Models.UnitModels;
 using NET1814_MilkShop.Repositories.Repositories;
@@ -22,6 +23,7 @@ namespace NET1814_MilkShop.API.Controllers
         private readonly ILogger _logger;
         private readonly IBrandService _brandService;
         private readonly IProductAttributeService _productAttributeService;
+        private readonly IProductAttributeValueService _productAttributeValueService;
 
         public ProductController(ILogger logger, IServiceProvider serviceProvider)
         {
@@ -31,6 +33,7 @@ namespace NET1814_MilkShop.API.Controllers
             _unitService = serviceProvider.GetRequiredService<IUnitService>();
             _categoryService = serviceProvider.GetRequiredService<ICategoryService>();
             _productAttributeService = serviceProvider.GetRequiredService<IProductAttributeService>();
+            _productAttributeValueService = serviceProvider.GetRequiredService<IProductAttributeValueService>();
         }
 
         #region Product
@@ -332,6 +335,25 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(res);
         }
+
+        #endregion
+
+        #region ProductAttributeValue
+
+        [HttpGet("/product_attribute_values")]
+        public async Task<IActionResult> GetProductAttributeValue([FromQuery] ProductAttributeValueQueryModel model)
+        {
+            _logger.Information("Get Product Attribute Value");
+            var res = await _productAttributeValueService.GetProductAttributeValue(model);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
+
 
         #endregion
     }
