@@ -13,11 +13,15 @@ namespace NET1814_MilkShop.API.Controllers
     {
         private readonly ILogger _logger;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AuthenticationController(ILogger logger, IServiceProvider serviceProvider)
+        public AuthenticationController(ILogger logger,
+            IWebHostEnvironment webHostEnvironment,
+            IServiceProvider serviceProvider)
         {
             _logger = logger;
             _authenticationService = serviceProvider.GetRequiredService<IAuthenticationService>();
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpPost("create-user")]
@@ -39,7 +43,8 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> SignUp([FromBody] SignUpModel model)
         {
             _logger.Information("Sign up");
-            var response = await _authenticationService.SignUpAsync(model);
+            var environment = _webHostEnvironment.EnvironmentName;
+            var response = await _authenticationService.SignUpAsync(model,environment);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
@@ -141,7 +146,8 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> ActivateAccount([FromBody] string email)
         {
             _logger.Information("Activate Account");
-            var res = await _authenticationService.ActivateAccountAsync(email);
+            var environment = _webHostEnvironment.EnvironmentName;
+            var res = await _authenticationService.ActivateAccountAsync(email,environment);
             if (res.Status == "Error")
             {
                 return BadRequest(res);
