@@ -12,7 +12,7 @@ namespace NET1814_MilkShop.Services.Services
     {
         Task<ResponseModel> GetProductAttributesAsync(ProductAttributeQueryModel queryModel);
         Task<ResponseModel> AddProductAttributeAsync(CreateProductAttributeModel model);
-        Task<ResponseModel> UpdateProductAttributeAsync(int id, CreateProductAttributeModel model);
+        Task<ResponseModel> UpdateProductAttributeAsync(int id, UpdateProductAttributeModel model);
         Task<ResponseModel> DeleteProductAttributeAsync(int id);
     }
 
@@ -34,9 +34,9 @@ namespace NET1814_MilkShop.Services.Services
 
             #region filter
 
-            if (queryModel.IsActive == false)
+            if (queryModel.IsActive.HasValue)
             {
-                query = query.Where(x => x.IsActive == false);
+                query = query.Where(x => x.IsActive == queryModel.IsActive);
             }
 
             if (!string.IsNullOrEmpty(queryModel.SearchTerm))
@@ -71,7 +71,9 @@ namespace NET1814_MilkShop.Services.Services
             return new ResponseModel()
             {
                 Data = pPage,
-                Message = pPage.TotalCount > 0 ? "Get brands successfully" : "No brands found",
+                Message = pPage.TotalCount > 0
+                    ? "Tìm kiếm thành công các thuộc tính sản phẩm"
+                    : "Danh sách thuộc tính sản phẩm rỗng",
                 Status = "Success"
             };
         }
@@ -104,7 +106,7 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> UpdateProductAttributeAsync(int id, CreateProductAttributeModel model)
+        public async Task<ResponseModel> UpdateProductAttributeAsync(int id, UpdateProductAttributeModel model)
         {
             var isExistId = await _productAttribute.GetProductAttributeById(id);
             if (isExistId == null)
@@ -118,7 +120,7 @@ namespace NET1814_MilkShop.Services.Services
 
             if (!string.IsNullOrEmpty(model.Name))
             {
-                var isExistName = await _productAttribute.GetProductAttributeByName(isExistId.Name);
+                var isExistName = await _productAttribute.GetProductAttributeByName(model.Name);
                 if (isExistName != null)
                 {
                     return new ResponseModel
@@ -160,7 +162,7 @@ namespace NET1814_MilkShop.Services.Services
                 return new ResponseModel
                 {
                     Status = "Error",
-                    Message = "Xóa thuộc tính sản phẩm thất bại"
+                    Message = "Thuộc tính sản phẩm không tồn tại"
                 };
             }
 
