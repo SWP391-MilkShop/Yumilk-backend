@@ -103,9 +103,52 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public Task<ResponseModel> UpdateProductAttributeAsync(int id, CreateProductAttributeModel model)
+        public async Task<ResponseModel> UpdateProductAttributeAsync(int id, CreateProductAttributeModel model)
         {
-            throw new NotImplementedException();
+            var isExistId = await _productAttribute.GetProductAttributeById(id);
+            if (isExistId == null)
+            {
+                return new ResponseModel
+                {
+                    Message = "Không tìm thấy thuộc tính sản phẩm",
+                    Status = "Error"
+                };
+            }
+
+            if (!string.IsNullOrEmpty(model.Name))
+            {
+                var isExistName = await _productAttribute.GetProductAttributeByName(isExistId.Name);
+                if (isExistName != null)
+                {
+                    return new ResponseModel
+                    {
+                        Message = "Tên thuộc tính đã tồn tại",
+                        Status = "Error"
+                    };
+                }
+
+                isExistId.Name = model.Name;
+            }
+
+            isExistId.Description =
+                !string.IsNullOrEmpty(model.Description) ? model.Description : isExistId.Description;
+            isExistId.IsActive = model.IsActive;
+            _productAttribute.Update(isExistId);
+            var res = await _unitOfWork.SaveChangesAsync();
+            if (res > 0)
+            {
+                return new ResponseModel
+                {
+                    Message = "Cập nhật thuộc tính sản phẩm thành công",
+                    Status = "Success",
+                };
+            }
+
+            return new ResponseModel
+            {
+                Message = "Cập nhật thuộc tính sản phẩm thất bại",
+                Status = "Error"
+            };
         }
 
         private Expression<Func<ProductAttribute, object>> GetSortProperty(ProductAttributeQueryModel queryModel)
