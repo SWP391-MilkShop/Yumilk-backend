@@ -12,6 +12,7 @@ using NET1814_MilkShop.Services.Services;
 using System.Reflection;
 using System.Text;
 
+
 namespace NET1814_MilkShop.API
 {
     public class Startup
@@ -212,6 +213,9 @@ namespace NET1814_MilkShop.API
 
             services.AddScoped<IProductAttributeRepository, ProductAttributeRepository>();
             services.AddScoped<IProductAttributeService, ProductAttributeService>();
+
+            services.AddScoped<IProductAttributeValueRepository, ProductAttributeValueRepository>();
+            services.AddScoped<IProductAttributeValueService, ProductAttributeValueService>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
