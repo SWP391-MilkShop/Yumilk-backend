@@ -320,6 +320,19 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
+        [HttpDelete("/product_attributes")]
+        public async Task<IActionResult> DeleteProductAttribute(int id)
+        {
+            _logger.Information("Delete Product Attribute");
+            var res = await _productAttributeService.DeleteProductAttributeAsync(id);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
         #endregion
     }
 }
