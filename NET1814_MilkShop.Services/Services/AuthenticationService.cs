@@ -208,7 +208,7 @@ namespace NET1814_MilkShop.Services.Services
             }
             if (isExist == null)
             {
-                return ResponseModel.NotFound(ResponseConstants.NotFound("Người dùng"));
+                return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
             }
             if (verifyToken.Equals(isExist.VerificationCode))
             {
@@ -246,7 +246,7 @@ namespace NET1814_MilkShop.Services.Services
                     return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
                 }
             }
-            return ResponseModel.NotFound(ResponseConstants.NotFound("Email"));
+            return ResponseModel.Success(ResponseConstants.NotFound("Email"), null);
         }
 
         public async Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request)
@@ -259,7 +259,7 @@ namespace NET1814_MilkShop.Services.Services
             var isExist = await _userRepository.GetById(Guid.Parse(userID));
             if (isExist == null)
             {
-                return ResponseModel.NotFound(ResponseConstants.NotFound("Người dùng"));
+                return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
             }
             if (verifyToken.Equals(isExist.ResetPasswordCode))
             {
@@ -287,7 +287,7 @@ namespace NET1814_MilkShop.Services.Services
             var userExisted = await _userRepository.GetById(Guid.Parse(userId));
             if (userExisted == null)
             {
-                return ResponseModel.NotFound(ResponseConstants.NotFound("Người dùng"));
+                return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
             }
 
             if (tokenType != TokenType.Refresh.ToString())
@@ -308,7 +308,7 @@ namespace NET1814_MilkShop.Services.Services
             var customer = await _customerRepository.GetByEmailAsync(email);
             if (customer == null)
             {
-                return ResponseModel.NotFound(ResponseConstants.NotFound("Email"));
+                return ResponseModel.Success(ResponseConstants.NotFound("Email"), null);
             }
             if (!customer.User.IsActive)
             {

@@ -54,7 +54,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public async Task<bool> IsExistAsync(Guid id)
         {
             //return await _context.Users.AnyAsync(e => e.Id == id && e.IsActive);
-            return await _query.AnyAsync(e => e.Id == id && e.IsActive);
+            return await _query.AnyAsync(e => e.Id == id);
         }
     }
 }

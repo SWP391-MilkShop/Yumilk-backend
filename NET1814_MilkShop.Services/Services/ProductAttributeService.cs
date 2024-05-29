@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductAttributeModels;
@@ -68,6 +69,7 @@ namespace NET1814_MilkShop.Services.Services
 
             #endregion
 
+            /*
             return new ResponseModel()
             {
                 Data = pPage,
@@ -75,7 +77,11 @@ namespace NET1814_MilkShop.Services.Services
                     ? "Tìm kiếm thành công các thuộc tính sản phẩm"
                     : "Danh sách thuộc tính sản phẩm rỗng",
                 Status = "Success"
-            };
+            };*/
+            return ResponseModel.Success(
+                ResponseConstants.Get(
+                    "các thuộc tính sản phẩm", pPage.TotalCount > 0),
+                       pPage);
         }
 
         public async Task<ResponseModel> AddProductAttributeAsync(CreateProductAttributeModel model)
@@ -83,11 +89,15 @@ namespace NET1814_MilkShop.Services.Services
             var isExistName = await _productAttribute.GetProductAttributeByName(model.Name);
             if (isExistName != null)
             {
-                return new ResponseModel
+                /*return new ResponseModel
                 {
                     Message = "Thuộc tính sản phẩm đã tồn tại! Thêm một thuộc tính mới thất bại!",
                     Status = "Error"
-                };
+                };*/
+                return ResponseModel.BadRequest(
+                    ResponseConstants.Exist(
+                        "Thuộc tính sản phẩm")
+                    );
             }
 
             var entity = new ProductAttribute
@@ -98,12 +108,17 @@ namespace NET1814_MilkShop.Services.Services
             };
             _productAttribute.Add(entity);
             await _unitOfWork.SaveChangesAsync();
-            return new ResponseModel
+            /*return new ResponseModel
             {
                 Status = "Success",
                 Data = entity,
                 Message = "Thêm mới thuộc tính sản phẩm thành công!"
-            };
+            };*/
+            return ResponseModel.Success(
+                ResponseConstants.Create(
+                    "thuộc tính sản phẩm", true),
+                entity
+            );
         }
 
         public async Task<ResponseModel> UpdateProductAttributeAsync(int id, UpdateProductAttributeModel model)
@@ -111,11 +126,15 @@ namespace NET1814_MilkShop.Services.Services
             var isExistId = await _productAttribute.GetProductAttributeById(id);
             if (isExistId == null)
             {
-                return new ResponseModel
+                /*return new ResponseModel
                 {
                     Message = "Không tìm thấy thuộc tính sản phẩm",
                     Status = "Error"
-                };
+                };*/
+                return ResponseModel.BadRequest(
+                    ResponseConstants.NotFound(
+                        "Thuộc tính sản phẩm")
+                );
             }
 
             if (!string.IsNullOrEmpty(model.Name))
@@ -123,11 +142,16 @@ namespace NET1814_MilkShop.Services.Services
                 var isExistName = await _productAttribute.GetProductAttributeByName(model.Name);
                 if (isExistName != null)
                 {
-                    return new ResponseModel
+                    /*return new ResponseModel
                     {
                         Message = "Tên thuộc tính đã tồn tại",
                         Status = "Error"
-                    };
+                    };*/
+                    return ResponseModel.BadRequest(
+                        ResponseConstants.Exist(
+                            "Tên thuộc tính")
+                    );
+                    
                 }
 
                 isExistId.Name = model.Name;
@@ -140,18 +164,27 @@ namespace NET1814_MilkShop.Services.Services
             var res = await _unitOfWork.SaveChangesAsync();
             if (res > 0)
             {
-                return new ResponseModel
+                /*return new ResponseModel
                 {
                     Message = "Cập nhật thuộc tính sản phẩm thành công",
                     Status = "Success",
-                };
+                };*/
+                return ResponseModel.Success(
+                    ResponseConstants.Update(
+                        "Thuộc tính sản phẩm", true),
+                    null
+                );
             }
 
-            return new ResponseModel
+            /*return new ResponseModel
             {
                 Message = "Cập nhật thuộc tính sản phẩm thất bại",
                 Status = "Error"
-            };
+            };*/
+            return ResponseModel.BadRequest(
+                ResponseConstants.Update(
+                    "Thuộc tính sản phẩm", false)
+            );
         }
 
         public async Task<ResponseModel> DeleteProductAttributeAsync(int id)
@@ -159,11 +192,16 @@ namespace NET1814_MilkShop.Services.Services
             var isExistId = await _productAttribute.GetProductAttributeById(id);
             if (isExistId == null)
             {
-                return new ResponseModel
+                /*return new ResponseModel
                 {
                     Status = "Error",
                     Message = "Thuộc tính sản phẩm không tồn tại"
-                };
+                };*/
+                return ResponseModel.BadRequest(
+                    ResponseConstants.NotFound(
+                        "thuộc tính sản phẩm"
+                    )
+                );
             }
 
             isExistId.DeletedAt = DateTime.Now;
@@ -171,18 +209,29 @@ namespace NET1814_MilkShop.Services.Services
             var res = await _unitOfWork.SaveChangesAsync();
             if (res > 0)
             {
-                return new ResponseModel
+                /*return new ResponseModel
                 {
                     Status = "Success",
                     Message = "Xóa thuộc tính sản phẩm thành công"
-                };
+                };*/
+                return ResponseModel.Success(
+                    ResponseConstants.Delete(
+                        "thuộc tính sản phẩm", true),
+                    null
+                );
+                
             }
 
-            return new ResponseModel
+            /*return new ResponseModel
             {
                 Status = "Success",
                 Message = "Xóa thuộc tính sản phẩm thất bại"
-            };
+            };*/
+            return ResponseModel.Error(
+                ResponseConstants.Delete(
+                    "thuộc tính sản phẩm", false)
+            );
+            
         }
 
         private Expression<Func<ProductAttribute, object>> GetSortProperty(ProductAttributeQueryModel queryModel)

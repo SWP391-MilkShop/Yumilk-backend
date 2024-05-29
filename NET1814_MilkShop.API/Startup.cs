@@ -128,7 +128,8 @@ namespace NET1814_MilkShop.API
                                 ValidateIssuerSigningKey = true,
                                 IssuerSigningKey = new SymmetricSecurityKey(
                                     Encoding.UTF8.GetBytes(_configuration["Jwt:AccessTokenKey"])
-                                )
+                                ),
+                                ClockSkew = TimeSpan.FromMinutes(0)
                             };
                     }
                 )
@@ -146,7 +147,8 @@ namespace NET1814_MilkShop.API
                                 ValidateIssuerSigningKey = true,
                                 IssuerSigningKey = new SymmetricSecurityKey(
                                     Encoding.UTF8.GetBytes(_configuration["Jwt:RefreshTokenKey"])
-                                )
+                                ),
+                                ClockSkew = TimeSpan.FromMinutes(0)
                             };
                     }
                 );

@@ -56,7 +56,7 @@ namespace NET1814_MilkShop.Services.Services
             var category = await _categoryRepository.GetById(id);
             if (category == null)
             {
-                return ResponseModel.NotFound(ResponseConstants.NotFound("Danh mục"));
+                return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
             }
             category.DeletedAt = DateTime.Now;
             _categoryRepository.Update(category);
@@ -96,7 +96,7 @@ namespace NET1814_MilkShop.Services.Services
                 queryModel.PageSize
             );
             if(categories.TotalCount > 0) return ResponseModel.Success(ResponseConstants.Get("danh mục", true), categories);
-            return ResponseModel.NotFound(ResponseConstants.Get("danh mục", false));
+            return ResponseModel.Success(ResponseConstants.NotFound("danh mục"), null);
         }
         private static Expression<Func<Category, object>> GetSortProperty(
             CategoryQueryModel queryModel
@@ -111,7 +111,7 @@ namespace NET1814_MilkShop.Services.Services
             var category = await _categoryRepository.GetById(id);
             if (category == null || !category.IsActive)
             {
-                return ResponseModel.NotFound(ResponseConstants.NotFound("Danh mục"));
+                return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
             }
             var categoryModel = new CategoryModel
             {
@@ -129,7 +129,7 @@ namespace NET1814_MilkShop.Services.Services
             var existingCategory = await _categoryRepository.GetById(id);
             if (existingCategory == null)
             {
-                return ResponseModel.NotFound(ResponseConstants.NotFound("Danh mục"));
+                return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
             }
             if (!string.IsNullOrEmpty(model.Name))
             {

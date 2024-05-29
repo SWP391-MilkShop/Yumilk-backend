@@ -6,6 +6,7 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 
 namespace NET1814_MilkShop.Services.Services;
 
@@ -34,6 +35,7 @@ public class UnitService : IUnitService
         var query = _unitRepository.GetUnitsQuery();
 
         #region Filter, Search
+
         if (!string.IsNullOrEmpty(request.SearchTerm))
         {
             query = query.Where(u =>
@@ -41,12 +43,16 @@ public class UnitService : IUnitService
                 || u.Description!.Contains(request.SearchTerm)
             );
         }
+
         if (request.IsActive.HasValue)
         {
             query = query.Where(u => u.IsActive == request.IsActive);
         }
+
         #endregion
+
         #region sort
+
         query = "desc".Equals(request.SortOrder?.ToLower())
             ? query.OrderByDescending(GetSortProperty(request))
             : query.OrderBy(GetSortProperty(request));
@@ -57,8 +63,11 @@ public class UnitService : IUnitService
             Description = u.Description!,
             IsActive = u.IsActive
         });
+
         #endregion
+
         #region page
+
         var units = await PagedList<UnitModel>.CreateAsync(
             result,
             request.Page,
@@ -66,19 +75,20 @@ public class UnitService : IUnitService
         );
 
         #endregion
-        return new ResponseModel
+
+        if (units.TotalCount > 0)
         {
-            Data = units,
-            Message = units.TotalCount > 0 ? "Get units successfully" : "No units found",
-            Status = "Success"
-        };
+            return ResponseModel.Success(ResponseConstants.Get("đơn vị", true), units);
+        }
+
+        return ResponseModel.Success(ResponseConstants.NotFound("Đơn vị"), null);
     }
 
     public async Task<ResponseModel> GetUnitByIdAsync(int id)
     {
         var unit = await _unitRepository.GetExistIsActiveId(id);
         if (unit == null)
-            return new ResponseModel { Status = "Failed", Message = "Unit not found" };
+            return ResponseModel.Success(ResponseConstants.NotFound("Đơn vị"),null);
         var result = new UnitModel
         {
             Id = id,
@@ -86,12 +96,7 @@ public class UnitService : IUnitService
             Description = unit.Description!,
             IsActive = unit.IsActive
         };
-        return new ResponseModel
-        {
-            Data = result,
-            Status = "success",
-            Message = "Get unit successfully",
-        };
+        return ResponseModel.Success(ResponseConstants.Get("đơn vị", true), result);
     }
 
     public async Task<ResponseModel> CreateUnitAsync(CreateUnitModel createUnitModel)
@@ -106,19 +111,10 @@ public class UnitService : IUnitService
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
         {
-            return new ResponseModel
-            {
-                Data = createUnitModel,
-                Status = "Success",
-                Message = "Create unit successfully"
-            };
+            return ResponseModel.Success(ResponseConstants.Create("đơn vị", true), createUnitModel);
         }
 
-        return new ResponseModel
-        {
-            Status = "Error",
-            Message = "An error occured while creating unit"
-        };
+        return ResponseModel.Error(ResponseConstants.Create("đơn vị", false));
     }
 
     public async Task<ResponseModel> UpdateUnitAsync(int id, UpdateUnitModel unitModel)
@@ -126,7 +122,7 @@ public class UnitService : IUnitService
         var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
         if (isExistUnit == null)
         {
-            return new ResponseModel { Status = "Failed", Message = "Unit not found" };
+            return ResponseModel.Success(ResponseConstants.NotFound("đơn vị"),null);
         }
 
         if (!unitModel.Name.IsNullOrEmpty())
@@ -138,27 +134,20 @@ public class UnitService : IUnitService
         {
             isExistUnit.Description = unitModel.Description;
         }
+
         if (unitModel.IsActive.HasValue)
         {
             isExistUnit.IsActive = unitModel.IsActive!.Value;
         }
+
         _unitRepository.Update(isExistUnit);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
         {
-            return new ResponseModel()
-            {
-                Data = unitModel,
-                Status = "Success",
-                Message = "Update unit successfully"
-            };
+            return ResponseModel.Success(ResponseConstants.Update("đơn vị", true), unitModel);
         }
 
-        return new ResponseModel()
-        {
-            Status = "Error",
-            Message = "An error occured while updating unit"
-        };
+        return ResponseModel.Error(ResponseConstants.Update("đơn vị", false));
     }
 
     public async Task<ResponseModel> DeleteUnitAsync(int id)
@@ -166,25 +155,19 @@ public class UnitService : IUnitService
         var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
         if (isExistUnit == null)
         {
-            return new ResponseModel { Status = "Failed", Message = "Unit not found" };
+            return ResponseModel.Success(ResponseConstants.NotFound("đơn vị"),null);
         }
+
         _unitRepository.Delete(isExistUnit);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
         {
-            return new ResponseModel
-            {
-                Status = "Success",
-                Message = "Delete unit successfully"
-            };
+            return ResponseModel.Success(ResponseConstants.Delete("đơn vị", true), null);
         }
 
-        return new ResponseModel
-        {
-            Status = "Error",
-            Message = "An error occured while deleting unit"
-        };
+        return ResponseModel.Error(ResponseConstants.Delete("đơn vị", false));
     }
+
     /// <summary>
     /// Sort property for unit (name, description)
     /// </summary>

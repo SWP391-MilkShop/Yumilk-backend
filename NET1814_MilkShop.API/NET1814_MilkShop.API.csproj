@@ -36,7 +36,6 @@
 
 	<ItemGroup>
 		<Folder Include="CoreHelpers\Constants\" />
-		<Folder Include="CoreHelpers\Extensions\" />
 	</ItemGroup>
 
 	<ItemGroup>

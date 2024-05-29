@@ -6,6 +6,7 @@ using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -76,13 +77,20 @@ namespace NET1814_MilkShop.Services.Services
                 request.Page,
                 request.PageSize
             );
-            return new ResponseModel()
+            /*return new ResponseModel()
             {
                 Data = customers,
                 Message =
                     customers.TotalCount > 0 ? "Get customers successfully" : "No customers found",
                 Status = "success"
-            };
+            };*/
+            return ResponseModel.Success(
+                customers.TotalCount > 0 
+                    ? ResponseConstants.Get("khách hàng", true)
+                    : ResponseConstants.Get("khách hàng", false)
+                    , customers)
+                ;
+            
         }
 
         private static Expression<Func<Customer, object>> GetSortProperty(
@@ -106,20 +114,31 @@ namespace NET1814_MilkShop.Services.Services
             var customer = await _customerRepository.GetByEmailAsync(email);
             if (customer == null)
             {
-                return new ResponseModel
+                /*return new ResponseModel
                 {
                     Data = null,
                     Message = "Customer not found",
                     Status = "Error"
-                };
+                };*/
+                return ResponseModel.Success(
+                    ResponseConstants.Get("khách hàng bằng email"
+                        , false),
+                    null
+                );
             }
             var customerModel = ToCustomerModel(customer, customer.User);
-            return new ResponseModel
+            /*return new ResponseModel
             {
                 Data = customerModel,
                 Message = "Get customer by email successfully",
                 Status = "Success"
-            };
+            };*/
+            return ResponseModel.Success(
+                ResponseConstants.Get("khách hàng bằng email"
+                                                             , true),
+                customerModel
+            );
+            
         }
 
         public async Task<ResponseModel> GetByIdAsync(Guid id)
@@ -127,15 +146,26 @@ namespace NET1814_MilkShop.Services.Services
             var customer = await _customerRepository.GetById(id);
             if (customer == null)
             {
-                return new ResponseModel { Message = "Customer not found", Status = "Error" };
+                /*return new ResponseModel { Message = "Customer not found", Status = "Error" };*/
+                return ResponseModel.Success(
+                    ResponseConstants.Get("khách hàng",
+                        false),
+                    null);
             }
-            var customerModel = ToCustomerModel(customer, customer.User);
+            var customerModel = ToCustomerModel(customer, customer.User);/*
             return new ResponseModel
             {
                 Data = customerModel,
                 Message = "Get customer by id successfully",
                 Status = "Success"
-            };
+            };*/
+            return ResponseModel.Success
+            (
+                ResponseConstants.Get(
+                    "khách hàng",
+                    true),
+                customerModel);
+            
         }
 
         public async Task<ResponseModel> ChangeInfoAsync(
@@ -146,18 +176,28 @@ namespace NET1814_MilkShop.Services.Services
             var customer = await _customerRepository.GetById(userId);
             if (customer == null)
             {
-                return new ResponseModel { Message = "Customer not found", Status = "Error" };
+                /*return new ResponseModel { Message = "Customer not found", Status = "Error" };*/
+                return ResponseModel.Success(
+                    ResponseConstants.Get("khách hàng",
+                        false
+                    ),
+                    null
+                );
             }
 
             if (!string.IsNullOrWhiteSpace(changeUserInfoModel.PhoneNumber))
             {
                 if (!Regex.IsMatch(changeUserInfoModel.PhoneNumber, @"^([0-9]{10})$"))
                 {
-                    return new ResponseModel
+                    /*return new ResponseModel
                     {
                         Message = "Invalid Phone Number!",
                         Status = "Error"
-                    };
+                    };*/
+                    return ResponseModel.BadRequest(
+                        ResponseConstants.InvalidPhoneNumber
+                    );
+                    
                 }
                 customer.PhoneNumber = changeUserInfoModel.PhoneNumber;
             }
@@ -171,7 +211,10 @@ namespace NET1814_MilkShop.Services.Services
                     )
                 )
                 {
-                    return new ResponseModel { Message = "Invalid URL!", Status = "Error" };
+                    /*return new ResponseModel { Message = "Invalid URL!", Status = "Error" };*/
+                    return ResponseModel.BadRequest(
+                                  ResponseConstants.InvalidUrl
+                    );
                 }
                 customer.ProfilePictureUrl = changeUserInfoModel.ProfilePictureUrl;
             }
@@ -190,14 +233,24 @@ namespace NET1814_MilkShop.Services.Services
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return new ResponseModel
+                /*return new ResponseModel
                 {
                     Data = ToCustomerModel(customer, customer.User),
                     Message = "Change user info successfully",
                     Status = "Success"
-                };
+                };*/
+                return ResponseModel.Success(
+                    ResponseConstants.ChangeInfo(
+                        true),
+                    ToCustomerModel(customer, customer.User)
+                );
+                
             }
-            return new ResponseModel { Message = "Change user info failed", Status = "Error" };
+            /*return new ResponseModel { Message = "Change user info failed", Status = "Error" };*/
+            return ResponseModel.Error(
+                ResponseConstants.ChangeInfo(
+                    false)
+            );
         }
 
         public async Task<bool> IsExistAsync(Guid id)

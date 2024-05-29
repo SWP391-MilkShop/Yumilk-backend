@@ -5,6 +5,7 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -64,10 +65,12 @@ namespace NET1814_MilkShop.Services.Services
                     || u.LastName!.Contains(request.SearchTerm)
                 );
             }
+
             if (!string.IsNullOrEmpty(request.Role))
             {
                 query = query.Where(u => string.Equals(u.Role!.Name, request.Role));
             }
+
             query = query.Where(u => u.IsActive == request.IsActive && u.IsBanned == request.IsBanned);
             //sort
             query = "desc".Equals(request.SortOrder?.ToLower())
@@ -89,12 +92,12 @@ namespace NET1814_MilkShop.Services.Services
                 request.Page,
                 request.PageSize
             );
-            return new ResponseModel()
+            if (users.TotalCount > 0)
             {
-                Data = users,
-                Message = users.TotalCount > 0 ? "Get users successfully" : "No users found",
-                Status = "Success"
-            };
+                return ResponseModel.Success(ResponseConstants.Get("người dùng", true), users);
+            }
+
+            return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
         }
 
         private static Expression<Func<User, object>> GetSortProperty(UserQueryModel request)
@@ -120,37 +123,29 @@ namespace NET1814_MilkShop.Services.Services
         {
             if (string.Equals(model.OldPassword, model.NewPassword))
             {
-                return new ResponseModel
-                {
-                    Message = "Old password and new password are the same",
-                    Status = "Error"
-                };
+                return ResponseModel.BadRequest(ResponseConstants.PassSameNewPass);
             }
+
             var user = await _userRepository.GetById(userId);
             if (user == null)
             {
-                return new ResponseModel { Message = "User not found", Status = "Error" };
+                return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"),null);
             }
+
             if (!BCrypt.Net.BCrypt.Verify(model.OldPassword, user.Password))
             {
-                return new ResponseModel
-                {
-                    Message = "Old password is incorrect",
-                    Status = "Error"
-                };
+                return ResponseModel.BadRequest(ResponseConstants.WrongPassword);
             }
+
             user.Password = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
             _userRepository.Update(user);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return new ResponseModel
-                {
-                    Message = "Change password successfully",
-                    Status = "Success"
-                };
+                return ResponseModel.Success(ResponseConstants.ChangePassword(true), null);
             }
-            return new ResponseModel { Message = "Change password failed", Status = "Error" };
+
+            return ResponseModel.Error(ResponseConstants.ChangePassword(false));
         }
     }
 }

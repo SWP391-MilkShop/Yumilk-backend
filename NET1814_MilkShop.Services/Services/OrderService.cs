@@ -4,6 +4,7 @@ using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Services.CoreHelpers;
 using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -89,12 +90,18 @@ namespace NET1814_MilkShop.Services.Services
                 model.Page,
                 model.PageSize
             );
-            return new ResponseModel
+            /*return new ResponseModel
             {
                 Data = orders,
                 Message = orders.TotalCount > 0 ? "Get orders successfully" : "No brands found",
                 Status = "Success"
-            };
+            };*/
+            return ResponseModel.Success(
+                ResponseConstants.Get(
+                    "đơn hàng", orders.TotalCount > 0),
+                orders
+            );
+            
 
             #endregion
         }
