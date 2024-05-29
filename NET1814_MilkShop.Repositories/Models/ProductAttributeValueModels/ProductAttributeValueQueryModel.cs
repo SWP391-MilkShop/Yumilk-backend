@@ -4,8 +4,6 @@ public class ProductAttributeValueQueryModel : QueryModel
 {
     public Guid? ProductId { get; set; }
 
-    public int? AttributeId { get; set; }
-
     /// <summary>
     /// search by value
     /// </summary>
