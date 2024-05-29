@@ -1,4 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Repositories.Repositories;
@@ -17,7 +18,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request, string environment);
         Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
         Task<ResponseModel> RefreshTokenAsync(string token);
-        Task<ResponseModel> ActivateAccountAsync(string email,string environment);
+        Task<ResponseModel> ActivateAccountAsync(string email, string environment);
         Task<ResponseModel> DashBoardLoginAsync(RequestLoginModel model);
     }
 
@@ -57,11 +58,7 @@ namespace NET1814_MilkShop.Services.Services
             var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
             if (existingUser != null)
             {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Tên đăng nhập đã tồn tại!"
-                };
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Tên đăng nhập"));
             }
 
             var user = new User
@@ -79,14 +76,9 @@ namespace NET1814_MilkShop.Services.Services
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return new ResponseModel
-                {
-                    Status = "Success",
-                    Message = "Tạo tài khoản thành công!"
-                };
+                return ResponseModel.Success(ResponseConstants.Create("tài khoản", true), null);
             }
-
-            return new ResponseModel { Status = "Error", Message = "Tạo tài khoản thất bại" };
+            return ResponseModel.Error(ResponseConstants.Create("tài khoản", false));
         }
 
         /// <summary>
@@ -94,37 +86,25 @@ namespace NET1814_MilkShop.Services.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public async Task<ResponseModel> SignUpAsync(SignUpModel model,string environment)
+        public async Task<ResponseModel> SignUpAsync(SignUpModel model, string environment)
         {
             var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
             if (existingUser != null)
             {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Tên đăng nhập đã tồn tại!"
-                };
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Tên đăng nhập"));
             }
 
             /*var IsCustomerExist = await _customerRepository.IsCustomerExistAsync(model.Email, model.PhoneNumber);*/
             var isPhoneNumberExist = await _customerRepository.IsExistPhoneNumberAsync(model.PhoneNumber);
             if (isPhoneNumberExist)
             {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Số điện thoại đã tồn tại trong hệ thống!"
-                };
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Số điện thoại"));
             }
 
             var isEmailExist = await _customerRepository.IsExistEmailAsync(model.Email);
             if (isEmailExist)
             {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Email đã tồn tại trong hệ thống!"
-                };
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Email"));
             }
             /*if (IsCustomerExist)
             {
@@ -160,16 +140,10 @@ namespace NET1814_MilkShop.Services.Services
             var jwtVeriryToken = _jwtTokenExtension.CreateJwtToken(user, TokenType.Authentication);
             if (result > 0)
             {
-                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken,environment);
-                return new ResponseModel
-                {
-                    Status = "Success",
-                    Message =
-                        "Đăng ký tài khoản thành công, vui lòng kiểm tra email để xác thực tài khoản!"
-                };
+                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken, environment);
+                return ResponseModel.Success(ResponseConstants.Register(true), null);
             }
-
-            return new ResponseModel { Status = "Error", Message = "Đăng ký tài khoản thất bại" };
+            return ResponseModel.Error(ResponseConstants.Register(false));
         }
 
         public async Task<ResponseModel> LoginAsync(RequestLoginModel model)
@@ -178,17 +152,13 @@ namespace NET1814_MilkShop.Services.Services
                 model.Username,
                 model.Password
             );
-            if (existingUser != null &&
-                existingUser.RoleId == 3) //Only customer can login, others will say wrong username or password
+            if (existingUser != null && existingUser.RoleId == 3)
+            //Only customer can login, others will say wrong username or password
             {
                 //check if user is banned
                 if (existingUser.IsBanned)
                 {
-                    return new ResponseModel
-                    {
-                        Status = "Error",
-                        Message = "Tài khoản của bạn đã bị khóa do hành vi không hợp lệ!"
-                    };
+                    return ResponseModel.BadRequest(ResponseConstants.Banned);
                 }
 
                 var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
@@ -217,19 +187,9 @@ namespace NET1814_MilkShop.Services.Services
                     responseLogin.Points = customer.Points;
                 }
 
-                return new ResponseModel
-                {
-                    Status = "Success",
-                    Message = "Đăng nhập thành công",
-                    Data = responseLogin
-                };
+                return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
             }
-
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Tên đăng nhập hoặc mật khẩu sai "
-            };
+            return ResponseModel.BadRequest(ResponseConstants.Login(false));
         }
 
         public async Task<ResponseModel> VerifyAccountAsync(string token)
@@ -244,10 +204,13 @@ namespace NET1814_MilkShop.Services.Services
             var isExist = await _userRepository.GetById(Guid.Parse(userID));
             if (expirationTime < DateTime.UtcNow)
             {
-                return new ResponseModel { Status = "Error", Message = "Hết hạn" };
+                return ResponseModel.BadRequest(ResponseConstants.Expired("Token"));
             }
-
-            if (isExist != null && verifyToken.Equals(isExist.VerificationCode))
+            if (isExist == null)
+            {
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Người dùng"));
+            }
+            if (verifyToken.Equals(isExist.VerificationCode))
             {
                 isExist.IsActive = true;
                 isExist.VerificationCode = null;
@@ -255,19 +218,11 @@ namespace NET1814_MilkShop.Services.Services
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
                 {
-                    return new ResponseModel
-                    {
-                        Status = "Success",
-                        Message = "Xác thực tài khoản thành công"
-                    };
+                    return ResponseModel.Success(ResponseConstants.Verify(true), null);
                 }
+                return ResponseModel.Error(ResponseConstants.Verify(false));
             }
-
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Có lỗi xảy ra trong quá trình xác thực hoặc link đã được dùng rồi"
-            };
+            return ResponseModel.BadRequest(ResponseConstants.WrongCode);
         }
 
         public async Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request,
@@ -287,16 +242,11 @@ namespace NET1814_MilkShop.Services.Services
                         TokenType.Reset
                     );
                     _emailService.SendPasswordResetEmail(customer.Email,
-                        verifyToken,environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
-                    return new ResponseModel
-                    {
-                        Status = "Success",
-                        Message = "Đã gửi link reset password vui lòng kiểm tra email"
-                    };
+                        verifyToken, environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
                 }
             }
-
-            return new ResponseModel { Status = "Error", Message = "Email không tồn tại" };
+            return ResponseModel.NotFound(ResponseConstants.NotFound("Email"));
         }
 
         public async Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request)
@@ -307,7 +257,11 @@ namespace NET1814_MilkShop.Services.Services
             var userID = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
             var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
             var isExist = await _userRepository.GetById(Guid.Parse(userID));
-            if (isExist != null && verifyToken.Equals(isExist.ResetPasswordCode))
+            if (isExist == null)
+            {
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Người dùng"));
+            }
+            if (verifyToken.Equals(isExist.ResetPasswordCode))
             {
                 isExist.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
                 isExist.ResetPasswordCode = null;
@@ -315,17 +269,12 @@ namespace NET1814_MilkShop.Services.Services
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
                 {
-                    return new ResponseModel
-                    {
-                        Status = "Success",
-                        Message = "Đổi mật khẩu thành công"
-                    };
+                    return ResponseModel.Success(ResponseConstants.ChangePassword(true), null);
                 }
+                return ResponseModel.Error(ResponseConstants.ChangePassword(false));
             }
-
-            return new ResponseModel() { Status = "Error", Message = "Token không hợp lệ" };
+            return ResponseModel.BadRequest(ResponseConstants.WrongCode);
         }
-
         public async Task<ResponseModel> RefreshTokenAsync(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -338,60 +287,47 @@ namespace NET1814_MilkShop.Services.Services
             var userExisted = await _userRepository.GetById(Guid.Parse(userId));
             if (userExisted == null)
             {
-                return new ResponseModel { Status = "Error", Message = "Không tồn tại người dùng" };
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Người dùng"));
             }
 
             if (tokenType != TokenType.Refresh.ToString())
             {
-                return new ResponseModel { Status = "Error", Message = "Định dạng refresh token sai" };
+                return ResponseModel.BadRequest(ResponseConstants.WrongFormat("Refresh token"));
             }
 
             if (expirationTime < DateTime.UtcNow)
             {
-                return new ResponseModel { Status = "Error", Message = "Hết hạn" };
+                return ResponseModel.BadRequest(ResponseConstants.Expired("Refresh token"));
             }
             var newToken = _jwtTokenExtension.CreateJwtToken(userExisted, TokenType.Access);
-            return new ResponseModel
-            {
-                Status = "Success",
-                Message = "Tạo access token mới thành công",
-                Data = newToken
-            };
+            return ResponseModel.Success(ResponseConstants.Create("Access Token", true), newToken);
         }
 
-        public async Task<ResponseModel> ActivateAccountAsync(string email,string environment)
+        public async Task<ResponseModel> ActivateAccountAsync(string email, string environment)
         {
             var customer = await _customerRepository.GetByEmailAsync(email);
-            if (customer != null)
+            if (customer == null)
             {
-                if (customer.User.IsActive != true)
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Email"));
+            }
+            if (!customer.User.IsActive)
+            {
+                string token = _jwtTokenExtension.CreateVerifyCode();
+                customer.User.VerificationCode = token;
+                _userRepository.Update(customer.User);
+                var result = await _unitOfWork.SaveChangesAsync();
+                if (result > 0)
                 {
-                    string token = _jwtTokenExtension.CreateVerifyCode();
-                    customer.User.VerificationCode = token;
-                    _userRepository.Update(customer.User);
-                    var result = await _unitOfWork.SaveChangesAsync();
-                    if (result > 0)
-                    {
-                        var verifyToken = _jwtTokenExtension.CreateJwtToken(
-                            customer.User,
-                            TokenType.Authentication
-                        );
-                        _emailService.SendVerificationEmail(customer.Email,
-                            verifyToken,environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
-                        return new ResponseModel
-                        {
-                            Status = "Success",
-                            Message = "Đã gửi link kích hoạt tài khoản, vui lòng kiểm tra email"
-                        };
-                    }
-                }
-                else
-                {
-                    return new ResponseModel { Status = "Error", Message = "Tài khoản đã được kích hoạt" };
+                    var verifyToken = _jwtTokenExtension.CreateJwtToken(
+                        customer.User,
+                        TokenType.Authentication
+                    );
+                    _emailService.SendVerificationEmail(customer.Email,
+                        verifyToken, environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    return ResponseModel.Success(ResponseConstants.ActivateAccountLink, null);
                 }
             }
-
-            return new ResponseModel { Status = "Error", Message = "Email không tồn tại" };
+            return ResponseModel.BadRequest(ResponseConstants.AccountActivated);
         }
 
         public async Task<ResponseModel> DashBoardLoginAsync(RequestLoginModel model)
@@ -400,26 +336,13 @@ namespace NET1814_MilkShop.Services.Services
                 model.Username,
                 model.Password
             );
-            if (existingUser != null)
+            if (existingUser != null && existingUser.RoleId != 3)
+            //Only admin,staff can login others will response wrong username or password
             {
-                //only admin,staff can login others will response wrong username or password
-                if (existingUser.RoleId == 3)
-                {
-                    return new ResponseModel
-                    {
-                        Status = "Error",
-                        Message = "Sai tên đăng nhập hoặc mật khẩu"
-                    };
-                }
-
                 //check if user is banned
                 if (existingUser.IsBanned)
                 {
-                    return new ResponseModel
-                    {
-                        Status = "Error",
-                        Message = "Tài khoản của bạn đã bị khóa"
-                    };
+                    return ResponseModel.BadRequest(ResponseConstants.Banned);
                 }
 
                 var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
@@ -438,19 +361,9 @@ namespace NET1814_MilkShop.Services.Services
                     RefreshToken = refreshToken.ToString(),
                     IsActive = existingUser.IsActive
                 };
-                return new ResponseModel
-                {
-                    Status = "Success",
-                    Message = "Đăng nhập thành công",
-                    Data = responseLogin
-                };
+                return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
             }
-
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Sai tên đăng nhập hoặc mật khẩu"
-            };
+            return ResponseModel.BadRequest(ResponseConstants.Login(false));
         }
     }
 }

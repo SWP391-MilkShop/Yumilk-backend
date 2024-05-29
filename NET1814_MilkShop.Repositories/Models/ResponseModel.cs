@@ -13,7 +13,7 @@
             this.Data = Data;
         }
         /// <summary>
-        /// This method is used to return success message
+        /// This method is used to return success message (Code 200)
         /// </summary>
         /// <param name="message"></param>
         /// <param name="data"></param>
@@ -23,7 +23,7 @@
             return new ResponseModel("200 Success", message, data);
         }
         /// <summary>
-        /// This method is used to return error message
+        /// This method is used to return error message (Code 500)
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
@@ -32,7 +32,7 @@
             return new ResponseModel("500 Error", message, null);
         }
         /// <summary>
-        /// This method is used to return not found message
+        /// This method is used to return not found message (Code 404)
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
@@ -41,7 +41,7 @@
             return new ResponseModel("404 Not Found", message, null);
         }
         /// <summary>
-        /// This method is used to return bad request message
+        /// This method is used to return bad request message (Code 400)
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>

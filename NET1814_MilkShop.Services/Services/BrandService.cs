@@ -1,3 +1,4 @@
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.BrandModels;
@@ -11,7 +12,7 @@ namespace NET1814_MilkShop.Services.Services;
 public interface IBrandService
 {
     Task<ResponseModel> GetBrandsAsync(BrandQueryModel queryModel);
-    Task<ResponseModel> AddBrandAsync(CreateBrandModel model);
+    Task<ResponseModel> CreateBrandAsync(CreateBrandModel model);
     Task<ResponseModel> UpdateBrandAsync(int id, UpdateBrandModel model);
     Task<ResponseModel> DeleteBrandAsync(int id);
 }
@@ -73,15 +74,11 @@ public class BrandService : IBrandService
 
         #endregion
 
-        return new ResponseModel()
-        {
-            Data = brands,
-            Message = brands.TotalCount > 0 ? "Get brands successfully" : "No brands found",
-            Status = "Success"
-        };
+        if (brands.TotalCount > 0) return ResponseModel.Success(ResponseConstants.Get("thương hiệu", true), brands);
+        return ResponseModel.NotFound(ResponseConstants.NotFound("Thương hiệu"));
     }
 
-    public async Task<ResponseModel> AddBrandAsync(CreateBrandModel model)
+    public async Task<ResponseModel> CreateBrandAsync(CreateBrandModel model)
     {
         // var isExistId = await _brandRepository.GetById(model.Id);
         // if (isExistId != null) //không cần check vì brandid tự tăng và không được nhập
@@ -95,13 +92,8 @@ public class BrandService : IBrandService
         var isExistName = await _brandRepository.GetBrandByName(model.Name);
         if (isExistName != null)
         {
-            return new ResponseModel
-            {
-                Message = "Brand name is existed! Add new brand fail!",
-                Status = "Error"
-            };
+            return ResponseModel.BadRequest(ResponseConstants.Exist("Thương hiệu"));
         }
-
         var entity = new Brand
         {
             Name = model.Name,
@@ -109,13 +101,9 @@ public class BrandService : IBrandService
             IsActive = true
         };
         _brandRepository.Add(entity);
-        await _unitOfWork.SaveChangesAsync();
-        return new ResponseModel
-        {
-            Status = "Success",
-            Data = entity,
-            Message = "Add new brand successfully"
-        };
+        var result = await _unitOfWork.SaveChangesAsync();
+        if (result > 0) return ResponseModel.Success(ResponseConstants.Create("thương hiệu", true), null);
+        return ResponseModel.Error(ResponseConstants.Create("thương hiệu", false));
     }
 
     public async Task<ResponseModel> UpdateBrandAsync(int id, UpdateBrandModel model)
@@ -123,11 +111,7 @@ public class BrandService : IBrandService
         var existingBrand = await _brandRepository.GetById(id);
         if (existingBrand == null)
         {
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Không tìm thấy thương hiệu"
-            };
+            return ResponseModel.NotFound(ResponseConstants.NotFound("Thương hiệu"));
         }
 
         if (!string.IsNullOrEmpty(model.Name))
@@ -135,11 +119,7 @@ public class BrandService : IBrandService
             var isExistName = await _brandRepository.GetBrandByName(model.Name);
             if (isExistName != null)
             {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Tên thương hiệu đã tồn tại"
-                };
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Tên thương hiệu"));
             }
             existingBrand.Name = model.Name;
         }
@@ -147,21 +127,12 @@ public class BrandService : IBrandService
         existingBrand.Description = string.IsNullOrEmpty(model.Description) ? existingBrand.Description : model.Description;
         existingBrand.IsActive = model.IsActive;
         _brandRepository.Update(existingBrand);
-        var res = await _unitOfWork.SaveChangesAsync();
-        if (res > 0)
+        var result = await _unitOfWork.SaveChangesAsync();
+        if (result > 0)
         {
-            return new ResponseModel
-            {
-                Status = "Success",
-                Message = "Cập nhật thương hiệu thành công",
-            };
+            return ResponseModel.Success(ResponseConstants.Update("thương hiệu", true), null);
         }
-
-        return new ResponseModel
-        {
-            Status = "Success",
-            Message = "Cập nhật thương hiệu thất bại",
-        };
+        return ResponseModel.Error(ResponseConstants.Update("thương hiệu", false));
     }
 
     public async Task<ResponseModel> DeleteBrandAsync(int id)
@@ -169,28 +140,16 @@ public class BrandService : IBrandService
         var isExist = await _brandRepository.GetById(id);
         if (isExist == null)
         {
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Brand not found"
-            };
+            return ResponseModel.NotFound(ResponseConstants.NotFound("Thương hiệu"));
         }
 
         _brandRepository.Delete(isExist);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
         {
-            return new ResponseModel
-            {
-                Status = "Success",
-                Message = "Delete brand successfully"
-            };
+            return ResponseModel.Success(ResponseConstants.Delete("thương hiệu", true), null);
         }
-        return new ResponseModel
-        {
-            Status = "Error",
-            Message = "Delete brand fail"
-        };
+        return ResponseModel.Error(ResponseConstants.Delete("thương hiệu", false));
     }
 
 

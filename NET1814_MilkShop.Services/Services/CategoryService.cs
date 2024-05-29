@@ -1,4 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.CategoryModels;
 using NET1814_MilkShop.Repositories.Repositories;
@@ -33,11 +34,7 @@ namespace NET1814_MilkShop.Services.Services
             var isExist = await _categoryRepository.IsExistAsync(model.Name);
             if (isExist)
             {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Category already exists"
-                };
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Danh mục"));   
             }
             var category = new Category
             {
@@ -49,17 +46,9 @@ namespace NET1814_MilkShop.Services.Services
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return new ResponseModel
-                {
-                    Status = "Success",
-                    Message = "Create category successfully"
-                };
+                return ResponseModel.Success(ResponseConstants.Create("danh mục", true), null);
             }
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Create category failed"
-            };
+            return ResponseModel.Error(ResponseConstants.Create("danh mục", false));
         }
 
         public async Task<ResponseModel> DeleteCategoryAsync(int id)
@@ -67,28 +56,16 @@ namespace NET1814_MilkShop.Services.Services
             var category = await _categoryRepository.GetById(id);
             if (category == null)
             {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Category not found"
-                };
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Danh mục"));
             }
             category.DeletedAt = DateTime.Now;
             _categoryRepository.Update(category);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return new ResponseModel
-                {
-                    Status = "Success",
-                    Message = "Delete category successfully"
-                };
+                return ResponseModel.Success(ResponseConstants.Delete("danh mục", true), null);
             }
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Delete category failed"
-            };
+            return ResponseModel.Error(ResponseConstants.Delete("danh mục", false));
         }
 
         public async Task<ResponseModel> GetCategoriesAsync(CategoryQueryModel queryModel)
@@ -118,12 +95,8 @@ namespace NET1814_MilkShop.Services.Services
                 queryModel.Page,
                 queryModel.PageSize
             );
-            return new ResponseModel
-            {
-                Data = categories,
-                Message = categories.TotalCount > 0 ? "Get products successfully" : "No products found",
-                Status = "Success"
-            };
+            if(categories.TotalCount > 0) return ResponseModel.Success(ResponseConstants.Get("danh mục", true), categories);
+            return ResponseModel.NotFound(ResponseConstants.Get("danh mục", false));
         }
         private static Expression<Func<Category, object>> GetSortProperty(
             CategoryQueryModel queryModel
@@ -138,11 +111,7 @@ namespace NET1814_MilkShop.Services.Services
             var category = await _categoryRepository.GetById(id);
             if (category == null || !category.IsActive)
             {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Category not found"
-                };
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Danh mục"));
             }
             var categoryModel = new CategoryModel
             {
@@ -151,12 +120,7 @@ namespace NET1814_MilkShop.Services.Services
                 Description = category.Description,
                 IsActive = category.IsActive
             };
-            return new ResponseModel
-            {
-                Data = categoryModel,
-                Message = "Get category successfully",
-                Status = "Success"
-            };
+            return ResponseModel.Success(ResponseConstants.Get("danh mục", true), categoryModel);
         }
 
         public async Task<ResponseModel> UpdateCategoryAsync(int id, UpdateCategoryModel model)
@@ -165,11 +129,7 @@ namespace NET1814_MilkShop.Services.Services
             var existingCategory = await _categoryRepository.GetById(id);
             if (existingCategory == null)
             {
-                return new ResponseModel
-                {
-                    Status = "Error",
-                    Message = "Category not found"
-                };
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Danh mục"));
             }
             if (!string.IsNullOrEmpty(model.Name))
             {
@@ -179,11 +139,7 @@ namespace NET1814_MilkShop.Services.Services
                     var isExist = await _categoryRepository.IsExistAsync(model.Name);
                     if (isExist)
                     {
-                        return new ResponseModel
-                        {
-                            Status = "Error",
-                            Message = "Category already exists"
-                        };
+                        return ResponseModel.BadRequest(ResponseConstants.Exist("Danh mục"));
                     }
                 }
                 existingCategory.Name = model.Name;
@@ -194,17 +150,9 @@ namespace NET1814_MilkShop.Services.Services
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return new ResponseModel
-                {
-                    Status = "Success",
-                    Message = "Update category successfully"
-                };
+                return ResponseModel.Success(ResponseConstants.Update("danh mục", true), null);
             }
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Update category failed"
-            };
+            return ResponseModel.Error(ResponseConstants.Update("danh mục", false));
         }
     }
 }

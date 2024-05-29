@@ -140,7 +140,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> AddBrand([FromBody] CreateBrandModel model)
         {
             _logger.Information("Add Brand");
-            var response = await _brandService.AddBrandAsync(model);
+            var response = await _brandService.CreateBrandAsync(model);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
