@@ -130,5 +130,7 @@
         public const string WrongCode = "Mã xác thực không đúng";
         public const string PassSameNewPass = "Mật khẩu cũ và mật khẩu mới không được trùng nhau";
         public const string WrongPassword = "Mật khẩu cũ không chính xác";
+        public const string InvalidPhoneNumber = "Số điện thoại không hợp lệ";
+        public const string InvalidUrl = "Url không hợp lệ";
     }
 }
