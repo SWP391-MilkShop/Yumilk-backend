@@ -36,11 +36,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Get all users");
             var response = await _userService.GetUsersAsync(request);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-            return Ok(response);
+            return Ok(response);*/
+            
+            return ResponseExtension.Result(response);
         }
         #endregion
 
