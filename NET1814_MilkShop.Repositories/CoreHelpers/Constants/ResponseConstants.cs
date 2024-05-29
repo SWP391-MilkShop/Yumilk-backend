@@ -128,5 +128,7 @@
         public const string Banned = "Tài khoản của bạn đã bị khóa";
         public const string AccountActivated = "Tài khoản của bạn đã được kích hoạt";
         public const string WrongCode = "Mã xác thực không đúng";
+        public const string PassSameNewPass = "Mật khẩu cũ và mật khẩu mới không được trùng nhau";
+        public const string WrongPassword = "Mật khẩu cũ không chính xác";
     }
 }
