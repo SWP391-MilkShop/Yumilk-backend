@@ -14,7 +14,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> CreateUserAsync(CreateUserModel model);
         Task<ResponseModel> LoginAsync(RequestLoginModel model);
         Task<ResponseModel> VerifyAccountAsync(string token);
-        Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request);
+        Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request, string environment);
         Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
         Task<ResponseModel> RefreshTokenAsync(string token);
         Task<ResponseModel> ActivateAccountAsync(string email,string environment);
@@ -269,7 +269,8 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request)
+        public async Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request,
+                                                                      string environment)
         {
             var customer = await _customerRepository.GetByEmailAsync(request.Email);
             if (customer != null)
@@ -285,7 +286,7 @@ namespace NET1814_MilkShop.Services.Services
                         TokenType.Reset
                     );
                     _emailService.SendPasswordResetEmail(customer.Email,
-                        verifyToken); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                        verifyToken,environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return new ResponseModel
                     {
                         Status = "Success",
