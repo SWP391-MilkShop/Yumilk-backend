@@ -14,11 +14,16 @@
 
         public decimal SalePrice { get; set; }
 
+        public string? Thumbnail { get; set; }
+
         public string Category { get; set; } = null!;
+
         public string Brand { get; set; } = null!;
 
         public string Unit { get; set; } = null!;
 
         public string Status { get; set; } = null!;
+
+        public bool IsActive { get; set; }
     }
 }

@@ -10,14 +10,14 @@ namespace NET1814_MilkShop.Services.Services
 {
     public interface IAuthenticationService
     {
-        Task<ResponseModel> SignUpAsync(SignUpModel model);
+        Task<ResponseModel> SignUpAsync(SignUpModel model, string environment);
         Task<ResponseModel> CreateUserAsync(CreateUserModel model);
         Task<ResponseModel> LoginAsync(RequestLoginModel model);
         Task<ResponseModel> VerifyAccountAsync(string token);
-        Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request);
+        Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request, string environment);
         Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
         Task<ResponseModel> RefreshTokenAsync(string token);
-        Task<ResponseModel> ActivateAccountAsync(string email);
+        Task<ResponseModel> ActivateAccountAsync(string email,string environment);
         Task<ResponseModel> DashBoardLoginAsync(RequestLoginModel model);
     }
 
@@ -94,7 +94,7 @@ namespace NET1814_MilkShop.Services.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public async Task<ResponseModel> SignUpAsync(SignUpModel model)
+        public async Task<ResponseModel> SignUpAsync(SignUpModel model,string environment)
         {
             var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
             if (existingUser != null)
@@ -116,6 +116,7 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Số điện thoại đã tồn tại trong hệ thống!"
                 };
             }
+
             var isEmailExist = await _customerRepository.IsExistEmailAsync(model.Email);
             if (isEmailExist)
             {
@@ -159,7 +160,7 @@ namespace NET1814_MilkShop.Services.Services
             var jwtVeriryToken = _jwtTokenExtension.CreateJwtToken(user, TokenType.Authentication);
             if (result > 0)
             {
-                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken);
+                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken,environment);
                 return new ResponseModel
                 {
                     Status = "Success",
@@ -269,7 +270,8 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request)
+        public async Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request,
+                                                                      string environment)
         {
             var customer = await _customerRepository.GetByEmailAsync(request.Email);
             if (customer != null)
@@ -285,7 +287,7 @@ namespace NET1814_MilkShop.Services.Services
                         TokenType.Reset
                     );
                     _emailService.SendPasswordResetEmail(customer.Email,
-                        verifyToken); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                        verifyToken,environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return new ResponseModel
                     {
                         Status = "Success",
@@ -330,12 +332,24 @@ namespace NET1814_MilkShop.Services.Services
             var jsonToken = handler.ReadToken(token);
             var tokenS = jsonToken as JwtSecurityToken;
             var userId = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
+            var tokenType = tokenS.Claims.First(claim => claim.Type == "tokenType").Value;
+            var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
+            var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
             var userExisted = await _userRepository.GetById(Guid.Parse(userId));
             if (userExisted == null)
             {
                 return new ResponseModel { Status = "Error", Message = "Không tồn tại người dùng" };
             }
 
+            if (tokenType != TokenType.Refresh.ToString())
+            {
+                return new ResponseModel { Status = "Error", Message = "Định dạng refresh token sai" };
+            }
+
+            if (expirationTime < DateTime.UtcNow)
+            {
+                return new ResponseModel { Status = "Error", Message = "Hết hạn" };
+            }
             var newToken = _jwtTokenExtension.CreateJwtToken(userExisted, TokenType.Access);
             return new ResponseModel
             {
@@ -345,7 +359,7 @@ namespace NET1814_MilkShop.Services.Services
             };
         }
 
-        public async Task<ResponseModel> ActivateAccountAsync(string email)
+        public async Task<ResponseModel> ActivateAccountAsync(string email,string environment)
         {
             var customer = await _customerRepository.GetByEmailAsync(email);
             if (customer != null)
@@ -363,7 +377,7 @@ namespace NET1814_MilkShop.Services.Services
                             TokenType.Authentication
                         );
                         _emailService.SendVerificationEmail(customer.Email,
-                            verifyToken); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                            verifyToken,environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                         return new ResponseModel
                         {
                             Status = "Success",

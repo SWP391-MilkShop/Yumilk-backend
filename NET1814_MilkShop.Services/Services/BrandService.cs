@@ -1,10 +1,10 @@
-using System.Linq.Expressions;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.BrandModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
+using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services;
 
@@ -62,6 +62,7 @@ public class BrandService : IBrandService
 
         var model = query.Select(x => new BrandModel()
         {
+            Id = x.Id,
             Name = x.Name,
             Description = x.Description
         });
@@ -119,8 +120,8 @@ public class BrandService : IBrandService
 
     public async Task<ResponseModel> UpdateBrandAsync(int id, UpdateBrandModel model)
     {
-        var isExistId = await _brandRepository.GetById(id);
-        if (isExistId == null)
+        var existingBrand = await _brandRepository.GetById(id);
+        if (existingBrand == null)
         {
             return new ResponseModel
             {
@@ -176,13 +177,20 @@ public class BrandService : IBrandService
             };
         }
 
-        isExist.DeletedAt = DateTime.Now;
-        _brandRepository.Update(isExist);
-        await _unitOfWork.SaveChangesAsync();
+        _brandRepository.Delete(isExist);
+        var result = await _unitOfWork.SaveChangesAsync();
+        if (result > 0)
+        {
+            return new ResponseModel
+            {
+                Status = "Success",
+                Message = "Delete brand successfully"
+            };
+        }
         return new ResponseModel
         {
-            Status = "Success",
-            Message = "Delete brand successfully"
+            Status = "Error",
+            Message = "Delete brand fail"
         };
     }
 

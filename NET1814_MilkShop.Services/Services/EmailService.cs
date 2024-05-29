@@ -7,8 +7,8 @@ namespace NET1814_MilkShop.Services.Services
 {
     public interface IEmailService
     {
-        void SendPasswordResetEmail(string receiveEmail, string token);
-        void SendVerificationEmail(string receiveEmail, string token);
+        void SendPasswordResetEmail(string receiveEmail, string token, string environment);
+        void SendVerificationEmail(string receiveEmail, string token, string environment);
     }
 
     public class EmailService : IEmailService
@@ -28,6 +28,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 throw new ArgumentException("FromEmailAddress is not set in EmailSettingModel");
             }
+
             MailMessage mailMessage = new MailMessage()
             {
                 Subject = model.Subject,
@@ -55,34 +56,67 @@ namespace NET1814_MilkShop.Services.Services
 
         public void SendPasswordResetEmail( /*CustomerModel user*/
             string receiveEmail,
-            string token
+            string token,
+            string environment
         )
         {
-            var model = new SendMailModel
+            if ("Development".Equals(environment))
             {
-                Receiver = receiveEmail,
-                Subject = "Password Reset",
-                Body =
-                    "Please click the link below to reset your password\n\n"
-                    + $"https://localhost:5000/api/authentication/reset-password?token={token}"
-            };
-            SendMail(model);
+                var model = new SendMailModel
+                {
+                    Receiver = receiveEmail,
+                    Subject = "Password Reset",
+                    Body =
+                        "Please click the link below to reset your password\n\n"
+                        + $"https://localhost:5000/api/authentication/reset-password?token={token}"
+                };
+                SendMail(model);
+            } else if ("Production".Equals(environment))
+            {
+                var model = new SendMailModel
+                {
+                    Receiver = receiveEmail,
+                    Subject = "Password Reset",
+                    Body =
+                        "Please click the link below to reset your password\n\n"
+                        + $"https://milkshop.azurewebsites.net/api" +
+                        $"/authentication/reset-password?token={token}"
+                };
+                SendMail(model);
+            }
         }
 
         public void SendVerificationEmail( /*CustomerModel user*/
             string receiveEmail,
-            string token
+            string token,
+            string environment
         )
         {
-            var model = new SendMailModel
+            if ("Development".Equals(environment))
             {
-                Receiver = receiveEmail,
-                Subject = "Account Verification",
-                Body =
-                    "Please click the link below to verify your account\n\n"
-                    + $"https://localhost:5000/api/authentication/verify?token={token}"
-            };
-            SendMail(model);
+                var model = new SendMailModel
+                {
+                    Receiver = receiveEmail,
+                    Subject = "Account Verification",
+                    Body =
+                        "Please click the link below to verify your account\n\n"
+                        + $"https://localhost:5000/api/authentication/verify?token={token}"
+                };
+                SendMail(model);
+            } 
+            else if ("Production".Equals(environment))
+            {
+                var model = new SendMailModel
+                {
+                    Receiver = receiveEmail,
+                    Subject = "Account Verification",
+                    Body =
+                        "Please click the link below to verify your account\n\n"
+                        + $"https://milkshop.azurewebsites.net/api/" +
+                        $"authentication/verify?token={token}"
+                };
+                SendMail(model);
+            } 
         }
     }
 }

@@ -366,7 +366,7 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("deleted_at")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description").HasColumnType("nvarchar(2000)").UseCollation("Latin1_General_CS_AI");
+                    b.Property<string>("Description").HasColumnType("nvarchar(MAX)").UseCollation("Latin1_General_CS_AI");
 
                     b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
                     //accent insensitive
