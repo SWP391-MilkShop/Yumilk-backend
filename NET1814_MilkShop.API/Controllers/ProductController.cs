@@ -65,7 +65,7 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
-        
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(Guid id)
         {
@@ -78,6 +78,7 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+
         [HttpPost]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> CreateProduct([FromBody] CreateProductModel model)
@@ -91,6 +92,7 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+
         [HttpPatch("{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] UpdateProductModel model)
@@ -104,6 +106,7 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+
         [HttpDelete("{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> DeleteProduct(Guid id)
@@ -336,7 +339,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         #region ProductAttribute
 
-        [HttpGet("/product_attributes")]
+        [HttpGet("product_attributes")]
         public async Task<IActionResult> GetProductAttributes([FromQuery] ProductAttributeQueryModel queryModel)
         {
             _logger.Information("Get Product Attributes");
@@ -349,7 +352,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpPost("/product_attributes")]
+        [HttpPost("product_attributes")]
         public async Task<IActionResult> AddProductAttribute([FromBody] CreateProductAttributeModel model)
         {
             _logger.Information("Add Product Attribute");
@@ -362,7 +365,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpPut("/product_attributes/{id}")]
+        [HttpPut("product_attributes/{id}")]
         public async Task<IActionResult> UpdateProductAttribute(int id, [FromBody] UpdateProductAttributeModel model)
         {
             _logger.Information("Update Product Attribute");
@@ -375,7 +378,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpDelete("/product_attributes/{id}")]
+        [HttpDelete("product_attributes/{id}")]
         public async Task<IActionResult> DeleteProductAttribute(int id)
         {
             _logger.Information("Delete Product Attribute");
@@ -392,7 +395,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         #region ProductAttributeValue
 
-        [HttpGet("/product_attribute_values")]
+        [HttpGet("{id}/attribute-value")]
         public async Task<IActionResult> GetProductAttributeValue([FromQuery] ProductAttributeValueQueryModel model)
         {
             _logger.Information("Get Product Attribute Value");
@@ -405,7 +408,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpPost("/product_attribute_values/{pid}/{aid}")]
+        [HttpPost("product_attribute_values/{pid}/{aid}")]
         public async Task<IActionResult> AddProAttValues(Guid pid, int aid, [FromBody] CreateUpdatePavModel model)
         {
             _logger.Information("Add Product Attribute Value");
@@ -418,7 +421,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpPut("/product_attribute_values/{pid}/{aid}")]
+        [HttpPut("product_attribute_values/{pid}/{aid}")]
         public async Task<IActionResult> UpdateProAttValues(Guid pid, int aid, [FromBody] CreateUpdatePavModel model)
         {
             _logger.Information("Update Product Attribute Value");
@@ -431,7 +434,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpDelete("/product_attribute_values/{pid}/{aid}")]
+        [HttpDelete("product_attribute_values/{pid}/{aid}")]
         public async Task<IActionResult> DeleteProAttValues(Guid pid, int aid)
         {
             _logger.Information("Delete Product Attribute Value");
