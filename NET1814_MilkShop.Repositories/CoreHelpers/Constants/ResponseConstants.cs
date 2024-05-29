@@ -1,8 +1,6 @@
-﻿using NET1814_MilkShop.Repositories.Models.BrandModels;
-
-namespace NET1814_MilkShop.Repositories.CoreHelpers.Constants
+﻿namespace NET1814_MilkShop.Repositories.CoreHelpers.Constants
 {
-    public class ResponseConstants
+    public static class ResponseConstants
     {
         public static string Create(string name, bool result)
         {

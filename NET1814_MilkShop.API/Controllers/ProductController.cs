@@ -7,7 +7,6 @@ using NET1814_MilkShop.Repositories.Models.ProductAttributeModels;
 using NET1814_MilkShop.Repositories.Models.ProductAttributeValueModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Models.UnitModels;
-using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
 
@@ -150,7 +149,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
 
-        [HttpPut("brands/{id}")]
+        [HttpPatch("brands/{id}")]
         public async Task<IActionResult> UpdateBrand(int id, [FromBody] UpdateBrandModel model)
         {
             _logger.Information("Update Brand");
@@ -225,7 +224,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);
         }
 
-        [HttpPut("units/{id}")]
+        [HttpPatch("units/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> UpdateUnit(int id, [FromBody] UpdateUnitModel model)
         {
@@ -304,7 +303,7 @@ namespace NET1814_MilkShop.API.Controllers
         /// <param name="id"></param>
         /// <param name="model"></param>
         /// <returns></returns>
-        [HttpPut("categories/{id}")]
+        [HttpPatch("categories/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1, 2")]
         public async Task<IActionResult> UpdateCategory(
             int id,
@@ -339,7 +338,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         #region ProductAttribute
 
-        [HttpGet("product_attributes")]
+        [HttpGet("attributes")]
         public async Task<IActionResult> GetProductAttributes([FromQuery] ProductAttributeQueryModel queryModel)
         {
             _logger.Information("Get Product Attributes");
@@ -352,7 +351,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpPost("product_attributes")]
+        [HttpPost("attributes")]
         public async Task<IActionResult> AddProductAttribute([FromBody] CreateProductAttributeModel model)
         {
             _logger.Information("Add Product Attribute");
@@ -365,7 +364,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpPut("product_attributes/{id}")]
+        [HttpPatch("attributes/{id}")]
         public async Task<IActionResult> UpdateProductAttribute(int id, [FromBody] UpdateProductAttributeModel model)
         {
             _logger.Information("Update Product Attribute");
@@ -378,7 +377,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpDelete("product_attributes/{id}")]
+        [HttpDelete("attributes/{id}")]
         public async Task<IActionResult> DeleteProductAttribute(int id)
         {
             _logger.Information("Delete Product Attribute");
@@ -395,11 +394,11 @@ namespace NET1814_MilkShop.API.Controllers
 
         #region ProductAttributeValue
 
-        [HttpGet("{id}/attribute-value")]
-        public async Task<IActionResult> GetProductAttributeValue([FromQuery] ProductAttributeValueQueryModel model)
+        [HttpGet("{id}/attributes/values")]
+        public async Task<IActionResult> GetProductAttributeValue(Guid id, [FromQuery] ProductAttributeValueQueryModel model)
         {
             _logger.Information("Get Product Attribute Value");
-            var res = await _productAttributeValueService.GetProductAttributeValue(model);
+            var res = await _productAttributeValueService.GetProductAttributeValue(id, model);
             if (res.Status == "Error")
             {
                 return BadRequest(res);
@@ -408,11 +407,11 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpPost("product_attribute_values/{pid}/{aid}")]
-        public async Task<IActionResult> AddProAttValues(Guid pid, int aid, [FromBody] CreateUpdatePavModel model)
+        [HttpPost("{id}/attributes/{attributeId}/values")]
+        public async Task<IActionResult> AddProAttValues(Guid id, int attributeId, [FromBody] CreateUpdatePavModel model)
         {
             _logger.Information("Add Product Attribute Value");
-            var res = await _productAttributeValueService.AddProductAttributeValue(pid, aid, model);
+            var res = await _productAttributeValueService.AddProductAttributeValue(id, attributeId, model);
             if (res.Status == "Error")
             {
                 return BadRequest(res);
@@ -421,11 +420,11 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpPut("product_attribute_values/{pid}/{aid}")]
-        public async Task<IActionResult> UpdateProAttValues(Guid pid, int aid, [FromBody] CreateUpdatePavModel model)
+        [HttpPatch("{id}/attributes/{attributeId}/values")]
+        public async Task<IActionResult> UpdateProAttValues(Guid id, int attributeId, [FromBody] CreateUpdatePavModel model)
         {
             _logger.Information("Update Product Attribute Value");
-            var res = await _productAttributeValueService.UpdateProductAttributeValue(pid, aid, model);
+            var res = await _productAttributeValueService.UpdateProductAttributeValue(id, attributeId, model);
             if (res.Status == "Error")
             {
                 return BadRequest(res);
@@ -434,11 +433,11 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(res);
         }
 
-        [HttpDelete("product_attribute_values/{pid}/{aid}")]
-        public async Task<IActionResult> DeleteProAttValues(Guid pid, int aid)
+        [HttpDelete("{id}/attributes/{attributeId}/values")]
+        public async Task<IActionResult> DeleteProAttValues(Guid id, int attributeId)
         {
             _logger.Information("Delete Product Attribute Value");
-            var res = await _productAttributeValueService.DeleteProductAttributeValue(pid, aid);
+            var res = await _productAttributeValueService.DeleteProductAttributeValue(id, attributeId);
             if (res.Status == "Error")
             {
                 return BadRequest(res);

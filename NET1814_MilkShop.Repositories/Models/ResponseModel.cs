@@ -20,7 +20,7 @@
         /// <returns></returns>
         public static ResponseModel Success(string message, object? data)
         {
-            return new ResponseModel("Success", message, data);
+            return new ResponseModel("200 Success", message, data);
         }
         /// <summary>
         /// This method is used to return error message
@@ -29,7 +29,7 @@
         /// <returns></returns>
         public static ResponseModel Error(string message)
         {
-            return new ResponseModel("Error", message, null);
+            return new ResponseModel("500 Error", message, null);
         }
         /// <summary>
         /// This method is used to return not found message
@@ -38,7 +38,7 @@
         /// <returns></returns>
         public static ResponseModel NotFound(string message)
         {
-            return new ResponseModel("Not Found", message, null);
+            return new ResponseModel("404 Not Found", message, null);
         }
         /// <summary>
         /// This method is used to return bad request message
@@ -47,7 +47,7 @@
         /// <returns></returns>
         public static ResponseModel BadRequest(string message)
         {
-            return new ResponseModel("Bad Request", message, null);
+            return new ResponseModel("400 Bad Request", message, null);
         }
     }
 

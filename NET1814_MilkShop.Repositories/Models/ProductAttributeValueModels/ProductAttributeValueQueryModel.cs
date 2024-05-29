@@ -2,7 +2,6 @@ namespace NET1814_MilkShop.Repositories.Models.ProductAttributeValueModels;
 
 public class ProductAttributeValueQueryModel : QueryModel
 {
-    public Guid? ProductId { get; set; }
 
     /// <summary>
     /// search by value

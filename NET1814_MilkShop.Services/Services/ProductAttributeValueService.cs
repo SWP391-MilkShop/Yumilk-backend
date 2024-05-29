@@ -12,7 +12,7 @@ namespace NET1814_MilkShop.Services.Services;
 
 public interface IProductAttributeValueService
 {
-    Task<ResponseModel> GetProductAttributeValue(ProductAttributeValueQueryModel queryModel);
+    Task<ResponseModel> GetProductAttributeValue(Guid id, ProductAttributeValueQueryModel queryModel);
     Task<ResponseModel> AddProductAttributeValue(Guid pid, int aid, CreateUpdatePavModel model);
     Task<ResponseModel> UpdateProductAttributeValue(Guid pid, int aid, CreateUpdatePavModel model);
     Task<ResponseModel> DeleteProductAttributeValue(Guid pid, int aid);
@@ -29,15 +29,15 @@ public class ProductAttributeValueService : IProductAttributeValueService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<ResponseModel> GetProductAttributeValue(ProductAttributeValueQueryModel queryModel)
+    public async Task<ResponseModel> GetProductAttributeValue(Guid id, ProductAttributeValueQueryModel queryModel)
     {
         var query = _proAttValueRepository.GetProductAttributeValue();
 
         #region filter
 
-        if (!string.IsNullOrEmpty(queryModel.ProductId.ToString()))
+        if (!string.IsNullOrEmpty(id.ToString()))
         {
-            query = query.Where(x => x.ProductId == queryModel.ProductId);
+            query = query.Where(x => x.ProductId == id);
         }
 
         if (!string.IsNullOrEmpty(queryModel.SearchTerm))
