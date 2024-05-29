@@ -124,7 +124,6 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPost("refresh-token")]
-        [Authorize(AuthenticationSchemes = "Refresh")]
         public async Task<IActionResult> RefreshToken([FromQuery] string token)
         {
             _logger.Information("Refresh Token");
