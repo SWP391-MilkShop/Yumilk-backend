@@ -7,7 +7,7 @@ namespace NET1814_MilkShop.Services.Services
 {
     public interface IEmailService
     {
-        void SendPasswordResetEmail(string receiveEmail, string token);
+        void SendPasswordResetEmail(string receiveEmail, string token, string environment);
         void SendVerificationEmail(string receiveEmail, string token, string environment);
     }
 
@@ -56,18 +56,34 @@ namespace NET1814_MilkShop.Services.Services
 
         public void SendPasswordResetEmail( /*CustomerModel user*/
             string receiveEmail,
-            string token
+            string token,
+            string environment
         )
         {
-            var model = new SendMailModel
+            if ("Development".Equals(environment))
             {
-                Receiver = receiveEmail,
-                Subject = "Password Reset",
-                Body =
-                    "Please click the link below to reset your password\n\n"
-                    + $"https://localhost:5000/api/authentication/reset-password?token={token}"
-            };
-            SendMail(model);
+                var model = new SendMailModel
+                {
+                    Receiver = receiveEmail,
+                    Subject = "Password Reset",
+                    Body =
+                        "Please click the link below to reset your password\n\n"
+                        + $"https://localhost:5000/api/authentication/reset-password?token={token}"
+                };
+                SendMail(model);
+            } else if ("Production".Equals(environment))
+            {
+                var model = new SendMailModel
+                {
+                    Receiver = receiveEmail,
+                    Subject = "Password Reset",
+                    Body =
+                        "Please click the link below to reset your password\n\n"
+                        + $"https://milkshop.azurewebsites.net/api" +
+                        $"/authentication/reset-password?token={token}"
+                };
+                SendMail(model);
+            }
         }
 
         public void SendVerificationEmail( /*CustomerModel user*/
@@ -76,7 +92,7 @@ namespace NET1814_MilkShop.Services.Services
             string environment
         )
         {
-            if (environment == "Development")
+            if ("Development".Equals(environment))
             {
                 var model = new SendMailModel
                 {
@@ -88,7 +104,7 @@ namespace NET1814_MilkShop.Services.Services
                 };
                 SendMail(model);
             } 
-            else if (environment == "Production")
+            else if ("Production".Equals(environment))
             {
                 var model = new SendMailModel
                 {
@@ -96,7 +112,8 @@ namespace NET1814_MilkShop.Services.Services
                     Subject = "Account Verification",
                     Body =
                         "Please click the link below to verify your account\n\n"
-                        + $"https://milkshop.com/api/authentication/verify?token={token}"
+                        + $"https://milkshop.azurewebsites.net/api/" +
+                        $"authentication/verify?token={token}"
                 };
                 SendMail(model);
             } 
