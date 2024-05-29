@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.BrandModels;
 using NET1814_MilkShop.Repositories.Models.CategoryModels;
@@ -167,12 +168,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Delete Brand");
             var response = await _brandService.DeleteBrandAsync(id);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         #endregion
@@ -189,12 +191,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Get all units");
             var response = await _unitService.GetUnitsAsync(request);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         [HttpGet("units/{id}")]
@@ -202,12 +205,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Get unit by id");
             var response = await _unitService.GetUnitByIdAsync(id);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         [HttpPost("units")]
@@ -216,12 +220,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Create unit");
             var response = await _unitService.CreateUnitAsync(model);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         [HttpPatch("units/{id}")]
@@ -230,12 +235,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Update unit");
             var response = await _unitService.UpdateUnitAsync(id, model);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         [HttpDelete("units/{id}")]
@@ -244,12 +250,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Delete unit");
             var response = await _unitService.DeleteUnitAsync(id);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         #endregion
@@ -261,12 +268,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Get all categories");
             var response = await _categoryService.GetCategoriesAsync(queryModel);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         [HttpGet("categories/{id}")]
@@ -275,12 +283,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Get category by id");
             var response = await _categoryService.GetCategoryByIdAsync(id);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         [HttpPost("categories")]
@@ -289,12 +298,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Create category");
             var response = await _categoryService.CreateCategoryAsync(model);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         /// <summary>
@@ -312,12 +322,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Update category");
             var response = await _categoryService.UpdateCategoryAsync(id, model);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         [HttpDelete("categories/{id}")]
@@ -326,12 +337,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Delete category");
             var response = await _categoryService.DeleteCategoryAsync(id);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         #endregion
@@ -342,13 +354,14 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> GetProductAttributes([FromQuery] ProductAttributeQueryModel queryModel)
         {
             _logger.Information("Get Product Attributes");
-            var res = await _productAttributeService.GetProductAttributesAsync(queryModel);
+            var res = await _productAttributeService.GetProductAttributesAsync(queryModel);/*
             if (res.Status == "Error")
             {
                 return BadRequest(res);
             }
 
-            return Ok(res);
+            return Ok(res);*/
+            return ResponseExtension.Result(res);
         }
 
         [HttpPost("attributes")]
@@ -356,12 +369,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Add Product Attribute");
             var res = await _productAttributeService.AddProductAttributeAsync(model);
-            if (res.Status == "Error")
+            /*if (res.Status == "Error")
             {
                 return BadRequest(res);
             }
 
-            return Ok(res);
+            return Ok(res);*/
+            return ResponseExtension.Result(res);
         }
 
         [HttpPatch("attributes/{id}")]
@@ -369,12 +383,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Update Product Attribute");
             var res = await _productAttributeService.UpdateProductAttributeAsync(id, model);
-            if (res.Status == "Error")
+            /*if (res.Status == "Error")
             {
                 return BadRequest(res);
             }
 
-            return Ok(res);
+            return Ok(res);*/
+            return ResponseExtension.Result(res);
         }
 
         [HttpDelete("attributes/{id}")]
@@ -382,12 +397,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Delete Product Attribute");
             var res = await _productAttributeService.DeleteProductAttributeAsync(id);
-            if (res.Status == "Error")
+            /*if (res.Status == "Error")
             {
                 return BadRequest(res);
             }
 
-            return Ok(res);
+            return Ok(res);*/
+            return ResponseExtension.Result(res);
         }
 
         #endregion
@@ -399,12 +415,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Get Product Attribute Value");
             var res = await _productAttributeValueService.GetProductAttributeValue(id, model);
-            if (res.Status == "Error")
+            /*if (res.Status == "Error")
             {
                 return BadRequest(res);
             }
 
-            return Ok(res);
+            return Ok(res);*/
+            return ResponseExtension.Result(res);
         }
 
         [HttpPost("{id}/attributes/{attributeId}/values")]
@@ -412,12 +429,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Add Product Attribute Value");
             var res = await _productAttributeValueService.AddProductAttributeValue(id, attributeId, model);
-            if (res.Status == "Error")
+            /*if (res.Status == "Error")
             {
                 return BadRequest(res);
             }
 
-            return Ok(res);
+            return Ok(res);*/
+            return ResponseExtension.Result(res);
         }
 
         [HttpPatch("{id}/attributes/{attributeId}/values")]
@@ -425,12 +443,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Update Product Attribute Value");
             var res = await _productAttributeValueService.UpdateProductAttributeValue(id, attributeId, model);
-            if (res.Status == "Error")
+            /*if (res.Status == "Error")
             {
                 return BadRequest(res);
             }
 
-            return Ok(res);
+            return Ok(res);*/
+            return ResponseExtension.Result(res);
         }
 
         [HttpDelete("{id}/attributes/{attributeId}/values")]
@@ -438,12 +457,13 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Delete Product Attribute Value");
             var res = await _productAttributeValueService.DeleteProductAttributeValue(id, attributeId);
-            if (res.Status == "Error")
+            /*if (res.Status == "Error")
             {
                 return BadRequest(res);
             }
 
-            return Ok(res);
+            return Ok(res);*/
+            return ResponseExtension.Result(res);
         }
 
         #endregion
