@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
+using NET1814_MilkShop.API.CoreHelpers.Extensions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Models.AddressModels;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Services.Services;
@@ -51,11 +53,12 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Get all customers");
             var response = await _customerService.GetCustomersAsync(request);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         [HttpGet]
@@ -66,11 +69,12 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Get customer by id");
             var response = await _customerService.GetByIdAsync(id);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
         #endregion
 
@@ -85,11 +89,12 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Get current user");
             var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
             var response = await _customerService.GetByIdAsync(userId);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
         /// <summary>
         /// Only Customer can change profile info?
@@ -106,11 +111,12 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Change user info");
             var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
             var response = await _customerService.ChangeInfoAsync(userId, model);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         [HttpPut]
@@ -123,11 +129,12 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Change user password");
             var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
             var response = await _userService.ChangePasswordAsync(userId, model);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
         /// <summary>
         /// Feature only available for Customer role
@@ -142,12 +149,12 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Get customer addresses");
             var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
             var response = await _addressService.GetAddressesByCustomerId(userId);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
         
         /// <summary>
@@ -165,11 +172,12 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Create customer address");
             var customerId = (HttpContext.Items["UserId"] as Guid?)!.Value;
             var response = await _addressService.CreateAddressAsync(customerId, request);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
 
         /// <summary>
@@ -188,11 +196,12 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Update Customer Address");
             var customerId = (HttpContext.Items["UserId"] as Guid?)!.Value;
             var response = await _addressService.UpdateAddressAsync(customerId,id,request);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
         /// <summary>
         /// feature only available for Customer role,
@@ -209,11 +218,12 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Delete Customer Address");
             var customerId = (HttpContext.Items["UserId"] as Guid?)!.Value;
             var response = await _addressService.DeleteAddressAsync(customerId, id);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
-            return Ok(response);
+            return Ok(response);*/
+            return ResponseExtension.Result(response);
         }
         #endregion
     }
