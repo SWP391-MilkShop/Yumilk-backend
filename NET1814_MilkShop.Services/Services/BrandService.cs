@@ -75,7 +75,7 @@ public class BrandService : IBrandService
         #endregion
 
         if (brands.TotalCount > 0) return ResponseModel.Success(ResponseConstants.Get("thương hiệu", true), brands);
-        return ResponseModel.NotFound(ResponseConstants.NotFound("Thương hiệu"));
+        return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
     }
 
     public async Task<ResponseModel> CreateBrandAsync(CreateBrandModel model)
@@ -111,7 +111,7 @@ public class BrandService : IBrandService
         var existingBrand = await _brandRepository.GetById(id);
         if (existingBrand == null)
         {
-            return ResponseModel.NotFound(ResponseConstants.NotFound("Thương hiệu"));
+            return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
         }
 
         if (!string.IsNullOrEmpty(model.Name))
@@ -140,7 +140,7 @@ public class BrandService : IBrandService
         var isExist = await _brandRepository.GetById(id);
         if (isExist == null)
         {
-            return ResponseModel.NotFound(ResponseConstants.NotFound("Thương hiệu"));
+            return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
         }
 
         _brandRepository.Delete(isExist);

@@ -86,7 +86,7 @@ public class AddressService : IAddressService
         });
         var count = await result.CountAsync();
         if (count > 0) return ResponseModel.Success(ResponseConstants.Get("địa chỉ", true), result);
-        return ResponseModel.NotFound(ResponseConstants.NotFound("địa chỉ"));
+        return ResponseModel.Success(ResponseConstants.NotFound("địa chỉ"), null);
     }
 
     public async Task<ResponseModel> UpdateAddressAsync(Guid customerId, int id, UpdateAddressModel model)
@@ -95,7 +95,7 @@ public class AddressService : IAddressService
         var address = await customerAddresses.FirstOrDefaultAsync(x => x.Id == id);
         if (address == null)
         {
-            return ResponseModel.NotFound(ResponseConstants.NotFound("địa chỉ"));
+            return ResponseModel.Success(ResponseConstants.NotFound("địa chỉ"), null);
         }
         var countCustomerAddress = _addressRepository.GetCustomerAddresses(customerId).Count();
         if (countCustomerAddress == 1)
@@ -137,7 +137,7 @@ public class AddressService : IAddressService
         switch (address)
         {
             case null:
-                return ResponseModel.NotFound(ResponseConstants.NotFound("địa chỉ"));
+                return ResponseModel.Success(ResponseConstants.NotFound("địa chỉ"), null);
             case { IsDefault: true }:
                 return ResponseModel.BadRequest("Không thể xóa địa chỉ mặc định");
             default:

@@ -81,7 +81,7 @@ public class UnitService : IUnitService
             return ResponseModel.Success(ResponseConstants.Get("đơn vị", true), units);
         }
 
-        return ResponseModel.Error(ResponseConstants.NotFound("Đơn vị"));
+        return ResponseModel.Success(ResponseConstants.NotFound("Đơn vị"), null);
     }
 
     public async Task<ResponseModel> GetUnitByIdAsync(int id)
