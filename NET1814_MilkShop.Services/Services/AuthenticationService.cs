@@ -116,6 +116,7 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Số điện thoại đã tồn tại trong hệ thống!"
                 };
             }
+
             var isEmailExist = await _customerRepository.IsExistEmailAsync(model.Email);
             if (isEmailExist)
             {
@@ -330,12 +331,24 @@ namespace NET1814_MilkShop.Services.Services
             var jsonToken = handler.ReadToken(token);
             var tokenS = jsonToken as JwtSecurityToken;
             var userId = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
+            var tokenType = tokenS.Claims.First(claim => claim.Type == "tokenType").Value;
+            var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
+            var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
             var userExisted = await _userRepository.GetById(Guid.Parse(userId));
             if (userExisted == null)
             {
                 return new ResponseModel { Status = "Error", Message = "Không tồn tại người dùng" };
             }
 
+            if (tokenType != TokenType.Refresh.ToString())
+            {
+                return new ResponseModel { Status = "Error", Message = "Định dạng refresh token sai" };
+            }
+
+            if (expirationTime < DateTime.UtcNow)
+            {
+                return new ResponseModel { Status = "Error", Message = "Hết hạn" };
+            }
             var newToken = _jwtTokenExtension.CreateJwtToken(userExisted, TokenType.Access);
             return new ResponseModel
             {
