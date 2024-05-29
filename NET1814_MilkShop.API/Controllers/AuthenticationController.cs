@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
@@ -30,13 +32,7 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Create user");
             var response = await _authenticationService.CreateUserAsync(model);
-
-            if (response.Status == "Error")
-            {
-                return BadRequest(response);
-            }
-
-            return Ok(response);
+            return ResponseExtension.Result(response);
         }
 
         [HttpPost("sign-up")]
@@ -45,12 +41,7 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Sign up");
             var environment = _webHostEnvironment.EnvironmentName;
             var response = await _authenticationService.SignUpAsync(model,environment);
-            if (response.Status == "Error")
-            {
-                return BadRequest(response);
-            }
-
-            return Ok(response);
+            return ResponseExtension.Result(response);
         }
 
         [HttpPost("verify")]
@@ -58,12 +49,7 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Verify Account");
             var response = await _authenticationService.VerifyAccountAsync(token);
-            if (response.Status == "Error")
-            {
-                return BadRequest(response);
-            }
-
-            return Ok(response);
+            return ResponseExtension.Result(response);
         }
 
         /// <summary>
@@ -76,12 +62,7 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Login");
             var res = await _authenticationService.LoginAsync(model);
-            if (res.Status == "Error")
-            {
-                return BadRequest(res);
-            }
-
-            return Ok(res);
+            return ResponseExtension.Result(res);
         }
 
         /// <summary>
@@ -94,12 +75,7 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Login");
             var response = await _authenticationService.DashBoardLoginAsync(model);
-            if (response.Status == "Error")
-            {
-                return BadRequest(response);
-            }
-
-            return Ok(response);
+            return ResponseExtension.Result(response);
         }
 
         [HttpPost("forgot-password")]
@@ -108,12 +84,7 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Forgot Password");
             var environment = _webHostEnvironment.EnvironmentName;
             var response = await _authenticationService.ForgotPasswordAsync(request, environment);
-            if (response.Status == "Error")
-            {
-                return BadRequest(response);
-            }
-
-            return Ok(response);
+            return ResponseExtension.Result(response);
         }
 
         [HttpPost("reset-password")]
@@ -121,25 +92,15 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Reset Password");
             var response = await _authenticationService.ResetPasswordAsync(request);
-            if (response.Status == "Error")
-            {
-                return BadRequest(response);
-            }
-
-            return Ok(response);
+            return ResponseExtension.Result(response);
         }
 
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromQuery] string token)
         {
             _logger.Information("Refresh Token");
-            var res = await _authenticationService.RefreshTokenAsync(token);
-            if (res.Status == "Error")
-            {
-                return BadRequest(res);
-            }
-
-            return Ok(res);
+            var response = await _authenticationService.RefreshTokenAsync(token);
+            return ResponseExtension.Result(response);
         }
 
         [HttpPost("activate-account")]
@@ -147,13 +108,8 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Activate Account");
             var environment = _webHostEnvironment.EnvironmentName;
-            var res = await _authenticationService.ActivateAccountAsync(email,environment);
-            if (res.Status == "Error")
-            {
-                return BadRequest(res);
-            }
-
-            return Ok(res);
+            var response = await _authenticationService.ActivateAccountAsync(email,environment);
+            return ResponseExtension.Result(response);
         }
     }
 }
