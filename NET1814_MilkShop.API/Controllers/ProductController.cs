@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.BrandModels;
 using NET1814_MilkShop.Repositories.Models.CategoryModels;
+using NET1814_MilkShop.Repositories.Models.ProductAttributeModels;
+using NET1814_MilkShop.Repositories.Models.ProductAttributeValueModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Models.UnitModels;
+using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
 
@@ -19,6 +22,8 @@ namespace NET1814_MilkShop.API.Controllers
         private readonly ICategoryService _categoryService;
         private readonly ILogger _logger;
         private readonly IBrandService _brandService;
+        private readonly IProductAttributeService _productAttributeService;
+        private readonly IProductAttributeValueService _productAttributeValueService;
 
         public ProductController(ILogger logger, IServiceProvider serviceProvider)
         {
@@ -27,6 +32,8 @@ namespace NET1814_MilkShop.API.Controllers
             _brandService = serviceProvider.GetRequiredService<IBrandService>();
             _unitService = serviceProvider.GetRequiredService<IUnitService>();
             _categoryService = serviceProvider.GetRequiredService<ICategoryService>();
+            _productAttributeService = serviceProvider.GetRequiredService<IProductAttributeService>();
+            _productAttributeValueService = serviceProvider.GetRequiredService<IProductAttributeValueService>();
         }
 
         #region Product
@@ -58,6 +65,7 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+        
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(Guid id)
         {
@@ -109,6 +117,7 @@ namespace NET1814_MilkShop.API.Controllers
 
             return Ok(response);
         }
+
         #endregion
 
         #region Brand
@@ -139,7 +148,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPut("brands/{id}")]
-        public async Task<IActionResult> UpdateBrand(int id, [FromBody] CreateBrandModel model)
+        public async Task<IActionResult> UpdateBrand(int id, [FromBody] UpdateBrandModel model)
         {
             _logger.Information("Update Brand");
             var response = await _brandService.UpdateBrandAsync(id, model);
@@ -321,6 +330,118 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);
+        }
+
+        #endregion
+
+        #region ProductAttribute
+
+        [HttpGet("/product_attributes")]
+        public async Task<IActionResult> GetProductAttributes([FromQuery] ProductAttributeQueryModel queryModel)
+        {
+            _logger.Information("Get Product Attributes");
+            var res = await _productAttributeService.GetProductAttributesAsync(queryModel);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
+        [HttpPost("/product_attributes")]
+        public async Task<IActionResult> AddProductAttribute([FromBody] CreateProductAttributeModel model)
+        {
+            _logger.Information("Add Product Attribute");
+            var res = await _productAttributeService.AddProductAttributeAsync(model);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
+        [HttpPut("/product_attributes/{id}")]
+        public async Task<IActionResult> UpdateProductAttribute(int id, [FromBody] UpdateProductAttributeModel model)
+        {
+            _logger.Information("Update Product Attribute");
+            var res = await _productAttributeService.UpdateProductAttributeAsync(id, model);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
+        [HttpDelete("/product_attributes/{id}")]
+        public async Task<IActionResult> DeleteProductAttribute(int id)
+        {
+            _logger.Information("Delete Product Attribute");
+            var res = await _productAttributeService.DeleteProductAttributeAsync(id);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
+        #endregion
+
+        #region ProductAttributeValue
+
+        [HttpGet("/product_attribute_values")]
+        public async Task<IActionResult> GetProductAttributeValue([FromQuery] ProductAttributeValueQueryModel model)
+        {
+            _logger.Information("Get Product Attribute Value");
+            var res = await _productAttributeValueService.GetProductAttributeValue(model);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
+        [HttpPost("/product_attribute_values/{pid}/{aid}")]
+        public async Task<IActionResult> AddProAttValues(Guid pid, int aid, [FromBody] CreateUpdatePavModel model)
+        {
+            _logger.Information("Add Product Attribute Value");
+            var res = await _productAttributeValueService.AddProductAttributeValue(pid, aid, model);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
+        [HttpPut("/product_attribute_values/{pid}/{aid}")]
+        public async Task<IActionResult> UpdateProAttValues(Guid pid, int aid, [FromBody] CreateUpdatePavModel model)
+        {
+            _logger.Information("Update Product Attribute Value");
+            var res = await _productAttributeValueService.UpdateProductAttributeValue(pid, aid, model);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
+        }
+
+        [HttpDelete("/product_attribute_values/{pid}/{aid}")]
+        public async Task<IActionResult> DeleteProAttValues(Guid pid, int aid)
+        {
+            _logger.Information("Delete Product Attribute Value");
+            var res = await _productAttributeValueService.DeleteProductAttributeValue(pid, aid);
+            if (res.Status == "Error")
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
         }
 
         #endregion
