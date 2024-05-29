@@ -106,7 +106,8 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel request)
         {
             _logger.Information("Forgot Password");
-            var response = await _authenticationService.ForgotPasswordAsync(request);
+            var environment = _webHostEnvironment.EnvironmentName;
+            var response = await _authenticationService.ForgotPasswordAsync(request, environment);
             if (response.Status == "Error")
             {
                 return BadRequest(response);
