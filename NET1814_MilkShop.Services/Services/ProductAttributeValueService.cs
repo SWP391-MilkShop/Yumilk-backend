@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Runtime.Intrinsics.X86;
 using Microsoft.EntityFrameworkCore;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductAttributeValueModels;
@@ -69,14 +70,12 @@ public class ProductAttributeValueService : IProductAttributeValueService
 
         #endregion
 
-        return new ResponseModel
+        if (pPage.TotalCount > 0)
         {
-            Data = pPage,
-            Message = pPage.TotalCount > 0
-                ? "Tìm kiếm thành công"
-                : "Danh sách rỗng",
-            Status = "Success"
-        };
+            return ResponseModel.Success(ResponseConstants.Get("giá trị thuộc tính sản phẩm", true), pPage);
+        }
+
+        return ResponseModel.NotFound(ResponseConstants.NotFound("giá trị thuộc tính sản phẩm"));
     }
 
     public async Task<ResponseModel> AddProductAttributeValue(Guid pid, int aid, CreateUpdatePavModel model)
@@ -84,31 +83,19 @@ public class ProductAttributeValueService : IProductAttributeValueService
         var isExistpid = await _proAttValueRepository.GetProductById(pid);
         if (isExistpid == null)
         {
-            return new ResponseModel
-            {
-                Message = "Không tồn tại sản phẩm",
-                Status = "Error"
-            };
+            return ResponseModel.NotFound(ResponseConstants.NotFound("Sản phẩm"));
         }
 
         var isExistAttributeId = await _proAttValueRepository.GetAttributeById(aid);
         if (isExistAttributeId == null)
         {
-            return new ResponseModel
-            {
-                Message = "Không tồn tại thuộc tính",
-                Status = "Error"
-            };
+            return ResponseModel.NotFound(ResponseConstants.NotFound("Thuộc tính"));
         }
 
         var isExistBoth = await _proAttValueRepository.GetProdAttValue(pid, aid);
         if (isExistBoth != null)
         {
-            return new ResponseModel
-            {
-                Message = "Đã tồn tại giá trị ứng với thuộc tính của sản phẩm",
-                Status = "Error"
-            };
+            return ResponseModel.BadRequest(ResponseConstants.Exist("Giá trị ứng với thuộc tính của sản phẩm"));
         }
 
         var entity = new ProductAttributeValue
@@ -121,18 +108,10 @@ public class ProductAttributeValueService : IProductAttributeValueService
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
         {
-            return new ResponseModel
-            {
-                Message = "Thêm giá trị của thuộc tính sản phẩm thành công",
-                Status = "Success"
-            };
+            return ResponseModel.Success(ResponseConstants.Create("giá trị của thuộc tính sản phẩm", true), null);
         }
 
-        return new ResponseModel
-        {
-            Message = "Thêm giá trị của thuộc tính sản phẩm thất bại",
-            Status = "Success"
-        };
+        return ResponseModel.Error(ResponseConstants.Create("giá trị của thuộc tính sản phẩm", false));
     }
 
     public async Task<ResponseModel> UpdateProductAttributeValue(Guid pid, int aid, CreateUpdatePavModel model)
@@ -140,11 +119,7 @@ public class ProductAttributeValueService : IProductAttributeValueService
         var isExist = await _proAttValueRepository.GetProdAttValue(pid, aid);
         if (isExist == null)
         {
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Không tồn tại sản phẩm và thuộc tính"
-            };
+            return ResponseModel.NotFound(ResponseConstants.NotFound("Sản phẩm và thuộc tính"));
         }
 
         if (!string.IsNullOrEmpty(model.Value))
@@ -153,11 +128,7 @@ public class ProductAttributeValueService : IProductAttributeValueService
                 .FirstOrDefaultAsync(x => x.Value!.Equals(model.Value));
             if (isExistValue != null)
             {
-                return new ResponseModel
-                {
-                    Message = "Tồn tại giá trị thuộc tính ứng với sản phẩm",
-                    Status = "Error"
-                };
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Giá trị thuộc tính ứng với sản phẩm"));
             }
 
             isExist.Value = model.Value;
@@ -169,18 +140,10 @@ public class ProductAttributeValueService : IProductAttributeValueService
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
         {
-            return new ResponseModel
-            {
-                Message = "Cập nhật giá trị thuộc tính thành công",
-                Status = "Success"
-            };
+            return ResponseModel.Success(ResponseConstants.Update("giá trị thuộc tính", true), null);
         }
 
-        return new ResponseModel
-        {
-            Message = "Cập nhật giá trị thuộc tính thất bại",
-            Status = "Error"
-        };
+        return ResponseModel.Error(ResponseConstants.Update("giá trị thuộc tính", false));
     }
 
     public async Task<ResponseModel> DeleteProductAttributeValue(Guid pid, int aid)
@@ -188,28 +151,18 @@ public class ProductAttributeValueService : IProductAttributeValueService
         var isExist = await _proAttValueRepository.GetProdAttValue(pid, aid);
         if (isExist == null)
         {
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "Không tồn tại sản phẩm và thuộc tính"
-            };
+            return ResponseModel.NotFound(ResponseConstants.NotFound("Sản phẩm và thuộc tính"));
         }
+
         isExist.DeletedAt = DateTime.Now;
         _proAttValueRepository.Update(isExist);
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
         {
-            return new ResponseModel
-            {
-                Status = "Success",
-                Message = "Xóa giá trị của thuộc tính sản phẩm thành công"
-            };
+            return ResponseModel.Success(ResponseConstants.Delete("giá trị của thuộc tính sản phẩm", true), null);
         }
-        return new ResponseModel
-        {
-            Status = "Error",
-            Message = "Xóa giá trị của thuộc tính sản phẩm thất bại"
-        };
+
+        return ResponseModel.Error(ResponseConstants.Delete("giá trị của thuộc tính sản phẩm", false));
     }
 
     private Expression<Func<ProductAttributeValue, object>> GetSortProperty(
