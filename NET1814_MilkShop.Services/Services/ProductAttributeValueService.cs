@@ -40,11 +40,6 @@ public class ProductAttributeValueService : IProductAttributeValueService
             query = query.Where(x => x.ProductId == queryModel.ProductId);
         }
 
-        if (!string.IsNullOrEmpty(queryModel.AttributeId.ToString()))
-        {
-            query = query.Where(x => x.AttributeId == queryModel.AttributeId);
-        }
-
         if (!string.IsNullOrEmpty(queryModel.SearchTerm))
         {
             query = query.Where(x => x.Value.Contains(queryModel.SearchTerm));
