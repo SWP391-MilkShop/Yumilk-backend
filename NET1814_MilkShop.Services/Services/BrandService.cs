@@ -1,10 +1,10 @@
-using System.Linq.Expressions;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.BrandModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
+using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services;
 
@@ -62,6 +62,7 @@ public class BrandService : IBrandService
 
         var model = query.Select(x => new BrandModel()
         {
+            Id = x.Id,
             Name = x.Name,
             Description = x.Description
         });
@@ -119,8 +120,8 @@ public class BrandService : IBrandService
 
     public async Task<ResponseModel> UpdateBrandAsync(int id, CreateBrandModel model)
     {
-        var isExistId = await _brandRepository.GetById(id);
-        if (isExistId == null)
+        var existingBrand = await _brandRepository.GetById(id);
+        if (existingBrand == null)
         {
             return new ResponseModel
             {
@@ -128,35 +129,19 @@ public class BrandService : IBrandService
                 Message = "Brand not found"
             };
         }
-
-        if (string.Equals(isExistId.Name, model.Name) && string.Equals(isExistId.Description, model.Description) &&
-            isExistId.IsActive == model.IsActive)
-        {
-            return new ResponseModel
-            {
-                Status = "Error",
-                Message = "No change"
-            };
-        }
-        
-        if (string.Equals(isExistId.Name, model.Name) && (!string.Equals(isExistId.Description, model.Description) ||
-            isExistId.IsActive != model.IsActive))
-        {
-            isExistId.IsActive = model.IsActive;
-            isExistId.Name = model.Name;
-            isExistId.Description = model.Description;
-            _brandRepository.Update(isExistId);
-            await _unitOfWork.SaveChangesAsync();
-            return new ResponseModel
-            {
-                Status = "Success",
-                Message = "Update brand successfully",
-                Data = isExistId
-            };
-        }
+        // T nghi ko can check no change nay`
+        //if (string.Equals(existingBrand.Name, model.Name) && string.Equals(existingBrand.Description, model.Description) &&
+        //    existingBrand.IsActive == model.IsActive)
+        //{
+        //    return new ResponseModel
+        //    {
+        //        Status = "Error",
+        //        Message = "No change"
+        //    };
+        //}
 
         var isExistName = await _brandRepository.GetBrandByName(model.Name);
-        if (isExistName != null)
+        if (isExistName != null && isExistName.Id != id)
         {
             return new ResponseModel
             {
@@ -165,16 +150,16 @@ public class BrandService : IBrandService
             };
         }
 
-        isExistId.IsActive = model.IsActive;
-        isExistId.Name = model.Name;
-        isExistId.Description = model.Description;
-        _brandRepository.Update(isExistId);
+        existingBrand.IsActive = model.IsActive;
+        existingBrand.Name = model.Name;
+        existingBrand.Description = model.Description;
+        _brandRepository.Update(existingBrand);
         await _unitOfWork.SaveChangesAsync();
         return new ResponseModel
         {
             Status = "Success",
             Message = "Update brand successfully",
-            Data = isExistId
+            Data = existingBrand
         };
     }
 
@@ -190,13 +175,20 @@ public class BrandService : IBrandService
             };
         }
 
-        isExist.DeletedAt = DateTime.Now;
-        _brandRepository.Remove(isExist);
-        await _unitOfWork.SaveChangesAsync();
+        _brandRepository.Delete(isExist);
+        var result = await _unitOfWork.SaveChangesAsync();
+        if (result > 0)
+        {
+            return new ResponseModel
+            {
+                Status = "Success",
+                Message = "Delete brand successfully"
+            };
+        }
         return new ResponseModel
         {
-            Status = "Success",
-            Message = "Delete brand successfully"
+            Status = "Error",
+            Message = "Delete brand fail"
         };
     }
 

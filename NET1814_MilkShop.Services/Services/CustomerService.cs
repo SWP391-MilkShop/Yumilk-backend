@@ -70,20 +70,7 @@ namespace NET1814_MilkShop.Services.Services
             query = "desc".Equals(request.SortOrder?.ToLower())
                 ? query.OrderByDescending(GetSortProperty(request))
                 : query.OrderBy(GetSortProperty(request));
-            var result = query.Select(c => new CustomerModel()
-            {
-                UserID = c.UserId.ToString(),
-                FirstName = c.User.FirstName,
-                LastName = c.User.LastName,
-                IsActive = c.User.IsActive,
-                Email = c.Email,
-                Points = c.Points,
-                Username = c.User.Username,
-                PhoneNumber = c.PhoneNumber,
-                ProfilePictureUrl = c.ProfilePictureUrl,
-                GoogleId = c.GoogleId,
-                IsBanned = c.User.IsBanned
-            });
+            var result = query.Select(c => ToCustomerModel(c, c.User));
             var customers = await PagedList<CustomerModel>.CreateAsync(
                 result,
                 request.Page,

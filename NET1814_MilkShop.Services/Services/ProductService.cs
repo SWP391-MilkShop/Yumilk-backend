@@ -1,4 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Repositories;
@@ -12,20 +13,45 @@ namespace NET1814_MilkShop.Services.Services
     public interface IProductService
     {
         Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel);
+        Task<ResponseModel> GetProductByIdAsync(Guid id);
+        Task<ResponseModel> CreateProductAsync(CreateProductModel model);
+        Task<ResponseModel> UpdateProductAsync(Guid id, UpdateProductModel model);
+        Task<ResponseModel> DeleteProductAsync(Guid id);
     }
 
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly IBrandRepository _brandRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly IProductStatusRepository _productStatusRepository;
         private readonly IUnitOfWork _unitOfWork;
-
-        public ProductService(IProductRepository productRepository,
-            IUnitOfWork unitOfWork)
+        public ProductService(IProductRepository productRepository, IBrandRepository brandRepository, ICategoryRepository categoryRepository, IUnitRepository unitRepository, IProductStatusRepository productStatusRepository, IUnitOfWork unitOfWork)
         {
             _productRepository = productRepository;
+            _brandRepository = brandRepository;
+            _categoryRepository = categoryRepository;
+            _unitRepository = unitRepository;
+            _productStatusRepository = productStatusRepository;
             _unitOfWork = unitOfWork;
         }
-
+        private static ProductModel ToProductModel(Product product) =>
+            new ProductModel
+            {
+                Id = product.Id.ToString(),
+                Name = product.Name,
+                Description = product.Description,
+                Quantity = product.Quantity,
+                Brand = product.Brand!.Name,
+                Category = product.Category!.Name,
+                Unit = product.Unit!.Name,
+                OriginalPrice = product.OriginalPrice,
+                SalePrice = product.SalePrice,
+                Status = product.ProductStatus!.Name,
+                Thumbnail = product.Thumbnail,
+                IsActive = product.IsActive
+            };
         public async Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel)
         {
             var query = _productRepository.GetProductsQuery();
@@ -39,7 +65,7 @@ namespace NET1814_MilkShop.Services.Services
 
             //thu gọn thành 1 where thôi
             query = query.Where(p =>
-                p.IsActive == queryModel.IsActive
+                (queryModel.IsActive.HasValue ? p.IsActive == queryModel.IsActive.Value : true)
                 //search theo name, description, brand, unit, category
                 && (string.IsNullOrEmpty(searchTerm) || p.Name.ToLower().Contains(searchTerm)
                                                                 || p.Description!.ToLower().Contains(searchTerm)
@@ -53,30 +79,6 @@ namespace NET1814_MilkShop.Services.Services
                 && (string.IsNullOrEmpty(status) || string.Equals(p.ProductStatus!.Name.ToLower(), status))
                 && (queryModel.MinPrice <= 0 || p.SalePrice >= queryModel.MinPrice)
                 && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice));
-            /*if (!string.IsNullOrEmpty(queryModel.SearchTerm))
-            {
-                query = query.Where(p => p.Name.Contains(queryModel.SearchTerm)
-                        || p.Description!.Contains(queryModel.SearchTerm)
-                        || p.Brand!.Name.Contains(queryModel.SearchTerm)
-                        || p.Unit!.Name.Contains(queryModel.SearchTerm)
-                        || p.Category!.Name.Contains(queryModel.SearchTerm));
-            }
-            if (!string.IsNullOrEmpty(queryModel.Brand))
-            {
-                query = query.Where(p => string.Equals(p.Brand!.Name, queryModel.Brand));
-            }
-            if (!string.IsNullOrEmpty(queryModel.Category))
-            {
-                query = query.Where(p => string.Equals(p.Category!.Name, queryModel.Category));
-            }
-            if (!string.IsNullOrEmpty(queryModel.Unit))
-            {
-                query = query.Where(p => string.Equals(p.Unit!.Name, queryModel.Unit));
-            }
-            if (!string.IsNullOrEmpty(queryModel.Status))
-            {
-                query = query.Where(p => string.Equals(p.ProductStatus!.Name, queryModel.Status));
-            }*/
 
             #endregion
 
@@ -95,19 +97,7 @@ namespace NET1814_MilkShop.Services.Services
 
             #region Convert to ProductModel
 
-            var productModelQuery = query.Select(p => new ProductModel
-            {
-                Id = p.Id.ToString(),
-                Name = p.Name,
-                Description = p.Description,
-                Quantity = p.Quantity,
-                Brand = p.Brand!.Name,
-                Category = p.Category!.Name,
-                Unit = p.Unit!.Name,
-                OriginalPrice = p.OriginalPrice,
-                SalePrice = p.SalePrice,
-                Status = p.ProductStatus!.Name,
-            });
+            var productModelQuery = query.Select(p => ToProductModel(p));
 
             #endregion
 
@@ -121,16 +111,15 @@ namespace NET1814_MilkShop.Services.Services
 
             #endregion
 
-            return new ResponseModel
+            if(products.TotalCount > 0)
             {
-                Data = products,
-                Message =
-                    products.TotalCount > 0 ? "Get products successfully" : "No products found",
-                Status = "Success"
-            };
+                return ResponseModel.Success(ResponseConstants.Get("sản phẩm", true), products);
+            }
+            else
+            {
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Sản phẩm"));
+            }
         }
-
-       
 
         /// <summary>
         /// Get sort property as expression
@@ -148,6 +137,148 @@ namespace NET1814_MilkShop.Services.Services
                 _ => product => product.Id,
             };
 
+        public async Task<ResponseModel> GetProductByIdAsync(Guid id)
+        {
+            var product = await _productRepository.GetById(id);
+            if (product == null)
+            {
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Sản phẩm"));
+            }
+            return ResponseModel.Success(ResponseConstants.Get("sản phẩm", true), ToProductModel(product));
+        }
 
+        public async Task<ResponseModel> CreateProductAsync(CreateProductModel model)
+        {
+            #region Validate Brand, Category, Unit exist
+            var brand = await _brandRepository.GetById(model.BrandId);
+            if (brand == null)
+            {
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Thương hiệu"));
+            }
+            var category = await _categoryRepository.GetById(model.CategoryId);
+            if (category == null)
+            {
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Danh mục"));
+            }
+            var unit = await _unitRepository.GetById(model.UnitId);
+            if (unit == null)
+            {
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Đơn vị"));
+            }
+            #endregion
+            var product = new Product
+            {
+                Name = model.Name,
+                Description = model.Description,
+                Quantity = model.Quantity,
+                OriginalPrice = model.OriginalPrice,
+                SalePrice = model.SalePrice,
+                BrandId = model.BrandId,
+                CategoryId = model.CategoryId,
+                UnitId = model.UnitId,
+                StatusId = 1, //default status
+                IsActive = true,
+                Thumbnail = model.Thumbnail
+            };
+            _productRepository.Add(product);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return ResponseModel.Success(ResponseConstants.Create("sản phẩm", true), null);
+            }
+            return ResponseModel.Error(ResponseConstants.Create("sản phẩm", false));
+        }
+
+        public async Task<ResponseModel> UpdateProductAsync(Guid id, UpdateProductModel model)
+        {
+            var product = await _productRepository.GetById(id);
+            if (product == null)
+            {
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Sản phẩm"));
+            }
+            if (!string.IsNullOrEmpty(model.Name))
+            {
+                var productByName = await _productRepository.GetByNameAsync(model.Name);
+                if (productByName != null && productByName.Id != id)
+                {
+                    return ResponseModel.Success(ResponseConstants.Exist("Tên sản phẩm"), null);
+                }
+                product.Name = model.Name;
+            }
+            #region Validate Brand, Category, Unit, Status exist
+            if (model.BrandId.HasValue)
+            {
+                var brand = await _brandRepository.GetById(model.BrandId.Value);
+                if (brand == null)
+                {
+                    return ResponseModel.NotFound(ResponseConstants.NotFound("Thương hiệu"));
+                }
+                product.BrandId = model.BrandId.Value;
+            }
+            if (model.CategoryId.HasValue)
+            {
+                var category = await _categoryRepository.GetById(model.CategoryId.Value);
+                if (category == null)
+                {
+                    return ResponseModel.NotFound(ResponseConstants.NotFound("Danh mục"));
+                }
+                product.CategoryId = model.CategoryId.Value;
+            }
+            if (model.UnitId.HasValue)
+            {
+                var unit = await _unitRepository.GetById(model.UnitId.Value);
+                if (unit == null)
+                {
+                    return ResponseModel.NotFound(ResponseConstants.NotFound("Đơn vị"));
+                }
+                product.UnitId = model.UnitId.Value;
+            }
+            if (model.StatusId.HasValue)
+            {
+                var status = await _productStatusRepository.GetById(model.StatusId.Value);
+                if (status == null)
+                {
+                    return ResponseModel.NotFound(ResponseConstants.NotFound("Trạng thái"));
+                }
+                product.StatusId = model.StatusId.Value;
+            }
+            #endregion
+            product.Description = string.IsNullOrEmpty(model.Description) ? product.Description : model.Description;
+            product.Quantity = model.Quantity ?? product.Quantity;
+            product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
+            product.SalePrice = model.SalePrice ?? product.SalePrice;
+            if (!string.IsNullOrEmpty(model.Thumbnail))
+            {
+                if (!Uri.IsWellFormedUriString(model.Thumbnail, UriKind.Absolute))
+                {
+                    return ResponseModel.BadRequest(ResponseConstants.WrongFormat("URL"));
+                }
+                product.Thumbnail = model.Thumbnail;
+            }
+            product.IsActive = model.IsActive;
+            _productRepository.Update(product);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return ResponseModel.Success(ResponseConstants.Update("sản phẩm", true), null);
+            }
+            return ResponseModel.Error(ResponseConstants.Update("sản phẩm", false));
+        }
+
+        public async Task<ResponseModel> DeleteProductAsync(Guid id)
+        {
+            var product = await _productRepository.GetById(id);
+            if (product == null)
+            {
+                return ResponseModel.NotFound(ResponseConstants.NotFound("Sản phẩm"));
+            }
+            _productRepository.Delete(product);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return ResponseModel.Success(ResponseConstants.Delete("sản phẩm", true), null);
+            }
+            return ResponseModel.Error(ResponseConstants.Delete("sản phẩm", false));
+        }
     }
 }

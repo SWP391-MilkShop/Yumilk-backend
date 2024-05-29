@@ -13,7 +13,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         protected Repository(AppDbContext context)
         {
             _context = context;
-            _query = _context.Set<TEntity>().Where(x => x.DeletedAt==null).AsNoTracking();
+            _query = _context.Set<TEntity>().Where(x => x.DeletedAt == null).AsNoTracking();
         }
 
         public virtual void Add(TEntity entity)
@@ -30,11 +30,19 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             _context.Set<TEntity>().Remove(entity);
         }
-
+        /// <summary>
+        /// Soft delete entity
+        /// </summary>
+        /// <param name="entity"></param>
+        public virtual void Delete(TEntity entity)
+        {
+            entity.DeletedAt = DateTime.Now;
+            _context.Set<TEntity>().Update(entity);
+        }
         public virtual async Task<TEntity?> GetById(Guid id)
         {
             var entity = await _context.Set<TEntity>().FindAsync(id);
-            if(entity!=null && entity.DeletedAt == null)
+            if (entity != null && entity.DeletedAt == null)
             {
                 return entity;
             }
