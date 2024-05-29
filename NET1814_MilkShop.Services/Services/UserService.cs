@@ -97,7 +97,7 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.Success(ResponseConstants.Get("người dùng", true), users);
             }
 
-            return ResponseModel.NotFound(ResponseConstants.NotFound("Người dùng"));
+            return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
         }
 
         private static Expression<Func<User, object>> GetSortProperty(UserQueryModel request)
@@ -129,7 +129,7 @@ namespace NET1814_MilkShop.Services.Services
             var user = await _userRepository.GetById(userId);
             if (user == null)
             {
-                return ResponseModel.NotFound(ResponseConstants.NotFound("Người dùng"));
+                return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"),null);
             }
 
             if (!BCrypt.Net.BCrypt.Verify(model.OldPassword, user.Password))
@@ -142,7 +142,7 @@ namespace NET1814_MilkShop.Services.Services
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return ResponseModel.Success(ResponseConstants.ChangePassword(true),null);
+                return ResponseModel.Success(ResponseConstants.ChangePassword(true), null);
             }
 
             return ResponseModel.Error(ResponseConstants.ChangePassword(false));

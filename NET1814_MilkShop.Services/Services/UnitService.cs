@@ -88,7 +88,7 @@ public class UnitService : IUnitService
     {
         var unit = await _unitRepository.GetExistIsActiveId(id);
         if (unit == null)
-            return ResponseModel.NotFound(ResponseConstants.NotFound("Đơn vị"));
+            return ResponseModel.Success(ResponseConstants.NotFound("Đơn vị"),null);
         var result = new UnitModel
         {
             Id = id,
@@ -122,7 +122,7 @@ public class UnitService : IUnitService
         var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
         if (isExistUnit == null)
         {
-            return ResponseModel.NotFound(ResponseConstants.NotFound("đơn vị"));
+            return ResponseModel.Success(ResponseConstants.NotFound("đơn vị"),null);
         }
 
         if (!unitModel.Name.IsNullOrEmpty())
@@ -155,7 +155,7 @@ public class UnitService : IUnitService
         var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
         if (isExistUnit == null)
         {
-            return ResponseModel.NotFound(ResponseConstants.NotFound("đơn vị"));
+            return ResponseModel.Success(ResponseConstants.NotFound("đơn vị"),null);
         }
 
         _unitRepository.Delete(isExistUnit);
