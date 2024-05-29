@@ -49,21 +49,27 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Get all products");
             if (queryModel.MinPrice > queryModel.MaxPrice)
             {
-                var responseError = new ResponseModel
+                /*var responseError = new ResponseModel
                 {
                     Message = "Min price must be less than max price",
                     Status = "Error"
                 };
-                return BadRequest(responseError);
+                return BadRequest(responseError);*/
+                var res = ResponseModel.BadRequest(
+                    " Giá nhỏ nhất phải nhỏ hơn giá lớn nhất"
+                );
+                return ResponseExtension.Result(res);
             }
 
             var response = await _productService.GetProductsAsync(queryModel);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            
+            return ResponseExtension.Result(response);
         }
 
         [HttpGet("{id}")]
@@ -71,12 +77,14 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Get product by id");
             var response = await _productService.GetProductByIdAsync(id);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            
+            return ResponseExtension.Result(response);
         }
 
         [HttpPost]
@@ -85,12 +93,14 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Create product");
             var response = await _productService.CreateProductAsync(model);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            
+            return ResponseExtension.Result(response);
         }
 
         [HttpPatch("{id}")]
@@ -99,12 +109,14 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Update product");
             var response = await _productService.UpdateProductAsync(id, model);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            
+            return ResponseExtension.Result(response);
         }
 
         [HttpDelete("{id}")]
@@ -113,12 +125,14 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Delete product");
             var response = await _productService.DeleteProductAsync(id);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            
+            return ResponseExtension.Result(response);
         }
 
         #endregion
@@ -129,12 +143,14 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> GetBrands([FromQuery] BrandQueryModel queryModel)
         {
             var response = await _brandService.GetBrandsAsync(queryModel);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            
+            return ResponseExtension.Result(response);
         }
 
         [HttpPost("brands")]
@@ -142,12 +158,15 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Add Brand");
             var response = await _brandService.CreateBrandAsync(model);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            
+            return ResponseExtension.Result(response);
+            
         }
 
         [HttpPatch("brands/{id}")]
@@ -155,12 +174,15 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information("Update Brand");
             var response = await _brandService.UpdateBrandAsync(id, model);
-            if (response.Status == "Error")
+            /*if (response.Status == "Error")
             {
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return Ok(response);*/
+            
+            return ResponseExtension.Result(response);
+            
         }
 
         [HttpDelete("brands/{id}")]
@@ -174,6 +196,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
+            
             return ResponseExtension.Result(response);
         }
 
