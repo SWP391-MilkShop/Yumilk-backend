@@ -141,13 +141,12 @@ public class BrandService : IBrandService
                     Message = "Tên thương hiệu đã tồn tại"
                 };
             }
-
-            isExistId.Name = model.Name;
+            existingBrand.Name = model.Name;
         }
 
-        isExistId.Description = string.IsNullOrEmpty(model.Description) ? isExistId.Description : model.Description;
-        isExistId.IsActive = model.IsActive;
-        _brandRepository.Update(isExistId);
+        existingBrand.Description = string.IsNullOrEmpty(model.Description) ? existingBrand.Description : model.Description;
+        existingBrand.IsActive = model.IsActive;
+        _brandRepository.Update(existingBrand);
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
         {
