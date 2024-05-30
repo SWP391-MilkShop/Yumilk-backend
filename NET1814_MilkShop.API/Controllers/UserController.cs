@@ -13,6 +13,7 @@ using ILogger = Serilog.ILogger;
 namespace NET1814_MilkShop.API.Controllers
 {
     [ApiController]
+    [Route("api")]
     public class UserController : ControllerBase
     {
         private readonly ILogger _logger;
@@ -28,8 +29,7 @@ namespace NET1814_MilkShop.API.Controllers
             _addressService = serviceProvider.GetRequiredService<IAddressService>();
         }
         #region User
-        [HttpGet]
-        [Route("api/users")]
+        [HttpGet("users")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> GetUsers([FromQuery] UserQueryModel request)
@@ -48,7 +48,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         #region  Customer
         [HttpGet]
-        [Route("api/customers")]
+        [Route("customers")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> GetCustomers([FromQuery] CustomerQueryModel request)
@@ -64,7 +64,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpGet]
-        [Route("api/customers/{id}")]
+        [Route("customers/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> GetCustomerById(Guid id)
@@ -83,7 +83,7 @@ namespace NET1814_MilkShop.API.Controllers
         #region Account
         [HttpGet]
         /*[Route("api/user/me")]*/
-        [Route("api/user/account/profile")]
+        [Route("user/account/profile")]
         [Authorize(AuthenticationSchemes = "Access")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> GetCurrentAuthUser()
@@ -105,7 +105,7 @@ namespace NET1814_MilkShop.API.Controllers
         /// <returns></returns>
         [HttpPatch]
         /*[Route("api/user/account/change-info")]*/
-        [Route("api/user/account/profile")]
+        [Route("user/account/profile")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> ChangeInfo([FromBody] ChangeUserInfoModel model)
@@ -123,7 +123,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         [HttpPatch]
         /*[Route("api/user/change-password")]*/
-        [Route("api/user/account/change-password")]
+        [Route("user/account/change-password")]
         [Authorize(AuthenticationSchemes = "Access")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
@@ -143,7 +143,7 @@ namespace NET1814_MilkShop.API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("api/user/account/addresses")]
+        [Route("user/account/addresses")]
         [Authorize(AuthenticationSchemes = "Access",Roles = "3")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> GetCustomerAddresses()
@@ -166,7 +166,7 @@ namespace NET1814_MilkShop.API.Controllers
         /// <returns></returns>
         [HttpPost]
         /*[Route("api/user/change-password")]*/
-        [Route("api/user/account/addresses")]
+        [Route("user/account/addresses")]
         [Authorize(AuthenticationSchemes = "Access",Roles = "3")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> CreateCustomerAddress([FromBody] CreateAddressModel request)
@@ -188,7 +188,7 @@ namespace NET1814_MilkShop.API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPatch]
-        [Route("api/user/account/addresses/{id}")]
+        [Route("user/account/addresses/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> UpdateCustomerAddress(
@@ -212,7 +212,7 @@ namespace NET1814_MilkShop.API.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete]
-        [Route("api/user/account/addresses/{id}")]
+        [Route("user/account/addresses/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> DeleteCustomerAddress(int id)
