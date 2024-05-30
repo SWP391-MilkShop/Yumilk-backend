@@ -230,6 +230,8 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<IEmailService, EmailService>();
+
+            services.AddScoped<IImageService, ImageService>();
             //Add Extensions
             services.AddScoped<IJwtTokenExtension, JwtTokenExtension>();
             //Add Filters
