@@ -43,7 +43,7 @@ namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(GetExpiry(tokenType)),
+                expires: DateTime.UtcNow.AddMinutes(GetExpiry(tokenType)),
                 signingCredentials: creds
             );
 
