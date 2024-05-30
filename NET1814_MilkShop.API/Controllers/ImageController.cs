@@ -19,12 +19,22 @@ namespace NET1814_MilkShop.API.Controllers
             _logger = logger;
             _configuration = configuration;
         }
+        /// <summary>
+        /// Get image by image hash (id)
+        /// </summary>
+        /// <param name="imageHash"></param>
+        /// <returns></returns>
         [HttpGet("{imageHash}")]
         public async Task<IActionResult> GetImage(string imageHash)
         {
             var response = await _imageService.GetImageAsync(imageHash);
             return ResponseExtension.Result(response);
         }
+        /// <summary>
+        /// Upload image to Imgur
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> UploadImage([FromForm] ImageUploadModel model)
         {
