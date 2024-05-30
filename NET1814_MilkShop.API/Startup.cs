@@ -158,8 +158,9 @@ namespace NET1814_MilkShop.API
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                
             }
+            app.UseDeveloperExceptionPage();
 
             var isUserSwagger = _configuration.GetValue<bool>("UseSwagger", false);
             if (isUserSwagger)
