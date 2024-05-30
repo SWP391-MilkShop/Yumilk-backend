@@ -49,7 +49,7 @@ namespace NET1814_MilkShop.API.Controllers
         #region  Customer
         [HttpGet]
         [Route("customers")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1",Policy = "AllowAll")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> GetCustomers([FromQuery] CustomerQueryModel request)
         {
