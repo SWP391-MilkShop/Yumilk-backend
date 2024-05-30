@@ -103,7 +103,7 @@ namespace NET1814_MilkShop.API.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [HttpPut]
+        [HttpPatch]
         /*[Route("api/user/account/change-info")]*/
         [Route("api/user/account/profile")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
@@ -121,7 +121,7 @@ namespace NET1814_MilkShop.API.Controllers
             return ResponseExtension.Result(response);
         }
 
-        [HttpPut]
+        [HttpPatch]
         /*[Route("api/user/change-password")]*/
         [Route("api/user/account/change-password")]
         [Authorize(AuthenticationSchemes = "Access")]
@@ -187,7 +187,7 @@ namespace NET1814_MilkShop.API.Controllers
         /// if customer has only 1 address then cannot set it to non-default
         /// </summary>
         /// <returns></returns>
-        [HttpPut]
+        [HttpPatch]
         [Route("api/user/account/addresses/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
         [ServiceFilter(typeof(UserExistsFilter))]
