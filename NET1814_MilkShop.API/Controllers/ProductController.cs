@@ -210,6 +210,7 @@ namespace NET1814_MilkShop.API.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpGet("units")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> GetUnits([FromQuery] UnitQueryModel request)
         {
             _logger.Information("Get all units");
