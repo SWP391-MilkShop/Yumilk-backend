@@ -95,7 +95,7 @@ namespace NET1814_MilkShop.API
             //Add Cors
             services.AddCors(services =>
             {
-                services.AddPolicy(
+                /*services.AddPolicy(
                     "DefaultPolicy",
                     builder =>
                     {
@@ -105,7 +105,7 @@ namespace NET1814_MilkShop.API
                             .WithMethods("GET", "POST", "PUT", "DELETE") // Allow only these methods
                             .AllowAnyHeader();
                     }
-                );
+                );*/
                 services.AddPolicy(
                     "AllowAll",
                     builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }
