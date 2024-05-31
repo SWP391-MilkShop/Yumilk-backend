@@ -74,8 +74,7 @@ public class BrandService : IBrandService
 
         #endregion
 
-        if (brands.TotalCount > 0) return ResponseModel.Success(ResponseConstants.Get("thương hiệu", true), brands);
-        return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
+        return ResponseModel.Success(ResponseConstants.Get("thương hiệu", brands.TotalCount > 0), brands);
     }
 
     public async Task<ResponseModel> CreateBrandAsync(CreateBrandModel model)

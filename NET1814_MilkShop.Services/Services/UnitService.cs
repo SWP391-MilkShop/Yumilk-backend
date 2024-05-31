@@ -75,20 +75,14 @@ public class UnitService : IUnitService
         );
 
         #endregion
-
-        if (units.TotalCount > 0)
-        {
-            return ResponseModel.Success(ResponseConstants.Get("đơn vị", true), units);
-        }
-
-        return ResponseModel.Success(ResponseConstants.NotFound("Đơn vị"), null);
+        return ResponseModel.Success(ResponseConstants.Get("đơn vị", units.TotalCount > 0), units);
     }
 
     public async Task<ResponseModel> GetUnitByIdAsync(int id)
     {
         var unit = await _unitRepository.GetExistIsActiveId(id);
         if (unit == null)
-            return ResponseModel.Success(ResponseConstants.NotFound("Đơn vị"),null);
+            return ResponseModel.Success(ResponseConstants.NotFound("Đơn vị"), null);
         var result = new UnitModel
         {
             Id = id,
@@ -122,7 +116,7 @@ public class UnitService : IUnitService
         var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
         if (isExistUnit == null)
         {
-            return ResponseModel.Success(ResponseConstants.NotFound("đơn vị"),null);
+            return ResponseModel.Success(ResponseConstants.NotFound("đơn vị"), null);
         }
 
         if (!unitModel.Name.IsNullOrEmpty())
@@ -155,7 +149,7 @@ public class UnitService : IUnitService
         var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
         if (isExistUnit == null)
         {
-            return ResponseModel.Success(ResponseConstants.NotFound("đơn vị"),null);
+            return ResponseModel.Success(ResponseConstants.NotFound("đơn vị"), null);
         }
 
         _unitRepository.Delete(isExistUnit);

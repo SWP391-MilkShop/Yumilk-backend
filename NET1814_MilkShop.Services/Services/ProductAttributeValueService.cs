@@ -70,12 +70,8 @@ public class ProductAttributeValueService : IProductAttributeValueService
 
         #endregion
 
-        if (pPage.TotalCount > 0)
-        {
-            return ResponseModel.Success(ResponseConstants.Get("giá trị thuộc tính sản phẩm", true), pPage);
-        }
 
-        return ResponseModel.Success(ResponseConstants.NotFound("giá trị thuộc tính sản phẩm"), null);
+        return ResponseModel.Success(ResponseConstants.Get("giá trị thuộc tính sản phẩm", pPage.TotalCount > 0), pPage);
     }
 
     public async Task<ResponseModel> AddProductAttributeValue(Guid pid, int aid, CreateUpdatePavModel model)
@@ -83,13 +79,13 @@ public class ProductAttributeValueService : IProductAttributeValueService
         var isExistpid = await _proAttValueRepository.GetProductById(pid);
         if (isExistpid == null)
         {
-            return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"),null);
+            return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
         }
 
         var isExistAttributeId = await _proAttValueRepository.GetAttributeById(aid);
         if (isExistAttributeId == null)
         {
-            return ResponseModel.Success(ResponseConstants.NotFound("Thuộc tính"),null);
+            return ResponseModel.Success(ResponseConstants.NotFound("Thuộc tính"), null);
         }
 
         var isExistBoth = await _proAttValueRepository.GetProdAttValue(pid, aid);
@@ -151,7 +147,7 @@ public class ProductAttributeValueService : IProductAttributeValueService
         var isExist = await _proAttValueRepository.GetProdAttValue(pid, aid);
         if (isExist == null)
         {
-            return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm và thuộc tính"),null);
+            return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm và thuộc tính"), null);
         }
 
         isExist.DeletedAt = DateTime.Now;

@@ -34,7 +34,7 @@ namespace NET1814_MilkShop.Services.Services
             var isExist = await _categoryRepository.IsExistAsync(model.Name);
             if (isExist)
             {
-                return ResponseModel.BadRequest(ResponseConstants.Exist("Danh mục"));   
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Danh mục"));
             }
             var category = new Category
             {
@@ -95,8 +95,8 @@ namespace NET1814_MilkShop.Services.Services
                 queryModel.Page,
                 queryModel.PageSize
             );
-            if(categories.TotalCount > 0) return ResponseModel.Success(ResponseConstants.Get("danh mục", true), categories);
-            return ResponseModel.Success(ResponseConstants.NotFound("danh mục"), null);
+            return ResponseModel.Success(ResponseConstants.Get("danh mục", categories.TotalCount > 0), categories);
+
         }
         private static Expression<Func<Category, object>> GetSortProperty(
             CategoryQueryModel queryModel
