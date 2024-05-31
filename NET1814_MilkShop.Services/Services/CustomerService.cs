@@ -7,6 +7,7 @@ using NET1814_MilkShop.Services.CoreHelpers;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -55,18 +56,24 @@ namespace NET1814_MilkShop.Services.Services
         public async Task<ResponseModel> GetCustomersAsync(CustomerQueryModel request)
         {
             var query = _customerRepository.GetCustomersQuery();
+            var searchTerm = StringExtension.Normalize(request.SearchTerm);
             //filter
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            if (!string.IsNullOrEmpty(searchTerm))
             {
                 query = query.Where(c =>
-                    c.User.Username.Contains(request.SearchTerm)
-                    || c.Email!.Contains(request.SearchTerm)
-                    || c.PhoneNumber!.Contains(request.SearchTerm)
-                    || c.User.FirstName!.Contains(request.SearchTerm)
-                    || c.User.LastName!.Contains(request.SearchTerm)
+                    c.User.Username.ToLower().Contains(searchTerm)
+                    || c.Email.ToLower().Contains(searchTerm)
+                    || c.PhoneNumber.ToLower().Contains(searchTerm)
+                    || c.User.FirstName.ToLower().Contains(searchTerm)
+                    || c.User.LastName.ToLower().Contains(searchTerm)
                 );
             }
-            query = query.Where(c => c.User.IsActive == request.IsActive && c.User.IsBanned == request.IsBanned);
+
+            if (request.IsActive.HasValue || request.IsBanned.HasValue)
+            {
+                query = query.Where(c => (!request.IsActive.HasValue || c.User.IsActive == request.IsActive.Value)
+                                      && (!request.IsBanned.HasValue || c.User.IsBanned == request.IsBanned.Value));
+            }
             //sort
             query = "desc".Equals(request.SortOrder?.ToLower())
                 ? query.OrderByDescending(GetSortProperty(request))
@@ -77,20 +84,7 @@ namespace NET1814_MilkShop.Services.Services
                 request.Page,
                 request.PageSize
             );
-            /*return new ResponseModel()
-            {
-                Data = customers,
-                Message =
-                    customers.TotalCount > 0 ? "Get customers successfully" : "No customers found",
-                Status = "success"
-            };*/
-            return ResponseModel.Success(
-                customers.TotalCount > 0 
-                    ? ResponseConstants.Get("khách hàng", true)
-                    : ResponseConstants.Get("khách hàng", false)
-                    , customers)
-                ;
-            
+            return ResponseModel.Success(ResponseConstants.Get("khách hàng", customers.TotalCount > 0), customers);
         }
 
         private static Expression<Func<Customer, object>> GetSortProperty(
@@ -133,12 +127,8 @@ namespace NET1814_MilkShop.Services.Services
                 Message = "Get customer by email successfully",
                 Status = "Success"
             };*/
-            return ResponseModel.Success(
-                ResponseConstants.Get("khách hàng bằng email"
-                                                             , true),
-                customerModel
-            );
-            
+            return ResponseModel.Success(ResponseConstants.Get("khách hàng bằng email", true), customerModel);
+
         }
 
         public async Task<ResponseModel> GetByIdAsync(Guid id)
@@ -147,10 +137,7 @@ namespace NET1814_MilkShop.Services.Services
             if (customer == null)
             {
                 /*return new ResponseModel { Message = "Customer not found", Status = "Error" };*/
-                return ResponseModel.Success(
-                    ResponseConstants.Get("khách hàng",
-                        false),
-                    null);
+                return ResponseModel.Success(ResponseConstants.Get("khách hàng", false), null);
             }
             var customerModel = ToCustomerModel(customer, customer.User);/*
             return new ResponseModel
@@ -165,7 +152,7 @@ namespace NET1814_MilkShop.Services.Services
                     "khách hàng",
                     true),
                 customerModel);
-            
+
         }
 
         public async Task<ResponseModel> ChangeInfoAsync(
@@ -197,7 +184,7 @@ namespace NET1814_MilkShop.Services.Services
                     return ResponseModel.BadRequest(
                         ResponseConstants.InvalidPhoneNumber
                     );
-                    
+
                 }
                 customer.PhoneNumber = changeUserInfoModel.PhoneNumber;
             }
@@ -212,9 +199,7 @@ namespace NET1814_MilkShop.Services.Services
                 )
                 {
                     /*return new ResponseModel { Message = "Invalid URL!", Status = "Error" };*/
-                    return ResponseModel.BadRequest(
-                                  ResponseConstants.InvalidUrl
-                    );
+                    return ResponseModel.BadRequest(ResponseConstants.InvalidUrl);
                 }
                 customer.ProfilePictureUrl = changeUserInfoModel.ProfilePictureUrl;
             }
@@ -244,7 +229,7 @@ namespace NET1814_MilkShop.Services.Services
                         true),
                     ToCustomerModel(customer, customer.User)
                 );
-                
+
             }
             /*return new ResponseModel { Message = "Change user info failed", Status = "Error" };*/
             return ResponseModel.Error(

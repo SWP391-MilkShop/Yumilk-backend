@@ -84,9 +84,7 @@ public class AddressService : IAddressService
             ProvinceName = customerAddress.ProvinceName,
             IsDefault = customerAddress.IsDefault
         });
-        var count = await result.CountAsync();
-        if (count > 0) return ResponseModel.Success(ResponseConstants.Get("địa chỉ", true), result);
-        return ResponseModel.Success(ResponseConstants.NotFound("địa chỉ"), null);
+        return ResponseModel.Success(ResponseConstants.Get("địa chỉ", result.Any()), result);
     }
 
     public async Task<ResponseModel> UpdateAddressAsync(Guid customerId, int id, UpdateAddressModel model)

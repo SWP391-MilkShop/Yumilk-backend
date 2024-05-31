@@ -78,10 +78,7 @@ namespace NET1814_MilkShop.Services.Services
                     : "Danh sách thuộc tính sản phẩm rỗng",
                 Status = "Success"
             };*/
-            return ResponseModel.Success(
-                ResponseConstants.Get(
-                    "các thuộc tính sản phẩm", pPage.TotalCount > 0),
-                       pPage);
+            return ResponseModel.Success(ResponseConstants.Get("các thuộc tính sản phẩm", pPage.TotalCount > 0), pPage);
         }
 
         public async Task<ResponseModel> AddProductAttributeAsync(CreateProductAttributeModel model)

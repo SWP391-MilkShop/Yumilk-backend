@@ -33,14 +33,14 @@
             return result ? $"Xóa {name} thành công" : $"Xóa {name} không thành công";
         }
         /// <summary>
-        /// $"Lấy {name} thành công" : $"Lấy {name} không thành công"
+        /// $"Lấy {name} thành công" : $"Không tìm thấy {name} phù hợp"
         /// </summary>
         /// <param name="name"></param>
         /// <param name="result"></param>
         /// <returns></returns>
         public static string Get(string name, bool result)
         {
-            return result ? $"Lấy {name} thành công" : $"Lấy {name} không thành công";
+            return result ? $"Lấy {name} thành công" : $"Không tìm thấy {name} phù hợp";
         }
         /// <summary>
         /// $"{name} không tồn tại"

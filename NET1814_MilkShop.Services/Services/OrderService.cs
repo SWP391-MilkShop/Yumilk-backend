@@ -96,14 +96,11 @@ namespace NET1814_MilkShop.Services.Services
                 Message = orders.TotalCount > 0 ? "Get orders successfully" : "No brands found",
                 Status = "Success"
             };*/
-            return ResponseModel.Success(
-                ResponseConstants.Get(
-                    "đơn hàng", orders.TotalCount > 0),
-                orders
-            );
+            #endregion
+            return ResponseModel.Success(ResponseConstants.Get("đơn hàng", orders.TotalCount > 0), orders);
             
 
-            #endregion
+            
         }
 
         private static Expression<Func<Order, object>> GetSortProperty(
