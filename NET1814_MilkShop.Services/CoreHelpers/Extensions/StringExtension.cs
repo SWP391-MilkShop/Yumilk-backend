@@ -9,7 +9,7 @@ namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
         /// </summary>
         /// <param name="input"></param>
         /// <returns>Return a normalized string or null if input is null</returns>
-        public static string? Normalize(this string input)
+        public static string? Normalize(this string? input)
         {
             if (string.IsNullOrEmpty(input))
             {

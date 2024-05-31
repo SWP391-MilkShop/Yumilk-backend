@@ -68,15 +68,15 @@ namespace NET1814_MilkShop.Services.Services
                 (queryModel.IsActive.HasValue ? p.IsActive == queryModel.IsActive.Value : true)
                 //search theo name, description, brand, unit, category
                 && (string.IsNullOrEmpty(searchTerm) || p.Name.ToLower().Contains(searchTerm)
-                                                                || p.Description!.ToLower().Contains(searchTerm)
-                                                                || p.Brand!.Name.ToLower().Contains(searchTerm)
-                                                                || p.Unit!.Name.ToLower().Contains(searchTerm)
-                                                                || p.Category!.Name.ToLower().Contains(searchTerm))
+                                                                || p.Description!.Contains(searchTerm)
+                                                                || p.Brand!.Name.Contains(searchTerm)
+                                                                || p.Unit!.Name.Contains(searchTerm)
+                                                                || p.Category!.Name.Contains(searchTerm))
                 //filter theo brand, category, unit, status, minPrice, maxPrice
-                && (string.IsNullOrEmpty(brand) || string.Equals(p.Brand!.Name.ToLower(), brand))
-                && (string.IsNullOrEmpty(category) || string.Equals(p.Category!.Name.ToLower(), category))
-                && (string.IsNullOrEmpty(unit) || string.Equals(p.Unit!.Name.ToLower(), unit))
-                && (string.IsNullOrEmpty(status) || string.Equals(p.ProductStatus!.Name.ToLower(), status))
+                && (string.IsNullOrEmpty(brand) || string.Equals(p.Brand!.Name, brand))
+                && (string.IsNullOrEmpty(category) || string.Equals(p.Category!.Name, category))
+                && (string.IsNullOrEmpty(unit) || string.Equals(p.Unit!.Name, unit))
+                && (string.IsNullOrEmpty(status) || string.Equals(p.ProductStatus!.Name, status))
                 && (queryModel.MinPrice <= 0 || p.SalePrice >= queryModel.MinPrice)
                 && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice));
 

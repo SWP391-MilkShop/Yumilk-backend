@@ -24,6 +24,7 @@ namespace NET1814_MilkShop.API.Controllers
         private readonly IBrandService _brandService;
         private readonly IProductAttributeService _productAttributeService;
         private readonly IProductAttributeValueService _productAttributeValueService;
+        private readonly IProductImageService _productImageService;
 
         public ProductController(ILogger logger, IServiceProvider serviceProvider)
         {
@@ -34,6 +35,7 @@ namespace NET1814_MilkShop.API.Controllers
             _categoryService = serviceProvider.GetRequiredService<ICategoryService>();
             _productAttributeService = serviceProvider.GetRequiredService<IProductAttributeService>();
             _productAttributeValueService = serviceProvider.GetRequiredService<IProductAttributeValueService>();
+            _productImageService = serviceProvider.GetRequiredService<IProductImageService>();
         }
 
         #region Product
@@ -490,6 +492,54 @@ namespace NET1814_MilkShop.API.Controllers
             return ResponseExtension.Result(res);
         }
 
+        #endregion
+
+        #region ProductImage
+        [HttpGet("{id}/images")]
+        public async Task<IActionResult> GetProductImages(Guid id)
+        {
+            _logger.Information("Get Product Images");
+            var response = await _productImageService.GetByProductIdAsync(id);
+            return ResponseExtension.Result(response);
+        }
+        /// <summary>
+        /// Add new image by product id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="imageUrl"></param>
+        /// <returns></returns>
+        [HttpPost("{id}/images")]
+        public async Task<IActionResult> CreateProductImage(Guid id, [FromBody] string imageUrl)
+        {
+            _logger.Information("Add Product Image");
+            var response = await _productImageService.CreateProductImageAsync(id, imageUrl);
+            return ResponseExtension.Result(response);
+        }
+        /// <summary>
+        /// Update by image id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="imageUrl"></param>
+        /// <returns></returns>
+        [HttpPatch("images/{id}")]
+        public async Task<IActionResult> UpdateProductImage(int id, [FromBody] string imageUrl)
+        {
+            _logger.Information("Update Product Image");
+            var response = await _productImageService.UpdateProductImageAsync(id, imageUrl);
+            return ResponseExtension.Result(response);
+        }
+        /// <summary>
+        /// Delete by image id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete("images/{id}")]
+        public async Task<IActionResult> DeleteProductImage(int id)
+        {
+            _logger.Information("Delete Product Image");
+            var response = await _productImageService.DeleteProductImageAsync(id);
+            return ResponseExtension.Result(response);
+        }
         #endregion
     }
 }
