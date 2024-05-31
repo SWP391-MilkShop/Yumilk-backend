@@ -15,6 +15,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> ChangePasswordAsync(Guid userId, ChangePasswordModel model);
 
         /*Task<ResponseModel> GetUsersAsync();*/
+        Task<ResponseModel> CreateUserAsync(CreateUserModel model);
         Task<ResponseModel> GetUsersAsync(UserQueryModel request);
         Task<ResponseModel> UpdateUserAsync(Guid id, UpdateUserModel model);
         Task<bool> IsExistAsync(Guid id);
@@ -54,7 +55,41 @@ namespace NET1814_MilkShop.Services.Services
                 Status = "Success"
             };
         }*/
+        
+        /// <summary>
+        /// Admin có thể tạo tài khoản cho nhân viên hoặc admin khác
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
 
+        public async Task<ResponseModel> CreateUserAsync(CreateUserModel model)
+        {
+            var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
+            if (existingUser != null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Tên đăng nhập"));
+            }
+
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Username = model.Username,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
+                RoleId = model.RoleId,
+                IsActive = true, //no activation required
+                IsBanned = false
+            };
+            _userRepository.Add(user);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return ResponseModel.Success(ResponseConstants.Create("tài khoản", true), null);
+            }
+            return ResponseModel.Error(ResponseConstants.Create("tài khoản", false));
+        }
+        
         public async Task<ResponseModel> GetUsersAsync(UserQueryModel request)
         {
             var query = _userRepository.GetUsersQuery();

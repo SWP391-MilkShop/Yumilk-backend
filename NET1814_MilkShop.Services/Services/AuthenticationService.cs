@@ -12,7 +12,6 @@ namespace NET1814_MilkShop.Services.Services
     public interface IAuthenticationService
     {
         Task<ResponseModel> SignUpAsync(SignUpModel model, string environment);
-        Task<ResponseModel> CreateUserAsync(CreateUserModel model);
         Task<ResponseModel> LoginAsync(RequestLoginModel model);
         Task<ResponseModel> VerifyAccountAsync(string token);
         Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request, string environment);
@@ -48,38 +47,7 @@ namespace NET1814_MilkShop.Services.Services
             _jwtTokenExtension = jwtTokenExtension;
         }
 
-        /// <summary>
-        /// Admin có thể tạo tài khoản cho nhân viên hoặc admin khác
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        public async Task<ResponseModel> CreateUserAsync(CreateUserModel model)
-        {
-            var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
-            if (existingUser != null)
-            {
-                return ResponseModel.BadRequest(ResponseConstants.Exist("Tên đăng nhập"));
-            }
-
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Username = model.Username,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
-                RoleId = model.RoleId,
-                IsActive = true, //no activation required
-                IsBanned = false
-            };
-            _userRepository.Add(user);
-            var result = await _unitOfWork.SaveChangesAsync();
-            if (result > 0)
-            {
-                return ResponseModel.Success(ResponseConstants.Create("tài khoản", true), null);
-            }
-            return ResponseModel.Error(ResponseConstants.Create("tài khoản", false));
-        }
+        
 
         /// <summary>
         /// Người dùng đăng ký tài khoản

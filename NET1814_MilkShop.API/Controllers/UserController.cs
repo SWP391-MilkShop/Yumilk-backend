@@ -28,7 +28,18 @@ namespace NET1814_MilkShop.API.Controllers
             _customerService = serviceProvider.GetRequiredService<ICustomerService>();
             _addressService = serviceProvider.GetRequiredService<IAddressService>();
         }
+        
         #region User
+        
+        [HttpPost("users")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserModel model)
+        {
+            _logger.Information("Create user");
+            var response = await _userService.CreateUserAsync(model);
+            return ResponseExtension.Result(response);
+        }
+        
         [HttpGet("users")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         [ServiceFilter(typeof(UserExistsFilter))]

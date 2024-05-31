@@ -26,14 +26,7 @@ namespace NET1814_MilkShop.API.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        [HttpPost("create-user")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserModel model)
-        {
-            _logger.Information("Create user");
-            var response = await _authenticationService.CreateUserAsync(model);
-            return ResponseExtension.Result(response);
-        }
+
 
         [HttpPost("sign-up")]
         public async Task<IActionResult> SignUp([FromBody] SignUpModel model)
