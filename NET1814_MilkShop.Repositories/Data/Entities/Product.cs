@@ -1,7 +1,7 @@
-﻿using System.ComponentModel;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
@@ -20,6 +20,8 @@ public partial class Product : IAuditableEntity
     public decimal OriginalPrice { get; set; }
 
     public decimal SalePrice { get; set; }
+    [Column("thumbnail", TypeName = "nvarchar(255)")]
+    public string? Thumbnail { get; set; }
 
     public int CategoryId { get; set; }
 

@@ -1,15 +1,19 @@
-﻿using NET1814_MilkShop.Repositories.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using NET1814_MilkShop.Repositories.Data;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Repositories
 {
     public abstract class Repository<TEntity>
-        where TEntity : class
+        where TEntity : class, IAuditableEntity
     {
         protected readonly AppDbContext _context;
+        protected readonly IQueryable<TEntity> _query;
 
         protected Repository(AppDbContext context)
         {
             _context = context;
+            _query = _context.Set<TEntity>().Where(x => x.DeletedAt == null).AsNoTracking();
         }
 
         public virtual void Add(TEntity entity)
@@ -26,15 +30,33 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             _context.Set<TEntity>().Remove(entity);
         }
-
+        /// <summary>
+        /// Soft delete entity
+        /// </summary>
+        /// <param name="entity"></param>
+        public virtual void Delete(TEntity entity)
+        {
+            entity.DeletedAt = DateTime.Now;
+            _context.Set<TEntity>().Update(entity);
+        }
         public virtual async Task<TEntity?> GetById(Guid id)
         {
-            return await _context.Set<TEntity>().FindAsync(id);
+            var entity = await _context.Set<TEntity>().FindAsync(id);
+            if (entity != null && entity.DeletedAt == null)
+            {
+                return entity;
+            }
+            return null;
         }
 
         public virtual async Task<TEntity?> GetById(int id)
         {
-            return await _context.Set<TEntity>().FindAsync(id);
+            var entity = await _context.Set<TEntity>().FindAsync(id);
+            if (entity != null && entity.DeletedAt == null)
+            {
+                return entity;
+            }
+            return null;
         }
     }
 }

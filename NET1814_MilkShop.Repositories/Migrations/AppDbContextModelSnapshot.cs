@@ -45,13 +45,18 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("is_active");
 
+                    b.Property<string>("Logo")
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("logo");
+
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("modified_at");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(255)")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id");
 
@@ -158,7 +163,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(255)")
+                        .UseCollation("Latin1_General_CS_AI");
 
                     b.HasKey("Id");
 
@@ -446,7 +452,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(255)")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id");
 
@@ -476,7 +483,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnName("deleted_at");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(MAX)")
+                        .UseCollation("Latin1_General_CS_AI");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit")
@@ -488,7 +496,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(255)")
+                        .UseCollation("Latin1_General_CS_AI");
 
                     b.Property<decimal>("OriginalPrice")
                         .HasColumnType("decimal(18,2)")
@@ -508,6 +517,10 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<int>("UnitId")
                         .HasColumnType("int")
                         .HasColumnName("unit_id");
+
+                    b.Property<string>("Thumbnail")
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("thumbnail");
 
                     b.HasKey("Id");
 
@@ -594,7 +607,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(255)")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id");
 
@@ -770,7 +784,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(255)")
+                        .UseCollation("Latin1_General_CI_AS");
 
                     b.HasKey("Id");
 
@@ -799,6 +814,10 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("is_active");
 
+                    b.Property<bool>("IsBanned")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_banned");
+
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("last_name");
@@ -821,7 +840,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .UseCollation("Latin1_General_CS_AS");
 
                     b.Property<string>("VerificationCode")
                         .HasColumnType("nvarchar(6)")

@@ -1,11 +1,13 @@
-﻿using System.Linq.Expressions;
-using System.Text.RegularExpressions;
-using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -17,6 +19,9 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetByIdAsync(Guid id);
         Task<ResponseModel> ChangeInfoAsync(Guid userId, ChangeUserInfoModel changeUserInfoModel);
         Task<bool> IsExistAsync(Guid id);
+        /*Task<bool> IsCustomerExistAsync(string email, string phoneNumber);*/
+        Task<bool> IsExistPhoneNumberAsync(string phoneNumber);
+        Task<bool> IsExistEmailAsync(string email);
     }
 
     public sealed class CustomerService : ICustomerService
@@ -43,56 +48,43 @@ namespace NET1814_MilkShop.Services.Services
                 Email = customer.Email,
                 Points = customer.Points,
                 ProfilePictureUrl = customer.ProfilePictureUrl,
+                IsActive = user.IsActive,
+                IsBanned = user.IsBanned
             };
         }
 
         public async Task<ResponseModel> GetCustomersAsync(CustomerQueryModel request)
         {
             var query = _customerRepository.GetCustomersQuery();
+            var searchTerm = StringExtension.Normalize(request.SearchTerm);
             //filter
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            if (!string.IsNullOrEmpty(searchTerm))
             {
                 query = query.Where(c =>
-                    c.User.Username.Contains(request.SearchTerm)
-                    || c.Email!.Contains(request.SearchTerm)
-                    || c.PhoneNumber!.Contains(request.SearchTerm)
-                    || c.User.FirstName!.Contains(request.SearchTerm)
-                    || c.User.LastName!.Contains(request.SearchTerm)
+                    c.User.Username.ToLower().Contains(searchTerm)
+                    || c.Email.ToLower().Contains(searchTerm)
+                    || c.PhoneNumber.ToLower().Contains(searchTerm)
+                    || c.User.FirstName.ToLower().Contains(searchTerm)
+                    || c.User.LastName.ToLower().Contains(searchTerm)
                 );
             }
-            if (request.IsActive != null)
+
+            if (request.IsActive.HasValue || request.IsBanned.HasValue)
             {
-                query = query.Where(c => c.User.IsActive == request.IsActive);
+                query = query.Where(c => (!request.IsActive.HasValue || c.User.IsActive == request.IsActive.Value)
+                                      && (!request.IsBanned.HasValue || c.User.IsBanned == request.IsBanned.Value));
             }
             //sort
             query = "desc".Equals(request.SortOrder?.ToLower())
                 ? query.OrderByDescending(GetSortProperty(request))
                 : query.OrderBy(GetSortProperty(request));
-            var result = query.Select(c => new CustomerModel()
-            {
-                UserID = c.UserId.ToString(),
-                FirstName = c.User.FirstName,
-                LastName = c.User.LastName,
-                IsActive = c.User.IsActive,
-                Email = c.Email,
-                Points = c.Points,
-                Username = c.User.Username,
-                PhoneNumber = c.PhoneNumber,
-                ProfilePictureUrl = c.ProfilePictureUrl,
-                GoogleId = c.GoogleId
-            });
+            var result = query.Select(c => ToCustomerModel(c, c.User));
             var customers = await PagedList<CustomerModel>.CreateAsync(
                 result,
                 request.Page,
                 request.PageSize
             );
-            return new ResponseModel()
-            {
-                Data = customers,
-                Message =
-                    customers.TotalCount > 0 ? "Get customers successfully" : "No customers found",
-                Status = "success"
-            };
+            return ResponseModel.Success(ResponseConstants.Get("khách hàng", customers.TotalCount > 0), customers);
         }
 
         private static Expression<Func<Customer, object>> GetSortProperty(
@@ -116,92 +108,98 @@ namespace NET1814_MilkShop.Services.Services
             var customer = await _customerRepository.GetByEmailAsync(email);
             if (customer == null)
             {
-                return new ResponseModel
+                /*return new ResponseModel
                 {
                     Data = null,
                     Message = "Customer not found",
                     Status = "Error"
-                };
+                };*/
+                return ResponseModel.Success(
+                    ResponseConstants.Get("khách hàng bằng email"
+                        , false),
+                    null
+                );
             }
             var customerModel = ToCustomerModel(customer, customer.User);
-            return new ResponseModel
+            /*return new ResponseModel
             {
                 Data = customerModel,
                 Message = "Get customer by email successfully",
                 Status = "Success"
-            };
-        }
+            };*/
+            return ResponseModel.Success(ResponseConstants.Get("khách hàng bằng email", true), customerModel);
 
-        /*public async Task<ResponseModel> GetCustomersAsync()
-        {
-            var customers = await _customerRepository.GetCustomersAsync();
-            var list = new List<CustomerModel>();
-            foreach (var customer in customers)
-            {
-                list.Add(ToCustomerModel(customer, customer.User));
-            }
-            return new ResponseModel
-            {
-                Data = list,
-                Message = "Get all customers successfully",
-                Status = "Success"
-            };
-        }*/
+        }
 
         public async Task<ResponseModel> GetByIdAsync(Guid id)
         {
             var customer = await _customerRepository.GetById(id);
             if (customer == null)
             {
-                return new ResponseModel
-                {
-                    Message = "Customer not found",
-                    Status = "Error"
-                };
+                /*return new ResponseModel { Message = "Customer not found", Status = "Error" };*/
+                return ResponseModel.Success(ResponseConstants.Get("khách hàng", false), null);
             }
-            var customerModel = ToCustomerModel(customer, customer.User);
+            var customerModel = ToCustomerModel(customer, customer.User);/*
             return new ResponseModel
             {
                 Data = customerModel,
                 Message = "Get customer by id successfully",
                 Status = "Success"
-            };
+            };*/
+            return ResponseModel.Success
+            (
+                ResponseConstants.Get(
+                    "khách hàng",
+                    true),
+                customerModel);
+
         }
 
-        public async Task<ResponseModel> ChangeInfoAsync(Guid userId, ChangeUserInfoModel changeUserInfoModel)
+        public async Task<ResponseModel> ChangeInfoAsync(
+            Guid userId,
+            ChangeUserInfoModel changeUserInfoModel
+        )
         {
             var customer = await _customerRepository.GetById(userId);
             if (customer == null)
             {
-                return new ResponseModel
-                {
-                    Message = "Customer not found",
-                    Status = "Error"
-                };
+                /*return new ResponseModel { Message = "Customer not found", Status = "Error" };*/
+                return ResponseModel.Success(
+                    ResponseConstants.Get("khách hàng",
+                        false
+                    ),
+                    null
+                );
             }
 
             if (!string.IsNullOrWhiteSpace(changeUserInfoModel.PhoneNumber))
             {
                 if (!Regex.IsMatch(changeUserInfoModel.PhoneNumber, @"^([0-9]{10})$"))
                 {
-                    return new ResponseModel
+                    /*return new ResponseModel
                     {
                         Message = "Invalid Phone Number!",
                         Status = "Error"
-                    };
+                    };*/
+                    return ResponseModel.BadRequest(
+                        ResponseConstants.InvalidPhoneNumber
+                    );
+
                 }
                 customer.PhoneNumber = changeUserInfoModel.PhoneNumber;
             }
 
             if (!string.IsNullOrWhiteSpace(changeUserInfoModel.ProfilePictureUrl))
             {
-                if (!Uri.IsWellFormedUriString(changeUserInfoModel.ProfilePictureUrl, UriKind.Absolute))
+                if (
+                    !Uri.IsWellFormedUriString(
+                        changeUserInfoModel.ProfilePictureUrl,
+                        UriKind.Absolute
+                    )
+                )
                 {
-                    return new ResponseModel
-                    {
-                        Message = "Invalid URL!",
-                        Status = "Error"
-                    };
+                    /*return new ResponseModel { Message = "Invalid URL!", Status = "Error" };*/
+                    return ResponseModel.BadRequest(ResponseConstants.InvalidUrl);
                 }
                 customer.ProfilePictureUrl = changeUserInfoModel.ProfilePictureUrl;
             }
@@ -220,19 +218,44 @@ namespace NET1814_MilkShop.Services.Services
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return new ResponseModel
+                /*return new ResponseModel
                 {
                     Data = ToCustomerModel(customer, customer.User),
                     Message = "Change user info successfully",
                     Status = "Success"
-                };
+                };*/
+                return ResponseModel.Success(
+                    ResponseConstants.ChangeInfo(
+                        true),
+                    ToCustomerModel(customer, customer.User)
+                );
+
             }
-            return new ResponseModel { Message = "Change user info failed", Status = "Error" };
+            /*return new ResponseModel { Message = "Change user info failed", Status = "Error" };*/
+            return ResponseModel.Error(
+                ResponseConstants.ChangeInfo(
+                    false)
+            );
         }
 
         public async Task<bool> IsExistAsync(Guid id)
         {
             return await _customerRepository.IsExistAsync(id);
         }
+
+        public async Task<bool> IsExistPhoneNumberAsync(string phoneNumber)
+        {
+            return await _customerRepository.IsExistPhoneNumberAsync(phoneNumber);
+        }
+
+        public async Task<bool> IsExistEmailAsync(string email)
+        {
+            return await _customerRepository.IsExistEmailAsync(email);
+        }
+
+        /*public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
+        {
+            return await _customerRepository.IsCustomerExistAsync(email, phoneNumber);
+        }*/
     }
 }

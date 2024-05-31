@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
 
@@ -25,25 +24,22 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public IQueryable<User> GetUsersQuery()
         {
-            var query = _context.Users.Include(u => u.Role).AsNoTracking();
-            return query;
+            //var query = _context.Users.Include(u => u.Role).AsNoTracking();
+            return _query.Include(u => u.Role);
         }
 
         public async Task<User?> GetByUsernameAsync(string username)
         {
-            return await _context
-                .Users.AsNoTracking()
-                .FirstOrDefaultAsync(x => username.Equals(x.Username));
+            //var user = await _context
+            //    .Users.AsNoTracking()
+            //    .FirstOrDefaultAsync(x => username.Equals(x.Username));
+            var user = await _query.FirstOrDefaultAsync(x => username.Equals(x.Username));
+            if (user != null && username.Equals(user.Username, StringComparison.Ordinal))
+            {
+                return user;
+            }
+            return null;
         }
-
-        /// <summary>
-        /// Get all active users
-        /// </summary>
-        /// <returns></returns>
-        /*public async Task<List<User>> GetUsersAsync()
-        {
-            return await _context.Users.Where(x => x.IsActive).ToListAsync();
-        }*/
 
         public async Task<string?> GetVerificationTokenAsync(string username)
         {
@@ -57,7 +53,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public async Task<bool> IsExistAsync(Guid id)
         {
-            return await _context.Users.AnyAsync(e => e.Id == id);
+            //return await _context.Users.AnyAsync(e => e.Id == id && e.IsActive);
+            return await _query.AnyAsync(e => e.Id == id);
         }
     }
 }
