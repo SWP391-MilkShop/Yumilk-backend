@@ -75,6 +75,8 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name");
+
                     b.ToTable("brands");
                 }
             );
@@ -151,9 +153,11 @@ namespace NET1814_MilkShop.Repositories.Data
 
                     b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
 
-                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CS_AI");
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CI_AI");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name");
 
                     b.ToTable("categories");
                 }
@@ -366,11 +370,11 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("deleted_at")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description").HasColumnType("nvarchar(MAX)").UseCollation("Latin1_General_CS_AI");
+                    b.Property<string>("Description").HasColumnType("nvarchar(MAX)").UseCollation("Latin1_General_CI_AI");
 
                     b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
                     //accent insensitive
-                    b.Property<string>("Name").HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CS_AI");
+                    b.Property<string>("Name").HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CI_AI");
 
                     b.Property<decimal>("OriginalPrice")
                         .HasColumnName("original_price")
@@ -385,12 +389,6 @@ namespace NET1814_MilkShop.Repositories.Data
                     b.Property<int>("UnitId").HasColumnName("unit_id").HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BrandId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("UnitId");
 
                     b.ToTable("products");
                 }
@@ -570,6 +568,8 @@ namespace NET1814_MilkShop.Repositories.Data
                     b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(255)").UseCollation("Latin1_General_CI_AS"); ;
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name");
 
                     b.ToTable("units");
                 }
