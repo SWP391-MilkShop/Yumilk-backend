@@ -1,11 +1,12 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
+using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using System.Linq.Expressions;
-using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -15,6 +16,7 @@ namespace NET1814_MilkShop.Services.Services
 
         /*Task<ResponseModel> GetUsersAsync();*/
         Task<ResponseModel> GetUsersAsync(UserQueryModel request);
+        Task<ResponseModel> UpdateUserAsync(Guid id, UpdateUserModel model);
         Task<bool> IsExistAsync(Guid id);
     }
 
@@ -57,21 +59,23 @@ namespace NET1814_MilkShop.Services.Services
         {
             var query = _userRepository.GetUsersQuery();
             //filter
-            if (!string.IsNullOrEmpty(request.SearchTerm))
-            {
-                query = query.Where(u =>
-                    u.Username.Contains(request.SearchTerm)
-                    || u.FirstName!.Contains(request.SearchTerm)
-                    || u.LastName!.Contains(request.SearchTerm)
-                );
-            }
+            var searchTerm = StringExtension.Normalize(request.SearchTerm);
+            query = query.Where(u => string.IsNullOrEmpty(searchTerm)
+                || u.Username.ToLower().Contains(searchTerm)
+                || u.FirstName.Contains(searchTerm)
+                || u.LastName.Contains(searchTerm));
 
             if (!string.IsNullOrEmpty(request.Role))
             {
-                query = query.Where(u => string.Equals(u.Role!.Name, request.Role));
+                var roleIds = request.Role.Split(',').Select(int.Parse).ToList();
+                query = query.Where(u => roleIds.Contains(u.RoleId));
             }
 
-            query = query.Where(u => u.IsActive == request.IsActive && u.IsBanned == request.IsBanned);
+            if (request.IsActive.HasValue || request.IsBanned.HasValue)
+            {
+                query = query.Where(u => (!request.IsActive.HasValue || u.IsActive == request.IsActive.Value)
+                                      && (!request.IsBanned.HasValue || u.IsBanned == request.IsBanned.Value));
+            }
             //sort
             query = "desc".Equals(request.SortOrder?.ToLower())
                 ? query.OrderByDescending(GetSortProperty(request))
@@ -92,12 +96,7 @@ namespace NET1814_MilkShop.Services.Services
                 request.Page,
                 request.PageSize
             );
-            if (users.TotalCount > 0)
-            {
-                return ResponseModel.Success(ResponseConstants.Get("người dùng", true), users);
-            }
-
-            return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
+            return ResponseModel.Success(ResponseConstants.Get("người dùng", users.TotalCount>0), users);
         }
 
         private static Expression<Func<User, object>> GetSortProperty(UserQueryModel request)
@@ -129,7 +128,7 @@ namespace NET1814_MilkShop.Services.Services
             var user = await _userRepository.GetById(userId);
             if (user == null)
             {
-                return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"),null);
+                return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
             }
 
             if (!BCrypt.Net.BCrypt.Verify(model.OldPassword, user.Password))
@@ -146,6 +145,24 @@ namespace NET1814_MilkShop.Services.Services
             }
 
             return ResponseModel.Error(ResponseConstants.ChangePassword(false));
+        }
+
+        public async Task<ResponseModel> UpdateUserAsync(Guid id, UpdateUserModel model)
+        {
+            var user = await _userRepository.GetById(id);
+            if (user == null)
+            {
+                return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
+            }
+            user.IsBanned = model.IsBanned;
+            _userRepository.Update(user);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return ResponseModel.Success(ResponseConstants.Update("người dùng", true), null);
+            }
+            return ResponseModel.Error(ResponseConstants.Update("người dùng", false));
+
         }
     }
 }

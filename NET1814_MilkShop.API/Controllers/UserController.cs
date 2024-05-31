@@ -44,6 +44,13 @@ namespace NET1814_MilkShop.API.Controllers
             
             return ResponseExtension.Result(response);
         }
+        [HttpPatch("users/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserModel model)
+        {
+            var response = await _userService.UpdateUserAsync(id, model);
+            return ResponseExtension.Result(response);
+        }
         #endregion
 
         #region  Customer
