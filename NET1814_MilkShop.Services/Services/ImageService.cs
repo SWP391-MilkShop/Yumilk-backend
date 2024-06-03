@@ -28,7 +28,7 @@ namespace NET1814_MilkShop.Services.Services
             using var client = new HttpClient();
 
             // Add the client_id to the Authorization header
-            client.DefaultRequestHeaders.Add("Authorization", "Client-ID " + _configuration["Imgur:ClientId"]);
+            client.DefaultRequestHeaders.Add("Authorization", "Client-ID " + ClientId);
 
             // Send the GET request to the Imgur API
             var response = await client.GetAsync($"https://api.imgur.com/3/image/{imageHash}");
