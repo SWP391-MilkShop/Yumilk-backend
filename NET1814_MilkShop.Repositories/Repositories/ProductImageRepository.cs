@@ -16,7 +16,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<ProductImage?> GetById(int id);
         void Add(ProductImage productImage);
         void Update(ProductImage productImage);
-        void Delete(ProductImage productImage);
+        //void Delete(ProductImage productImage);
+        void Remove(ProductImage productImage);
 
     }
     public class ProductImageRepository : Repository<ProductImage>, IProductImageRepository

@@ -123,6 +123,25 @@
         {
             return $"{name} đã hết hạn";
         }
+        /// <summary>
+        /// $"{name} đã vượt quá giới hạn"
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string OverLimit(string name)
+        {
+            return $"{name} đã vượt quá giới hạn";
+        }
+        /// <summary>
+        /// $"Tải {name} lên thành công" : $"Tải {name} lên không thành công"
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static string Upload(string name, bool result)
+        {
+            return result ? $"Tải {name} lên thành công" : $"Tải {name} lên không thành công";
+        }
         public const string ResetPasswordLink = "Link đặt lại mật khẩu đã được gửi đến email của bạn";
         public const string ActivateAccountLink = "Link kích hoạt tài khoản đã được gửi đến email của bạn";
         public const string Banned = "Tài khoản của bạn đã bị khóa";

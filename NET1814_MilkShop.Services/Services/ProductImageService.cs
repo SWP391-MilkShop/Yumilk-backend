@@ -1,16 +1,29 @@
-﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+﻿using Microsoft.AspNetCore.Http;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
+using NET1814_MilkShop.Repositories.Models.ImageModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
+using Newtonsoft.Json;
 
 namespace NET1814_MilkShop.Services.Services
 {
     public interface IProductImageService
     {
         Task<ResponseModel> GetByProductIdAsync(Guid id);
-        Task<ResponseModel> CreateProductImageAsync(Guid id, string imageUrl);
-        Task<ResponseModel> UpdateProductImageAsync(int id, string imageUrl);
+        /// <summary>
+        /// Use imgur api to upload image and save image url to database
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="imageUrl"></param>
+        /// <returns></returns>
+        Task<ResponseModel> CreateProductImageAsync(Guid id, List<IFormFile> images);
+        /// <summary>
+        /// Delete product image by id (Hard delete)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         Task<ResponseModel> DeleteProductImageAsync(int id);
 
     }
@@ -19,36 +32,56 @@ namespace NET1814_MilkShop.Services.Services
         private readonly IProductImageRepository _productImageRepository;
         private readonly IProductRepository _productRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public ProductImageService(IProductImageRepository productImageRepository, IProductRepository productRepository, IUnitOfWork unitOfWork)
+        private readonly IImageService _imageService;
+        public ProductImageService(IProductImageRepository productImageRepository, IProductRepository productRepository, IUnitOfWork unitOfWork, IImageService imageService)
         {
             _productImageRepository = productImageRepository;
             _productRepository = productRepository;
             _unitOfWork = unitOfWork;
+            _imageService = imageService;
         }
-        public async Task<ResponseModel> CreateProductImageAsync(Guid id, string imageUrl)
+        public async Task<ResponseModel> CreateProductImageAsync(Guid id, List<IFormFile> images)
         {
-            if(!Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute))
+            var isExist = await _productRepository.IsExistAsync(id);
+            if (!isExist)
             {
-                return ResponseModel.BadRequest(ResponseConstants.WrongFormat("Url"));
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
             }
-            var product = await _productRepository.GetById(id);
-            if(product == null)
+            var productImages = await _productImageRepository.GetByProductIdAsync(id);
+            if (productImages.Count + images.Count > 10)
             {
-                return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
+                return ResponseModel.Success(ResponseConstants.OverLimit("hình ảnh sản phẩm"), null);
             }
-            var productImage = new ProductImage
+            //Upload images to imgur asynchronously
+            var uploadTasks = images.Select(async image =>
             {
-                ProductId = id,
-                ImageUrl = imageUrl,
-            };
-            _productImageRepository.Add(productImage);
+                var response = await _imageService.UploadImageAsync(new ImageUploadModel { Image = image });
+                if (response.StatusCode == 200)
+                {
+                    var imgurData = response.Data as ImgurData;
+                    if (imgurData != null)
+                    {
+                        var productImage = new ProductImage
+                        {
+                            ProductId = id,
+                            ImageUrl = imgurData.Link
+                        };
+                        _productImageRepository.Add(productImage);
+                        return ResponseConstants.Upload(image.FileName, true);
+                    }
+                }
+                return ResponseConstants.Upload(image.FileName, false);
+            });
+            //Wait for all upload tasks to complete
+            var uploadResults = await Task.WhenAll(uploadTasks);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return ResponseModel.Success(ResponseConstants.Create("hình ảnh sản phẩm", true), null);
+                return ResponseModel.Success(ResponseConstants.Create("hình ảnh sản phẩm", true), uploadResults);
             }
             return ResponseModel.Error(ResponseConstants.Create("hình ảnh sản phẩm", false));
         }
+
 
         public async Task<ResponseModel> DeleteProductImageAsync(int id)
         {
@@ -57,7 +90,8 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Hình ảnh sản phẩm"), null);
             }
-            _productImageRepository.Delete(productImage);
+            //_productImageRepository.Delete(productImage);
+            _productImageRepository.Remove(productImage);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
@@ -76,29 +110,6 @@ namespace NET1814_MilkShop.Services.Services
             return ResponseModel.Success(ResponseConstants.NotFound("Hình ảnh sản phẩm"), null);
         }
 
-        public async Task<ResponseModel> UpdateProductImageAsync(int id, string imageUrl)
-        {
-            var productImage = await _productImageRepository.GetById(id);
-            if (productImage == null)
-            {
-                return ResponseModel.Success(ResponseConstants.NotFound("Hình ảnh sản phẩm"), null);
-            }
-            if(imageUrl != null)
-            {
-                if(!Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute))
-                {
-                    return ResponseModel.BadRequest(ResponseConstants.WrongFormat("Url"));
-                }
-                productImage.ImageUrl = imageUrl;
-                _productImageRepository.Update(productImage);
-                var result = await _unitOfWork.SaveChangesAsync();
-                if (result > 0)
-                {
-                    return ResponseModel.Success(ResponseConstants.Update("hình ảnh sản phẩm", true), null);
-                }
-                return ResponseModel.Error(ResponseConstants.Update("hình ảnh sản phẩm", false));
-            }
-            return ResponseModel.BadRequest(ResponseConstants.WrongFormat("Url"));
-        }
+
     }
 }

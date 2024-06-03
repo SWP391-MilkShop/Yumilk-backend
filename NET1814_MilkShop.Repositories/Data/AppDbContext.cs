@@ -501,8 +501,6 @@ namespace NET1814_MilkShop.Repositories.Data
                         .HasColumnName("image_url")
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<bool>("IsActive").HasColumnName("is_active").HasColumnType("bit");
-
                     b.Property<Guid?>("ProductId")
                         .HasColumnName("product_id")
                         .HasColumnType("uniqueidentifier");
