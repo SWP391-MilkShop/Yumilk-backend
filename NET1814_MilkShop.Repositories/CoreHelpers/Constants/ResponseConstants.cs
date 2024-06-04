@@ -2,6 +2,8 @@
 {
     public static class ResponseConstants
     {
+        #region Common
+
         /// <summary>
         /// $"Tạo {name} mới thành công" : $"Tạo {name} mới không thành công"
         /// </summary>
@@ -52,6 +54,46 @@
             return $"{name} không tồn tại";
         }
         /// <summary>
+        /// $"{name} đã tồn tại"
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string Exist(string name)
+        {
+            return $"{name} đã tồn tại trong hệ thống";
+        }
+        /// <summary>
+        /// $"{name} không đúng định dạng"
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string WrongFormat(string name)
+        {
+            return $"{name} không đúng định dạng";
+        }
+        /// <summary>
+        /// $"{name} đã hết hạn"
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string Expired(string name)
+        {
+            return $"{name} đã hết hạn";
+        }
+        /// <summary>
+        /// $"{name} đã vượt quá giới hạn"
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string OverLimit(string name)
+        {
+            return $"{name} đã vượt quá giới hạn";
+        }
+        public const string NoChangeIsMade = "Không có thay đổi nào được thực hiện";
+        #endregion
+
+        #region Authen & Author
+        /// <summary>
         /// "Đăng nhập thành công" : "Tên đăng nhập hoặc mật khẩu không đúng"
         /// </summary>
         /// <param name="result"></param>
@@ -96,42 +138,17 @@
         {
             return result ? "Xác thực thành công" : "Xác thực không thành công";
         }
-        /// <summary>
-        /// $"{name} đã tồn tại"
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static string Exist(string name)
-        {
-            return $"{name} đã tồn tại trong hệ thống";
-        }
-        /// <summary>
-        /// $"{name} không đúng định dạng"
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static string WrongFormat(string name)
-        {
-            return $"{name} không đúng định dạng";
-        }
-        /// <summary>
-        /// $"{name} đã hết hạn"
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static string Expired(string name)
-        {
-            return $"{name} đã hết hạn";
-        }
-        /// <summary>
-        /// $"{name} đã vượt quá giới hạn"
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static string OverLimit(string name)
-        {
-            return $"{name} đã vượt quá giới hạn";
-        }
+        public const string ResetPasswordLink = "Link đặt lại mật khẩu đã được gửi đến email của bạn";
+        public const string ActivateAccountLink = "Link kích hoạt tài khoản đã được gửi đến email của bạn";
+        public const string Banned = "Tài khoản của bạn đã bị khóa";
+        public const string AccountActivated = "Tài khoản của bạn đã được kích hoạt";
+        public const string WrongCode = "Mã xác thực không đúng";
+        public const string PassSameNewPass = "Mật khẩu cũ và mật khẩu mới không được trùng nhau";
+        public const string WrongPassword = "Mật khẩu cũ không chính xác";
+        public const string InvalidPhoneNumber = "Số điện thoại không hợp lệ";
+
+        #endregion
+
         /// <summary>
         /// $"Tải {name} lên thành công" : $"Tải {name} lên không thành công"
         /// </summary>
@@ -142,14 +159,18 @@
         {
             return result ? $"Tải {name} lên thành công" : $"Tải {name} lên không thành công";
         }
-        public const string ResetPasswordLink = "Link đặt lại mật khẩu đã được gửi đến email của bạn";
-        public const string ActivateAccountLink = "Link kích hoạt tài khoản đã được gửi đến email của bạn";
-        public const string Banned = "Tài khoản của bạn đã bị khóa";
-        public const string AccountActivated = "Tài khoản của bạn đã được kích hoạt";
-        public const string WrongCode = "Mã xác thực không đúng";
-        public const string PassSameNewPass = "Mật khẩu cũ và mật khẩu mới không được trùng nhau";
-        public const string WrongPassword = "Mật khẩu cũ không chính xác";
-        public const string InvalidPhoneNumber = "Số điện thoại không hợp lệ";
         public const string InvalidUrl = "Url không hợp lệ";
+        #region Cart
+        public const string NotEnoughQuantity = "Số lượng sản phẩm không đủ";
+        /// <summary>
+        /// "Thêm sản phẩm vào giỏ hàng thành công" : "Thêm sản phẩm vào giỏ hàng không thành công"
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static string AddToCart(bool result)
+        {
+            return result ? "Thêm sản phẩm vào giỏ hàng thành công" : "Thêm sản phẩm vào giỏ hàng không thành công";
+        }
+        #endregion
     }
 }
