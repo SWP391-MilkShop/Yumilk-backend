@@ -503,37 +503,26 @@ namespace NET1814_MilkShop.API.Controllers
             return ResponseExtension.Result(response);
         }
         /// <summary>
-        /// Add new image by product id
+        /// Upload product images (max 10 images per product)
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="imageUrl"></param>
+        /// <param name="images"></param>
         /// <returns></returns>
         [HttpPost("{id}/images")]
-        public async Task<IActionResult> CreateProductImage(Guid id, [FromBody] string imageUrl)
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> CreateProductImage(Guid id, [FromForm] List<IFormFile> images)
         {
-            _logger.Information("Add Product Image");
-            var response = await _productImageService.CreateProductImageAsync(id, imageUrl);
+            _logger.Information("Upload Product Image");
+            var response = await _productImageService.CreateProductImageAsync(id, images);
             return ResponseExtension.Result(response);
         }
         /// <summary>
-        /// Update by image id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="imageUrl"></param>
-        /// <returns></returns>
-        [HttpPatch("images/{id}")]
-        public async Task<IActionResult> UpdateProductImage(int id, [FromBody] string imageUrl)
-        {
-            _logger.Information("Update Product Image");
-            var response = await _productImageService.UpdateProductImageAsync(id, imageUrl);
-            return ResponseExtension.Result(response);
-        }
-        /// <summary>
-        /// Delete by image id
+        /// Delete by image id (Hard delete)
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete("images/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> DeleteProductImage(int id)
         {
             _logger.Information("Delete Product Image");

@@ -25,7 +25,10 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             _context.Set<TEntity>().Update(entity);
         }
-
+        /// <summary>
+        /// Hard delete entity
+        /// </summary>
+        /// <param name="entity"></param>
         public virtual void Remove(TEntity entity)
         {
             _context.Set<TEntity>().Remove(entity);

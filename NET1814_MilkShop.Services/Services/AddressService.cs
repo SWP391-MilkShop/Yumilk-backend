@@ -73,7 +73,7 @@ public class AddressService : IAddressService
     public async Task<ResponseModel> GetAddressesByCustomerId(Guid customerId)
     {
         var customerAddresses = _addressRepository.GetCustomerAddresses(customerId);
-        var result = customerAddresses.Select(customerAddress => new AddressModel
+        var result = await customerAddresses.Select(customerAddress => new AddressModel
         {
             Id = customerAddress.Id,
             ReceiverName = customerAddress.ReceiverName,
@@ -83,7 +83,7 @@ public class AddressService : IAddressService
             DistrictName = customerAddress.DistrictName,
             ProvinceName = customerAddress.ProvinceName,
             IsDefault = customerAddress.IsDefault
-        });
+        }).ToListAsync();
         return ResponseModel.Success(ResponseConstants.Get("địa chỉ", result.Any()), result);
     }
 

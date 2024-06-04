@@ -2,7 +2,6 @@
 using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models.ImageModels;
 using NET1814_MilkShop.Services.Services;
-using Newtonsoft.Json;
 using ILogger = Serilog.ILogger;
 namespace NET1814_MilkShop.API.Controllers
 {
@@ -27,6 +26,7 @@ namespace NET1814_MilkShop.API.Controllers
         [HttpGet("{imageHash}")]
         public async Task<IActionResult> GetImage(string imageHash)
         {
+            _logger.Information("Get image by hash: {imageHash}", imageHash);
             var response = await _imageService.GetImageAsync(imageHash);
             return ResponseExtension.Result(response);
         }
@@ -38,6 +38,7 @@ namespace NET1814_MilkShop.API.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadImage([FromForm] ImageUploadModel model)
         {
+            _logger.Information("Upload image");
             var response = await _imageService.UploadImageAsync(model);
             return ResponseExtension.Result(response);
         }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
-using NET1814_MilkShop.Repositories.Models;
 
 namespace NET1814_MilkShop.Repositories.Repositories
 {
@@ -27,6 +26,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         void Add(Product product);
         void Update(Product product);
         void Delete(Product product);
+        Task<bool> IsExistAsync(Guid id);
     }
 
     public sealed class ProductRepository : Repository<Product>, IProductRepository
@@ -59,6 +59,11 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public async Task<Product?> GetByNameAsync(string name)
         {
             return await _query.FirstOrDefaultAsync(p => p.Name == name);
+        }
+
+        public Task<bool> IsExistAsync(Guid id)
+        {
+            return _query.AnyAsync(x => x.Id == id);
         }
     }
 }
