@@ -8,7 +8,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
     {
         IQueryable<Category> GetCategoriesQuery();
         Task<bool> IsExistAsync(string name);
-        Task<Category?> GetById(int id);
+        Task<Category?> GetByIdAsync(int id);
         void Add(Category category);
         void Update(Category category);
 

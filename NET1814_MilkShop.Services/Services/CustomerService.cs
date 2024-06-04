@@ -133,7 +133,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> GetByIdAsync(Guid id)
         {
-            var customer = await _customerRepository.GetById(id);
+            var customer = await _customerRepository.GetByIdAsync(id);
             if (customer == null)
             {
                 /*return new ResponseModel { Message = "Customer not found", Status = "Error" };*/
@@ -160,7 +160,7 @@ namespace NET1814_MilkShop.Services.Services
             ChangeUserInfoModel changeUserInfoModel
         )
         {
-            var customer = await _customerRepository.GetById(userId);
+            var customer = await _customerRepository.GetByIdAsync(userId);
             if (customer == null)
             {
                 /*return new ResponseModel { Message = "Customer not found", Status = "Error" };*/

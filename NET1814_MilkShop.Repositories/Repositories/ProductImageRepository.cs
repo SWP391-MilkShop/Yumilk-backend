@@ -13,7 +13,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <param name="id"></param>
         /// <returns></returns>
         Task<List<ProductImageModel>> GetByProductIdAsync(Guid id);
-        Task<ProductImage?> GetById(int id);
+        Task<ProductImage?> GetByIdAsync(int id);
         void Add(ProductImage productImage);
         void Update(ProductImage productImage);
         //void Delete(ProductImage productImage);

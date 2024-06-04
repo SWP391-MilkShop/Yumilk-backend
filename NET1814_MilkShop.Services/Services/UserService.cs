@@ -160,7 +160,7 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.BadRequest(ResponseConstants.PassSameNewPass);
             }
 
-            var user = await _userRepository.GetById(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
@@ -184,7 +184,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> UpdateUserAsync(Guid id, UpdateUserModel model)
         {
-            var user = await _userRepository.GetById(id);
+            var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);

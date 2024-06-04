@@ -133,7 +133,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> GetProductByIdAsync(Guid id)
         {
-            var product = await _productRepository.GetById(id);
+            var product = await _productRepository.GetByIdAsync(id);
             if (product == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
@@ -144,17 +144,17 @@ namespace NET1814_MilkShop.Services.Services
         public async Task<ResponseModel> CreateProductAsync(CreateProductModel model)
         {
             #region Validate Brand, Category, Unit exist
-            var brand = await _brandRepository.GetById(model.BrandId);
+            var brand = await _brandRepository.GetByIdAsync(model.BrandId);
             if (brand == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
             }
-            var category = await _categoryRepository.GetById(model.CategoryId);
+            var category = await _categoryRepository.GetByIdAsync(model.CategoryId);
             if (category == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
             }
-            var unit = await _unitRepository.GetById(model.UnitId);
+            var unit = await _unitRepository.GetByIdAsync(model.UnitId);
             if (unit == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Đơn vị"), null);
@@ -185,7 +185,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> UpdateProductAsync(Guid id, UpdateProductModel model)
         {
-            var product = await _productRepository.GetById(id);
+            var product = await _productRepository.GetByIdAsync(id);
             if (product == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
@@ -202,7 +202,7 @@ namespace NET1814_MilkShop.Services.Services
             #region Validate Brand, Category, Unit, Status exist
             if (model.BrandId.HasValue)
             {
-                var brand = await _brandRepository.GetById(model.BrandId.Value);
+                var brand = await _brandRepository.GetByIdAsync(model.BrandId.Value);
                 if (brand == null)
                 {
                     return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
@@ -211,7 +211,7 @@ namespace NET1814_MilkShop.Services.Services
             }
             if (model.CategoryId.HasValue)
             {
-                var category = await _categoryRepository.GetById(model.CategoryId.Value);
+                var category = await _categoryRepository.GetByIdAsync(model.CategoryId.Value);
                 if (category == null)
                 {
                     return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
@@ -220,7 +220,7 @@ namespace NET1814_MilkShop.Services.Services
             }
             if (model.UnitId.HasValue)
             {
-                var unit = await _unitRepository.GetById(model.UnitId.Value);
+                var unit = await _unitRepository.GetByIdAsync(model.UnitId.Value);
                 if (unit == null)
                 {
                     return ResponseModel.Success(ResponseConstants.NotFound("Đơn vị"), null);
@@ -229,7 +229,7 @@ namespace NET1814_MilkShop.Services.Services
             }
             if (model.StatusId.HasValue)
             {
-                var status = await _productStatusRepository.GetById(model.StatusId.Value);
+                var status = await _productStatusRepository.GetByIdAsync(model.StatusId.Value);
                 if (status == null)
                 {
                     return ResponseModel.Success(ResponseConstants.NotFound("Trạng thái"), null);
@@ -261,7 +261,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> DeleteProductAsync(Guid id)
         {
-            var product = await _productRepository.GetById(id);
+            var product = await _productRepository.GetByIdAsync(id);
             if (product == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);

@@ -53,7 +53,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> DeleteCategoryAsync(int id)
         {
-            var category = await _categoryRepository.GetById(id);
+            var category = await _categoryRepository.GetByIdAsync(id);
             if (category == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
@@ -108,7 +108,7 @@ namespace NET1814_MilkShop.Services.Services
             };
         public async Task<ResponseModel> GetCategoryByIdAsync(int id)
         {
-            var category = await _categoryRepository.GetById(id);
+            var category = await _categoryRepository.GetByIdAsync(id);
             if (category == null || !category.IsActive)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
@@ -126,7 +126,7 @@ namespace NET1814_MilkShop.Services.Services
         public async Task<ResponseModel> UpdateCategoryAsync(int id, UpdateCategoryModel model)
         {
 
-            var existingCategory = await _categoryRepository.GetById(id);
+            var existingCategory = await _categoryRepository.GetByIdAsync(id);
             if (existingCategory == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);

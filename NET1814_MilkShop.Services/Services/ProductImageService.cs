@@ -85,7 +85,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> DeleteProductImageAsync(int id)
         {
-            var productImage = await _productImageRepository.GetById(id);
+            var productImage = await _productImageRepository.GetByIdAsync(id);
             if (productImage == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Hình ảnh sản phẩm"), null);

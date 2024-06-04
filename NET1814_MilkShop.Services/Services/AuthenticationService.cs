@@ -145,7 +145,7 @@ namespace NET1814_MilkShop.Services.Services
                     RefreshToken = refreshToken.ToString(),
                     IsActive = existingUser.IsActive
                 };
-                var customer = await _customerRepository.GetById(existingUser.Id);
+                var customer = await _customerRepository.GetByIdAsync(existingUser.Id);
                 if (customer != null)
                 {
                     responseLogin.Email = customer.Email;
@@ -169,7 +169,7 @@ namespace NET1814_MilkShop.Services.Services
             var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
             var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
             var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
-            var isExist = await _userRepository.GetById(Guid.Parse(userID));
+            var isExist = await _userRepository.GetByIdAsync(Guid.Parse(userID));
             if (expirationTime < DateTime.UtcNow)
             {
                 return ResponseModel.BadRequest(ResponseConstants.Expired("Token"));
@@ -224,7 +224,7 @@ namespace NET1814_MilkShop.Services.Services
             var tokenS = jsonToken as JwtSecurityToken;
             var userID = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
             var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
-            var isExist = await _userRepository.GetById(Guid.Parse(userID));
+            var isExist = await _userRepository.GetByIdAsync(Guid.Parse(userID));
             if (isExist == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
@@ -252,7 +252,7 @@ namespace NET1814_MilkShop.Services.Services
             var tokenType = tokenS.Claims.First(claim => claim.Type == "tokenType").Value;
             var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
             var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
-            var userExisted = await _userRepository.GetById(Guid.Parse(userId));
+            var userExisted = await _userRepository.GetByIdAsync(Guid.Parse(userId));
             if (userExisted == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);

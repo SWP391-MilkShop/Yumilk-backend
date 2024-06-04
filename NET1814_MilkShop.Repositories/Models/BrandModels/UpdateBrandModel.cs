@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace NET1814_MilkShop.Repositories.Models.BrandModels;
 
 public class UpdateBrandModel

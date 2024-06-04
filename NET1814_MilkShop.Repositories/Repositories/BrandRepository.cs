@@ -10,7 +10,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         void Add(Brand b);
         void Update(Brand b);
         void Delete(Brand b);
-        Task<Brand?> GetById(int id);
+        Task<Brand?> GetByIdAsync(int id);
         Task<Brand?> GetBrandByName(string name);
     }
 

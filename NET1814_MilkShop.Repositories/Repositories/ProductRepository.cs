@@ -16,7 +16,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<Product?> GetById(Guid id);
+        Task<Product?> GetByIdAsync(Guid id);
         /// <summary>
         /// Get product by name for checking duplicate
         /// </summary>
@@ -47,7 +47,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
                          .Include(p => p.ProductStatus);
         }
 
-        public override Task<Product?> GetById(Guid id)
+        public override Task<Product?> GetByIdAsync(Guid id)
         {
             return _query.Include(p => p.Brand)
                          .Include(p => p.Category)
