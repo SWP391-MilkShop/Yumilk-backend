@@ -11,18 +11,18 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<Category?> GetByIdAsync(int id);
         void Add(Category category);
         void Update(Category category);
-
     }
+
     public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
-        public CategoryRepository(AppDbContext context) : base(context)
-        {
-        }
+        public CategoryRepository(AppDbContext context)
+            : base(context) { }
 
         public IQueryable<Category> GetCategoriesQuery()
         {
             return _query;
         }
+
         /// <summary>
         /// Check if category name is exist
         /// </summary>

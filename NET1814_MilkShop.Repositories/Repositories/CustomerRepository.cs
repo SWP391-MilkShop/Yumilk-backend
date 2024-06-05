@@ -26,9 +26,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
     public sealed class CustomerRepository : Repository<Customer>, ICustomerRepository
     {
         public CustomerRepository(AppDbContext context)
-            : base(context)
-        {
-        }
+            : base(context) { }
 
         public async Task<Customer?> GetByEmailAsync(string email)
         {
@@ -37,7 +35,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
             //    .Customers.AsNoTracking()
             //    .Include(x => x.User)
             //    .FirstOrDefaultAsync(x => string.Equals(email, x.Email));
-            var customer = await _query.Include(x => x.User)
+            var customer = await _query
+                .Include(x => x.User)
                 .FirstOrDefaultAsync(x => string.Equals(email, x.Email));
             return customer;
         }
@@ -53,8 +52,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             //return await _context
             //    .Customers.Include(x => x.User)
             //    .FirstOrDefaultAsync(x => x.UserId == id);
-            return await _query.Include(x => x.User)
-                .FirstOrDefaultAsync(x => x.UserId == id);
+            return await _query.Include(x => x.User).FirstOrDefaultAsync(x => x.UserId == id);
         }
 
         public async Task<bool> IsExistAsync(Guid id)

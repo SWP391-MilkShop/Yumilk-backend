@@ -1,7 +1,7 @@
-﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
@@ -30,6 +30,7 @@ public partial class User : IAuditableEntity
 
     [DefaultValue(false)]
     public bool IsActive { get; set; }
+
     [Column("is_banned")]
     [DefaultValue(false)]
     public bool IsBanned { get; set; }

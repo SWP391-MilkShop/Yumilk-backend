@@ -21,8 +21,13 @@ public class CheckoutService : ICheckoutService
     private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CheckoutService(IUnitOfWork unitOfWork, IOrderRepository orderRepository,
-        IProductRepository productRepository, ICartRepository cartRepository, ICustomerRepository customerRepository)
+    public CheckoutService(
+        IUnitOfWork unitOfWork,
+        IOrderRepository orderRepository,
+        IProductRepository productRepository,
+        ICartRepository cartRepository,
+        ICustomerRepository customerRepository
+    )
     {
         _customerRepository = customerRepository;
         _cartRepository = cartRepository;
@@ -89,7 +94,13 @@ public class CheckoutService : ICheckoutService
             TotalAmount = GetTotalPrice(cartItems) + model.ShippingFee,
             VoucherId = 1, // de tam 1 voucher
             Address =
-                address.Address + " " + address.WardName + " " + address.DistrictName + " " + address.ProvinceName,
+                address.Address
+                + " "
+                + address.WardName
+                + " "
+                + address.DistrictName
+                + " "
+                + address.ProvinceName,
             PhoneNumber = address.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
             Note = model.Note,
             PaymentMethod = model.PaymentMethod,
@@ -98,20 +109,17 @@ public class CheckoutService : ICheckoutService
         _orderRepository.Add(orders);
 
         //thêm vào order detail
-        var orderDetailsList = cartItems.Select(x =>
-            new OrderDetail
-            {
-                OrderId = orders.Id,
-                ProductId = x.ProductId,
-                Quantity = x.Quantity,
-                UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
-                ProductName = x.Product.Name,
-                ItemPrice = x.Quantity *
-                            (x.Product.SalePrice == 0
-                                ? x.Product.OriginalPrice
-                                : x.Product.SalePrice) //check sale price va original price
-            }
-        );
+        var orderDetailsList = cartItems.Select(x => new OrderDetail
+        {
+            OrderId = orders.Id,
+            ProductId = x.ProductId,
+            Quantity = x.Quantity,
+            UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
+            ProductName = x.Product.Name,
+            ItemPrice =
+                x.Quantity
+                * (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice) //check sale price va original price
+        });
         _orderRepository.AddRange(orderDetailsList);
 
         // xóa cart detail
@@ -165,7 +173,9 @@ public class CheckoutService : ICheckoutService
             ProductName = x.Product.Name,
             Quantity = x.Quantity,
             UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
-            ItemPrice = x.Quantity * (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice)
+            ItemPrice =
+                x.Quantity
+                * (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice)
         });
         return res;
     }

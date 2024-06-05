@@ -1,4 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+﻿using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.CategoryModels;
@@ -6,7 +7,6 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
-using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -17,12 +17,13 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> CreateCategoryAsync(CreateCategoryModel model);
         Task<ResponseModel> UpdateCategoryAsync(int id, UpdateCategoryModel model);
         Task<ResponseModel> DeleteCategoryAsync(int id);
-
     }
+
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IUnitOfWork _unitOfWork;
+
         public CategoryService(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork)
         {
             _categoryRepository = categoryRepository;
@@ -73,8 +74,9 @@ namespace NET1814_MilkShop.Services.Services
             var query = _categoryRepository.GetCategoriesQuery();
             var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
             query = query.Where(p =>
-            p.IsActive == queryModel.IsActive
-            && (string.IsNullOrEmpty(searchTerm) || p.Name.ToLower().Contains(searchTerm)));
+                p.IsActive == queryModel.IsActive
+                && (string.IsNullOrEmpty(searchTerm) || p.Name.ToLower().Contains(searchTerm))
+            );
             if ("desc".Equals(queryModel.SortOrder?.ToLower()))
             {
                 query = query.OrderByDescending(GetSortProperty(queryModel));
@@ -95,9 +97,12 @@ namespace NET1814_MilkShop.Services.Services
                 queryModel.Page,
                 queryModel.PageSize
             );
-            return ResponseModel.Success(ResponseConstants.Get("danh mục", categories.TotalCount > 0), categories);
-
+            return ResponseModel.Success(
+                ResponseConstants.Get("danh mục", categories.TotalCount > 0),
+                categories
+            );
         }
+
         private static Expression<Func<Category, object>> GetSortProperty(
             CategoryQueryModel queryModel
         ) =>
@@ -106,6 +111,7 @@ namespace NET1814_MilkShop.Services.Services
                 "name" => category => category.Name,
                 _ => category => category.Id,
             };
+
         public async Task<ResponseModel> GetCategoryByIdAsync(int id)
         {
             var category = await _categoryRepository.GetByIdAsync(id);
@@ -125,7 +131,6 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> UpdateCategoryAsync(int id, UpdateCategoryModel model)
         {
-
             var existingCategory = await _categoryRepository.GetByIdAsync(id);
             if (existingCategory == null)
             {
@@ -134,7 +139,13 @@ namespace NET1814_MilkShop.Services.Services
             if (!string.IsNullOrEmpty(model.Name))
             {
                 // Check if category name is changed
-                if (!string.Equals(model.Name, existingCategory.Name, StringComparison.OrdinalIgnoreCase))
+                if (
+                    !string.Equals(
+                        model.Name,
+                        existingCategory.Name,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                )
                 {
                     var isExist = await _categoryRepository.IsExistAsync(model.Name);
                     if (isExist)
@@ -144,7 +155,9 @@ namespace NET1814_MilkShop.Services.Services
                 }
                 existingCategory.Name = model.Name;
             }
-            existingCategory.Description = string.IsNullOrEmpty(model.Description) ? existingCategory.Description : model.Description;
+            existingCategory.Description = string.IsNullOrEmpty(model.Description)
+                ? existingCategory.Description
+                : model.Description;
             existingCategory.IsActive = model.IsActive;
             _categoryRepository.Update(existingCategory);
             var result = await _unitOfWork.SaveChangesAsync();

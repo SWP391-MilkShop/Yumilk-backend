@@ -16,15 +16,12 @@ namespace NET1814_MilkShop.Repositories.Repositories
     public class OrderRepository : Repository<Order>, IOrderRepository
     {
         public OrderRepository(AppDbContext context)
-            : base(context)
-        {
-        }
+            : base(context) { }
 
         public IQueryable<Order> GetOrdersQuery()
         {
             //return _context.Orders.Include(o => o.Status).Include(o => o.Customer).AsNoTracking();
-            return _query.Include(o => o.Status)
-                .Include(o => o.Customer);
+            return _query.Include(o => o.Status).Include(o => o.Customer);
         }
 
         public void AddRange(IEnumerable<OrderDetail> list)
@@ -34,7 +31,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public async Task<Order?> GetByCodeAsync(int orderCode)
         {
-            return await _query.Include(o => o.Status)
+            return await _query
+                .Include(o => o.Status)
                 .Include(o => o.Customer)
                 .ThenInclude(o => o.User)
                 .Include(o => o.OrderDetails)

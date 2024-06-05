@@ -38,7 +38,7 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
                 }
                 catch (Exception)
                 {
-                    //Log Exception Handling message                      
+                    //Log Exception Handling message
                     result = -1;
                     dbContextTransaction.Rollback();
                 }

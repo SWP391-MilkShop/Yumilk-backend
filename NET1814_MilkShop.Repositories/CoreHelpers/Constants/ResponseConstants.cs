@@ -156,8 +156,10 @@
             return result ? "Xác thực thành công" : "Xác thực không thành công";
         }
 
-        public const string ResetPasswordLink = "Link đặt lại mật khẩu đã được gửi đến email của bạn";
-        public const string ActivateAccountLink = "Link kích hoạt tài khoản đã được gửi đến email của bạn";
+        public const string ResetPasswordLink =
+            "Link đặt lại mật khẩu đã được gửi đến email của bạn";
+        public const string ActivateAccountLink =
+            "Link kích hoạt tài khoản đã được gửi đến email của bạn";
         public const string Banned = "Tài khoản của bạn đã bị khóa";
         public const string AccountActivated = "Tài khoản của bạn đã được kích hoạt";
         public const string WrongCode = "Mã xác thực không đúng";
@@ -191,7 +193,9 @@
         /// <returns></returns>
         public static string AddToCart(bool result)
         {
-            return result ? "Thêm sản phẩm vào giỏ hàng thành công" : "Thêm sản phẩm vào giỏ hàng không thành công";
+            return result
+                ? "Thêm sản phẩm vào giỏ hàng thành công"
+                : "Thêm sản phẩm vào giỏ hàng không thành công";
         }
 
         public const string CartIsEmpty = "Giỏ hàng của bạn hiện tại đang rỗng!";

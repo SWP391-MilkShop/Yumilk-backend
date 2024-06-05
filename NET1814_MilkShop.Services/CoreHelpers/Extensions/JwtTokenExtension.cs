@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using NET1814_MilkShop.Repositories.Data.Entities;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using NET1814_MilkShop.Repositories.Data.Entities;
 
 namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
 {

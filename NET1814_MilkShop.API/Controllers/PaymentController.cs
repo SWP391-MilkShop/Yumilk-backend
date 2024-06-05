@@ -9,7 +9,6 @@ namespace NET1814_MilkShop.API.Controllers;
 
 [ApiController]
 [Route("api/payment-requests")]
-
 public class PaymentController : ControllerBase
 {
     private readonly IPaymentService _paymentService;
@@ -35,7 +34,7 @@ public class PaymentController : ControllerBase
         var response = await _paymentService.CreatePaymentLink(id);
         return ResponseExtension.Result(response);
     }
-    
+
     /// <summary>
     /// Get payment link information by OrderCode in database
     /// </summary>
@@ -48,7 +47,7 @@ public class PaymentController : ControllerBase
         var response = await _paymentService.GetPaymentLinkInformation(id);
         return ResponseExtension.Result(response);
     }
-    
+
     /// <summary>
     /// Cancel payment link by OrderCode in database
     /// </summary>

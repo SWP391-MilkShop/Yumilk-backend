@@ -17,7 +17,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 collation: "Latin1_General_CS_AS",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(50)");
+                oldType: "nvarchar(50)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -26,7 +27,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 collation: "Latin1_General_CI_AS",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(255)");
+                oldType: "nvarchar(255)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -35,7 +37,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 collation: "Latin1_General_CS_AI",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(255)");
+                oldType: "nvarchar(255)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
@@ -45,7 +48,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 collation: "Latin1_General_CS_AI",
                 oldClrType: typeof(string),
                 oldType: "nvarchar(2000)",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -54,7 +58,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 collation: "Latin1_General_CI_AS",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(255)");
+                oldType: "nvarchar(255)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -63,7 +68,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 collation: "Latin1_General_CI_AS",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(255)");
+                oldType: "nvarchar(255)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -72,7 +78,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 collation: "Latin1_General_CS_AI",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(255)");
+                oldType: "nvarchar(255)"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -81,7 +88,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 collation: "Latin1_General_CI_AS",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(255)");
+                oldType: "nvarchar(255)"
+            );
         }
 
         /// <inheritdoc />
@@ -94,7 +102,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)",
-                oldCollation: "Latin1_General_CS_AS");
+                oldCollation: "Latin1_General_CS_AS"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -103,7 +112,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldCollation: "Latin1_General_CI_AS");
+                oldCollation: "Latin1_General_CI_AS"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -112,7 +122,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldCollation: "Latin1_General_CS_AI");
+                oldCollation: "Latin1_General_CS_AI"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
@@ -122,7 +133,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(2000)",
                 oldNullable: true,
-                oldCollation: "Latin1_General_CS_AI");
+                oldCollation: "Latin1_General_CS_AI"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -131,7 +143,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldCollation: "Latin1_General_CI_AS");
+                oldCollation: "Latin1_General_CI_AS"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -140,7 +153,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldCollation: "Latin1_General_CI_AS");
+                oldCollation: "Latin1_General_CI_AS"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -149,7 +163,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldCollation: "Latin1_General_CS_AI");
+                oldCollation: "Latin1_General_CS_AI"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -158,7 +173,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldCollation: "Latin1_General_CI_AS");
+                oldCollation: "Latin1_General_CI_AS"
+            );
         }
     }
 }

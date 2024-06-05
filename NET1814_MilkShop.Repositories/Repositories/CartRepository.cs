@@ -32,16 +32,15 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
     public class CartRepository : Repository<Cart>, ICartRepository
     {
-        public CartRepository(AppDbContext context) : base(context)
-        {
-        }
+        public CartRepository(AppDbContext context)
+            : base(context) { }
 
         public IQueryable<Cart> GetCartQuery()
         {
             return _query;
         }
 
-        public async override Task<Cart?> GetByIdAsync(int id)
+        public override async Task<Cart?> GetByIdAsync(int id)
         {
             return await _query.Include(x => x.CartDetails).FirstOrDefaultAsync(x => x.Id == id);
         }
@@ -50,11 +49,15 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             if (includeProduct)
             {
-                return _query.Include(x => x.CartDetails).ThenInclude(x => x.Product)
+                return _query
+                    .Include(x => x.CartDetails)
+                    .ThenInclude(x => x.Product)
                     .FirstOrDefaultAsync(x => x.CustomerId == customerId);
             }
 
-            return _query.Include(x => x.CartDetails).FirstOrDefaultAsync(x => x.CustomerId == customerId);
+            return _query
+                .Include(x => x.CartDetails)
+                .FirstOrDefaultAsync(x => x.CustomerId == customerId);
         }
 
         public void RemoveRange(IEnumerable<CartDetail> list)
@@ -69,7 +72,10 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public async Task<List<CartDetail>> GetCartDetails(int cartId)
         {
-            return await _context.CartDetails.Include(x => x.Product).Where(x => x.CartId == cartId).ToListAsync();
+            return await _context
+                .CartDetails.Include(x => x.Product)
+                .Where(x => x.CartId == cartId)
+                .ToListAsync();
         }
     }
 }

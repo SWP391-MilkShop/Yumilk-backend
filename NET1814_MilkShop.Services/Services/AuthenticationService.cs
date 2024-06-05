@@ -1,11 +1,11 @@
-﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+﻿using System.IdentityModel.Tokens.Jwt;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -47,8 +47,6 @@ namespace NET1814_MilkShop.Services.Services
             _jwtTokenExtension = jwtTokenExtension;
         }
 
-
-
         /// <summary>
         /// Người dùng đăng ký tài khoản
         /// </summary>
@@ -63,7 +61,9 @@ namespace NET1814_MilkShop.Services.Services
             }
 
             /*var IsCustomerExist = await _customerRepository.IsCustomerExistAsync(model.Email, model.PhoneNumber);*/
-            var isPhoneNumberExist = await _customerRepository.IsExistPhoneNumberAsync(model.PhoneNumber);
+            var isPhoneNumberExist = await _customerRepository.IsExistPhoneNumberAsync(
+                model.PhoneNumber
+            );
             if (isPhoneNumberExist)
             {
                 return ResponseModel.BadRequest(ResponseConstants.Exist("Số điện thoại"));
@@ -193,8 +193,10 @@ namespace NET1814_MilkShop.Services.Services
             return ResponseModel.BadRequest(ResponseConstants.WrongCode);
         }
 
-        public async Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request,
-                                                                      string environment)
+        public async Task<ResponseModel> ForgotPasswordAsync(
+            ForgotPasswordModel request,
+            string environment
+        )
         {
             var customer = await _customerRepository.GetByEmailAsync(request.Email);
             if (customer != null)
@@ -209,8 +211,7 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Reset
                     );
-                    _emailService.SendPasswordResetEmail(customer.Email,
-                        verifyToken, environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken, environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
                 }
             }
@@ -243,6 +244,7 @@ namespace NET1814_MilkShop.Services.Services
             }
             return ResponseModel.BadRequest(ResponseConstants.WrongCode);
         }
+
         public async Task<ResponseModel> RefreshTokenAsync(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -290,8 +292,7 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Authentication
                     );
-                    _emailService.SendVerificationEmail(customer.Email,
-                        verifyToken, environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendVerificationEmail(customer.Email, verifyToken, environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ActivateAccountLink, null);
                 }
             }

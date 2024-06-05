@@ -16,9 +16,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
     public class BrandRepository : Repository<Brand>, IBrandRepository
     {
-        public BrandRepository(AppDbContext context) : base(context)
-        {
-        }
+        public BrandRepository(AppDbContext context)
+            : base(context) { }
 
         public IQueryable<Brand> GetBrandsQuery()
         {
