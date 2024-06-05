@@ -14,6 +14,7 @@
         {
             return result ? $"Tạo {name} mới thành công" : $"Tạo {name} mới không thành công";
         }
+
         /// <summary>
         /// $"Cập nhật {name} thành công" : $"Cập nhật {name} không thành công"
         /// </summary>
@@ -24,6 +25,7 @@
         {
             return result ? $"Cập nhật {name} thành công" : $"Cập nhật {name} không thành công";
         }
+
         /// <summary>
         /// $"Xóa {name} thành công" : $"Xóa {name} không thành công"
         /// </summary>
@@ -34,6 +36,7 @@
         {
             return result ? $"Xóa {name} thành công" : $"Xóa {name} không thành công";
         }
+
         /// <summary>
         /// $"Lấy {name} thành công" : $"Không tìm thấy {name} phù hợp"
         /// </summary>
@@ -44,6 +47,7 @@
         {
             return result ? $"Lấy {name} thành công" : $"Không tìm thấy {name} phù hợp";
         }
+
         /// <summary>
         /// $"{name} không tồn tại"
         /// </summary>
@@ -53,6 +57,7 @@
         {
             return $"{name} không tồn tại";
         }
+
         /// <summary>
         /// $"{name} đã tồn tại"
         /// </summary>
@@ -62,6 +67,7 @@
         {
             return $"{name} đã tồn tại trong hệ thống";
         }
+
         /// <summary>
         /// $"{name} không đúng định dạng"
         /// </summary>
@@ -71,6 +77,7 @@
         {
             return $"{name} không đúng định dạng";
         }
+
         /// <summary>
         /// $"{name} đã hết hạn"
         /// </summary>
@@ -80,6 +87,7 @@
         {
             return $"{name} đã hết hạn";
         }
+
         /// <summary>
         /// $"{name} đã vượt quá giới hạn"
         /// </summary>
@@ -89,10 +97,13 @@
         {
             return $"{name} đã vượt quá giới hạn";
         }
+
         public const string NoChangeIsMade = "Không có thay đổi nào được thực hiện";
+
         #endregion
 
         #region Authen & Author
+
         /// <summary>
         /// "Đăng nhập thành công" : "Tên đăng nhập hoặc mật khẩu không đúng"
         /// </summary>
@@ -102,6 +113,7 @@
         {
             return result ? "Đăng nhập thành công" : "Tên đăng nhập hoặc mật khẩu không đúng";
         }
+
         /// <summary>
         /// "Đăng ký thành công" : "Đăng ký không thành công"
         /// </summary>
@@ -109,8 +121,11 @@
         /// <returns></returns>
         public static string Register(bool result)
         {
-            return result ? "Đăng ký thành công, vui lòng kiểm tra email để xác thực tài khoản!" : "Đăng ký không thành công";
+            return result
+                ? "Đăng ký thành công, vui lòng kiểm tra email để xác thực tài khoản!"
+                : "Đăng ký không thành công";
         }
+
         /// <summary>
         /// "Đổi mật khẩu thành công" : "Đổi mật khẩu không thành công"
         /// </summary>
@@ -120,6 +135,7 @@
         {
             return result ? "Đổi mật khẩu thành công" : "Đổi mật khẩu không thành công";
         }
+
         /// <summary>
         /// "Thay đổi thông tin thành công" : "Thay đổi thông tin không thành công"
         /// </summary>
@@ -129,6 +145,7 @@
         {
             return result ? "Thay đổi thông tin thành công" : "Thay đổi thông tin không thành công";
         }
+
         /// <summary>
         /// "Xác thực thành công" : "Xác thực không thành công"
         /// </summary>
@@ -138,6 +155,7 @@
         {
             return result ? "Xác thực thành công" : "Xác thực không thành công";
         }
+
         public const string ResetPasswordLink = "Link đặt lại mật khẩu đã được gửi đến email của bạn";
         public const string ActivateAccountLink = "Link kích hoạt tài khoản đã được gửi đến email của bạn";
         public const string Banned = "Tài khoản của bạn đã bị khóa";
@@ -159,9 +177,13 @@
         {
             return result ? $"Tải {name} lên thành công" : $"Tải {name} lên không thành công";
         }
+
         public const string InvalidUrl = "Url không hợp lệ";
+
         #region Cart
+
         public const string NotEnoughQuantity = "Số lượng sản phẩm không đủ";
+
         /// <summary>
         /// "Thêm sản phẩm vào giỏ hàng thành công" : "Thêm sản phẩm vào giỏ hàng không thành công"
         /// </summary>
@@ -171,6 +193,9 @@
         {
             return result ? "Thêm sản phẩm vào giỏ hàng thành công" : "Thêm sản phẩm vào giỏ hàng không thành công";
         }
+
+        public const string CartIsEmpty = "Giỏ hàng của bạn hiện tại đang rỗng!";
+
         #endregion
     }
 }
