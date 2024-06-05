@@ -239,6 +239,8 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IEmailService, EmailService>();
 
             services.AddScoped<IImageService, ImageService>();
+
+            services.AddScoped<IPaymentService, PaymentService>();
             //Add Extensions
             services.AddScoped<IJwtTokenExtension, JwtTokenExtension>();
             //Add Filters
