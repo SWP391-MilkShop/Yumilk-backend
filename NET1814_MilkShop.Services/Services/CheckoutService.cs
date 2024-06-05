@@ -15,11 +15,14 @@ public interface ICheckoutService
 public class CheckoutService : ICheckoutService
 {
     private readonly IOrderRepository _orderRepository;
+    private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CheckoutService(IUnitOfWork unitOfWork, IOrderRepository orderRepository)
+    public CheckoutService(IUnitOfWork unitOfWork, IOrderRepository orderRepository,
+        IProductRepository productRepository)
     {
         _orderRepository = orderRepository;
+        _productRepository = productRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -30,19 +33,37 @@ public class CheckoutService : ICheckoutService
             // tạo link payos trong đây
         }
 
-        var cart = await _GetCartByUserId(userId);
+        var cart = await _orderRepository.GetCartByUserId(userId); //tạo hàm mẫu ở order repo
         if (cart == null)
         {
-            return ResponseModel.Success(ResponseConstants.NotFound("giỏ hàng"), null);
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("giỏ hàng"));
         }
 
-        List<CartDetail> cartItems = await _GetCartDetails(cart.CartId);
+        List<CartDetail> cartItems = await _orderRepository.GetCartDetails(cart.Id); //tạo hàm mẫu ở order repo
         if (!cartItems.Any())
         {
             return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", false), null);
         }
-        
+
         //check quantity coi còn hàng không
+        List<CartDetail> unavailableItems = new List<CartDetail>();
+        foreach (var c in cartItems)
+        {
+            if (c.Quantity > c.Product.Quantity)
+            {
+                unavailableItems.Add(c);
+            }
+        }
+
+        if (unavailableItems.Any())
+        {
+            var resp = unavailableItems.Select(x => new CheckoutResponseModel
+            {
+                ProductName = x.Product.Name,
+                Quantity = x.Quantity
+            });
+            return ResponseModel.Success(ResponseConstants.OverLimit("số lượng sản phẩm"), resp);
+        }
 
         // thêm vào order
         var orders = new Order
@@ -68,22 +89,28 @@ public class CheckoutService : ICheckoutService
                 OrderId = orders.Id,
                 ProductId = x.ProductId,
                 Quantity = x.Quantity,
-                UnitPrice = x.Product.OriginalPrice,
+                UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
                 ProductName = x.Product.Name,
-                ItemPrice = x.Quantity * x.Product.OriginalPrice //check sale price va original price
+                ItemPrice = x.Quantity *
+                            (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice) //check sale price va original price
             }
         );
         _orderRepository.AddRange(orderDetailsList);
 
         // xóa cart detail
-        _cartRepository.RemoveRange(cartItems);
-        
+        _orderRepository.RemoveRange(cartItems); ////tạo hàm mẫu ở order repo
+
         // cập nhật quantity trong product
+        foreach (var c in cartItems)
+        {
+            c.Product.Quantity -= c.Quantity;
+            _productRepository.Update(c.Product);
+        }
 
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
         {
-            return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), items);
+            return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), cartItems);
         }
 
         return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
@@ -92,10 +119,10 @@ public class CheckoutService : ICheckoutService
     private decimal GetTotalPrice(List<CartDetail> list)
     {
         decimal total = 0;
-        foreach (var a in list)
+        foreach (var x in list)
         {
-            var price = a.Product.OriginalPrice;
-            total += a.Quantity * price;
+            var price = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice;
+            total += x.Quantity * price;
         }
 
         return total;
