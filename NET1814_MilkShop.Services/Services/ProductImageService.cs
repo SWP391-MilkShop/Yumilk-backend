@@ -5,7 +5,6 @@ using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ImageModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
-using Newtonsoft.Json;
 
 namespace NET1814_MilkShop.Services.Services
 {

@@ -16,6 +16,12 @@ namespace NET1814_MilkShop.API.Controllers
             _logger = logger;
             _cartService = serviceProvider.GetRequiredService<ICartService>();
         }
+        /// <summary>
+        /// Search by product name
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpGet]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
         [Route("api/user/{userId}/cart")]
@@ -45,6 +51,20 @@ namespace NET1814_MilkShop.API.Controllers
         {
             _logger.Information($"Update cart of customer {userId} with new product data");
             var response = await _cartService.UpdateCartAsync(userId);
+            return ResponseExtension.Result(response);
+        }
+        /// <summary>
+        /// Hard delete all items in cart
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        [Route("api/user/{userId}/cart")]
+        public async Task<IActionResult> ClearCartAsync(Guid userId)
+        {
+            _logger.Information($"Clear cart of customer {userId}");
+            var response = await _cartService.ClearCartAsync(userId);
             return ResponseExtension.Result(response);
         }
         [HttpPatch]

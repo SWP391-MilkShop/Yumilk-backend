@@ -11,6 +11,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         void Add(CartDetail cartDetail);
         void Update(CartDetail cartDetail);
         void Remove(CartDetail cartDetail);
+        void RemoveRange(IEnumerable<CartDetail> cartDetails);
     }
     public class CartDetailRepository : Repository<CartDetail>, ICartDetailRepository
     {
@@ -24,6 +25,11 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public Task<CartDetail?> GetByCartIdAndProductId(int cartId, Guid productId)
         {
             return _query.FirstOrDefaultAsync(x => x.CartId == cartId && x.ProductId == productId);
+        }
+
+        public void RemoveRange(IEnumerable<CartDetail> cartDetails)
+        {
+            _context.Set<CartDetail>().RemoveRange(cartDetails);
         }
     }
 }

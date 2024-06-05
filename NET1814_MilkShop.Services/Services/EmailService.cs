@@ -71,7 +71,8 @@ namespace NET1814_MilkShop.Services.Services
                         + $"https://localhost:5000/api/authentication/reset-password?token={token}"
                 };
                 SendMail(model);
-            } else if ("Production".Equals(environment))
+            }
+            else if ("Production".Equals(environment))
             {
                 var model = new SendMailModel
                 {
@@ -103,7 +104,7 @@ namespace NET1814_MilkShop.Services.Services
                         + $"https://localhost:5000/api/authentication/verify?token={token}"
                 };
                 SendMail(model);
-            } 
+            }
             else if ("Production".Equals(environment))
             {
                 var model = new SendMailModel
@@ -116,7 +117,7 @@ namespace NET1814_MilkShop.Services.Services
                         $"authentication/verify?token={token}"
                 };
                 SendMail(model);
-            } 
+            }
         }
     }
 }

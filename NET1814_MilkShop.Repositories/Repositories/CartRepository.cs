@@ -40,7 +40,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public Task<Cart?> GetByCustomerIdAsync(Guid customerId, bool includeProduct)
         {
-            if(includeProduct)
+            if (includeProduct)
             {
                 return _query.Include(x => x.CartDetails).ThenInclude(x => x.Product).FirstOrDefaultAsync(x => x.CustomerId == customerId);
             }
