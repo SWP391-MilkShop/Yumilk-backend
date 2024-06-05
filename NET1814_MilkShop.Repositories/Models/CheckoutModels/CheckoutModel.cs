@@ -8,6 +8,7 @@ public class CheckoutModel
 
     [Required]
     public int AddressId { get; set; }
+
     public string? Note { get; set; }
 
     [Required]

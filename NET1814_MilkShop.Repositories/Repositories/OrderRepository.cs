@@ -38,6 +38,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
                 .Include(o => o.OrderDetails)
                 .ThenInclude(o => o.Product)
                 .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
+
         }
     }
 }

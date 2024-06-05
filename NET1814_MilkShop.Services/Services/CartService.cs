@@ -74,7 +74,10 @@ namespace NET1814_MilkShop.Services.Services
             var cart = await _cartRepository.GetByCustomerIdAsync(customerId, false);
             if (cart == null)
             {
-                cart = new Cart { CustomerId = customerId, IsActive = true };
+                cart = new Cart
+                {
+                    CustomerId = customerId,
+                };
                 _cartRepository.Add(cart);
                 var createResult = await _unitOfWork.SaveChangesAsync();
                 if (createResult <= 0)
@@ -164,7 +167,6 @@ namespace NET1814_MilkShop.Services.Services
                 var newCart = new CartModel
                 {
                     CustomerId = customerId,
-                    IsActive = false,
                     TotalPrice = 0,
                     TotalQuantity = 0,
                     CartItems = new List<CartDetailModel>()
@@ -200,8 +202,7 @@ namespace NET1814_MilkShop.Services.Services
             var cartModel = new CartModel
             {
                 Id = cart.Id,
-                CustomerId = cart.CustomerId.Value,
-                IsActive = cart.IsActive,
+                CustomerId = cart.CustomerId,
                 TotalPrice = pagedList.Items.Sum(x => x.Price * x.Quantity),
                 TotalQuantity = pagedList.Items.Sum(x => x.Quantity),
                 CartItems = pagedList

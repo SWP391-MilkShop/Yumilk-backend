@@ -1,7 +1,6 @@
-﻿using System.ComponentModel;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
@@ -14,9 +13,6 @@ public partial class OrderStatus : IAuditableEntity
     public string Name { get; set; } = null!;
 
     public string? Description { get; set; }
-
-    [DefaultValue(false)]
-    public bool IsActive { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
