@@ -2,6 +2,7 @@ using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.CheckoutModels;
+using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 
@@ -15,13 +16,15 @@ public interface ICheckoutService
 public class CheckoutService : ICheckoutService
 {
     private readonly ICartRepository _cartRepository;
+    private readonly ICustomerRepository _customerRepository;
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CheckoutService(IUnitOfWork unitOfWork, IOrderRepository orderRepository,
-        IProductRepository productRepository, ICartRepository cartRepository)
+        IProductRepository productRepository, ICartRepository cartRepository, ICustomerRepository customerRepository)
     {
+        _customerRepository = customerRepository;
         _cartRepository = cartRepository;
         _orderRepository = orderRepository;
         _productRepository = productRepository;
@@ -44,7 +47,7 @@ public class CheckoutService : ICheckoutService
         List<CartDetail> cartItems = await _cartRepository.GetCartDetails(cart.Id);
         if (!cartItems.Any())
         {
-            return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", false), null);
+            return ResponseModel.Success(ResponseConstants.CartIsEmpty, cartItems);
         }
 
         //check quantity coi còn hàng không
@@ -59,12 +62,21 @@ public class CheckoutService : ICheckoutService
 
         if (unavailableItems.Any())
         {
-            var resp = unavailableItems.Select(x => new CheckoutResponseModel
+            var resp = unavailableItems.Select(x => new CheckoutQuantityResponseModel()
             {
                 ProductName = x.Product.Name,
-                Quantity = x.Quantity
+                Quantity = x.Quantity,
+                Message =
+                    $"Số lượng sản phẩm bạn mua ({x.Quantity}) đã vượt quá số lượng sản phẩm còn lại của cửa hàng ({x.Product.Quantity}). Vui lòng kiểm tra lại giỏ hàng của quý khách!"
             });
             return ResponseModel.Success(ResponseConstants.OverLimit("số lượng sản phẩm"), resp);
+        }
+
+        // lấy address theo address id
+        var address = await _customerRepository.GetCustomerAddressById(model.AddressId);
+        if (address == null)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Địa chỉ"));
         }
 
         // thêm vào order
@@ -76,8 +88,9 @@ public class CheckoutService : ICheckoutService
             ShippingFee = model.ShippingFee,
             TotalAmount = GetTotalPrice(cartItems) + model.ShippingFee,
             VoucherId = 1, // de tam 1 voucher
-            Address = model.Address,
-            PhoneNumber = model.PhoneNumber,
+            Address =
+                address.Address + " " + address.WardName + " " + address.DistrictName + " " + address.ProvinceName,
+            PhoneNumber = address.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
             Note = model.Note,
             PaymentMethod = model.PaymentMethod,
             StatusId = 1, //mac dinh la pending
@@ -114,7 +127,19 @@ public class CheckoutService : ICheckoutService
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
         {
-            return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), cartItems);
+            var resp = new CheckoutResponseModel
+            {
+                OrderId = orders.Id,
+                CustomerId = orders.CustomerId,
+                FullName = address.ReceiverName,
+                TotalAmount = orders.TotalAmount,
+                ShippingFee = orders.ShippingFee,
+                Address = orders.Address,
+                PhoneNumber = orders.PhoneNumber,
+                Note = orders.Note,
+                OrderDetail = ToOrderDetailModel(cartItems),
+            };
+            return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
         return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
@@ -130,5 +155,18 @@ public class CheckoutService : ICheckoutService
         }
 
         return total;
+    }
+
+    private IEnumerable<OrderDetailModel> ToOrderDetailModel(List<CartDetail> list)
+    {
+        var res = list.Select(x => new OrderDetailModel
+        {
+            ProductId = x.ProductId,
+            ProductName = x.Product.Name,
+            Quantity = x.Quantity,
+            UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
+            ItemPrice = x.Quantity * (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice)
+        });
+        return res;
     }
 }
