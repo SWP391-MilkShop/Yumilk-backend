@@ -9,19 +9,23 @@ namespace NET1814_MilkShop.Repositories.Repositories
         IQueryable<Order> GetOrdersQuery();
         void Add(Order order);
         void AddRange(IEnumerable<OrderDetail> list);
-       
+        void RemoveRange(IEnumerable<CartDetail> list);
+        Task<Cart?> GetCartByUserId(Guid userId);
+        Task<List<CartDetail>> GetCartDetails(int cartId);
     }
 
     public class OrderRepository : Repository<Order>, IOrderRepository
     {
         public OrderRepository(AppDbContext context)
-            : base(context) { }
+            : base(context)
+        {
+        }
 
         public IQueryable<Order> GetOrdersQuery()
         {
             //return _context.Orders.Include(o => o.Status).Include(o => o.Customer).AsNoTracking();
             return _query.Include(o => o.Status)
-                         .Include(o => o.Customer);
+                .Include(o => o.Customer);
         }
 
         public void AddRange(IEnumerable<OrderDetail> list)
@@ -29,9 +33,19 @@ namespace NET1814_MilkShop.Repositories.Repositories
             _context.OrderDetails.AddRange(list);
         }
 
-        public void Remove(OrderDetail orderDetail)
+        public void RemoveRange(IEnumerable<CartDetail> list)
         {
-            _context.OrderDetails.RemoveRange();
+            _context.CartDetails.RemoveRange(list);
+        }
+
+        public async Task<Cart?> GetCartByUserId(Guid userId)
+        {
+            return await _context.Carts.FirstOrDefaultAsync(c => c.CustomerId == userId);
+        }
+
+        public async Task<List<CartDetail>> GetCartDetails(int cartId)
+        {
+            return await _context.CartDetails.Include(x => x.Product).Where(x => x.CartId == cartId).ToListAsync();
         }
     }
 }
