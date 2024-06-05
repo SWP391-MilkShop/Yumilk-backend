@@ -50,14 +50,14 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             return await _context.CartDetails.Include(x => x.Product).Where(x => x.CartId == cartId).ToListAsync();
         }
-        
+
         public async Task<Order?> GetByCodeAsync(int orderCode)
         {
             return await _query.Include(o => o.Status)
                                .Include(o => o.Customer)
-                               .ThenInclude(o=>o.User)
+                               .ThenInclude(o => o.User)
                                .Include(o => o.OrderDetails)
-                               .ThenInclude(o=>o.Product)
+                               .ThenInclude(o => o.Product)
                                .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
         }
     }
