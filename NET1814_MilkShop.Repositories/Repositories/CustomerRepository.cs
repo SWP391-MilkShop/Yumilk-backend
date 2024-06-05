@@ -9,7 +9,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /*Task<List<Customer>> GetCustomersAsync();*/
         IQueryable<Customer> GetCustomersQuery();
         Task<Customer?> GetByEmailAsync(string email);
-        Task<Customer?> GetById(Guid id);
+        Task<Customer?> GetByIdAsync(Guid id);
         Task<bool> IsExistAsync(Guid id);
         /*Task<bool> IsCustomerExistAsync(string email, string phoneNumber);*/
         Task<bool> IsExistPhoneNumberAsync(string phoneNumber);
@@ -42,7 +42,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             return query;
         }
 
-        public override async Task<Customer?> GetById(Guid id)
+        public override async Task<Customer?> GetByIdAsync(Guid id)
         {
             //return await _context
             //    .Customers.Include(x => x.User)

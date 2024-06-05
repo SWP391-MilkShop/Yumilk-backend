@@ -79,7 +79,7 @@ public class BrandService : IBrandService
 
     public async Task<ResponseModel> CreateBrandAsync(CreateBrandModel model)
     {
-        // var isExistId = await _brandRepository.GetById(model.Id);
+        // var isExistId = await _brandRepository.GetByIdAsync(model.Id);
         // if (isExistId != null) //không cần check vì brandid tự tăng và không được nhập
         // {
         //     return new ResponseModel
@@ -107,7 +107,7 @@ public class BrandService : IBrandService
 
     public async Task<ResponseModel> UpdateBrandAsync(int id, UpdateBrandModel model)
     {
-        var existingBrand = await _brandRepository.GetById(id);
+        var existingBrand = await _brandRepository.GetByIdAsync(id);
         if (existingBrand == null)
         {
             return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
@@ -136,7 +136,7 @@ public class BrandService : IBrandService
 
     public async Task<ResponseModel> DeleteBrandAsync(int id)
     {
-        var isExist = await _brandRepository.GetById(id);
+        var isExist = await _brandRepository.GetByIdAsync(id);
         if (isExist == null)
         {
             return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);

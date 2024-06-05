@@ -7,6 +7,10 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {
+        /// <summary>
+        /// Save changes to the database in a single transaction
+        /// </summary>
+        /// <returns></returns>
         Task<int> SaveChangesAsync();
     }
 
@@ -21,15 +25,35 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
 
         public async Task<int> SaveChangesAsync()
         {
-            try
+            int result = -1;
+
+            // Wrap the entire save process in a transaction
+            using (var dbContextTransaction = _context.Database.BeginTransaction())
             {
-                UpdateAuditableEntities();
-                return await _context.SaveChangesAsync();
+                try
+                {
+                    UpdateAuditableEntities();
+                    result = await _context.SaveChangesAsync();
+                    dbContextTransaction.Commit();
+                }
+                catch (Exception)
+                {
+                    //Log Exception Handling message                      
+                    result = -1;
+                    dbContextTransaction.Rollback();
+                }
             }
-            catch (Exception ex)
-            {
-                throw new Exception("An error occurred while saving changes", ex);
-            }
+
+            return result;
+            //try
+            //{
+            //    UpdateAuditableEntities();
+            //    return await _context.SaveChangesAsync();
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw new Exception("An error occurred while saving changes", ex);
+            //}
         }
 
         private void UpdateAuditableEntities()

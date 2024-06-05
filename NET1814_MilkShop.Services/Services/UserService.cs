@@ -55,7 +55,7 @@ namespace NET1814_MilkShop.Services.Services
                 Status = "Success"
             };
         }*/
-        
+
         /// <summary>
         /// Admin có thể tạo tài khoản cho nhân viên hoặc admin khác
         /// </summary>
@@ -89,7 +89,7 @@ namespace NET1814_MilkShop.Services.Services
             }
             return ResponseModel.Error(ResponseConstants.Create("tài khoản", false));
         }
-        
+
         public async Task<ResponseModel> GetUsersAsync(UserQueryModel request)
         {
             var query = _userRepository.GetUsersQuery();
@@ -131,7 +131,7 @@ namespace NET1814_MilkShop.Services.Services
                 request.Page,
                 request.PageSize
             );
-            return ResponseModel.Success(ResponseConstants.Get("người dùng", users.TotalCount>0), users);
+            return ResponseModel.Success(ResponseConstants.Get("người dùng", users.TotalCount > 0), users);
         }
 
         private static Expression<Func<User, object>> GetSortProperty(UserQueryModel request)
@@ -160,7 +160,7 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.BadRequest(ResponseConstants.PassSameNewPass);
             }
 
-            var user = await _userRepository.GetById(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
@@ -184,7 +184,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> UpdateUserAsync(Guid id, UpdateUserModel model)
         {
-            var user = await _userRepository.GetById(id);
+            var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);

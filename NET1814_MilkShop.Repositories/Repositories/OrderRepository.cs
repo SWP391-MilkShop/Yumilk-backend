@@ -7,11 +7,14 @@ namespace NET1814_MilkShop.Repositories.Repositories
     public interface IOrderRepository
     {
         IQueryable<Order> GetOrdersQuery();
+
         void Add(Order order);
         void AddRange(IEnumerable<OrderDetail> list);
         void RemoveRange(IEnumerable<CartDetail> list);
         Task<Cart?> GetCartByUserId(Guid userId);
         Task<List<CartDetail>> GetCartDetails(int cartId);
+        Task<Order?> GetByCodeAsync(int orderCode);
+
     }
 
     public class OrderRepository : Repository<Order>, IOrderRepository
@@ -46,6 +49,16 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public async Task<List<CartDetail>> GetCartDetails(int cartId)
         {
             return await _context.CartDetails.Include(x => x.Product).Where(x => x.CartId == cartId).ToListAsync();
+        }
+        
+        public async Task<Order?> GetByCodeAsync(int orderCode)
+        {
+            return await _query.Include(o => o.Status)
+                               .Include(o => o.Customer)
+                               .ThenInclude(o=>o.User)
+                               .Include(o => o.OrderDetails)
+                               .ThenInclude(o=>o.Product)
+                               .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
         }
     }
 }

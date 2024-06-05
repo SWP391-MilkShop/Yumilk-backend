@@ -84,7 +84,7 @@ namespace NET1814_MilkShop.Services.Services
 
             // Convert the response content to a ResponseModel
             var imgurResponse = JsonConvert.DeserializeObject<ImgurResponse>(responseContent);
-            if(imgurResponse == null)
+            if (imgurResponse == null)
             {
                 return ResponseModel.Error("Đã xảy ra lỗi khi đăng tải hình ảnh");
             }

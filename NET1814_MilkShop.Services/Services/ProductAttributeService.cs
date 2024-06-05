@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
@@ -6,6 +5,7 @@ using NET1814_MilkShop.Repositories.Models.ProductAttributeModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
+using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -148,7 +148,7 @@ namespace NET1814_MilkShop.Services.Services
                         ResponseConstants.Exist(
                             "Tên thuộc tính")
                     );
-                    
+
                 }
 
                 isExistId.Name = model.Name;
@@ -216,7 +216,7 @@ namespace NET1814_MilkShop.Services.Services
                         "thuộc tính sản phẩm", true),
                     null
                 );
-                
+
             }
 
             /*return new ResponseModel
@@ -228,7 +228,7 @@ namespace NET1814_MilkShop.Services.Services
                 ResponseConstants.Delete(
                     "thuộc tính sản phẩm", false)
             );
-            
+
         }
 
         private Expression<Func<ProductAttribute, object>> GetSortProperty(ProductAttributeQueryModel queryModel)

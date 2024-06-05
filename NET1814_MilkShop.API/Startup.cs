@@ -213,6 +213,10 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IUnitRepository, UnitRepository>();
             services.AddScoped<IUnitService, UnitService>();
 
+            services.AddScoped<ICartDetailRepository, CartDetailRepository>();
+            services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<ICartService, CartService>();
+
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IOrderService, OrderService>();
 
@@ -236,6 +240,8 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IEmailService, EmailService>();
 
             services.AddScoped<IImageService, ImageService>();
+
+            services.AddScoped<IPaymentService, PaymentService>();
             //Add Extensions
             services.AddScoped<IJwtTokenExtension, JwtTokenExtension>();
             //Add Filters

@@ -10,7 +10,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         IQueryable<User> GetUsersQuery();
         Task<User?> GetByUsernameAsync(string username);
         Task<string?> GetVerificationTokenAsync(string username);
-        Task<User?> GetById(Guid id);
+        Task<User?> GetByIdAsync(Guid id);
         Task<bool> IsExistAsync(Guid id);
         void Add(User user);
         void Update(User user);

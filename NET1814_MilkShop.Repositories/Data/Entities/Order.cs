@@ -9,7 +9,7 @@ public partial class Order : IAuditableEntity
 {
     [Key]
     public Guid Id { get; set; }
-
+    
     public Guid? CustomerId { get; set; }
 
     public decimal TotalPrice { get; set; }
@@ -28,6 +28,9 @@ public partial class Order : IAuditableEntity
 
     [Column("payment_method", TypeName = "varchar(255)")]
     public string? PaymentMethod { get; set; }
+    
+    [Column("order_code", TypeName = "int")]
+    public int? OrderCode { get; set; }
 
     [Column("payment_date", TypeName = "datetime2")]
     public DateTime? PaymentDate { get; set; }

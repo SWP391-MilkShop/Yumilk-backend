@@ -22,6 +22,6 @@ namespace NET1814_MilkShop.Repositories.Models.ProductModels
         [Range(1, int.MaxValue, ErrorMessage = "Status must be greater than 1")]
         public int? StatusId { get; set; }
         public bool IsActive { get; set; } = true;
-        
+
     }
 }

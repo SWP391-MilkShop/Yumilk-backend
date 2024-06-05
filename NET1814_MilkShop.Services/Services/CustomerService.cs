@@ -1,13 +1,13 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
+using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
-using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -133,7 +133,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> GetByIdAsync(Guid id)
         {
-            var customer = await _customerRepository.GetById(id);
+            var customer = await _customerRepository.GetByIdAsync(id);
             if (customer == null)
             {
                 /*return new ResponseModel { Message = "Customer not found", Status = "Error" };*/
@@ -160,7 +160,7 @@ namespace NET1814_MilkShop.Services.Services
             ChangeUserInfoModel changeUserInfoModel
         )
         {
-            var customer = await _customerRepository.GetById(userId);
+            var customer = await _customerRepository.GetByIdAsync(userId);
             if (customer == null)
             {
                 /*return new ResponseModel { Message = "Customer not found", Status = "Error" };*/
