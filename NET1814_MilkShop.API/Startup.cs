@@ -158,8 +158,8 @@ namespace NET1814_MilkShop.API
         {
             if (env.IsDevelopment())
             {
-                
             }
+
             app.UseDeveloperExceptionPage();
 
             var isUserSwagger = _configuration.GetValue<bool>("UseSwagger", false);
@@ -229,6 +229,7 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<IAddressService, AddressService>();
 
+            services.AddScoped<ICheckoutService, CheckoutService>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
