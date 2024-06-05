@@ -14,13 +14,15 @@ public interface ICheckoutService
 
 public class CheckoutService : ICheckoutService
 {
+    private readonly ICartRepository _cartRepository;
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CheckoutService(IUnitOfWork unitOfWork, IOrderRepository orderRepository,
-        IProductRepository productRepository)
+        IProductRepository productRepository, ICartRepository cartRepository)
     {
+        _cartRepository = cartRepository;
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
@@ -33,13 +35,13 @@ public class CheckoutService : ICheckoutService
             // tạo link payos trong đây
         }
 
-        var cart = await _orderRepository.GetCartByUserId(userId); //tạo hàm mẫu ở order repo
+        var cart = await _cartRepository.GetCartByUserId(userId);
         if (cart == null)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("giỏ hàng"));
         }
 
-        List<CartDetail> cartItems = await _orderRepository.GetCartDetails(cart.Id); //tạo hàm mẫu ở order repo
+        List<CartDetail> cartItems = await _cartRepository.GetCartDetails(cart.Id);
         if (!cartItems.Any())
         {
             return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", false), null);
@@ -92,13 +94,15 @@ public class CheckoutService : ICheckoutService
                 UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
                 ProductName = x.Product.Name,
                 ItemPrice = x.Quantity *
-                            (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice) //check sale price va original price
+                            (x.Product.SalePrice == 0
+                                ? x.Product.OriginalPrice
+                                : x.Product.SalePrice) //check sale price va original price
             }
         );
         _orderRepository.AddRange(orderDetailsList);
 
         // xóa cart detail
-        _orderRepository.RemoveRange(cartItems); ////tạo hàm mẫu ở order repo
+        _cartRepository.RemoveRange(cartItems); ////tạo hàm mẫu ở order repo
 
         // cập nhật quantity trong product
         foreach (var c in cartItems)
