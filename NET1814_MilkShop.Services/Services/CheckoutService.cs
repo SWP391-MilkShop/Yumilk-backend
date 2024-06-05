@@ -1,0 +1,130 @@
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.Data.Entities;
+using NET1814_MilkShop.Repositories.Models;
+using NET1814_MilkShop.Repositories.Models.CheckoutModels;
+using NET1814_MilkShop.Repositories.Repositories;
+using NET1814_MilkShop.Repositories.UnitOfWork;
+
+namespace NET1814_MilkShop.Services.Services;
+
+public interface ICheckoutService
+{
+    Task<ResponseModel> Checkout(Guid userId, CheckoutModel model);
+}
+
+public class CheckoutService : ICheckoutService
+{
+    private readonly IOrderRepository _orderRepository;
+    private readonly IProductRepository _productRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public CheckoutService(IUnitOfWork unitOfWork, IOrderRepository orderRepository,
+        IProductRepository productRepository)
+    {
+        _orderRepository = orderRepository;
+        _productRepository = productRepository;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<ResponseModel> Checkout(Guid userId, CheckoutModel model)
+    {
+        if (model.PaymentMethod == "PAYOS")
+        {
+            // tạo link payos trong đây
+        }
+
+        var cart = await _orderRepository.GetCartByUserId(userId); //tạo hàm mẫu ở order repo
+        if (cart == null)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("giỏ hàng"));
+        }
+
+        List<CartDetail> cartItems = await _orderRepository.GetCartDetails(cart.Id); //tạo hàm mẫu ở order repo
+        if (!cartItems.Any())
+        {
+            return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", false), null);
+        }
+
+        //check quantity coi còn hàng không
+        List<CartDetail> unavailableItems = new List<CartDetail>();
+        foreach (var c in cartItems)
+        {
+            if (c.Quantity > c.Product.Quantity)
+            {
+                unavailableItems.Add(c);
+            }
+        }
+
+        if (unavailableItems.Any())
+        {
+            var resp = unavailableItems.Select(x => new CheckoutResponseModel
+            {
+                ProductName = x.Product.Name,
+                Quantity = x.Quantity
+            });
+            return ResponseModel.Success(ResponseConstants.OverLimit("số lượng sản phẩm"), resp);
+        }
+
+        // thêm vào order
+        var orders = new Order
+        {
+            Id = Guid.NewGuid(),
+            CustomerId = userId,
+            TotalPrice = GetTotalPrice(cartItems),
+            ShippingFee = model.ShippingFee,
+            TotalAmount = GetTotalPrice(cartItems) + model.ShippingFee,
+            VoucherId = 1, // de tam 1 voucher
+            Address = model.Address,
+            PhoneNumber = model.PhoneNumber,
+            Note = model.Note,
+            PaymentMethod = model.PaymentMethod,
+            StatusId = 1, //mac dinh la pending
+        };
+        _orderRepository.Add(orders);
+
+        //thêm vào order detail
+        var orderDetailsList = cartItems.Select(x =>
+            new OrderDetail
+            {
+                OrderId = orders.Id,
+                ProductId = x.ProductId,
+                Quantity = x.Quantity,
+                UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
+                ProductName = x.Product.Name,
+                ItemPrice = x.Quantity *
+                            (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice) //check sale price va original price
+            }
+        );
+        _orderRepository.AddRange(orderDetailsList);
+
+        // xóa cart detail
+        _orderRepository.RemoveRange(cartItems); ////tạo hàm mẫu ở order repo
+
+        // cập nhật quantity trong product
+        foreach (var c in cartItems)
+        {
+            c.Product.Quantity -= c.Quantity;
+            _productRepository.Update(c.Product);
+        }
+
+        var res = await _unitOfWork.SaveChangesAsync();
+        if (res > 0)
+        {
+            return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), cartItems);
+        }
+
+        return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
+    }
+
+    private decimal GetTotalPrice(List<CartDetail> list)
+    {
+        decimal total = 0;
+        foreach (var x in list)
+        {
+            var price = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice;
+            total += x.Quantity * price;
+        }
+
+        return total;
+    }
+}
