@@ -11,13 +11,13 @@ namespace NET1814_MilkShop.Services.Services
 {
     public interface IAuthenticationService
     {
-        Task<ResponseModel> SignUpAsync(SignUpModel model, string environment);
+        Task<ResponseModel> SignUpAsync(SignUpModel model);
         Task<ResponseModel> LoginAsync(RequestLoginModel model);
         Task<ResponseModel> VerifyAccountAsync(string token);
-        Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request, string environment);
+        Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request);
         Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
         Task<ResponseModel> RefreshTokenAsync(string token);
-        Task<ResponseModel> ActivateAccountAsync(string email, string environment);
+        Task<ResponseModel> ActivateAccountAsync(string email);
         Task<ResponseModel> DashBoardLoginAsync(RequestLoginModel model);
     }
 
@@ -52,7 +52,7 @@ namespace NET1814_MilkShop.Services.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public async Task<ResponseModel> SignUpAsync(SignUpModel model, string environment)
+        public async Task<ResponseModel> SignUpAsync(SignUpModel model)
         {
             var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
             if (existingUser != null)
@@ -108,7 +108,7 @@ namespace NET1814_MilkShop.Services.Services
             var jwtVeriryToken = _jwtTokenExtension.CreateJwtToken(user, TokenType.Authentication);
             if (result > 0)
             {
-                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken, environment);
+                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken,model.FirstName);
                 return ResponseModel.Success(ResponseConstants.Register(true), null);
             }
             return ResponseModel.Error(ResponseConstants.Register(false));
@@ -194,8 +194,7 @@ namespace NET1814_MilkShop.Services.Services
         }
 
         public async Task<ResponseModel> ForgotPasswordAsync(
-            ForgotPasswordModel request,
-            string environment
+            ForgotPasswordModel request
         )
         {
             var customer = await _customerRepository.GetByEmailAsync(request.Email);
@@ -211,7 +210,7 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Reset
                     );
-                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken, environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken,customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
                 }
             }
@@ -273,7 +272,7 @@ namespace NET1814_MilkShop.Services.Services
             return ResponseModel.Success(ResponseConstants.Create("Access Token", true), newToken);
         }
 
-        public async Task<ResponseModel> ActivateAccountAsync(string email, string environment)
+        public async Task<ResponseModel> ActivateAccountAsync(string email)
         {
             var customer = await _customerRepository.GetByEmailAsync(email);
             if (customer == null)
@@ -292,7 +291,7 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Authentication
                     );
-                    _emailService.SendVerificationEmail(customer.Email, verifyToken, environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendVerificationEmail(customer.Email, verifyToken,customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ActivateAccountLink, null);
                 }
             }
