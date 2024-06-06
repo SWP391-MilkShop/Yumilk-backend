@@ -123,8 +123,8 @@ public static class MailBody
       border-bottom: 10px solid #3869D4;
       border-left: 18px solid #3869D4;
       display: inline-block;
-      color: #FFF;
-      text-decoration: none;
+      color: #FFF !important;
+      text-decoration: none !important;
       border-radius: 3px;
       box-shadow: 0 2px 3px rgba(0, 0, 0, 0.16);
       -webkit-text-size-adjust: none;
@@ -426,7 +426,7 @@ public static class MailBody
         background-color: #222 !important;
       }
       .email-masthead_name {
-        text-shadow: none !important;
+        text-shadow: none ;
       }
     }
     
@@ -444,16 +444,16 @@ public static class MailBody
   <![endif]-->
   </head>
   <body>
-    <span class=""preheader"">Sử dụng liên kết này để đặt lại mật khẩu của bạn. Liên kết chỉ có hiệu lực trong 24 giờ.</span>
+    <span class=""preheader"">Sử dụng liên kết này để đặt lại mật khẩu của bạn. Liên kết chỉ có hiệu lực trong 1 giờ.</span>
     <table class=""email-wrapper"" width=""100%"" cellpadding=""0"" cellspacing=""0"" role=""presentation"">
       <tr>
         <td align=""center"">
           <table class=""email-content"" width=""100%"" cellpadding=""0"" cellspacing=""0"" role=""presentation"">
             <tr>
               <td class=""email-masthead"">
-                <a href=""#"" class=""f-fallback email-masthead_name"">
-                [Product Name]
-              </a>
+                              <a href=""https://milkshop.vercel.app/"" class=""f-fallback email-masthead_name"">
+                    <img src=""https://i.imgur.com/gIXll7M.png"" alt=""Logo"" class=""email-masthead_logo"" style=""width: 200px""/>
+                </a>
               </td>
             </tr>
             <!-- Email Body -->
@@ -464,8 +464,8 @@ public static class MailBody
                   <tr>
                     <td class=""content-cell"">
                       <div class=""f-fallback"">
-                        <h1>Hi {{name}},</h1>
-                        <p>Bạn vừa yêu cầu đặt lại mật khẩu cho tài khoản [Product Name] của mình. Sử dụng nút dưới đây để đặt lại mật khẩu. <strong>Yêu cầu đặt lại mật khẩu này chỉ có hiệu lực trong 24 giờ tới.</strong></p>
+                        <h1>Xin chào {{name}},</h1>
+                        <p>Bạn vừa yêu cầu đặt lại mật khẩu cho tài khoản [Product Name] của mình. Sử dụng nút dưới đây để đặt lại mật khẩu. <strong>Yêu cầu đặt lại mật khẩu này chỉ có hiệu lực trong 1 giờ tới.</strong></p>
                         <!-- Action -->
                         <table class=""body-action"" align=""center"" width=""100%"" cellpadding=""0"" cellspacing=""0"" role=""presentation"">
                           <tr>
@@ -483,8 +483,8 @@ public static class MailBody
                           </tr>
                         </table>
                         <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc <a href=""{{support_url}}"">liên hệ hỗ trợ</a> nếu bạn có thắc mắc.</p>
-<p>Trân trọng,
-  <br>Đội ngũ [Product Name]</p>
+<p>Thân chào,
+  <br>Đội ngũ [Team]</p>
 
                         <!-- Sub copy -->
                         <table class=""body-sub"" role=""presentation"">
@@ -525,6 +525,9 @@ public static class MailBody
         body = body.Replace("{{name}}", customerName);
         body = body.Replace("{{action_url}}", $"https://milkshop.azurewebsites.net/api/authentication/reset-password?token={token}");
         body = body.Replace("{{support_url}}", "https://milkshop.azurewebsites.net/api");
+        body = body.Replace("[Product Name]", "Yumilk shop");
+        body = body.Replace("[Company Name, LLC]","Yumilk");
+        body = body.Replace("[Team]", "Yumilk Team");
       return body;
     }
      public static string ActivateAccount(string customerName,string token)
@@ -648,8 +651,8 @@ public static class MailBody
       border-bottom: 10px solid #3869D4;
       border-left: 18px solid #3869D4;
       display: inline-block;
-      color: #FFF;
-      text-decoration: none;
+      color: #FFF !important;
+      text-decoration: none !important;
       border-radius: 3px;
       box-shadow: 0 2px 3px rgba(0, 0, 0, 0.16);
       -webkit-text-size-adjust: none;
@@ -662,10 +665,6 @@ public static class MailBody
       border-right: 18px solid #22BC66;
       border-bottom: 10px solid #22BC66;
       border-left: 18px solid #22BC66;
-    }
-    .button a{
-        color: #FFF !important;
-        text-decoration: none;
     }
    
     .button--red {
@@ -973,16 +972,16 @@ public static class MailBody
   <![endif]-->
   </head>
   <body>
-    <span class=""preheader"">Sử dụng liên kết này để đặt lại mật khẩu của bạn. Liên kết chỉ có hiệu lực trong 24 giờ.</span>
+    <span class=""preheader"">Sử dụng liên kết này để đặt lại mật khẩu của bạn. Liên kết chỉ có hiệu lực trong 1 giờ.</span>
     <table class=""email-wrapper"" width=""100%"" cellpadding=""0"" cellspacing=""0"" role=""presentation"">
       <tr>
         <td align=""center"">
           <table class=""email-content"" width=""100%"" cellpadding=""0"" cellspacing=""0"" role=""presentation"">
             <tr>
               <td class=""email-masthead"">
-                <a href=""https://example.com"" class=""f-fallback email-masthead_name"">
-                [Product Name]
-              </a>
+                <a href=""https://milkshop.vercel.app/"" class=""f-fallback email-masthead_name"">
+                    <img src=""https://i.imgur.com/gIXll7M.png"" alt=""Logo"" class=""email-masthead_logo"" style=""width: 200px""/>
+                </a>
               </td>
             </tr>
             <!-- Email Body -->
@@ -993,8 +992,8 @@ public static class MailBody
                   <tr>
                     <td class=""content-cell"">
                       <div class=""f-fallback"">
-                        <h1>Hi {{name}},</h1>
-                        <p>Bạn vừa yêu cầu đặt lại mật khẩu cho tài khoản [Product Name] của mình. Sử dụng nút dưới đây để đặt lại mật khẩu. <strong>Yêu cầu đặt lại mật khẩu này chỉ có hiệu lực trong 24 giờ tới.</strong></p>
+                        <h1>Xin chào {{name}},</h1>
+                        <p>Bạn vừa yêu cầu kích hoạt cho tài khoản [Product Name] của mình. Sử dụng nút dưới đây để kích hoạt. <strong>Yêu cầu kích hoạt này chỉ có hiệu lực trong 1 giờ tới.</strong></p>
                         <!-- Action -->
                         <table class=""body-action"" align=""center"" width=""100%"" cellpadding=""0"" cellspacing=""0"" role=""presentation"">
                           <tr>
@@ -1011,9 +1010,9 @@ public static class MailBody
                             </td>
                           </tr>
                         </table>
-                        <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc <a href=""{{support_url}}"">liên hệ hỗ trợ</a> nếu bạn có thắc mắc.</p>
-<p>Trân trọng,
-  <br>Đội ngũ [Product Name]</p>
+                        <p>Nếu có vấn đề xảy ra trong quá trình kích hoạt vui lòng <a href=""{{support_url}}"">liên hệ hỗ trợ</a> nếu bạn có thắc mắc.</p>
+<p>Thân chào,
+  <br>Đội ngũ [Team]</p>
 
                         <!-- Sub copy -->
                         <table class=""body-sub"" role=""presentation"">
@@ -1054,7 +1053,9 @@ public static class MailBody
         body = body.Replace("{{name}}", customerName);
         body = body.Replace("{{action_url}}", $"https://milkshop.azurewebsites.net/api/authentication/verify?token={token}");
         body = body.Replace("{{support_url}}", "https://milkshop.azurewebsites.net/api");
-        body = body.Replace("[Product Name]", "YuMilk Shop");
+        body = body.Replace("[Product Name]", "Yumilk shop");
+        body = body.Replace("[Team]", "Yumilk Team");
+        body = body.Replace("[Company Name, LLC]","Yumilk");
       return body;
     }
 }
