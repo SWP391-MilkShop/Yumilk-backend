@@ -1,10 +1,10 @@
-﻿using NET1814_MilkShop.Repositories.Data.Entities;
+﻿using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Services.CoreHelpers;
-using System.Linq.Expressions;
-using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -45,9 +45,36 @@ namespace NET1814_MilkShop.Services.Services
                 query = query.Where(o => o.TotalAmount > model.TotalAmount);
             }
 
-            if (model.ToOrderDate is not null)
+            if (model.FromOrderDate == null && model.ToOrderDate != null)
             {
-                query = query.Where(o => o.CreatedAt <= model.ToOrderDate);
+                return ResponseModel.BadRequest("Phải có ngày bắt đầu trong trường hợp có ngày kết thúc");
+            }
+
+            if (model.FromOrderDate != null && model.ToOrderDate == null)
+            {
+                if (model.FromOrderDate.Value.Date > DateTime.Now.Date)
+                {
+                    return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+                }
+
+                query = query.Where(o =>
+                    o.CreatedAt.Date <= DateTime.Now.Date && o.CreatedAt.Date >= model.FromOrderDate.Value.Date);
+            }
+
+            if (model.FromOrderDate != null && model.ToOrderDate != null)
+            {
+                if (model.FromOrderDate.Value.Date > model.ToOrderDate.Value.Date)
+                {
+                    return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+                }
+
+                query = query.Where(o =>
+                    o.CreatedAt.Date <= model.ToOrderDate.Value.Date && o.CreatedAt >= model.FromOrderDate.Value.Date);
+            }
+
+            if (!string.IsNullOrEmpty(model.PaymentMethod))
+            {
+                query = query.Where(o => o.PaymentMethod == model.PaymentMethod);
             }
 
             if (!string.IsNullOrEmpty(model.OrderStatus))
@@ -78,6 +105,7 @@ namespace NET1814_MilkShop.Services.Services
                 TotalAmount = x.TotalAmount,
                 PhoneNumber = x.PhoneNumber,
                 Address = x.Address,
+                PaymentMethod = x.PaymentMethod,
                 OrderStatus = x.Status!.Name,
                 CreatedDate = x.CreatedAt,
                 PaymentDate = x.PaymentDate,
@@ -96,17 +124,19 @@ namespace NET1814_MilkShop.Services.Services
                 Message = orders.TotalCount > 0 ? "Get orders successfully" : "No brands found",
                 Status = "Success"
             };*/
-            #endregion
-            return ResponseModel.Success(ResponseConstants.Get("đơn hàng", orders.TotalCount > 0), orders);
-            
 
-            
+            #endregion
+
+            return ResponseModel.Success(
+                ResponseConstants.Get("đơn hàng", orders.TotalCount > 0),
+                orders
+            );
         }
 
         private static Expression<Func<Order, object>> GetSortProperty(
             OrderQueryModel queryModel
         ) =>
-            queryModel.SortColumn?.ToLower() switch
+            queryModel.SortColumn?.ToLower().Replace(" ", "") switch
             {
                 "totalamount" => order => order.TotalAmount,
                 "createdat" => order => order.CreatedAt,

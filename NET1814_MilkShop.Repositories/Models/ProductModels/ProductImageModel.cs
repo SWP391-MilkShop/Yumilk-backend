@@ -7,6 +7,5 @@
         public Guid ProductId { get; set; }
 
         public string ImageUrl { get; set; } = null!;
-
     }
 }

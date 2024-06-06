@@ -1,6 +1,6 @@
-﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
@@ -28,6 +28,9 @@ public partial class Order : IAuditableEntity
 
     [Column("payment_method", TypeName = "varchar(255)")]
     public string? PaymentMethod { get; set; }
+
+    [Column("order_code", TypeName = "int")]
+    public int? OrderCode { get; set; }
 
     [Column("payment_date", TypeName = "datetime2")]
     public DateTime? PaymentDate { get; set; }

@@ -15,25 +15,22 @@ namespace NET1814_MilkShop.API.Controllers
     {
         private readonly ILogger _logger;
         private readonly IAuthenticationService _authenticationService;
-        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AuthenticationController(ILogger logger,
+        public AuthenticationController(
+            ILogger logger,
             IWebHostEnvironment webHostEnvironment,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider
+        )
         {
             _logger = logger;
             _authenticationService = serviceProvider.GetRequiredService<IAuthenticationService>();
-            _webHostEnvironment = webHostEnvironment;
         }
-
-
 
         [HttpPost("sign-up")]
         public async Task<IActionResult> SignUp([FromBody] SignUpModel model)
         {
             _logger.Information("Sign up");
-            var environment = _webHostEnvironment.EnvironmentName;
-            var response = await _authenticationService.SignUpAsync(model,environment);
+            var response = await _authenticationService.SignUpAsync(model);
             return ResponseExtension.Result(response);
         }
 
@@ -75,8 +72,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel request)
         {
             _logger.Information("Forgot Password");
-            var environment = _webHostEnvironment.EnvironmentName;
-            var response = await _authenticationService.ForgotPasswordAsync(request, environment);
+            var response = await _authenticationService.ForgotPasswordAsync(request);
             return ResponseExtension.Result(response);
         }
 
@@ -100,8 +96,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> ActivateAccount([FromBody] string email)
         {
             _logger.Information("Activate Account");
-            var environment = _webHostEnvironment.EnvironmentName;
-            var response = await _authenticationService.ActivateAccountAsync(email,environment);
+            var response = await _authenticationService.ActivateAccountAsync(email);
             return ResponseExtension.Result(response);
         }
     }

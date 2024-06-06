@@ -13,27 +13,30 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <param name="id"></param>
         /// <returns></returns>
         Task<List<ProductImageModel>> GetByProductIdAsync(Guid id);
-        Task<ProductImage?> GetById(int id);
+        Task<ProductImage?> GetByIdAsync(int id);
         void Add(ProductImage productImage);
         void Update(ProductImage productImage);
+
         //void Delete(ProductImage productImage);
         void Remove(ProductImage productImage);
-
     }
+
     public class ProductImageRepository : Repository<ProductImage>, IProductImageRepository
     {
-        public ProductImageRepository(AppDbContext context) : base(context)
-        {
-        }
+        public ProductImageRepository(AppDbContext context)
+            : base(context) { }
 
         public async Task<List<ProductImageModel>> GetByProductIdAsync(Guid id)
         {
-            return await _query.Where(x => x.ProductId == id).Select(x => new ProductImageModel
-            {
-                Id = x.Id,
-                ProductId = id,
-                ImageUrl = x.ImageUrl,
-            }).ToListAsync();
+            return await _query
+                .Where(x => x.ProductId == id)
+                .Select(x => new ProductImageModel
+                {
+                    Id = x.Id,
+                    ProductId = id,
+                    ImageUrl = x.ImageUrl,
+                })
+                .ToListAsync();
         }
     }
 }

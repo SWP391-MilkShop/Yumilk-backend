@@ -8,4 +8,8 @@ public class UserQueryModel : QueryModel
     public bool? IsActive { get; set; }
 
     public bool? IsBanned { get; set; }
+    /// <summary>
+    /// Sort by id, username, first name, last name, role, is active, created at (default is id)
+    /// </summary>
+    public new string? SortColumn { get; set; }
 }

@@ -77,7 +77,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid?>("CustomerId")
+                    b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("customer_id");
 
@@ -85,17 +85,14 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("deleted_at");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
-
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("modified_at");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId")
+                        .IsUnique();
 
                     b.ToTable("carts", (string)null);
                 });
@@ -117,10 +114,6 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("deleted_at");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2")
@@ -334,6 +327,10 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("OrderCode")
+                        .HasColumnType("int")
+                        .HasColumnName("order_code");
+
                     b.Property<DateTime?>("PaymentDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("payment_date");
@@ -348,7 +345,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnName("phone_number");
 
                     b.Property<decimal>("ShippingFee")
-                        .HasColumnType("decimal(18,2)")
+                        .HasColumnType("decimal(18,3)")
                         .HasColumnName("shipping_fee");
 
                     b.Property<int>("StatusId")
@@ -356,11 +353,11 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnName("status_id");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)")
+                        .HasColumnType("decimal(18,3)")
                         .HasColumnName("total_amount");
 
                     b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)")
+                        .HasColumnType("decimal(18,3)")
                         .HasColumnName("total_price");
 
                     b.Property<int>("VoucherId")
@@ -396,12 +393,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("deleted_at");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
-
                     b.Property<decimal>("ItemPrice")
-                        .HasColumnType("decimal(18,2)")
+                        .HasColumnType("decimal(18,3)")
                         .HasColumnName("item_price");
 
                     b.Property<DateTime?>("ModifiedAt")
@@ -417,7 +410,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)")
+                        .HasColumnType("decimal(18,3)")
                         .HasColumnName("unit_price");
 
                     b.HasKey("OrderId", "ProductId");
@@ -445,10 +438,6 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(2000)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2")
@@ -504,14 +493,18 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .UseCollation("Latin1_General_CI_AI");
 
                     b.Property<decimal>("OriginalPrice")
-                        .HasColumnType("decimal(18,2)")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,3)")
+                        .HasDefaultValue(0m)
                         .HasColumnName("original_price");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<decimal>("SalePrice")
-                        .HasColumnType("decimal(18,2)")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,3)")
+                        .HasDefaultValue(0m)
                         .HasColumnName("sale_price");
 
                     b.Property<int>("StatusId")
@@ -738,10 +731,6 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
-
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("modified_at");
@@ -913,7 +902,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("nvarchar(2000)");
 
                     b.Property<decimal>("DiscountPercent")
-                        .HasColumnType("decimal(18,2)")
+                        .HasColumnType("decimal(18,3)")
                         .HasColumnName("discount_percent");
 
                     b.Property<DateTime?>("EndDate")
@@ -925,11 +914,11 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnName("is_active");
 
                     b.Property<decimal>("MaxDiscountAmount")
-                        .HasColumnType("decimal(18,2)")
+                        .HasColumnType("decimal(18,3)")
                         .HasColumnName("max_discount_amount");
 
                     b.Property<decimal>("MinOrderValue")
-                        .HasColumnType("decimal(18,2)")
+                        .HasColumnType("decimal(18,3)")
                         .HasColumnName("min_order_value");
 
                     b.Property<DateTime?>("ModifiedAt")
@@ -949,7 +938,9 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 {
                     b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Customer", "Customer")
                         .WithMany("Carts")
-                        .HasForeignKey("CustomerId");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Customer");
                 });

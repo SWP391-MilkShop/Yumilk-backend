@@ -7,7 +7,7 @@
         public decimal TotalAmount { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
-
+        public string? PaymentMethod { get; set; }
         public string? OrderStatus { get; set; }
 
         public DateTime? CreatedDate { get; set; }

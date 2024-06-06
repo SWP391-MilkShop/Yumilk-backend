@@ -1,12 +1,12 @@
+using System.Linq.Expressions;
 using Microsoft.IdentityModel.Tokens;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UnitModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
-using System.Linq.Expressions;
-using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 
 namespace NET1814_MilkShop.Services.Services;
 
@@ -39,8 +39,7 @@ public class UnitService : IUnitService
         if (!string.IsNullOrEmpty(request.SearchTerm))
         {
             query = query.Where(u =>
-                u.Name.Contains(request.SearchTerm)
-                || u.Description!.Contains(request.SearchTerm)
+                u.Name.Contains(request.SearchTerm) || u.Description!.Contains(request.SearchTerm)
             );
         }
 
@@ -68,11 +67,7 @@ public class UnitService : IUnitService
 
         #region page
 
-        var units = await PagedList<UnitModel>.CreateAsync(
-            result,
-            request.Page,
-            request.PageSize
-        );
+        var units = await PagedList<UnitModel>.CreateAsync(result, request.Page, request.PageSize);
 
         #endregion
         return ResponseModel.Success(ResponseConstants.Get("đơn vị", units.TotalCount > 0), units);
@@ -169,7 +164,7 @@ public class UnitService : IUnitService
     /// <returns></returns>
     private static Expression<Func<Unit, object>> GetSortProperty(UnitQueryModel request)
     {
-        return request.SortColumn?.ToLower() switch
+        return request.SortColumn?.ToLower().Replace(" ", "") switch
         {
             "name" => unit => unit.Name,
             "description" => unit => unit.Description!,

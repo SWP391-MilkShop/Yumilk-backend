@@ -10,15 +10,14 @@ namespace NET1814_MilkShop.Repositories.Repositories
         void Add(Brand b);
         void Update(Brand b);
         void Delete(Brand b);
-        Task<Brand?> GetById(int id);
+        Task<Brand?> GetByIdAsync(int id);
         Task<Brand?> GetBrandByName(string name);
     }
 
     public class BrandRepository : Repository<Brand>, IBrandRepository
     {
-        public BrandRepository(AppDbContext context) : base(context)
-        {
-        }
+        public BrandRepository(AppDbContext context)
+            : base(context) { }
 
         public IQueryable<Brand> GetBrandsQuery()
         {

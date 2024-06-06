@@ -1,5 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.CoreHelpers.Validation;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using NET1814_MilkShop.Repositories.CoreHelpers.Validation;
 
 namespace NET1814_MilkShop.Repositories.Models.UserModels
 {

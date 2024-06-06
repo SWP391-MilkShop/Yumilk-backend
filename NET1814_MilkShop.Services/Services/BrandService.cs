@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
@@ -5,7 +6,6 @@ using NET1814_MilkShop.Repositories.Models.BrandModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
-using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services;
 
@@ -42,8 +42,9 @@ public class BrandService : IBrandService
         if (!string.IsNullOrEmpty(queryModel.SearchTerm))
         {
             query = query.Where(x =>
-                x.Name.Contains(queryModel.SearchTerm) ||
-                x.Description.Contains(queryModel.SearchTerm));
+                x.Name.Contains(queryModel.SearchTerm)
+                || x.Description.Contains(queryModel.SearchTerm)
+            );
         }
 
         #endregion
@@ -70,16 +71,23 @@ public class BrandService : IBrandService
 
         #region paging
 
-        var brands = await PagedList<Brand>.CreateAsync(query, queryModel.Page, queryModel.PageSize);
+        var brands = await PagedList<Brand>.CreateAsync(
+            query,
+            queryModel.Page,
+            queryModel.PageSize
+        );
 
         #endregion
 
-        return ResponseModel.Success(ResponseConstants.Get("thương hiệu", brands.TotalCount > 0), brands);
+        return ResponseModel.Success(
+            ResponseConstants.Get("thương hiệu", brands.TotalCount > 0),
+            brands
+        );
     }
 
     public async Task<ResponseModel> CreateBrandAsync(CreateBrandModel model)
     {
-        // var isExistId = await _brandRepository.GetById(model.Id);
+        // var isExistId = await _brandRepository.GetByIdAsync(model.Id);
         // if (isExistId != null) //không cần check vì brandid tự tăng và không được nhập
         // {
         //     return new ResponseModel
@@ -101,13 +109,14 @@ public class BrandService : IBrandService
         };
         _brandRepository.Add(entity);
         var result = await _unitOfWork.SaveChangesAsync();
-        if (result > 0) return ResponseModel.Success(ResponseConstants.Create("thương hiệu", true), null);
+        if (result > 0)
+            return ResponseModel.Success(ResponseConstants.Create("thương hiệu", true), null);
         return ResponseModel.Error(ResponseConstants.Create("thương hiệu", false));
     }
 
     public async Task<ResponseModel> UpdateBrandAsync(int id, UpdateBrandModel model)
     {
-        var existingBrand = await _brandRepository.GetById(id);
+        var existingBrand = await _brandRepository.GetByIdAsync(id);
         if (existingBrand == null)
         {
             return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
@@ -123,7 +132,9 @@ public class BrandService : IBrandService
             existingBrand.Name = model.Name;
         }
 
-        existingBrand.Description = string.IsNullOrEmpty(model.Description) ? existingBrand.Description : model.Description;
+        existingBrand.Description = string.IsNullOrEmpty(model.Description)
+            ? existingBrand.Description
+            : model.Description;
         existingBrand.IsActive = model.IsActive;
         _brandRepository.Update(existingBrand);
         var result = await _unitOfWork.SaveChangesAsync();
@@ -136,7 +147,7 @@ public class BrandService : IBrandService
 
     public async Task<ResponseModel> DeleteBrandAsync(int id)
     {
-        var isExist = await _brandRepository.GetById(id);
+        var isExist = await _brandRepository.GetByIdAsync(id);
         if (isExist == null)
         {
             return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
@@ -151,10 +162,9 @@ public class BrandService : IBrandService
         return ResponseModel.Error(ResponseConstants.Delete("thương hiệu", false));
     }
 
-
     private static Expression<Func<Brand, object>> GetSortBrandProperty(
         BrandQueryModel queryModel
-    ) => queryModel.SortColumn?.ToLower() switch
+    ) => queryModel.SortColumn?.ToLower().Replace(" ", "") switch
     {
         "name" => product => product.Name,
         _ => product => product.Id

@@ -13,6 +13,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
     {
         public AuthenticationRepository(AppDbContext context)
             : base(context) { }
+
         /// <summary>
         /// Get by username and password for login
         /// </summary>

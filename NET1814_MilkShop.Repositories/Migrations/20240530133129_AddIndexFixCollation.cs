@@ -18,7 +18,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 collation: "Latin1_General_CI_AI",
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldCollation: "Latin1_General_CS_AI");
+                oldCollation: "Latin1_General_CS_AI"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
@@ -29,7 +30,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)",
                 oldNullable: true,
-                oldCollation: "Latin1_General_CS_AI");
+                oldCollation: "Latin1_General_CS_AI"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -39,38 +41,28 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 collation: "Latin1_General_CI_AI",
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldCollation: "Latin1_General_CS_AI");
+                oldCollation: "Latin1_General_CS_AI"
+            );
 
-            migrationBuilder.CreateIndex(
-                name: "IX_units_Name",
-                table: "units",
-                column: "Name");
+            migrationBuilder.CreateIndex(name: "IX_units_Name", table: "units", column: "Name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_categories_Name",
                 table: "categories",
-                column: "Name");
+                column: "Name"
+            );
 
-            migrationBuilder.CreateIndex(
-                name: "IX_brands_Name",
-                table: "brands",
-                column: "Name");
+            migrationBuilder.CreateIndex(name: "IX_brands_Name", table: "brands", column: "Name");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_units_Name",
-                table: "units");
+            migrationBuilder.DropIndex(name: "IX_units_Name", table: "units");
 
-            migrationBuilder.DropIndex(
-                name: "IX_categories_Name",
-                table: "categories");
+            migrationBuilder.DropIndex(name: "IX_categories_Name", table: "categories");
 
-            migrationBuilder.DropIndex(
-                name: "IX_brands_Name",
-                table: "brands");
+            migrationBuilder.DropIndex(name: "IX_brands_Name", table: "brands");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -80,7 +72,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 collation: "Latin1_General_CS_AI",
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldCollation: "Latin1_General_CI_AI");
+                oldCollation: "Latin1_General_CI_AI"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
@@ -91,7 +84,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)",
                 oldNullable: true,
-                oldCollation: "Latin1_General_CI_AI");
+                oldCollation: "Latin1_General_CI_AI"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -101,7 +95,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 collation: "Latin1_General_CS_AI",
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldCollation: "Latin1_General_CI_AI");
+                oldCollation: "Latin1_General_CI_AI"
+            );
         }
     }
 }
