@@ -164,7 +164,7 @@ public class UnitService : IUnitService
     /// <returns></returns>
     private static Expression<Func<Unit, object>> GetSortProperty(UnitQueryModel request)
     {
-        return request.SortColumn?.ToLower() switch
+        return request.SortColumn?.ToLower().Replace(" ", "") switch
         {
             "name" => unit => unit.Name,
             "description" => unit => unit.Description!,

@@ -97,13 +97,14 @@ namespace NET1814_MilkShop.Services.Services
             CustomerQueryModel request
         )
         {
-            Expression<Func<Customer, object>> keySelector = request.SortColumn?.ToLower() switch
+            Expression<Func<Customer, object>> keySelector = request.SortColumn?.ToLower().Replace(" ","") switch
             {
                 "point" => customer => customer.Points,
                 "email" => customer => customer.Email!,
-                "isActive" => customer => customer.User.IsActive,
-                "firstName" => customer => customer.User.FirstName!,
-                "lastName" => customer => customer.User.LastName!,
+                "isactive" => customer => customer.User.IsActive,
+                "firstname" => customer => customer.User.FirstName!,
+                "lastname" => customer => customer.User.LastName!,
+                "createdat" => customer => customer.User.CreatedAt,
                 _ => customer => customer.UserId
             };
             return keySelector;

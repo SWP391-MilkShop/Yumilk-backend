@@ -143,13 +143,14 @@ namespace NET1814_MilkShop.Services.Services
 
         private static Expression<Func<User, object>> GetSortProperty(UserQueryModel request)
         {
-            Expression<Func<User, object>> keySelector = request.SortColumn?.ToLower() switch
+            Expression<Func<User, object>> keySelector = request.SortColumn?.ToLower().Replace(" ", "") switch
             {
                 "username" => user => user.Username,
-                "firstName" => user => user.FirstName!,
-                "lastName" => user => user.LastName!,
+                "firstname" => user => user.FirstName!,
+                "lastname" => user => user.LastName!,
                 "role" => user => user.Role!.Name,
-                "isActive" => user => user.IsActive,
+                "isactive" => user => user.IsActive,
+                "createdat" => user => user.CreatedAt,
                 _ => user => user.Id
             };
             return keySelector;

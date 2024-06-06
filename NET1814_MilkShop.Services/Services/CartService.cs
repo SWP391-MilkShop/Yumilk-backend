@@ -213,7 +213,7 @@ namespace NET1814_MilkShop.Services.Services
         private static Expression<Func<CartDetailModel, object>> GetSortProperty(
             CartQueryModel model
         ) =>
-            model.SortColumn?.ToLower() switch
+            model.SortColumn?.ToLower().Replace(" ", "") switch
             {
                 "price" => item => item.Price,
                 _ => item => item.ProductName

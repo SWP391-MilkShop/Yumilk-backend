@@ -223,10 +223,8 @@ namespace NET1814_MilkShop.Services.Services
             return ResponseModel.Error(ResponseConstants.Delete("thuộc tính sản phẩm", false));
         }
 
-        private Expression<Func<ProductAttribute, object>> GetSortProperty(
-            ProductAttributeQueryModel queryModel
-        ) =>
-            queryModel.SortColumn?.ToLower() switch
+        private Expression<Func<ProductAttribute, object>> GetSortProperty(ProductAttributeQueryModel queryModel)
+            => queryModel.SortColumn?.ToLower().Replace(" ", "") switch
             {
                 "name" => p => p.Name,
                 _ => p => p.Id

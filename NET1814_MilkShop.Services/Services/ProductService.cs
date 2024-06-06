@@ -140,11 +140,12 @@ namespace NET1814_MilkShop.Services.Services
         private static Expression<Func<Product, object>> GetSortProperty(
             ProductQueryModel queryModel
         ) =>
-            queryModel.SortColumn?.ToLower() switch
+            queryModel.SortColumn?.ToLower().Replace(" ", "") switch
             {
                 "name" => product => product.Name,
                 "saleprice" => product => product.SalePrice,
                 "quantity" => product => product.Quantity,
+                "createdat" => product => product.CreatedAt,
                 _ => product => product.Id,
             };
 

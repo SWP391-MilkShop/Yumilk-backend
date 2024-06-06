@@ -210,12 +210,11 @@ public class ProductAttributeValueService : IProductAttributeValueService
     }
 
     private Expression<Func<ProductAttributeValue, object>> GetSortProperty(
-        ProductAttributeValueQueryModel queryModel
-    ) =>
-        queryModel.SortColumn?.ToLower() switch
+        ProductAttributeValueQueryModel queryModel)
+        => queryModel.SortColumn?.ToLower().Replace(" ", "") switch
         {
-            "product_id" => s => s.ProductId,
-            "attribute_id" => s => s.AttributeId,
+            "productid" => s => s.ProductId,
+            "attributeid" => s => s.AttributeId,
             _ => s => s.Value!
         };
 }

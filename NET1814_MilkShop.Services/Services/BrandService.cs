@@ -164,10 +164,9 @@ public class BrandService : IBrandService
 
     private static Expression<Func<Brand, object>> GetSortBrandProperty(
         BrandQueryModel queryModel
-    ) =>
-        queryModel.SortColumn?.ToLower() switch
-        {
-            "name" => product => product.Name,
-            _ => product => product.Id
-        };
+    ) => queryModel.SortColumn?.ToLower().Replace(" ", "") switch
+    {
+        "name" => product => product.Name,
+        _ => product => product.Id
+    };
 }

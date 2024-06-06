@@ -17,7 +17,7 @@ namespace NET1814_MilkShop.Repositories.Models.ProductModels
         public bool? IsActive { get; set; }
 
         /// <summary>
-        /// Sort by id, name, quantity, sale price (default is id)
+        /// Sort by id, name, quantity, sale price, created at (default is id)
         /// </summary>
         public new string? SortColumn { get; set; }
 

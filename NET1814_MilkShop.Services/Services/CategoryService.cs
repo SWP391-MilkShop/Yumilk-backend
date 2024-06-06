@@ -106,7 +106,7 @@ namespace NET1814_MilkShop.Services.Services
         private static Expression<Func<Category, object>> GetSortProperty(
             CategoryQueryModel queryModel
         ) =>
-            queryModel.SortColumn?.ToLower() switch
+            queryModel.SortColumn?.ToLower().Replace(" ", "") switch
             {
                 "name" => category => category.Name,
                 _ => category => category.Id,
