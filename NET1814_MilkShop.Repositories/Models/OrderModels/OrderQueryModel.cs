@@ -14,8 +14,9 @@ namespace NET1814_MilkShop.Repositories.Models.OrderModels
 
         public string? Email { get; set; }
 
+        public DateTime? FromOrderDate { get; set; }
         public DateTime? ToOrderDate { get; set; }
-
+        public string? PaymentMethod { get; set; }
         public string? OrderStatus { get; set; }
         /// <summary>
         /// Sort by id, total amount, order date, payment date (default is id)
