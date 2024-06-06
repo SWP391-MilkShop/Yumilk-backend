@@ -181,7 +181,7 @@
         }
 
         public const string InvalidUrl = "Url không hợp lệ";
-
+        public const string InvalidFilterDate = "Ngày bắt đầu phải trước hoặc trùng với ngày kết thúc";
         #region Cart
 
         public const string NotEnoughQuantity = "Số lượng sản phẩm không đủ";
