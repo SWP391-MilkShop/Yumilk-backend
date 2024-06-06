@@ -43,21 +43,20 @@ public class CheckoutService : ICheckoutService
             // tạo link payos trong đây
         }
 
-        var cart = await _cartRepository.GetCartByUserId(userId);
+        var cart = await _cartRepository.GetByCustomerIdAsync(userId, true);
         if (cart == null)
         {
-            return ResponseModel.BadRequest(ResponseConstants.NotFound("giỏ hàng"));
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Giỏ hàng"));
         }
-
-        List<CartDetail> cartItems = await _cartRepository.GetCartDetails(cart.Id);
-        if (!cartItems.Any())
+        
+        if (!cart.CartDetails.Any())
         {
-            return ResponseModel.Success(ResponseConstants.CartIsEmpty, cartItems);
+            return ResponseModel.Success(ResponseConstants.CartIsEmpty, cart.CartDetails);
         }
 
         //check quantity coi còn hàng không
         List<CartDetail> unavailableItems = new List<CartDetail>();
-        foreach (var c in cartItems)
+        foreach (var c in cart.CartDetails)
         {
             if (c.Quantity > c.Product.Quantity)
             {
@@ -89,9 +88,9 @@ public class CheckoutService : ICheckoutService
         {
             Id = Guid.NewGuid(),
             CustomerId = userId,
-            TotalPrice = GetTotalPrice(cartItems),
+            TotalPrice = GetTotalPrice(cart.CartDetails.ToList()),
             ShippingFee = model.ShippingFee,
-            TotalAmount = GetTotalPrice(cartItems) + model.ShippingFee,
+            TotalAmount = GetTotalPrice(cart.CartDetails.ToList()) + model.ShippingFee,
             VoucherId = 1, // de tam 1 voucher
             Address =
                 address.Address
@@ -109,7 +108,7 @@ public class CheckoutService : ICheckoutService
         _orderRepository.Add(orders);
 
         //thêm vào order detail
-        var orderDetailsList = cartItems.Select(x => new OrderDetail
+        var orderDetailsList = cart.CartDetails.Select(x => new OrderDetail
         {
             OrderId = orders.Id,
             ProductId = x.ProductId,
@@ -118,15 +117,18 @@ public class CheckoutService : ICheckoutService
             ProductName = x.Product.Name,
             ItemPrice =
                 x.Quantity
-                * (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice) //check sale price va original price
+                * (x.Product.SalePrice == 0
+                    ? x.Product.OriginalPrice
+                    : x.Product.SalePrice) //check sale price va original price
         });
+        var cartTemp = cart.CartDetails.ToList();
         _orderRepository.AddRange(orderDetailsList);
 
         // xóa cart detail
-        _cartRepository.RemoveRange(cartItems); ////tạo hàm mẫu ở order repo
+        _cartRepository.RemoveRange(cart.CartDetails); ////tạo hàm mẫu ở order repo
 
         // cập nhật quantity trong product
-        foreach (var c in cartItems)
+        foreach (var c in cart.CartDetails)
         {
             c.Product.Quantity -= c.Quantity;
             _productRepository.Update(c.Product);
@@ -145,8 +147,9 @@ public class CheckoutService : ICheckoutService
                 Address = orders.Address,
                 PhoneNumber = orders.PhoneNumber,
                 Note = orders.Note,
-                OrderDetail = ToOrderDetailModel(cartItems),
+                OrderDetail = ToOrderDetailModel(cartTemp),
             };
+            
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
