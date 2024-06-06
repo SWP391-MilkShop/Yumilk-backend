@@ -15,15 +15,14 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 table: "users",
                 type: "bit",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "is_banned",
-                table: "users");
+            migrationBuilder.DropColumn(name: "is_banned", table: "users");
         }
     }
 }

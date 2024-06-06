@@ -14,15 +14,14 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 name: "order_code",
                 table: "orders",
                 type: "int",
-                nullable: true);
+                nullable: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "order_code",
-                table: "orders");
+            migrationBuilder.DropColumn(name: "order_code", table: "orders");
         }
     }
 }

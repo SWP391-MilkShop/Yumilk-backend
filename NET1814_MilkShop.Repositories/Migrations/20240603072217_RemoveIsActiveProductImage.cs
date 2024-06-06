@@ -10,9 +10,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "is_active",
-                table: "product_images");
+            migrationBuilder.DropColumn(name: "is_active", table: "product_images");
         }
 
         /// <inheritdoc />
@@ -23,7 +21,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 table: "product_images",
                 type: "bit",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
         }
     }
 }

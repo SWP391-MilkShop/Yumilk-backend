@@ -1,10 +1,10 @@
-﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+﻿using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Services.CoreHelpers;
-using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -30,9 +30,7 @@ namespace NET1814_MilkShop.Services.Services
 
             if (!string.IsNullOrEmpty(model.SearchTerm))
             {
-                query = query.Where(o =>
-                    o.Address.Contains(model
-                        .SearchTerm)); // chưa nghĩ ra search theo cái gì nên tạm thời để so với address
+                query = query.Where(o => o.Address.Contains(model.SearchTerm)); // chưa nghĩ ra search theo cái gì nên tạm thời để so với address
             }
 
             if (!string.IsNullOrEmpty(model.Email))
@@ -97,10 +95,10 @@ namespace NET1814_MilkShop.Services.Services
                 Status = "Success"
             };*/
             #endregion
-            return ResponseModel.Success(ResponseConstants.Get("đơn hàng", orders.TotalCount > 0), orders);
-
-
-
+            return ResponseModel.Success(
+                ResponseConstants.Get("đơn hàng", orders.TotalCount > 0),
+                orders
+            );
         }
 
         private static Expression<Func<Order, object>> GetSortProperty(
@@ -110,8 +108,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 "totalamount" => order => order.TotalAmount,
                 "createdat" => order => order.CreatedAt,
-                "paymentdate" => order =>
-                    order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
+                "paymentdate" => order => order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
                 _ => order => order.Id, //chưa biết mặc định sort theo cái gì nên để tạm là id
             };
     }

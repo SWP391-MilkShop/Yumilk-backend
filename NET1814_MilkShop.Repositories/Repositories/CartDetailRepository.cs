@@ -13,15 +13,17 @@ namespace NET1814_MilkShop.Repositories.Repositories
         void Remove(CartDetail cartDetail);
         void RemoveRange(IEnumerable<CartDetail> cartDetails);
     }
+
     public class CartDetailRepository : Repository<CartDetail>, ICartDetailRepository
     {
-        public CartDetailRepository(AppDbContext context) : base(context)
-        {
-        }
+        public CartDetailRepository(AppDbContext context)
+            : base(context) { }
+
         public IQueryable<CartDetail> GetCartDetailQuery()
         {
             return _query;
         }
+
         public Task<CartDetail?> GetByCartIdAndProductId(int cartId, Guid productId)
         {
             return _query.FirstOrDefaultAsync(x => x.CartId == cartId && x.ProductId == productId);

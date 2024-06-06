@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
@@ -7,7 +8,6 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
-using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -15,6 +15,7 @@ namespace NET1814_MilkShop.Services.Services
     {
         Task<ResponseModel> GetCartAsync(Guid customerId, CartQueryModel model);
         Task<ResponseModel> AddToCartAsync(Guid customerId, AddToCartModel model);
+
         /// <summary>
         /// Update cart and remove invalid items
         /// </summary>
@@ -22,9 +23,14 @@ namespace NET1814_MilkShop.Services.Services
         /// <returns></returns>
         Task<ResponseModel> UpdateCartAsync(Guid customerId);
         Task<ResponseModel> ClearCartAsync(Guid customerId);
-        Task<ResponseModel> UpdateCartItemAsync(Guid customerId, Guid productId, UpdateCartItemModel model);
+        Task<ResponseModel> UpdateCartItemAsync(
+            Guid customerId,
+            Guid productId,
+            UpdateCartItemModel model
+        );
         Task<ResponseModel> DeleteCartItemAsync(Guid customerId, Guid productId);
     }
+
     public class CartService : ICartService
     {
         private readonly ICartRepository _cartRepository;
@@ -32,7 +38,14 @@ namespace NET1814_MilkShop.Services.Services
         private readonly IProductRepository _productRepository;
         private readonly ICustomerRepository _customerRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public CartService(ICartRepository cartRepository, ICartDetailRepository cartDetailRepository, IUnitOfWork unitOfWork, IProductRepository productRepository, ICustomerRepository customerRepository)
+
+        public CartService(
+            ICartRepository cartRepository,
+            ICartDetailRepository cartDetailRepository,
+            IUnitOfWork unitOfWork,
+            IProductRepository productRepository,
+            ICustomerRepository customerRepository
+        )
         {
             _cartRepository = cartRepository;
             _cartDetailRepository = cartDetailRepository;
@@ -100,7 +113,6 @@ namespace NET1814_MilkShop.Services.Services
             return ResponseModel.Error(ResponseConstants.AddToCart(false));
         }
 
-
         public async Task<ResponseModel> UpdateCartAsync(Guid customerId)
         {
             var cart = await _cartRepository.GetByCustomerIdAsync(customerId, true);
@@ -122,7 +134,9 @@ namespace NET1814_MilkShop.Services.Services
                 if (cartDetail.Quantity > cartDetail.Product.Quantity)
                 {
                     cartDetail.Quantity = cartDetail.Product.Quantity;
-                    messages.Add($"Sản phẩm {cartDetail.Product.Name} chỉ còn {cartDetail.Product.Quantity} sản phẩm");
+                    messages.Add(
+                        $"Sản phẩm {cartDetail.Product.Name} chỉ còn {cartDetail.Product.Quantity} sản phẩm"
+                    );
                     isChanged = true;
                     _cartDetailRepository.Update(cartDetail);
                 }
@@ -132,8 +146,10 @@ namespace NET1814_MilkShop.Services.Services
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
                 {
-                    return ResponseModel.Success(ResponseConstants.Update("giỏ hàng", true), messages);
-
+                    return ResponseModel.Success(
+                        ResponseConstants.Update("giỏ hàng", true),
+                        messages
+                    );
                 }
                 return ResponseModel.Error(ResponseConstants.Update("giỏ hàng", false));
             }
@@ -142,7 +158,8 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> GetCartAsync(Guid customerId, CartQueryModel model)
         {
-            var cart = await _cartRepository.GetCartQuery()
+            var cart = await _cartRepository
+                .GetCartQuery()
                 .Where(x => x.CustomerId == customerId)
                 .FirstOrDefaultAsync();
             if (cart == null)
@@ -157,7 +174,9 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", true), newCart);
             }
             var searchTerm = StringExtension.Normalize(model.SearchTerm) ?? "";
-            var cartDetailQuery = _cartDetailRepository.GetCartDetailQuery().Include(x => x.Product)
+            var cartDetailQuery = _cartDetailRepository
+                .GetCartDetailQuery()
+                .Include(x => x.Product)
                 .Where(x => x.CartId == cart.Id && x.Product.Name.Contains(searchTerm));
             var cartItems = cartDetailQuery.Select(x => new CartDetailModel
             {
@@ -175,7 +194,11 @@ namespace NET1814_MilkShop.Services.Services
             {
                 cartItems = cartItems.OrderBy(GetSortProperty(model));
             }
-            var pagedList = await PagedList<CartDetailModel>.CreateAsync(cartItems, model.Page, model.PageSize);
+            var pagedList = await PagedList<CartDetailModel>.CreateAsync(
+                cartItems,
+                model.Page,
+                model.PageSize
+            );
             var cartModel = new CartModel
             {
                 Id = cart.Id,
@@ -186,6 +209,7 @@ namespace NET1814_MilkShop.Services.Services
             };
             return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", true), cartModel);
         }
+
         private static Expression<Func<CartDetailModel, object>> GetSortProperty(
             CartQueryModel model
         ) =>
@@ -194,6 +218,7 @@ namespace NET1814_MilkShop.Services.Services
                 "price" => item => item.Price,
                 _ => item => item.ProductName
             };
+
         public async Task<ResponseModel> DeleteCartItemAsync(Guid customerId, Guid productId)
         {
             var cart = await _cartRepository.GetByCustomerIdAsync(customerId, false);
@@ -204,19 +229,28 @@ namespace NET1814_MilkShop.Services.Services
             var cartItem = cart.CartDetails.FirstOrDefault(x => x.ProductId == productId);
             if (cartItem == null)
             {
-                return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm trong giỏ hàng"));
+                return ResponseModel.BadRequest(
+                    ResponseConstants.NotFound("Sản phẩm trong giỏ hàng")
+                );
             }
             //Hard delete
             _cartDetailRepository.Remove(cartItem);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return ResponseModel.Success(ResponseConstants.Delete("sản phẩm trong giỏ hàng", true), null);
+                return ResponseModel.Success(
+                    ResponseConstants.Delete("sản phẩm trong giỏ hàng", true),
+                    null
+                );
             }
             return ResponseModel.Error(ResponseConstants.Delete("sản phẩm trong giỏ hàng", false));
         }
 
-        public async Task<ResponseModel> UpdateCartItemAsync(Guid customerId, Guid productId, UpdateCartItemModel model)
+        public async Task<ResponseModel> UpdateCartItemAsync(
+            Guid customerId,
+            Guid productId,
+            UpdateCartItemModel model
+        )
         {
             var cart = await _cartRepository.GetByCustomerIdAsync(customerId, true);
             if (cart == null)
@@ -226,7 +260,9 @@ namespace NET1814_MilkShop.Services.Services
             var cartItem = cart.CartDetails.FirstOrDefault(x => x.ProductId == productId);
             if (cartItem == null)
             {
-                return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm trong giỏ hàng"));
+                return ResponseModel.BadRequest(
+                    ResponseConstants.NotFound("Sản phẩm trong giỏ hàng")
+                );
             }
             if (model.Quantity > cartItem.Product.Quantity)
             {
@@ -237,7 +273,10 @@ namespace NET1814_MilkShop.Services.Services
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return ResponseModel.Success(ResponseConstants.Update("sản phẩm trong giỏ hàng", true), null);
+                return ResponseModel.Success(
+                    ResponseConstants.Update("sản phẩm trong giỏ hàng", true),
+                    null
+                );
             }
             return ResponseModel.Error(ResponseConstants.Update("sản phẩm trong giỏ hàng", false));
         }

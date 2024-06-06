@@ -33,8 +33,10 @@ namespace NET1814_MilkShop.API.Controllers
             _brandService = serviceProvider.GetRequiredService<IBrandService>();
             _unitService = serviceProvider.GetRequiredService<IUnitService>();
             _categoryService = serviceProvider.GetRequiredService<ICategoryService>();
-            _productAttributeService = serviceProvider.GetRequiredService<IProductAttributeService>();
-            _productAttributeValueService = serviceProvider.GetRequiredService<IProductAttributeValueService>();
+            _productAttributeService =
+                serviceProvider.GetRequiredService<IProductAttributeService>();
+            _productAttributeValueService =
+                serviceProvider.GetRequiredService<IProductAttributeValueService>();
             _productImageService = serviceProvider.GetRequiredService<IProductImageService>();
         }
 
@@ -57,9 +59,7 @@ namespace NET1814_MilkShop.API.Controllers
                     Status = "Error"
                 };
                 return BadRequest(responseError);*/
-                var res = ResponseModel.BadRequest(
-                    " Giá nhỏ nhất phải nhỏ hơn giá lớn nhất"
-                );
+                var res = ResponseModel.BadRequest(" Giá nhỏ nhất phải nhỏ hơn giá lớn nhất");
                 return ResponseExtension.Result(res);
             }
 
@@ -70,7 +70,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -85,7 +85,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -101,7 +101,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -117,7 +117,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -133,7 +133,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -151,7 +151,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -166,9 +166,8 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
-            
         }
 
         [HttpPatch("brands/{id}")]
@@ -182,9 +181,8 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
-            
         }
 
         [HttpDelete("brands/{id}")]
@@ -198,7 +196,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -377,10 +375,12 @@ namespace NET1814_MilkShop.API.Controllers
         #region ProductAttribute
 
         [HttpGet("attributes")]
-        public async Task<IActionResult> GetProductAttributes([FromQuery] ProductAttributeQueryModel queryModel)
+        public async Task<IActionResult> GetProductAttributes(
+            [FromQuery] ProductAttributeQueryModel queryModel
+        )
         {
             _logger.Information("Get Product Attributes");
-            var res = await _productAttributeService.GetProductAttributesAsync(queryModel);/*
+            var res = await _productAttributeService.GetProductAttributesAsync(queryModel); /*
             if (res.Status == "Error")
             {
                 return BadRequest(res);
@@ -391,7 +391,9 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPost("attributes")]
-        public async Task<IActionResult> AddProductAttribute([FromBody] CreateProductAttributeModel model)
+        public async Task<IActionResult> AddProductAttribute(
+            [FromBody] CreateProductAttributeModel model
+        )
         {
             _logger.Information("Add Product Attribute");
             var res = await _productAttributeService.AddProductAttributeAsync(model);
@@ -405,7 +407,10 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPatch("attributes/{id}")]
-        public async Task<IActionResult> UpdateProductAttribute(int id, [FromBody] UpdateProductAttributeModel model)
+        public async Task<IActionResult> UpdateProductAttribute(
+            int id,
+            [FromBody] UpdateProductAttributeModel model
+        )
         {
             _logger.Information("Update Product Attribute");
             var res = await _productAttributeService.UpdateProductAttributeAsync(id, model);
@@ -437,7 +442,10 @@ namespace NET1814_MilkShop.API.Controllers
         #region ProductAttributeValue
 
         [HttpGet("{id}/attributes/values")]
-        public async Task<IActionResult> GetProductAttributeValue(Guid id, [FromQuery] ProductAttributeValueQueryModel model)
+        public async Task<IActionResult> GetProductAttributeValue(
+            Guid id,
+            [FromQuery] ProductAttributeValueQueryModel model
+        )
         {
             _logger.Information("Get Product Attribute Value");
             var res = await _productAttributeValueService.GetProductAttributeValue(id, model);
@@ -451,10 +459,18 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPost("{id}/attributes/{attributeId}/values")]
-        public async Task<IActionResult> AddProAttValues(Guid id, int attributeId, [FromBody] CreateUpdatePavModel model)
+        public async Task<IActionResult> AddProAttValues(
+            Guid id,
+            int attributeId,
+            [FromBody] CreateUpdatePavModel model
+        )
         {
             _logger.Information("Add Product Attribute Value");
-            var res = await _productAttributeValueService.AddProductAttributeValue(id, attributeId, model);
+            var res = await _productAttributeValueService.AddProductAttributeValue(
+                id,
+                attributeId,
+                model
+            );
             /*if (res.Status == "Error")
             {
                 return BadRequest(res);
@@ -465,10 +481,18 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPatch("{id}/attributes/{attributeId}/values")]
-        public async Task<IActionResult> UpdateProAttValues(Guid id, int attributeId, [FromBody] CreateUpdatePavModel model)
+        public async Task<IActionResult> UpdateProAttValues(
+            Guid id,
+            int attributeId,
+            [FromBody] CreateUpdatePavModel model
+        )
         {
             _logger.Information("Update Product Attribute Value");
-            var res = await _productAttributeValueService.UpdateProductAttributeValue(id, attributeId, model);
+            var res = await _productAttributeValueService.UpdateProductAttributeValue(
+                id,
+                attributeId,
+                model
+            );
             /*if (res.Status == "Error")
             {
                 return BadRequest(res);
@@ -482,7 +506,10 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> DeleteProAttValues(Guid id, int attributeId)
         {
             _logger.Information("Delete Product Attribute Value");
-            var res = await _productAttributeValueService.DeleteProductAttributeValue(id, attributeId);
+            var res = await _productAttributeValueService.DeleteProductAttributeValue(
+                id,
+                attributeId
+            );
             /*if (res.Status == "Error")
             {
                 return BadRequest(res);
@@ -502,6 +529,7 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _productImageService.GetByProductIdAsync(id);
             return ResponseExtension.Result(response);
         }
+
         /// <summary>
         /// Upload product images (max 10 images per product)
         /// </summary>
@@ -510,12 +538,16 @@ namespace NET1814_MilkShop.API.Controllers
         /// <returns></returns>
         [HttpPost("{id}/images")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> CreateProductImage(Guid id, [FromForm] List<IFormFile> images)
+        public async Task<IActionResult> CreateProductImage(
+            Guid id,
+            [FromForm] List<IFormFile> images
+        )
         {
             _logger.Information("Upload Product Image");
             var response = await _productImageService.CreateProductImageAsync(id, images);
             return ResponseExtension.Result(response);
         }
+
         /// <summary>
         /// Delete by image id (Hard delete)
         /// </summary>

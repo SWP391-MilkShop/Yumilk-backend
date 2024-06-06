@@ -14,11 +14,12 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<ProductAttribute?> GetProductAttributeById(int id);
     }
 
-    public class ProductAttributeRepository : Repository<ProductAttribute>, IProductAttributeRepository
+    public class ProductAttributeRepository
+        : Repository<ProductAttribute>,
+            IProductAttributeRepository
     {
-        public ProductAttributeRepository(AppDbContext context) : base(context)
-        {
-        }
+        public ProductAttributeRepository(AppDbContext context)
+            : base(context) { }
 
         public IQueryable<ProductAttribute> GetProductAttributes()
         {

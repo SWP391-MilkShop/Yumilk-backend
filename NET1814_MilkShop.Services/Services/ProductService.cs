@@ -1,4 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+﻿using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
@@ -6,7 +7,6 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
-using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -27,7 +27,15 @@ namespace NET1814_MilkShop.Services.Services
         private readonly IUnitRepository _unitRepository;
         private readonly IProductStatusRepository _productStatusRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public ProductService(IProductRepository productRepository, IBrandRepository brandRepository, ICategoryRepository categoryRepository, IUnitRepository unitRepository, IProductStatusRepository productStatusRepository, IUnitOfWork unitOfWork)
+
+        public ProductService(
+            IProductRepository productRepository,
+            IBrandRepository brandRepository,
+            ICategoryRepository categoryRepository,
+            IUnitRepository unitRepository,
+            IProductStatusRepository productStatusRepository,
+            IUnitOfWork unitOfWork
+        )
         {
             _productRepository = productRepository;
             _brandRepository = brandRepository;
@@ -36,6 +44,7 @@ namespace NET1814_MilkShop.Services.Services
             _productStatusRepository = productStatusRepository;
             _unitOfWork = unitOfWork;
         }
+
         private static ProductModel ToProductModel(Product product) =>
             new ProductModel
             {
@@ -52,6 +61,7 @@ namespace NET1814_MilkShop.Services.Services
                 Thumbnail = product.Thumbnail,
                 IsActive = product.IsActive
             };
+
         public async Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel)
         {
             var query = _productRepository.GetProductsQuery();
@@ -67,18 +77,22 @@ namespace NET1814_MilkShop.Services.Services
             query = query.Where(p =>
                 (queryModel.IsActive.HasValue ? p.IsActive == queryModel.IsActive.Value : true)
                 //search theo name, description, brand, unit, category
-                && (string.IsNullOrEmpty(searchTerm) || p.Name.ToLower().Contains(searchTerm)
-                                                                || p.Description!.Contains(searchTerm)
-                                                                || p.Brand!.Name.Contains(searchTerm)
-                                                                || p.Unit!.Name.Contains(searchTerm)
-                                                                || p.Category!.Name.Contains(searchTerm))
+                && (
+                    string.IsNullOrEmpty(searchTerm)
+                    || p.Name.ToLower().Contains(searchTerm)
+                    || p.Description!.Contains(searchTerm)
+                    || p.Brand!.Name.Contains(searchTerm)
+                    || p.Unit!.Name.Contains(searchTerm)
+                    || p.Category!.Name.Contains(searchTerm)
+                )
                 //filter theo brand, category, unit, status, minPrice, maxPrice
                 && (string.IsNullOrEmpty(brand) || string.Equals(p.Brand!.Name, brand))
                 && (string.IsNullOrEmpty(category) || string.Equals(p.Category!.Name, category))
                 && (string.IsNullOrEmpty(unit) || string.Equals(p.Unit!.Name, unit))
                 && (string.IsNullOrEmpty(status) || string.Equals(p.ProductStatus!.Name, status))
                 && (queryModel.MinPrice <= 0 || p.SalePrice >= queryModel.MinPrice)
-                && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice));
+                && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice)
+            );
 
             #endregion
 
@@ -112,7 +126,10 @@ namespace NET1814_MilkShop.Services.Services
             #endregion
 
 
-            return ResponseModel.Success(ResponseConstants.Get("sản phẩm", products.TotalCount > 0), products);
+            return ResponseModel.Success(
+                ResponseConstants.Get("sản phẩm", products.TotalCount > 0),
+                products
+            );
         }
 
         /// <summary>
@@ -138,7 +155,10 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
             }
-            return ResponseModel.Success(ResponseConstants.Get("sản phẩm", true), ToProductModel(product));
+            return ResponseModel.Success(
+                ResponseConstants.Get("sản phẩm", true),
+                ToProductModel(product)
+            );
         }
 
         public async Task<ResponseModel> CreateProductAsync(CreateProductModel model)
@@ -237,7 +257,9 @@ namespace NET1814_MilkShop.Services.Services
                 product.StatusId = model.StatusId.Value;
             }
             #endregion
-            product.Description = string.IsNullOrEmpty(model.Description) ? product.Description : model.Description;
+            product.Description = string.IsNullOrEmpty(model.Description)
+                ? product.Description
+                : model.Description;
             product.Quantity = model.Quantity ?? product.Quantity;
             product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
             product.SalePrice = model.SalePrice ?? product.SalePrice;

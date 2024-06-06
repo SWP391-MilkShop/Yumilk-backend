@@ -1,4 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+﻿using System.Linq.Expressions;
+using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
@@ -6,7 +7,6 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
-using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -95,10 +95,12 @@ namespace NET1814_MilkShop.Services.Services
             var query = _userRepository.GetUsersQuery();
             //filter
             var searchTerm = StringExtension.Normalize(request.SearchTerm);
-            query = query.Where(u => string.IsNullOrEmpty(searchTerm)
+            query = query.Where(u =>
+                string.IsNullOrEmpty(searchTerm)
                 || u.Username.ToLower().Contains(searchTerm)
                 || u.FirstName.Contains(searchTerm)
-                || u.LastName.Contains(searchTerm));
+                || u.LastName.Contains(searchTerm)
+            );
 
             if (!string.IsNullOrEmpty(request.Role))
             {
@@ -108,8 +110,10 @@ namespace NET1814_MilkShop.Services.Services
 
             if (request.IsActive.HasValue || request.IsBanned.HasValue)
             {
-                query = query.Where(u => (!request.IsActive.HasValue || u.IsActive == request.IsActive.Value)
-                                      && (!request.IsBanned.HasValue || u.IsBanned == request.IsBanned.Value));
+                query = query.Where(u =>
+                    (!request.IsActive.HasValue || u.IsActive == request.IsActive.Value)
+                    && (!request.IsBanned.HasValue || u.IsBanned == request.IsBanned.Value)
+                );
             }
             //sort
             query = "desc".Equals(request.SortOrder?.ToLower())
@@ -131,7 +135,10 @@ namespace NET1814_MilkShop.Services.Services
                 request.Page,
                 request.PageSize
             );
-            return ResponseModel.Success(ResponseConstants.Get("người dùng", users.TotalCount > 0), users);
+            return ResponseModel.Success(
+                ResponseConstants.Get("người dùng", users.TotalCount > 0),
+                users
+            );
         }
 
         private static Expression<Func<User, object>> GetSortProperty(UserQueryModel request)
@@ -197,7 +204,6 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.Success(ResponseConstants.Update("người dùng", true), null);
             }
             return ResponseModel.Error(ResponseConstants.Update("người dùng", false));
-
         }
     }
 }

@@ -10,13 +10,17 @@ namespace NET1814_MilkShop.Repositories.Repositories
         IQueryable<Customer> GetCustomersQuery();
         Task<Customer?> GetByEmailAsync(string email);
         Task<Customer?> GetByIdAsync(Guid id);
+
         Task<bool> IsExistAsync(Guid id);
+
         /*Task<bool> IsCustomerExistAsync(string email, string phoneNumber);*/
         Task<bool> IsExistPhoneNumberAsync(string phoneNumber);
         Task<bool> IsExistEmailAsync(string email);
         void Add(Customer customer);
         void Update(Customer customer);
         void Remove(Customer customer);
+
+        Task<CustomerAddress?> GetCustomerAddressById(int addressId);
     }
 
     public sealed class CustomerRepository : Repository<Customer>, ICustomerRepository
@@ -31,8 +35,9 @@ namespace NET1814_MilkShop.Repositories.Repositories
             //    .Customers.AsNoTracking()
             //    .Include(x => x.User)
             //    .FirstOrDefaultAsync(x => string.Equals(email, x.Email));
-            var customer = await _query.Include(x => x.User)
-                                       .FirstOrDefaultAsync(x => string.Equals(email, x.Email));
+            var customer = await _query
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => string.Equals(email, x.Email));
             return customer;
         }
 
@@ -47,8 +52,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             //return await _context
             //    .Customers.Include(x => x.User)
             //    .FirstOrDefaultAsync(x => x.UserId == id);
-            return await _query.Include(x => x.User)
-                               .FirstOrDefaultAsync(x => x.UserId == id);
+            return await _query.Include(x => x.User).FirstOrDefaultAsync(x => x.UserId == id);
         }
 
         public async Task<bool> IsExistAsync(Guid id)
@@ -56,6 +60,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             //return await _context.Customers.AnyAsync(e => e.UserId == id);
             return await _query.AnyAsync(e => e.UserId == id);
         }
+
         // Tach PhoneNumber va Email de handle loi rieng tren frontend
         public async Task<bool> IsExistPhoneNumberAsync(string phoneNumber)
         {
@@ -68,12 +73,14 @@ namespace NET1814_MilkShop.Repositories.Repositories
             //return await _context.Customers.AnyAsync(e => e.Email == email);
             return await _query.AnyAsync(e => e.Email == email);
         }
+
+        public async Task<CustomerAddress?> GetCustomerAddressById(int addressId)
+        {
+            return await _context.CustomerAddresses.FirstOrDefaultAsync(x => x.Id == addressId);
+        }
         /*public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
         {
             return await _context.Customers.AnyAsync(e => e.Email == email || e.PhoneNumber == phoneNumber);
         }*/
-
-
-
     }
 }

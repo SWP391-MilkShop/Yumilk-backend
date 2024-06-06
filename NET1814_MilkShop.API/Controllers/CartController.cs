@@ -4,6 +4,7 @@ using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models.CartModels;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
+
 namespace NET1814_MilkShop.API.Controllers
 {
     [ApiController]
@@ -11,11 +12,13 @@ namespace NET1814_MilkShop.API.Controllers
     {
         private readonly ILogger _logger;
         private readonly ICartService _cartService;
+
         public CartController(ILogger logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _cartService = serviceProvider.GetRequiredService<ICartService>();
         }
+
         /// <summary>
         /// Search by product name
         /// </summary>
@@ -31,14 +34,19 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _cartService.GetCartAsync(userId, model);
             return ResponseExtension.Result(response);
         }
+
         [HttpPost]
         [Route("api/user/{userId}/cart")]
-        public async Task<IActionResult> AddToCartAsync(Guid userId, [FromBody] AddToCartModel model)
+        public async Task<IActionResult> AddToCartAsync(
+            Guid userId,
+            [FromBody] AddToCartModel model
+        )
         {
             _logger.Information($"Add product {model.ProductId} to cart of customer {userId}");
             var response = await _cartService.AddToCartAsync(userId, model);
             return ResponseExtension.Result(response);
         }
+
         /// <summary>
         /// Update items quantity and remove invalid items
         /// </summary>
@@ -53,6 +61,7 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _cartService.UpdateCartAsync(userId);
             return ResponseExtension.Result(response);
         }
+
         /// <summary>
         /// Hard delete all items in cart
         /// </summary>
@@ -67,15 +76,21 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _cartService.ClearCartAsync(userId);
             return ResponseExtension.Result(response);
         }
+
         [HttpPatch]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
         [Route("api/user/{userId}/cart/{productId}")]
-        public async Task<IActionResult> UpdateCartItemAsync(Guid userId, Guid productId, [FromBody] UpdateCartItemModel model)
+        public async Task<IActionResult> UpdateCartItemAsync(
+            Guid userId,
+            Guid productId,
+            [FromBody] UpdateCartItemModel model
+        )
         {
             _logger.Information($"Update product {productId} in cart of customer {userId}");
             var response = await _cartService.UpdateCartItemAsync(userId, productId, model);
             return ResponseExtension.Result(response);
         }
+
         /// <summary>
         /// Hard delete item from cart
         /// </summary>

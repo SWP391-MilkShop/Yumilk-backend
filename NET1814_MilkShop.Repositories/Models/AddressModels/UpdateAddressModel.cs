@@ -4,7 +4,6 @@ namespace NET1814_MilkShop.Repositories.Models.AddressModels;
 
 public class UpdateAddressModel
 {
-
     [Required(ErrorMessage = "Receiver name is required")]
     public string? ReceiverName { get; set; }
 

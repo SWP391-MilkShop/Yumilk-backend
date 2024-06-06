@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Options;
-using NET1814_MilkShop.Repositories.Models.MailModels;
-using System.Net;
+﻿using System.Net;
 using System.Net.Mail;
+using Microsoft.Extensions.Options;
+using NET1814_MilkShop.Repositories.Models.MailModels;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -80,8 +80,8 @@ namespace NET1814_MilkShop.Services.Services
                     Subject = "Password Reset",
                     Body =
                         "Please click the link below to reset your password\n\n"
-                        + $"https://milkshop.azurewebsites.net/api" +
-                        $"/authentication/reset-password?token={token}"
+                        + $"https://milkshop.azurewebsites.net/api"
+                        + $"/authentication/reset-password?token={token}"
                 };
                 SendMail(model);
             }
@@ -113,8 +113,8 @@ namespace NET1814_MilkShop.Services.Services
                     Subject = "Account Verification",
                     Body =
                         "Please click the link below to verify your account\n\n"
-                        + $"https://milkshop.azurewebsites.net/api/" +
-                        $"authentication/verify?token={token}"
+                        + $"https://milkshop.azurewebsites.net/api/"
+                        + $"authentication/verify?token={token}"
                 };
                 SendMail(model);
             }

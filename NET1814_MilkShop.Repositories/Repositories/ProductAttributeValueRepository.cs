@@ -15,11 +15,12 @@ public interface IProductAttributeValueRepository
     Task<ProductAttributeValue?> GetProdAttValue(Guid id, int aid);
 }
 
-public class ProductAttributeValueRepository : Repository<ProductAttributeValue>, IProductAttributeValueRepository
+public class ProductAttributeValueRepository
+    : Repository<ProductAttributeValue>,
+        IProductAttributeValueRepository
 {
-    public ProductAttributeValueRepository(AppDbContext context) : base(context)
-    {
-    }
+    public ProductAttributeValueRepository(AppDbContext context)
+        : base(context) { }
 
     public IQueryable<ProductAttributeValue> GetProductAttributeValue()
     {
@@ -28,7 +29,9 @@ public class ProductAttributeValueRepository : Repository<ProductAttributeValue>
 
     public async Task<Product?> GetProductById(Guid id)
     {
-        var entity = await _context.Products.FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt == null);
+        var entity = await _context.Products.FirstOrDefaultAsync(x =>
+            x.Id == id && x.DeletedAt == null
+        );
         if (entity != null)
         {
             return entity;
@@ -39,7 +42,9 @@ public class ProductAttributeValueRepository : Repository<ProductAttributeValue>
 
     public async Task<ProductAttribute?> GetAttributeById(int aid)
     {
-        var entity = await _context.ProductAttributes.FirstOrDefaultAsync(x => x.Id == aid && x.DeletedAt == null);
+        var entity = await _context.ProductAttributes.FirstOrDefaultAsync(x =>
+            x.Id == aid && x.DeletedAt == null
+        );
         if (entity != null)
         {
             return entity;
@@ -50,8 +55,8 @@ public class ProductAttributeValueRepository : Repository<ProductAttributeValue>
 
     public async Task<ProductAttributeValue?> GetProdAttValue(Guid id, int aid)
     {
-        return await
-            _context.ProductAttributeValues.FirstOrDefaultAsync(x =>
-                x.ProductId == id && x.AttributeId == aid && x.DeletedAt == null);
+        return await _context.ProductAttributeValues.FirstOrDefaultAsync(x =>
+            x.ProductId == id && x.AttributeId == aid && x.DeletedAt == null
+        );
     }
 }

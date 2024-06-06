@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Reflection;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
@@ -9,9 +11,6 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using NET1814_MilkShop.Services.Services;
-using System.Reflection;
-using System.Text;
-
 
 namespace NET1814_MilkShop.API
 {
@@ -30,7 +29,10 @@ namespace NET1814_MilkShop.API
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(o =>
             {
-                o.SwaggerDoc("v1", new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" });
+                o.SwaggerDoc(
+                    "v1",
+                    new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" }
+                );
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var APIXmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 o.IncludeXmlComments(APIXmlPath);
@@ -84,9 +86,7 @@ namespace NET1814_MilkShop.API
             //Add Dependency Injection
             AddDI(services);
             //Add Email Setting
-            services.Configure<EmailSettingModel>(
-                _configuration
-                    .GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
+            services.Configure<EmailSettingModel>(_configuration.GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
             //Add Database
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
             //Add Exception Handler
@@ -108,7 +108,10 @@ namespace NET1814_MilkShop.API
                 );*/
                 services.AddPolicy(
                     "AllowAll",
-                    builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    }
                 );
             });
             //Add Authentication
@@ -156,9 +159,7 @@ namespace NET1814_MilkShop.API
 
         public void Configure(WebApplication app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-            }
+            if (env.IsDevelopment()) { }
 
             app.UseDeveloperExceptionPage();
 
@@ -219,7 +220,6 @@ namespace NET1814_MilkShop.API
 
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IOrderService, OrderService>();
-
 
             services.AddScoped<IProductAttributeRepository, ProductAttributeRepository>();
             services.AddScoped<IProductAttributeService, ProductAttributeService>();
