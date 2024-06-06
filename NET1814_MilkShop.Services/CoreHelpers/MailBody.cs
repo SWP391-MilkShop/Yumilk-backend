@@ -2,10 +2,10 @@ namespace NET1814_MilkShop.Services.CoreHelpers;
 
 public static class MailBody
 {
-     public static string ResetPassword(string customerName,string token)
+    public static string ResetPassword(string customerName, string token)
     {
         string body =
-          @"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"">
+            @"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"">
 <html xmlns=""http://www.w3.org/1999/xhtml"">
   <head>
     <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
@@ -523,17 +523,21 @@ public static class MailBody
   </body>
 </html>";
         body = body.Replace("{{name}}", customerName);
-        body = body.Replace("{{action_url}}", $"https://milkshop.azurewebsites.net/api/authentication/reset-password?token={token}");
+        body = body.Replace(
+            "{{action_url}}",
+            $"https://milkshop.azurewebsites.net/api/authentication/reset-password?token={token}"
+        );
         body = body.Replace("{{support_url}}", "https://milkshop.azurewebsites.net/api");
         body = body.Replace("[Product Name]", "Yumilk shop");
-        body = body.Replace("[Company Name, LLC]","Yumilk");
+        body = body.Replace("[Company Name, LLC]", "Yumilk");
         body = body.Replace("[Team]", "Yumilk Team");
-      return body;
+        return body;
     }
-     public static string ActivateAccount(string customerName,string token)
+
+    public static string ActivateAccount(string customerName, string token)
     {
         string body =
-          @"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"">
+            @"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"">
 <html xmlns=""http://www.w3.org/1999/xhtml"">
   <head>
     <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
@@ -1051,11 +1055,14 @@ public static class MailBody
   </body>
 </html>";
         body = body.Replace("{{name}}", customerName);
-        body = body.Replace("{{action_url}}", $"https://milkshop.azurewebsites.net/api/authentication/verify?token={token}");
+        body = body.Replace(
+            "{{action_url}}",
+            $"https://milkshop.azurewebsites.net/api/authentication/verify?token={token}"
+        );
         body = body.Replace("{{support_url}}", "https://milkshop.azurewebsites.net/api");
         body = body.Replace("[Product Name]", "Yumilk shop");
         body = body.Replace("[Team]", "Yumilk Team");
-        body = body.Replace("[Company Name, LLC]","Yumilk");
-      return body;
+        body = body.Replace("[Company Name, LLC]", "Yumilk");
+        return body;
     }
 }
