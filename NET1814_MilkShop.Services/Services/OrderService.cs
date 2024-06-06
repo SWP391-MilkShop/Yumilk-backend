@@ -30,7 +30,9 @@ namespace NET1814_MilkShop.Services.Services
 
             if (!string.IsNullOrEmpty(model.SearchTerm))
             {
-                query = query.Where(o => o.Address.Contains(model.SearchTerm)); // chưa nghĩ ra search theo cái gì nên tạm thời để so với address
+                query = query.Where(o =>
+                    o.Address.Contains(model
+                        .SearchTerm)); // chưa nghĩ ra search theo cái gì nên tạm thời để so với address
             }
 
             if (!string.IsNullOrEmpty(model.Email))
@@ -43,9 +45,36 @@ namespace NET1814_MilkShop.Services.Services
                 query = query.Where(o => o.TotalAmount > model.TotalAmount);
             }
 
-            if (model.ToOrderDate is not null)
+            if (model.FromOrderDate == null && model.ToOrderDate != null)
             {
-                query = query.Where(o => o.CreatedAt <= model.ToOrderDate);
+                return ResponseModel.BadRequest("Phải có ngày bắt đầu trong trường hợp có ngày kết thúc");
+            }
+
+            if (model.FromOrderDate != null && model.ToOrderDate == null)
+            {
+                if (model.FromOrderDate.Value.Date > DateTime.Now.Date)
+                {
+                    return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+                }
+
+                query = query.Where(o =>
+                    o.CreatedAt.Date <= DateTime.Now.Date && o.CreatedAt.Date >= model.FromOrderDate.Value.Date);
+            }
+
+            if (model.FromOrderDate != null && model.ToOrderDate != null)
+            {
+                if (model.FromOrderDate.Value.Date > model.ToOrderDate.Value.Date)
+                {
+                    return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+                }
+
+                query = query.Where(o =>
+                    o.CreatedAt.Date <= model.ToOrderDate.Value.Date && o.CreatedAt >= model.FromOrderDate.Value.Date);
+            }
+
+            if (!string.IsNullOrEmpty(model.PaymentMethod))
+            {
+                query = query.Where(o => o.PaymentMethod == model.PaymentMethod);
             }
 
             if (!string.IsNullOrEmpty(model.OrderStatus))
@@ -76,6 +105,7 @@ namespace NET1814_MilkShop.Services.Services
                 TotalAmount = x.TotalAmount,
                 PhoneNumber = x.PhoneNumber,
                 Address = x.Address,
+                PaymentMethod = x.PaymentMethod,
                 OrderStatus = x.Status!.Name,
                 CreatedDate = x.CreatedAt,
                 PaymentDate = x.PaymentDate,
@@ -94,7 +124,9 @@ namespace NET1814_MilkShop.Services.Services
                 Message = orders.TotalCount > 0 ? "Get orders successfully" : "No brands found",
                 Status = "Success"
             };*/
+
             #endregion
+
             return ResponseModel.Success(
                 ResponseConstants.Get("đơn hàng", orders.TotalCount > 0),
                 orders
@@ -108,7 +140,8 @@ namespace NET1814_MilkShop.Services.Services
             {
                 "totalamount" => order => order.TotalAmount,
                 "createdat" => order => order.CreatedAt,
-                "paymentdate" => order => order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
+                "paymentdate" => order =>
+                    order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
                 _ => order => order.Id, //chưa biết mặc định sort theo cái gì nên để tạm là id
             };
     }
