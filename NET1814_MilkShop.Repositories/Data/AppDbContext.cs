@@ -29,6 +29,7 @@ namespace NET1814_MilkShop.Repositories.Data
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Brand> Brands { get; set; }
         public virtual DbSet<Unit> Units { get; set; }
+        public virtual DbSet<ProductReview> ProductReviews { get; set; }
         public virtual DbSet<ProductAnalytic> ProductAnalytics { get; set; }
         public virtual DbSet<ProductAttribute> ProductAttributes { get; set; }
         public virtual DbSet<ProductAttributeValue> ProductAttributeValues { get; set; }
