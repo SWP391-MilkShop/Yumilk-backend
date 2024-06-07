@@ -11,6 +11,9 @@ namespace NET1814_MilkShop.Repositories.Repositories
         void Add(Order order);
         void AddRange(IEnumerable<OrderDetail> list);
         Task<Order?> GetByCodeAsync(int orderCode);
+        Task<Order?> GetByIdNoInlcudeAsync(Guid id);
+        Task<List<Order>?> GetAllCodeAsync();
+        void Update(Order order);
     }
 
     public class OrderRepository : Repository<Order>, IOrderRepository
@@ -38,7 +41,21 @@ namespace NET1814_MilkShop.Repositories.Repositories
                 .Include(o => o.OrderDetails)
                 .ThenInclude(o => o.Product)
                 .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
+        }
 
+        public async Task<Order?> GetByIdNoInlcudeAsync(Guid id)
+        {
+            return await _query.FirstOrDefaultAsync(x => x.Id == id);
+        }
+        
+
+        public async Task<List<Order>?> GetAllCodeAsync()
+        {
+            return await _query
+                .Include(o => o.OrderDetails)
+                .ThenInclude(o => o.Product)
+                .Where(x=>x.OrderCode != null)
+                .ToListAsync();
         }
     }
 }
