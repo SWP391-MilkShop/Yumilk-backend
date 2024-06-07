@@ -12,6 +12,7 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
         /// </summary>
         /// <returns></returns>
         Task<int> SaveChangesAsync();
+        void Detach<TEntity>(TEntity entity) where TEntity : class;
     }
 
     public class UnitOfWork : IUnitOfWork
@@ -78,6 +79,11 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
         public void Dispose()
         {
             _context.Dispose();
+        }
+        
+        public void Detach<TEntity>(TEntity entity) where TEntity : class
+        {
+            _context.Entry(entity).State = EntityState.Detached;
         }
     }
 }
