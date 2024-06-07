@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities
 {
-    [Table("ProductReviews")]
+    [Table("product_reviews")]
     public class ProductReview : IAuditableEntity
     {
         [Key]

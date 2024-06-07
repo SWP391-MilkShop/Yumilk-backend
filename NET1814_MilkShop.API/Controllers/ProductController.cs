@@ -7,6 +7,7 @@ using NET1814_MilkShop.Repositories.Models.CategoryModels;
 using NET1814_MilkShop.Repositories.Models.ProductAttributeModels;
 using NET1814_MilkShop.Repositories.Models.ProductAttributeValueModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
+using NET1814_MilkShop.Repositories.Models.ProductReviewModels;
 using NET1814_MilkShop.Repositories.Models.UnitModels;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
@@ -25,6 +26,7 @@ namespace NET1814_MilkShop.API.Controllers
         private readonly IProductAttributeService _productAttributeService;
         private readonly IProductAttributeValueService _productAttributeValueService;
         private readonly IProductImageService _productImageService;
+        private readonly IProductReviewService _productReviewService;
 
         public ProductController(ILogger logger, IServiceProvider serviceProvider)
         {
@@ -33,11 +35,10 @@ namespace NET1814_MilkShop.API.Controllers
             _brandService = serviceProvider.GetRequiredService<IBrandService>();
             _unitService = serviceProvider.GetRequiredService<IUnitService>();
             _categoryService = serviceProvider.GetRequiredService<ICategoryService>();
-            _productAttributeService =
-                serviceProvider.GetRequiredService<IProductAttributeService>();
-            _productAttributeValueService =
-                serviceProvider.GetRequiredService<IProductAttributeValueService>();
+            _productAttributeService = serviceProvider.GetRequiredService<IProductAttributeService>();
+            _productAttributeValueService = serviceProvider.GetRequiredService<IProductAttributeValueService>();
             _productImageService = serviceProvider.GetRequiredService<IProductImageService>();
+            _productReviewService = serviceProvider.GetRequiredService<IProductReviewService>();
         }
 
         #region Product
@@ -561,6 +562,48 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _productImageService.DeleteProductImageAsync(id);
             return ResponseExtension.Result(response);
         }
+        #endregion
+
+        #region ProductReview
+
+        [HttpGet("{productId}/reviews")]
+        public async Task<IActionResult> GetProductReviews(Guid productId, [FromQuery] ReviewQueryModel queryModel)
+        {
+            _logger.Information("Get Product Reviews");
+            var response = await _productReviewService.GetProductReviewsAsync(productId, queryModel);
+            return ResponseExtension.Result(response);
+        }
+        /// <summary>
+        /// Create review using order id to make sure the customer has bought the product
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost("{productId}/reviews")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        public async Task<IActionResult> CreateProductReview(Guid productId, [FromBody] CreateReviewModel model)
+        {
+            _logger.Information("Create Product Review");
+            var response = await _productReviewService.CreateProductReviewAsync(productId, model);
+            return ResponseExtension.Result(response);
+        }
+        [HttpPatch("reviews/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        public async Task<IActionResult> UpdateProductReview(int id, [FromBody] UpdateReviewModel model)
+        {
+            _logger.Information("Update Product Review");
+            var response = await _productReviewService.UpdateProductReviewAsync(id, model);
+            return ResponseExtension.Result(response);
+        }
+        [HttpDelete("reviews/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2,3")]
+        public async Task<IActionResult> DeleteProductReview(int id)
+        {
+            _logger.Information("Delete Product Review");
+            var response = await _productReviewService.DeleteProductReviewAsync(id);
+            return ResponseExtension.Result(response);
+        }
+
         #endregion
     }
 }

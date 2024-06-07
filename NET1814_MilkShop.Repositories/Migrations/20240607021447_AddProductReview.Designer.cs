@@ -740,7 +740,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductReviews");
+                    b.ToTable("product_reviews");
                 });
 
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.ProductStatus", b =>

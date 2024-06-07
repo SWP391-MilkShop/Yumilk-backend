@@ -18,7 +18,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 defaultValue: "");
 
             migrationBuilder.CreateTable(
-                name: "ProductReviews",
+                name: "product_reviews",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -35,21 +35,21 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductReviews", x => x.Id);
+                    table.PrimaryKey("PK_product_reviews", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProductReviews_customers_customer_id",
+                        name: "FK_product_reviews_customers_customer_id",
                         column: x => x.customer_id,
                         principalTable: "customers",
                         principalColumn: "user_id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProductReviews_orders_order_id",
+                        name: "FK_product_reviews_orders_order_id",
                         column: x => x.order_id,
                         principalTable: "orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProductReviews_products_product_id",
+                        name: "FK_product_reviews_products_product_id",
                         column: x => x.product_id,
                         principalTable: "products",
                         principalColumn: "Id",
@@ -57,18 +57,18 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductReviews_customer_id",
-                table: "ProductReviews",
+                name: "IX_product_reviews_customer_id",
+                table: "product_reviews",
                 column: "customer_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductReviews_order_id",
-                table: "ProductReviews",
+                name: "IX_product_reviews_order_id",
+                table: "product_reviews",
                 column: "order_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductReviews_product_id",
-                table: "ProductReviews",
+                name: "IX_product_reviews_product_id",
+                table: "product_reviews",
                 column: "product_id");
         }
 
@@ -76,7 +76,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ProductReviews");
+                name: "product_reviews");
 
             migrationBuilder.DropColumn(
                 name: "receiver_name",

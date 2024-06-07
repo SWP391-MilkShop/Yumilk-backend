@@ -92,13 +92,14 @@ public class CheckoutService : ICheckoutService
             ShippingFee = model.ShippingFee,
             TotalAmount = GetTotalPrice(cart.CartDetails.ToList()) + model.ShippingFee,
             VoucherId = 1, // de tam 1 voucher
+            ReceiverName = address.ReceiverName ?? "",
             Address =
                 address.Address
-                + " "
+                + ", "
                 + address.WardName
-                + " "
+                + ", "
                 + address.DistrictName
-                + " "
+                + ", "
                 + address.ProvinceName,
             PhoneNumber = address.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
             Note = model.Note,
@@ -141,7 +142,7 @@ public class CheckoutService : ICheckoutService
             {
                 OrderId = orders.Id,
                 CustomerId = orders.CustomerId,
-                FullName = address.ReceiverName,
+                FullName = orders.ReceiverName,
                 TotalAmount = orders.TotalAmount,
                 ShippingFee = orders.ShippingFee,
                 Address = orders.Address,

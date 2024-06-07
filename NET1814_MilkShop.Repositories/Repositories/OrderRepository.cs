@@ -7,7 +7,12 @@ namespace NET1814_MilkShop.Repositories.Repositories
     public interface IOrderRepository
     {
         IQueryable<Order> GetOrdersQuery();
-
+        /// <summary>
+        /// Get order by id include order details
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<Order?> GetByIdAsync(Guid id);
         void Add(Order order);
         void AddRange(IEnumerable<OrderDetail> list);
         Task<Order?> GetByCodeAsync(int orderCode);
@@ -39,6 +44,10 @@ namespace NET1814_MilkShop.Repositories.Repositories
                 .ThenInclude(o => o.Product)
                 .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
 
+        }
+        public override Task<Order?> GetByIdAsync(Guid id)
+        {
+            return _query.Include(o => o.OrderDetails).FirstOrDefaultAsync(o => o.Id == id);
         }
     }
 }
