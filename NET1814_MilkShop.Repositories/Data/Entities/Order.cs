@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("Orders")]
+[Table("orders")]
 public partial class Order : IAuditableEntity
 {
     [Key]

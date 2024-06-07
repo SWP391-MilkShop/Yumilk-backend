@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("ProductImages")]
+[Table("product_images")]
 public partial class ProductImage : IAuditableEntity
 {
     [Key]

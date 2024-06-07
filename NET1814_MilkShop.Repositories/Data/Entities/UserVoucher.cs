@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("UserVouchers")]
+[Table("user_vouchers")]
 public partial class UserVoucher : IAuditableEntity
 {
     public int VoucherId { get; set; }

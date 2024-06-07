@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("Categories")]
+[Table("categories")]
 public partial class Category : IAuditableEntity
 {
     [Key]

@@ -1,4 +1,5 @@
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.CheckoutModels;
@@ -104,7 +105,7 @@ public class CheckoutService : ICheckoutService
             PhoneNumber = address.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
             Note = model.Note,
             PaymentMethod = model.PaymentMethod,
-            StatusId = 1, //mac dinh la pending
+            StatusId = (int) OrderStatusId.PENDING
         };
         _orderRepository.Add(orders);
 

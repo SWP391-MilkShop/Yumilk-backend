@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("ProductAttributeValues")]
+[Table("product_attribute_values")]
 public partial class ProductAttributeValue : IAuditableEntity
 {
     public Guid ProductId { get; set; }

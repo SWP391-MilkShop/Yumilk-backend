@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("CustomerAddresses")]
+[Table("customer_addresses")]
 public partial class CustomerAddress : IAuditableEntity
 {
     [Key]
