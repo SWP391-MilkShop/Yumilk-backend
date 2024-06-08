@@ -14,7 +14,10 @@ public class OrderHistoryQueryModel : QueryModel
 
     public DateTime? FromOrderDate { get; set; }
     public DateTime? ToOrderDate { get; set; }
-
+    
+    /// <summary>
+    /// order status theo id từ 1-5
+    /// </summary>
     [Range(1, 5, ErrorMessage = "Status Id must be in range 1-5")]
     public int? OrderStatus { get; set; }
 
