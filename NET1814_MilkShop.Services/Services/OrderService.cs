@@ -14,6 +14,7 @@ namespace NET1814_MilkShop.Services.Services
     {
         Task<ResponseModel> GetOrderAsync(OrderQueryModel model);
         Task<ResponseModel> GetOrderHistoryAsync(Guid customerId, OrderHistoryQueryModel model);
+        Task<ResponseModel> GetOrderHistoryDetailAsync(Guid userId, Guid id);
     }
 
     public class OrderService : IOrderService
@@ -228,7 +229,8 @@ namespace NET1814_MilkShop.Services.Services
             // gán ngược lại productlist
             foreach (var orderHistory in pagedOrders.Items)
             {
-                orderHistory.ProductList = await GetProductByOrderIdAsync(orderHistory.OrderId);
+                var list = await GetProductByOrderIdAsync(orderHistory.OrderId);
+                orderHistory.ProductList = list.Select(x => x.Name).ToList();
             }
 
             #endregion
@@ -239,13 +241,45 @@ namespace NET1814_MilkShop.Services.Services
             );
         }
 
-        private async Task<List<string>> GetProductByOrderIdAsync(Guid id)
+        public async Task<ResponseModel> GetOrderHistoryDetailAsync(Guid userId, Guid orderId)
         {
-            List<string> list = new();
+            var order = await _orderRepository.GetByOrderIdAsync(orderId);
+            if (order == null || order.CustomerId != userId)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Đơn hàng"));
+            }
+
+            var pModel = order.OrderDetails.Select(x => new CheckoutOrderDetailModel
+            {
+                ProductId = x.ProductId,
+                ProductName = x.ProductName,
+                Quantity = x.Quantity,
+                UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
+                ItemPrice = x.ItemPrice
+            }).ToList();
+
+            var detail = new OrderDetailModel
+            {
+                RecieverName = "Tam thoi de la vay", //order.RecieverName (do chua update db nen chua co)
+                PhoneNumber = order.PhoneNumber,
+                Address = order.Address,
+                Note = order.Note,
+                DetailModels = pModel,
+                TotalPrice = order.TotalPrice,
+                ShippingFee = order.ShippingFee,
+                TotalAmount = order.TotalAmount,
+                PaymentMethod = order.PaymentMethod,
+            };
+            return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
+        }
+
+        private async Task<List<Product>> GetProductByOrderIdAsync(Guid id)
+        {
+            List<Product> list = new();
             var order = await _orderRepository.GetByOrderIdAsync(id);
             foreach (var a in order!.OrderDetails)
             {
-                list.Add(a.Product.Name);
+                list.Add(a.Product);
             }
 
             return list;
