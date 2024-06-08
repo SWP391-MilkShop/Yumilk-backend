@@ -51,7 +51,8 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
             }
-            var order = await _orderRepository.GetByIdAsync(model.OrderId);
+            //include order details
+            var order = await _orderRepository.GetByIdAsync(model.OrderId, includeDetails: true);
             if (order == null) 
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Đơn hàng"));
