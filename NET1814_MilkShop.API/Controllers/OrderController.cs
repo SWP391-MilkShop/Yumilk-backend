@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
 using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Services.Services;
@@ -34,5 +35,21 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);*/
             return ResponseExtension.Result(response);
         }
+
+        #region OrderHistory
+
+        [HttpGet]
+        [Route("/api/customer/orders")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        [ServiceFilter(typeof(UserExistsFilter))]
+        public async Task<IActionResult> GetOrderHistory([FromQuery] OrderHistoryQueryModel model)
+        {
+            _logger.Information("Get order history");
+            var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
+            var res = await _orderService.GetOrderHistoryAsync(userId, model);
+            return ResponseExtension.Result(res);
+        }
+
+        #endregion
     }
 }
