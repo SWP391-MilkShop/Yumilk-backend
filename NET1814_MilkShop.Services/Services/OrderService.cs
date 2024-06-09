@@ -217,7 +217,10 @@ namespace NET1814_MilkShop.Services.Services
                 OrderId = o.Id,
                 TotalAmount = o.TotalAmount,
                 OrderStatus = o.Status!.Name,
-                ProductList = null // do là iqueryable nên ko sử dụng được trực tiếp
+                ProductList = o.OrderDetails
+                    .Where(u => u.OrderId == o.Id)
+                    .Select(h => h.Product.Name)
+                    .ToList()
             });
 
             #endregion
@@ -231,11 +234,11 @@ namespace NET1814_MilkShop.Services.Services
             );
 
             // gán ngược lại productlist
-            foreach (var orderHistory in pagedOrders.Items)
-            {
-                var list = await GetProductByOrderIdAsync(orderHistory.OrderId);
-                orderHistory.ProductList = list.Select(x => x.Name).ToList();
-            }
+            // foreach (var orderHistory in pagedOrders.Items)
+            // {
+            //     var list = await GetProductByOrderIdAsync(orderHistory.OrderId);
+            //     orderHistory.ProductList = list.Select(x => x.Name).ToList();
+            // }
 
             #endregion
 
@@ -247,7 +250,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> GetOrderHistoryDetailAsync(Guid userId, Guid orderId)
         {
-            var order = await _orderRepository.GetByOrderIdAsync(orderId);
+            var order = await _orderRepository.GetByOrderIdAsync(orderId, true);
             if (order == null || order.CustomerId != userId)
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Đơn hàng"));
@@ -280,7 +283,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> CancelOrderAsync(Guid userId, Guid orderId)
         {
-            var order = await _orderRepository.GetByOrderIdAsync(orderId);
+            var order = await _orderRepository.GetByOrderIdAsync(orderId, false);
             if (order == null || order.CustomerId != userId)
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Đơn hàng"));
@@ -310,7 +313,7 @@ namespace NET1814_MilkShop.Services.Services
         private async Task<List<Product>> GetProductByOrderIdAsync(Guid id)
         {
             List<Product> list = new();
-            var order = await _orderRepository.GetByOrderIdAsync(id);
+            var order = await _orderRepository.GetByOrderIdAsync(id, true);
             foreach (var a in order!.OrderDetails)
             {
                 list.Add(a.Product);
