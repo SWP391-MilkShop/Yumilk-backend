@@ -35,5 +35,23 @@ namespace NET1814_MilkShop.Services.CoreHelpers
 
             return new(items, page, pageSize, totalCount);
         }
+        /// <summary>
+        /// Use this method if you want to create a PagedList without async
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public static PagedList<T> Create(
+            IQueryable<T> query,
+            int page,
+            int pageSize
+        )
+        {
+            var totalCount = query.Count();
+            var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return new(items, page, pageSize, totalCount);
+        }
     }
 }

@@ -1,10 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using NET1814_MilkShop.Repositories.Data.Interfaces;
-
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("Orders")]
+[Table("orders")]
 public partial class Order : IAuditableEntity
 {
     [Key]
@@ -19,6 +18,9 @@ public partial class Order : IAuditableEntity
     public decimal TotalAmount { get; set; }
 
     public int VoucherId { get; set; }
+
+    [Column("receiver_name", TypeName = "nvarchar(255)")]
+    public string ReceiverName { get; set; } = null!;
 
     public string Address { get; set; } = null!;
 

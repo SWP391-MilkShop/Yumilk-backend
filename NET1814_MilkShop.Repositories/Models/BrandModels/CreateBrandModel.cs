@@ -9,4 +9,5 @@ public class CreateBrandModel
 
     [Required(ErrorMessage = "Description is required")]
     public string? Description { get; set; } = null;
+
 }

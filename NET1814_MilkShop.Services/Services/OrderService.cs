@@ -17,6 +17,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetOrderHistoryAsync(Guid customerId, OrderHistoryQueryModel model);
         Task<ResponseModel> GetOrderHistoryDetailAsync(Guid userId, Guid id);
         Task<ResponseModel> CancelOrderAsync(Guid userId, Guid orderId);
+        Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model);
     }
 
     public class OrderService : IOrderService
@@ -342,5 +343,26 @@ namespace NET1814_MilkShop.Services.Services
                     order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
                 _ => order => order.Id, //chưa biết mặc định sort theo cái gì nên để tạm là id
             };
+
+        public async Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model)
+        {
+            var order = await _orderRepository.GetByIdAsync(id, includeDetails: false);
+            if(order == null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("đơn hàng"));
+            }
+            if(order.StatusId == model.StatusId)
+            {
+                return ResponseModel.Success(ResponseConstants.NoChangeIsMade, null);
+            }
+            order.StatusId = model.StatusId;
+            _orderRepository.Update(order);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), null);
+            }
+            return ResponseModel.Error(ResponseConstants.Update("trạng thái đơn hàng", false));
+        }
     }
 }

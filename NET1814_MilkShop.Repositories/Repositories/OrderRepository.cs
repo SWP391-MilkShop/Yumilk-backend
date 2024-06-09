@@ -8,9 +8,17 @@ namespace NET1814_MilkShop.Repositories.Repositories
     {
         IQueryable<Order> GetOrdersQuery();
         IQueryable<Order> GetOrderHistory(Guid customerId);
+        /// <summary>
+        /// Get order by id include order details if includeDetails is true
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="includeDetails"></param>
+        /// <returns></returns>
+        Task<Order?> GetByIdAsync(Guid id, bool includeDetails);
         void Add(Order order);
         void Update(Order order);
         void AddRange(IEnumerable<OrderDetail> list);
+        void Update(Order order);
         Task<Order?> GetByCodeAsync(int orderCode);
         Task<Order?> GetByOrderIdAsync(Guid orderId, bool include);
     }
@@ -63,6 +71,11 @@ namespace NET1814_MilkShop.Repositories.Repositories
                     : await _query.Include(o => o.OrderDetails).ThenInclude(o => o.Product)
                         .FirstOrDefaultAsync(o => o.Id == orderId)
                 ;
+        }
+        public Task<Order?> GetByIdAsync(Guid id, bool includeDetails)
+        {
+            var query = includeDetails ? _query.Include(o => o.OrderDetails) : _query;
+            return query.FirstOrDefaultAsync(o => o.Id == id);
         }
     }
 }

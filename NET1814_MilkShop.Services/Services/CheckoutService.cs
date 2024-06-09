@@ -1,4 +1,5 @@
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.CheckoutModels;
@@ -92,18 +93,19 @@ public class CheckoutService : ICheckoutService
             ShippingFee = model.ShippingFee,
             TotalAmount = GetTotalPrice(cart.CartDetails.ToList()) + model.ShippingFee,
             VoucherId = 1, // de tam 1 voucher
+            ReceiverName = address.ReceiverName ?? "",
             Address =
                 address.Address
-                + " "
+                + ", "
                 + address.WardName
-                + " "
+                + ", "
                 + address.DistrictName
-                + " "
+                + ", "
                 + address.ProvinceName,
             PhoneNumber = address.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
             Note = model.Note,
             PaymentMethod = model.PaymentMethod,
-            StatusId = 1, //mac dinh la pending
+            StatusId = (int) OrderStatusId.PENDING
         };
         _orderRepository.Add(orders);
 
@@ -141,7 +143,7 @@ public class CheckoutService : ICheckoutService
             {
                 OrderId = orders.Id,
                 CustomerId = orders.CustomerId,
-                FullName = address.ReceiverName,
+                FullName = orders.ReceiverName,
                 TotalAmount = orders.TotalAmount,
                 ShippingFee = orders.ShippingFee,
                 Address = orders.Address,

@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("UserVouchers")]
+[Table("user_vouchers")]
 public partial class UserVoucher : IAuditableEntity
 {
     public int VoucherId { get; set; }

@@ -1,11 +1,11 @@
-﻿using System.ComponentModel;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("Products")]
+[Table("products")]
 public partial class Product : IAuditableEntity
 {
     [Key]
@@ -63,4 +63,6 @@ public partial class Product : IAuditableEntity
 
     public virtual ProductStatus? ProductStatus { get; set; }
     public virtual Unit? Unit { get; set; }
+
+    public virtual ICollection<ProductReview> ProductReviews { get; set; } = [];
 }

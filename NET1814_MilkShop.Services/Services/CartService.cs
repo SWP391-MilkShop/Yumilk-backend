@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.CartModels;
@@ -67,6 +68,10 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
             }
+            if(product.StatusId == (int) ProductStatusId.OUT_OF_STOCK)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.OutOfStock);
+            }
             if (model.Quantity > product.Quantity)
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotEnoughQuantity);
@@ -131,6 +136,13 @@ namespace NET1814_MilkShop.Services.Services
                     isChanged = true;
                     continue;
                 }
+                if(cartDetail.Product.StatusId == (int)ProductStatusId.OUT_OF_STOCK)
+                {
+                    _cartDetailRepository.Remove(cartDetail);
+                    messages.Add($"Sản phẩm {cartDetail.Product.Name} đã hết hàng");
+                    isChanged = true;
+                    continue;
+                }
                 if (cartDetail.Quantity > cartDetail.Product.Quantity)
                 {
                     cartDetail.Quantity = cartDetail.Product.Quantity;
@@ -169,7 +181,10 @@ namespace NET1814_MilkShop.Services.Services
                     CustomerId = customerId,
                     TotalPrice = 0,
                     TotalQuantity = 0,
-                    CartItems = new List<CartDetailModel>()
+                    CartItems = PagedList<CartDetailModel>.Create(
+                        new List<CartDetailModel>().AsQueryable(), 
+                        model.Page, 
+                        model.PageSize)
                 };
                 return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", true), newCart);
             }
@@ -184,7 +199,8 @@ namespace NET1814_MilkShop.Services.Services
                 Quantity = x.Quantity,
                 ProductName = x.Product.Name,
                 Thumbnail = x.Product.Thumbnail,
-                Price = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice
+                OriginalPrice = x.Product.OriginalPrice,
+                SalePrice = x.Product.SalePrice
             });
             if (model.SortOrder == "desc")
             {
@@ -203,7 +219,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 Id = cart.Id,
                 CustomerId = cart.CustomerId,
-                TotalPrice = pagedList.Items.Sum(x => x.Price * x.Quantity),
+                TotalPrice = pagedList.Items.Sum(x => (x.SalePrice > 0 ? x.SalePrice : x.OriginalPrice) * x.Quantity),
                 TotalQuantity = pagedList.Items.Sum(x => x.Quantity),
                 CartItems = pagedList
             };
@@ -215,7 +231,7 @@ namespace NET1814_MilkShop.Services.Services
         ) =>
             model.SortColumn?.ToLower().Replace(" ", "") switch
             {
-                "price" => item => item.Price,
+                "price" => item => item.SalePrice > 0 ? item.SalePrice : item.OriginalPrice,
                 _ => item => item.ProductName
             };
 
