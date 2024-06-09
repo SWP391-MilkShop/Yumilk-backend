@@ -85,8 +85,14 @@ namespace NET1814_MilkShop.API
 
             //Add Dependency Injection
             AddDI(services);
+            
+            //Add Infrastructure BackgroundJob
+            QuartzExtenstionHosting.AddQuartzBackgroundJobs(services);
+            
             //Add Email Setting
-            services.Configure<EmailSettingModel>(_configuration.GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
+            services.Configure<EmailSettingModel>(
+                _configuration
+                    .GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
             //Add Database
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
             //Add Exception Handler
@@ -108,10 +114,7 @@ namespace NET1814_MilkShop.API
                 );*/
                 services.AddPolicy(
                     "AllowAll",
-                    builder =>
-                    {
-                        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                    }
+                    builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }
                 );
             });
             //Add Authentication
@@ -159,7 +162,9 @@ namespace NET1814_MilkShop.API
 
         public void Configure(WebApplication app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment()) { }
+            if (env.IsDevelopment())
+            {
+            }
 
             app.UseDeveloperExceptionPage();
 
@@ -188,6 +193,7 @@ namespace NET1814_MilkShop.API
             });
             app.MapControllers();
         }
+
 
         private static void AddDI(IServiceCollection services)
         {

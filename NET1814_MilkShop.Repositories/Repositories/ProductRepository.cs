@@ -18,6 +18,13 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <param name="id"></param>
         /// <returns></returns>
         Task<Product?> GetByIdAsync(Guid id);
+        
+        /// <summary>
+        ///  Get product by id without including brand, category, unit, product status
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<Product?> GetIdNoIncludeAsync(Guid id);
 
         /// <summary>
         /// Get product by name for checking duplicate
@@ -57,7 +64,13 @@ namespace NET1814_MilkShop.Repositories.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Unit)
                 .Include(p => p.ProductStatus)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<Product?> GetIdNoIncludeAsync(Guid id)
+        {
+            return await _query.FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task<Product?> GetByNameAsync(string name)
