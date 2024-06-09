@@ -6,6 +6,7 @@ using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories;
+using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 
 namespace NET1814_MilkShop.Services.Services
@@ -15,15 +16,18 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetOrderAsync(OrderQueryModel model);
         Task<ResponseModel> GetOrderHistoryAsync(Guid customerId, OrderHistoryQueryModel model);
         Task<ResponseModel> GetOrderHistoryDetailAsync(Guid userId, Guid id);
+        Task<ResponseModel> CancelOrderAsync(Guid userId, Guid orderId);
     }
 
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public OrderService(IOrderRepository orderRepository)
+        public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork)
         {
             _orderRepository = orderRepository;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -264,13 +268,43 @@ namespace NET1814_MilkShop.Services.Services
                 PhoneNumber = order.PhoneNumber,
                 Address = order.Address,
                 Note = order.Note,
-                DetailModels = pModel,
+                OrderDetail = pModel,
                 TotalPrice = order.TotalPrice,
                 ShippingFee = order.ShippingFee,
                 TotalAmount = order.TotalAmount,
                 PaymentMethod = order.PaymentMethod,
+                OrderStatus = order.Status!.Name
             };
             return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
+        }
+
+        public async Task<ResponseModel> CancelOrderAsync(Guid userId, Guid orderId)
+        {
+            var order = await _orderRepository.GetByOrderIdAsync(orderId);
+            if (order == null || order.CustomerId != userId)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Đơn hàng"));
+            }
+
+            if (order.StatusId == 5)
+            {
+                return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
+            }
+
+            if (order.StatusId != 1)
+            {
+                return ResponseModel.BadRequest("Đơn hàng đang trong quá trình giao nên bạn không thể hủy.");
+            }
+
+            order.StatusId = 5;
+            _orderRepository.Update(order);
+            var res = await _unitOfWork.SaveChangesAsync();
+            if (res > 0)
+            {
+                return ResponseModel.Success(ResponseConstants.Cancel("đơn hàng", true), null);
+            }
+
+            return ResponseModel.Error(ResponseConstants.Cancel("đơn hàng", false));
         }
 
         private async Task<List<Product>> GetProductByOrderIdAsync(Guid id)
