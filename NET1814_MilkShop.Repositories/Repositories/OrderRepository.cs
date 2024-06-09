@@ -60,7 +60,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
                         .Include(o => o.Status)
                         .Include(o => o.OrderDetails)
                         .ThenInclude(o => o.Product).FirstOrDefaultAsync(o => o.Id == orderId)
-                    : await _query.FirstOrDefaultAsync(o => o.Id == orderId)
+                    : await _query.Include(o => o.OrderDetails).ThenInclude(o => o.Product)
+                        .FirstOrDefaultAsync(o => o.Id == orderId)
                 ;
         }
     }
