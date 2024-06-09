@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("CustomerAddresses")]
+[Table("customer_addresses")]
 public partial class CustomerAddress : IAuditableEntity
 {
     [Key]

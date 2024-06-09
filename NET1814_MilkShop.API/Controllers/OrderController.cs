@@ -34,5 +34,14 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);*/
             return ResponseExtension.Result(response);
         }
+        [HttpPatch]
+        [Route("/api/dashboard/orders/{id}/status")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> UpdateOrderStatus(Guid id, [FromBody] OrderStatusModel model)
+        {
+            _logger.Information("Update order status");
+            var response = await _orderService.UpdateOrderStatusAsync(id, model);
+            return ResponseExtension.Result(response);
+        }
     }
 }

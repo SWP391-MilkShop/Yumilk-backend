@@ -4,6 +4,7 @@ using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories;
+using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 
 namespace NET1814_MilkShop.Services.Services
@@ -11,15 +12,18 @@ namespace NET1814_MilkShop.Services.Services
     public interface IOrderService
     {
         Task<ResponseModel> GetOrderAsync(OrderQueryModel model);
+        Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model);
     }
 
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public OrderService(IOrderRepository orderRepository)
+        public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork)
         {
             _orderRepository = orderRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ResponseModel> GetOrderAsync(OrderQueryModel model)
@@ -144,5 +148,26 @@ namespace NET1814_MilkShop.Services.Services
                     order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
                 _ => order => order.Id, //chưa biết mặc định sort theo cái gì nên để tạm là id
             };
+
+        public async Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model)
+        {
+            var order = await _orderRepository.GetByIdAsync(id, includeDetails: false);
+            if(order == null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("đơn hàng"));
+            }
+            if(order.StatusId == model.StatusId)
+            {
+                return ResponseModel.Success(ResponseConstants.NoChangeIsMade, null);
+            }
+            order.StatusId = model.StatusId;
+            _orderRepository.Update(order);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), null);
+            }
+            return ResponseModel.Error(ResponseConstants.Update("trạng thái đơn hàng", false));
+        }
     }
 }

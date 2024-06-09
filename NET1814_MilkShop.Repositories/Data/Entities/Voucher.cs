@@ -5,7 +5,7 @@ using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("Vouchers")]
+[Table("vouchers")]
 public partial class Voucher : IAuditableEntity
 {
     [Key]

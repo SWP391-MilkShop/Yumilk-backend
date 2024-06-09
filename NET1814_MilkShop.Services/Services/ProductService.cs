@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
@@ -164,6 +165,10 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> CreateProductAsync(CreateProductModel model)
         {
+            if(model.SalePrice > model.OriginalPrice)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.InvalidSalePrice);
+            }
             #region Validate Brand, Category, Unit exist
             var brand = await _brandRepository.GetByIdAsync(model.BrandId);
             if (brand == null)
@@ -191,8 +196,8 @@ namespace NET1814_MilkShop.Services.Services
                 BrandId = model.BrandId,
                 CategoryId = model.CategoryId,
                 UnitId = model.UnitId,
-                StatusId = 1, //default status
-                IsActive = true,
+                StatusId = (int) ProductStatusId.SELLING, //default status is selling
+                IsActive = true, // default is active (published)
                 Thumbnail = model.Thumbnail
             };
             _productRepository.Add(product);
@@ -206,6 +211,10 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> UpdateProductAsync(Guid id, UpdateProductModel model)
         {
+            if (model.SalePrice > model.OriginalPrice)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.InvalidSalePrice);
+            }
             var product = await _productRepository.GetByIdAsync(id);
             if (product == null)
             {
