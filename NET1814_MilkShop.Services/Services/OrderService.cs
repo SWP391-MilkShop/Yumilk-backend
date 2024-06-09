@@ -23,11 +23,14 @@ namespace NET1814_MilkShop.Services.Services
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IProductRepository _productRepository;
 
-        public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork)
+        public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork,
+            IProductRepository productRepository)
         {
             _orderRepository = orderRepository;
             _unitOfWork = unitOfWork;
+            _productRepository = productRepository;
         }
 
         /// <summary>
@@ -300,6 +303,12 @@ namespace NET1814_MilkShop.Services.Services
             }
 
             order.StatusId = 5;
+            foreach (var o in order.OrderDetails)
+            {
+                o.Product.Quantity += o.Quantity;
+                _productRepository.Update(o.Product);
+            }
+
             _orderRepository.Update(order);
             var res = await _unitOfWork.SaveChangesAsync();
             if (res > 0)
