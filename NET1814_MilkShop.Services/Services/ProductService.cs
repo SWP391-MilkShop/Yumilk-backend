@@ -165,6 +165,10 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> CreateProductAsync(CreateProductModel model)
         {
+            if(model.SalePrice > model.OriginalPrice)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.InvalidSalePrice);
+            }
             #region Validate Brand, Category, Unit exist
             var brand = await _brandRepository.GetByIdAsync(model.BrandId);
             if (brand == null)
@@ -207,6 +211,10 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> UpdateProductAsync(Guid id, UpdateProductModel model)
         {
+            if (model.SalePrice > model.OriginalPrice)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.InvalidSalePrice);
+            }
             var product = await _productRepository.GetByIdAsync(id);
             if (product == null)
             {

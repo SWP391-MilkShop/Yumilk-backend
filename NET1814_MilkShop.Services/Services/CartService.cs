@@ -199,7 +199,8 @@ namespace NET1814_MilkShop.Services.Services
                 Quantity = x.Quantity,
                 ProductName = x.Product.Name,
                 Thumbnail = x.Product.Thumbnail,
-                Price = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice
+                OriginalPrice = x.Product.OriginalPrice,
+                SalePrice = x.Product.SalePrice
             });
             if (model.SortOrder == "desc")
             {
@@ -218,7 +219,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 Id = cart.Id,
                 CustomerId = cart.CustomerId,
-                TotalPrice = pagedList.Items.Sum(x => x.Price * x.Quantity),
+                TotalPrice = pagedList.Items.Sum(x => (x.SalePrice > 0 ? x.SalePrice : x.OriginalPrice) * x.Quantity),
                 TotalQuantity = pagedList.Items.Sum(x => x.Quantity),
                 CartItems = pagedList
             };
@@ -230,7 +231,7 @@ namespace NET1814_MilkShop.Services.Services
         ) =>
             model.SortColumn?.ToLower().Replace(" ", "") switch
             {
-                "price" => item => item.Price,
+                "price" => item => item.SalePrice > 0 ? item.SalePrice : item.OriginalPrice,
                 _ => item => item.ProductName
             };
 

@@ -192,6 +192,7 @@
 
         public const string OutOfStock = "Sản phẩm đã hết hàng";
         public const string NotEnoughQuantity = "Số lượng sản phẩm không đủ";
+        public const string InvalidSalePrice = "Giá khuyến mãi phải nhỏ hơn giá gốc";
 
         #endregion
         #region Cart
