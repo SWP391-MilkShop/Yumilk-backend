@@ -42,7 +42,6 @@ public class CheckPaymentStatusJob : IJob
 
         foreach (var order in orders)
         {
-            await Task.Delay(300);//delay 0.3s de tranh loop qua nhanh
             try
             {
                 if (order.OrderCode == null)
@@ -53,14 +52,15 @@ public class CheckPaymentStatusJob : IJob
 
                 if (order.StatusId == 5)
                 {
-                    _logger.LogInformation("Order {OrderId} is already cancelled and updated in product quantity",
-                        order.Id);
+                    _logger.LogInformation("OrderId {OrderId} code {OrderCode} is already cancelled and updated in product quantity",
+                        order.Id,order.OrderCode.Value);
                     continue;
                 }
                 
                 //Gọi API lấy payment status của PayOS
+                await Task.Delay(300); //Tranh request qua nhieu trong thoi gian ngan tranh bi block
                 var paymentStatus = await _paymentService.GetPaymentLinkInformation(order.OrderCode.Value);
-
+                _logger.LogInformation($"OrderId:{order.Id.ToString()} code:{order.OrderCode.Value} --> " + paymentStatus.Message);
                 if (paymentStatus.StatusCode == 500)
                 {
                     continue;
