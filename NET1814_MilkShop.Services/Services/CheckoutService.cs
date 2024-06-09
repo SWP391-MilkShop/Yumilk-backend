@@ -170,9 +170,9 @@ public class CheckoutService : ICheckoutService
         return total;
     }
 
-    private IEnumerable<OrderDetailModel> ToOrderDetailModel(List<CartDetail> list)
+    private IEnumerable<CheckoutOrderDetailModel> ToOrderDetailModel(List<CartDetail> list)
     {
-        var res = list.Select(x => new OrderDetailModel
+        var res = list.Select(x => new CheckoutOrderDetailModel
         {
             ProductId = x.ProductId,
             ProductName = x.Product.Name,

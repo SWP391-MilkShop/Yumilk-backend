@@ -1,4 +1,6 @@
 ﻿using System.Linq.Expressions;
+using Azure;
+using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
@@ -12,6 +14,9 @@ namespace NET1814_MilkShop.Services.Services
     public interface IOrderService
     {
         Task<ResponseModel> GetOrderAsync(OrderQueryModel model);
+        Task<ResponseModel> GetOrderHistoryAsync(Guid customerId, OrderHistoryQueryModel model);
+        Task<ResponseModel> GetOrderHistoryDetailAsync(Guid userId, Guid id);
+        Task<ResponseModel> CancelOrderAsync(Guid userId, Guid orderId);
         Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model);
     }
 
@@ -19,13 +24,21 @@ namespace NET1814_MilkShop.Services.Services
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IProductRepository _productRepository;
 
-        public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork)
+        public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork,
+            IProductRepository productRepository)
         {
             _orderRepository = orderRepository;
             _unitOfWork = unitOfWork;
+            _productRepository = productRepository;
         }
 
+        /// <summary>
+        /// đơn đặt hàng của các khách hàng
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>trả về danh sách các order của hệ thống</returns>
         public async Task<ResponseModel> GetOrderAsync(OrderQueryModel model)
         {
             var query = _orderRepository.GetOrdersQuery();
@@ -137,9 +150,191 @@ namespace NET1814_MilkShop.Services.Services
             );
         }
 
-        private static Expression<Func<Order, object>> GetSortProperty(
-            OrderQueryModel queryModel
-        ) =>
+        /// <summary>
+        /// lịch sử đặt hàng của khách hàng cụ thể
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="model"></param>
+        /// <returns>trả về danh sách các sản phẩm đã được đặt (toàn bộ danh sách kể cả hủy)</returns>
+        public async Task<ResponseModel> GetOrderHistoryAsync(Guid customerId, OrderHistoryQueryModel model)
+        {
+            var query = _orderRepository.GetOrderHistory(customerId);
+
+            #region filter
+
+            if (model.SearchTerm != null)
+            {
+                query = query.Where(o => o.OrderDetails.Any(c => c.Product.Name.Contains(model.SearchTerm)));
+            }
+
+            if (model.TotalAmount > 0)
+            {
+                query = query.Where(o => o.TotalAmount > model.TotalAmount);
+            }
+
+            if (model.FromOrderDate == null && model.ToOrderDate != null)
+            {
+                return ResponseModel.BadRequest("Phải có ngày bắt đầu trong trường hợp có ngày kết thúc");
+            }
+
+            if (model.FromOrderDate != null && model.ToOrderDate == null)
+            {
+                if (model.FromOrderDate.Value.Date > DateTime.Now.Date)
+                {
+                    return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+                }
+
+                query = query.Where(o =>
+                    o.CreatedAt.Date <= DateTime.Now.Date && o.CreatedAt.Date >= model.FromOrderDate.Value.Date);
+            }
+
+            if (model.FromOrderDate != null && model.ToOrderDate != null)
+            {
+                if (model.FromOrderDate.Value.Date > model.ToOrderDate.Value.Date)
+                {
+                    return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+                }
+
+                query = query.Where(o =>
+                    o.CreatedAt.Date <= model.ToOrderDate.Value.Date && o.CreatedAt >= model.FromOrderDate.Value.Date);
+            }
+
+            if (model.OrderStatus.HasValue)
+            {
+                query = query.Where(o => o.StatusId == model.OrderStatus);
+            }
+
+            #endregion
+
+            #region sort
+
+            query = "desc".Equals(model.SortOrder?.ToLower())
+                ? query.OrderByDescending(GetSortProperty(model))
+                : query.OrderBy(GetSortProperty(model));
+
+            #endregion
+
+            #region ToOrderHistoryModel
+
+            var orderHistoryQuery = query.Select(o => new OrderHistoryModel
+            {
+                OrderId = o.Id,
+                TotalAmount = o.TotalAmount,
+                OrderStatus = o.Status!.Name,
+                ProductList = o.OrderDetails
+                    .Where(u => u.OrderId == o.Id)
+                    .Select(h => h.Product.Name)
+                    .ToList()
+            });
+
+            #endregion
+
+            #region Paging
+
+            var pagedOrders = await PagedList<OrderHistoryModel>.CreateAsync(
+                orderHistoryQuery,
+                model.Page,
+                model.PageSize
+            );
+
+            // gán ngược lại productlist
+            // foreach (var orderHistory in pagedOrders.Items)
+            // {
+            //     var list = await GetProductByOrderIdAsync(orderHistory.OrderId);
+            //     orderHistory.ProductList = list.Select(x => x.Name).ToList();
+            // }
+
+            #endregion
+
+            return ResponseModel.Success(
+                ResponseConstants.Get("lịch sử đơn hàng", pagedOrders.TotalCount > 0),
+                pagedOrders
+            );
+        }
+
+        public async Task<ResponseModel> GetOrderHistoryDetailAsync(Guid userId, Guid orderId)
+        {
+            var order = await _orderRepository.GetByOrderIdAsync(orderId, true);
+            if (order == null || order.CustomerId != userId)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Đơn hàng"));
+            }
+
+            var pModel = order.OrderDetails.Select(x => new CheckoutOrderDetailModel
+            {
+                ProductId = x.ProductId,
+                ProductName = x.ProductName,
+                Quantity = x.Quantity,
+                UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
+                ItemPrice = x.ItemPrice
+            }).ToList();
+
+            var detail = new OrderDetailModel
+            {
+                RecieverName = "Tam thoi de la vay", //order.RecieverName (do chua update db nen chua co)
+                PhoneNumber = order.PhoneNumber,
+                Address = order.Address,
+                Note = order.Note,
+                OrderDetail = pModel,
+                TotalPrice = order.TotalPrice,
+                ShippingFee = order.ShippingFee,
+                TotalAmount = order.TotalAmount,
+                PaymentMethod = order.PaymentMethod,
+                OrderStatus = order.Status!.Name
+            };
+            return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
+        }
+
+        public async Task<ResponseModel> CancelOrderAsync(Guid userId, Guid orderId)
+        {
+            var order = await _orderRepository.GetByOrderIdAsync(orderId, false);
+            if (order == null || order.CustomerId != userId)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Đơn hàng"));
+            }
+
+            if (order.StatusId == 5)
+            {
+                return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
+            }
+
+            if (order.StatusId != 1)
+            {
+                return ResponseModel.BadRequest("Đơn hàng đang trong quá trình giao nên bạn không thể hủy.");
+            }
+
+            order.StatusId = 5;
+            foreach (var o in order.OrderDetails)
+            {
+                o.Product.Quantity += o.Quantity;
+                _productRepository.Update(o.Product);
+            }
+
+            _orderRepository.Update(order);
+            var res = await _unitOfWork.SaveChangesAsync();
+            if (res > 0)
+            {
+                return ResponseModel.Success(ResponseConstants.Cancel("đơn hàng", true), null);
+            }
+
+            return ResponseModel.Error(ResponseConstants.Cancel("đơn hàng", false));
+        }
+
+        private async Task<List<Product>> GetProductByOrderIdAsync(Guid id)
+        {
+            List<Product> list = new();
+            var order = await _orderRepository.GetByOrderIdAsync(id, true);
+            foreach (var a in order!.OrderDetails)
+            {
+                list.Add(a.Product);
+            }
+
+            return list;
+        }
+
+        private static Expression<Func<Order, object>> GetSortProperty<T>(
+            T queryModel
+        ) where T : QueryModel =>
             queryModel.SortColumn?.ToLower().Replace(" ", "") switch
             {
                 "totalamount" => order => order.TotalAmount,
