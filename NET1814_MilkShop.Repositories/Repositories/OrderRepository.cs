@@ -12,7 +12,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         void Update(Order order);
         void AddRange(IEnumerable<OrderDetail> list);
         Task<Order?> GetByCodeAsync(int orderCode);
-        Task<Order?> GetByOrderIdAsync(Guid orderId);
+        Task<Order?> GetByOrderIdAsync(Guid orderId, bool include);
     }
 
     public class OrderRepository : Repository<Order>, IOrderRepository
@@ -53,13 +53,15 @@ namespace NET1814_MilkShop.Repositories.Repositories
                 .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
         }
 
-        public async Task<Order?> GetByOrderIdAsync(Guid orderId)
+        public async Task<Order?> GetByOrderIdAsync(Guid orderId, bool include)
         {
-            return await _query
-                .Include(o => o.Status)
-                .Include(o => o.OrderDetails)
-                .ThenInclude(o => o.Product)
-                .FirstOrDefaultAsync(o => o.Id == orderId);
+            return include
+                    ? await _query
+                        .Include(o => o.Status)
+                        .Include(o => o.OrderDetails)
+                        .ThenInclude(o => o.Product).FirstOrDefaultAsync(o => o.Id == orderId)
+                    : await _query.FirstOrDefaultAsync(o => o.Id == orderId)
+                ;
         }
     }
 }
