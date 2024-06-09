@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
@@ -11,6 +9,8 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using NET1814_MilkShop.Services.Services;
+using System.Reflection;
+using System.Text;
 
 namespace NET1814_MilkShop.API
 {
@@ -235,6 +235,9 @@ namespace NET1814_MilkShop.API
 
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
             services.AddScoped<IProductImageService, ProductImageService>();
+
+            services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
+            services.AddScoped<IProductReviewService, ProductReviewService>();
 
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<IAddressService, AddressService>();

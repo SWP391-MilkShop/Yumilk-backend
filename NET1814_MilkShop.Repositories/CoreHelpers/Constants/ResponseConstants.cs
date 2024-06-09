@@ -38,6 +38,17 @@
         }
 
         /// <summary>
+        /// $"Hủy {name} thành công" : $"Hủy {name} không thành công"
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static string Cancel(string name, bool result)
+        {
+            return result ? $"Hủy {name} thành công" : $"Hủy {name} không thành công";
+        }
+
+        /// <summary>
         /// $"Lấy {name} thành công" : $"Không tìm thấy {name} phù hợp"
         /// </summary>
         /// <param name="name"></param>
@@ -158,8 +169,10 @@
 
         public const string ResetPasswordLink =
             "Link đặt lại mật khẩu đã được gửi đến email của bạn";
+
         public const string ActivateAccountLink =
             "Link kích hoạt tài khoản đã được gửi đến email của bạn";
+
         public const string Banned = "Tài khoản của bạn đã bị khóa";
         public const string AccountActivated = "Tài khoản của bạn đã được kích hoạt";
         public const string WrongCode = "Mã xác thực không đúng";
@@ -182,9 +195,20 @@
 
         public const string InvalidUrl = "Url không hợp lệ";
         public const string InvalidFilterDate = "Ngày bắt đầu phải trước hoặc trùng với ngày kết thúc";
-        #region Cart
+        #region Review
 
+        public const string ReviewConstraint = "Bạn không thể đánh giá sản phẩm khi chưa mua hàng hoặc đơn hàng chưa được giao";
+        public const string ReviewPerOrder = "Bạn chỉ được đánh giá sản phẩm một lần trên mỗi đơn hàng";
+
+        #endregion
+        #region Product
+
+        public const string OutOfStock = "Sản phẩm đã hết hàng";
         public const string NotEnoughQuantity = "Số lượng sản phẩm không đủ";
+        public const string InvalidSalePrice = "Giá khuyến mãi phải nhỏ hơn giá gốc";
+
+        #endregion
+        #region Cart
 
         /// <summary>
         /// "Thêm sản phẩm vào giỏ hàng thành công" : "Thêm sản phẩm vào giỏ hàng không thành công"
