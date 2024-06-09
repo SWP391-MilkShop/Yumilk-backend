@@ -55,9 +55,20 @@ namespace NET1814_MilkShop.API.Controllers
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> GetOrderHistoryDetail(Guid id)
         {
-            _logger.Information("Get order history by id");
+            _logger.Information("Get order detail history");
             var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
             var res = await _orderService.GetOrderHistoryDetailAsync(userId, id);
+            return ResponseExtension.Result(res);
+        }
+
+        [HttpPatch("/api/customer/orders/{id}/cancel")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        [ServiceFilter(typeof(UserExistsFilter))]
+        public async Task<IActionResult> CancelOrder(Guid id)
+        {
+            _logger.Information("Cancel order");
+            var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
+            var res = await _orderService.CancelOrderAsync(userId, id);
             return ResponseExtension.Result(res);
         }
 
