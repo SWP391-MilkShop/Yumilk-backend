@@ -9,6 +9,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         IQueryable<Order> GetOrdersQuery();
         IQueryable<Order> GetOrderHistory(Guid customerId);
         void Add(Order order);
+        void Update(Order order);
         void AddRange(IEnumerable<OrderDetail> list);
         Task<Order?> GetByCodeAsync(int orderCode);
         Task<Order?> GetByOrderIdAsync(Guid orderId);
@@ -56,8 +57,6 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             return await _query
                 .Include(o => o.Status)
-                .Include(o => o.Customer)
-                .ThenInclude(o => o.User)
                 .Include(o => o.OrderDetails)
                 .ThenInclude(o => o.Product)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
