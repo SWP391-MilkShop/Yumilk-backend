@@ -21,7 +21,6 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<Order?> GetByCodeAsync(int orderCode);
         Task<Order?> GetByIdNoInlcudeAsync(Guid id);
         Task<List<Order>?> GetAllCodeAsync();
-=======
         Task<Order?> GetByOrderIdAsync(Guid orderId, bool include);
 
     }
@@ -68,15 +67,16 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             return await _query.FirstOrDefaultAsync(x => x.Id == id);
         }
-        
+
 
         public async Task<List<Order>?> GetAllCodeAsync()
         {
             return await _query
                 .Include(o => o.OrderDetails)
                 .ThenInclude(o => o.Product)
-                .Where(x=>x.OrderCode != null)
+                .Where(x => x.OrderCode != null)
                 .ToListAsync();
+        }
 
         public async Task<Order?> GetByOrderIdAsync(Guid orderId, bool include)
         {
