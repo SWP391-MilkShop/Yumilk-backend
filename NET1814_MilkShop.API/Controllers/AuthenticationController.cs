@@ -1,10 +1,12 @@
-﻿using Azure;
+﻿using System.Text.Json.Serialization;
+using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Services.Services;
+using System.Text.Json.Serialization;
 using ILogger = Serilog.ILogger;
 
 namespace NET1814_MilkShop.API.Controllers
@@ -93,7 +95,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPost("activate-account")]
-        public async Task<IActionResult> ActivateAccount([FromBody] string email)
+        public async Task<IActionResult> ActivateAccount([FromQuery]string email)
         {
             _logger.Information("Activate Account");
             var response = await _authenticationService.ActivateAccountAsync(email);
