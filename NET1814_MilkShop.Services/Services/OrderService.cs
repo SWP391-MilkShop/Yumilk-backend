@@ -223,8 +223,11 @@ namespace NET1814_MilkShop.Services.Services
                 OrderStatus = o.Status!.Name,
                 ProductList = o.OrderDetails
                     .Where(u => u.OrderId == o.Id)
-                    .Select(h => h.Product.Name)
-                    .ToList()
+                    .Select(h => new
+                    {
+                        ProductName = h.Product.Name,
+                        Thumbnail = h.Thumbnail
+                    })
             });
 
             #endregion
@@ -266,12 +269,13 @@ namespace NET1814_MilkShop.Services.Services
                 ProductName = x.ProductName,
                 Quantity = x.Quantity,
                 UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
-                ItemPrice = x.ItemPrice
+                ItemPrice = x.ItemPrice,
+                ThumbNail = x.Thumbnail
             }).ToList();
 
             var detail = new OrderDetailModel
             {
-                RecieverName = "Tam thoi de la vay", //order.RecieverName (do chua update db nen chua co)
+                RecieverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
                 PhoneNumber = order.PhoneNumber,
                 Address = order.Address,
                 Note = order.Note,
@@ -347,14 +351,16 @@ namespace NET1814_MilkShop.Services.Services
         public async Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model)
         {
             var order = await _orderRepository.GetByIdAsync(id, includeDetails: false);
-            if(order == null)
+            if (order == null)
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("đơn hàng"));
             }
-            if(order.StatusId == model.StatusId)
+
+            if (order.StatusId == model.StatusId)
             {
                 return ResponseModel.Success(ResponseConstants.NoChangeIsMade, null);
             }
+
             order.StatusId = model.StatusId;
             _orderRepository.Update(order);
             var result = await _unitOfWork.SaveChangesAsync();
@@ -362,6 +368,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), null);
             }
+
             return ResponseModel.Error(ResponseConstants.Update("trạng thái đơn hàng", false));
         }
     }

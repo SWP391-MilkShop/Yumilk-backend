@@ -7,4 +7,5 @@ public class CheckoutOrderDetailModel
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal ItemPrice { get; set; }
+    public string? ThumbNail { get; set; }
 }

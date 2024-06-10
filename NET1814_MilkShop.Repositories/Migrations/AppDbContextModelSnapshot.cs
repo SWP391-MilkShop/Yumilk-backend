@@ -414,6 +414,10 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<string>("Thumbnail")
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("thumbnail");
+
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,3)")
                         .HasColumnName("unit_price");
