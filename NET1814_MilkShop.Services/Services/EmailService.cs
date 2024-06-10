@@ -64,7 +64,7 @@ namespace NET1814_MilkShop.Services.Services
                 var model = new SendMailModel
                 {
                     Receiver = receiveEmail,
-                    Subject = "Password Reset",
+                    Subject = "Đặt lại mật khẩu",
                     Body = MailBody.ResetPassword(name,token)
                 };
                 SendMail(model);
@@ -79,7 +79,7 @@ namespace NET1814_MilkShop.Services.Services
                 var model = new SendMailModel
                 {
                     Receiver = receiveEmail,
-                    Subject = "Account Verification",
+                    Subject = "Kích hoạt tài khoản",
                     Body = MailBody.ActivateAccount(name, token)
                 };
                 SendMail(model);
