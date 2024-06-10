@@ -18,6 +18,9 @@ public partial class OrderDetail : IAuditableEntity
 
     public decimal ItemPrice { get; set; }
 
+    [Column("thumbnail", TypeName = "nvarchar(255)")]
+    public string? Thumbnail { get; set; }
+
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
 
