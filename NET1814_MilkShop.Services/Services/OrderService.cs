@@ -225,8 +225,7 @@ namespace NET1814_MilkShop.Services.Services
                     .Where(u => u.OrderId == o.Id)
                     .Select(h => new
                     {
-                        ProductName = h.Product.Name,
-                        Thumbnail = h.Thumbnail
+                        h.Product.Name, h.Thumbnail
                     })
             });
 
