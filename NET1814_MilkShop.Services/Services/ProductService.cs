@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.IdentityModel.Tokens;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
@@ -8,6 +8,7 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
+using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -60,20 +61,22 @@ namespace NET1814_MilkShop.Services.Services
                 SalePrice = product.SalePrice,
                 Status = product.ProductStatus!.Name,
                 Thumbnail = product.Thumbnail,
-                IsActive = product.IsActive
+                AverageRating = product.ProductReviews.IsNullOrEmpty() ? 0 : product.ProductReviews.Average(pr => (double) pr.Rating),
+                OrderCount = product.OrderDetails.IsNullOrEmpty() ? 0 : product.OrderDetails.Sum(od => od.Quantity),
+                IsActive = product.IsActive,
+                CreatedAt = product.CreatedAt
             };
 
         public async Task<ResponseModel> GetProductsAsync(ProductQueryModel queryModel)
         {
-            var query = _productRepository.GetProductsQuery();
-            //Normalize search term, brand, category, unit, status
+            var query = _productRepository.GetProductsQuery(includeRating: true, includeOrderCount: true);
+            //normalize search term, brand, category, unit, status
             var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
             var brand = StringExtension.Normalize(queryModel.Brand);
             var category = StringExtension.Normalize(queryModel.Category);
             var unit = StringExtension.Normalize(queryModel.Unit);
             var status = StringExtension.Normalize(queryModel.Status);
             #region Filter, Search
-
             //thu gọn thành 1 where thôi
             query = query.Where(p =>
                 (queryModel.IsActive.HasValue ? p.IsActive == queryModel.IsActive.Value : true)
@@ -87,9 +90,9 @@ namespace NET1814_MilkShop.Services.Services
                     || p.Category!.Name.Contains(searchTerm)
                 )
                 //filter theo brand, category, unit, status, minPrice, maxPrice
-                && (string.IsNullOrEmpty(brand) || string.Equals(p.Brand!.Name, brand))
-                && (string.IsNullOrEmpty(category) || string.Equals(p.Category!.Name, category))
-                && (string.IsNullOrEmpty(unit) || string.Equals(p.Unit!.Name, unit))
+                && (string.IsNullOrEmpty(brand) || string.Equals(p.Brand, brand))
+                && (string.IsNullOrEmpty(category) || string.Equals(p.Category, category))
+                && (string.IsNullOrEmpty(unit) || string.Equals(p.Unit, unit))
                 && (string.IsNullOrEmpty(status) || string.Equals(p.ProductStatus!.Name, status))
                 && (queryModel.MinPrice <= 0 || p.SalePrice >= queryModel.MinPrice)
                 && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice)
@@ -109,13 +112,8 @@ namespace NET1814_MilkShop.Services.Services
             }
 
             #endregion
-
-            #region Convert to ProductModel
-
+            //Convert to ProductModel
             var productModelQuery = query.Select(p => ToProductModel(p));
-
-            #endregion
-
             #region Pagination
 
             var products = await PagedList<ProductModel>.CreateAsync(
@@ -125,7 +123,6 @@ namespace NET1814_MilkShop.Services.Services
             );
 
             #endregion
-
 
             return ResponseModel.Success(
                 ResponseConstants.Get("sản phẩm", products.TotalCount > 0),
@@ -143,16 +140,18 @@ namespace NET1814_MilkShop.Services.Services
         ) =>
             queryModel.SortColumn?.ToLower().Replace(" ", "") switch
             {
-                "name" => product => product.Name,
-                "saleprice" => product => product.SalePrice,
-                "quantity" => product => product.Quantity,
-                "createdat" => product => product.CreatedAt,
+                "name" => p => p.Name,
+                "saleprice" => p => p.SalePrice,
+                "quantity" => p => p.Quantity,
+                "createdat" => p => p.CreatedAt,
+                "rating" => p => p.ProductReviews.Any() ? p.ProductReviews.Average(pr => (double)pr.Rating) : 0.0,
+                "ordercount" => p => p.OrderDetails.Sum(od => od.Quantity),
                 _ => product => product.Id,
             };
 
         public async Task<ResponseModel> GetProductByIdAsync(Guid id)
         {
-            var product = await _productRepository.GetByIdAsync(id);
+            var product = await _productRepository.GetByIdAsync(id, includeRating: true, includeOrderCount: true);
             if (product == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
@@ -215,7 +214,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest(ResponseConstants.InvalidSalePrice);
             }
-            var product = await _productRepository.GetByIdAsync(id);
+            var product = await _productRepository.GetByIdNoIncludeAsync(id);
             if (product == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
@@ -293,7 +292,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> DeleteProductAsync(Guid id)
         {
-            var product = await _productRepository.GetByIdAsync(id);
+            var product = await _productRepository.GetByIdNoIncludeAsync(id);
             if (product == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
