@@ -22,7 +22,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<Order?> GetByIdNoInlcudeAsync(Guid id);
         Task<List<Order>?> GetAllCodeAsync();
         Task<Order?> GetByOrderIdAsync(Guid orderId, bool include);
-
+        Task<bool> IsExistOrderCode(int id);
     }
 
     public class OrderRepository : Repository<Order>, IOrderRepository
@@ -89,6 +89,12 @@ namespace NET1814_MilkShop.Repositories.Repositories
                         .FirstOrDefaultAsync(o => o.Id == orderId)
                 ;
         }
+
+        public async Task<bool> IsExistOrderCode(int id)
+        {
+            return await _query.AnyAsync(x => x.OrderCode == id);
+        }
+
         public Task<Order?> GetByIdAsync(Guid id, bool includeDetails)
         {
             var query = includeDetails ? _query.Include(o => o.OrderDetails) : _query;
