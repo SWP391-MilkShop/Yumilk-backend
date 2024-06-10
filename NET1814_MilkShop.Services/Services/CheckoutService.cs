@@ -21,13 +21,15 @@ public class CheckoutService : ICheckoutService
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IPaymentService _paymentService;
 
     public CheckoutService(
         IUnitOfWork unitOfWork,
         IOrderRepository orderRepository,
         IProductRepository productRepository,
         ICartRepository cartRepository,
-        ICustomerRepository customerRepository
+        ICustomerRepository customerRepository,
+        IPaymentService paymentService
     )
     {
         _customerRepository = customerRepository;
@@ -35,21 +37,17 @@ public class CheckoutService : ICheckoutService
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
+        _paymentService = paymentService;
     }
 
     public async Task<ResponseModel> Checkout(Guid userId, CheckoutModel model)
     {
-        if (model.PaymentMethod == "PAYOS")
-        {
-            // tạo link payos trong đây
-        }
-
         var cart = await _cartRepository.GetByCustomerIdAsync(userId, true);
         if (cart == null)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Giỏ hàng"));
         }
-        
+
         if (!cart.CartDetails.Any())
         {
             return ResponseModel.Success(ResponseConstants.CartIsEmpty, cart.CartDetails);
@@ -105,7 +103,8 @@ public class CheckoutService : ICheckoutService
             PhoneNumber = address.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
             Note = model.Note,
             PaymentMethod = model.PaymentMethod,
-            StatusId = (int) OrderStatusId.PENDING
+            StatusId = (int)OrderStatusId.PENDING,
+            OrderCode = await GenerateOrderCode()
         };
         _orderRepository.Add(orders);
 
@@ -151,11 +150,28 @@ public class CheckoutService : ICheckoutService
                 Note = orders.Note,
                 OrderDetail = ToOrderDetailModel(cartTemp),
             };
-            
+            if (model.PaymentMethod == "PAYOS")
+            {
+                var paymentLink = await _paymentService.CreatePaymentLink(orders.OrderCode.Value);
+                return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), paymentLink);
+            }
+
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
         return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
+    }
+
+    private async Task<int> GenerateOrderCode()
+    {
+        Random random = new Random();
+        int orderCode;
+        do
+        {
+            orderCode = random.Next(0, 10000000);
+        } while (await _orderRepository.IsExistOrderCode(orderCode));
+
+        return orderCode;
     }
 
     private decimal GetTotalPrice(List<CartDetail> list)
