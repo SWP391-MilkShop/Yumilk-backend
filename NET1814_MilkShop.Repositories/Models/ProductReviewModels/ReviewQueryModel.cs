@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Numerics;
 
 namespace NET1814_MilkShop.Repositories.Models.ProductReviewModels
 {

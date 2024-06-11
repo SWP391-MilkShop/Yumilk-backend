@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
@@ -19,6 +20,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> CreateProductAsync(CreateProductModel model);
         Task<ResponseModel> UpdateProductAsync(Guid id, UpdateProductModel model);
         Task<ResponseModel> DeleteProductAsync(Guid id);
+        Task<ResponseModel> GetProductStatsAsync(ProductStatsQueryModel queryModel);
     }
 
     public class ProductService : IProductService
@@ -28,6 +30,7 @@ namespace NET1814_MilkShop.Services.Services
         private readonly ICategoryRepository _categoryRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IProductStatusRepository _productStatusRepository;
+        private readonly IOrderDetailRepository _orderDetailRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public ProductService(
@@ -37,7 +40,8 @@ namespace NET1814_MilkShop.Services.Services
             IUnitRepository unitRepository,
             IProductStatusRepository productStatusRepository,
             IUnitOfWork unitOfWork
-        )
+,
+            IOrderDetailRepository orderDetailRepository)
         {
             _productRepository = productRepository;
             _brandRepository = brandRepository;
@@ -45,6 +49,7 @@ namespace NET1814_MilkShop.Services.Services
             _unitRepository = unitRepository;
             _productStatusRepository = productStatusRepository;
             _unitOfWork = unitOfWork;
+            _orderDetailRepository = orderDetailRepository;
         }
 
         private static ProductModel ToProductModel(Product product) =>
@@ -164,7 +169,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> CreateProductAsync(CreateProductModel model)
         {
-            if(model.SalePrice > model.OriginalPrice)
+            if (model.SalePrice > model.OriginalPrice)
             {
                 return ResponseModel.BadRequest(ResponseConstants.InvalidSalePrice);
             }
@@ -195,7 +200,7 @@ namespace NET1814_MilkShop.Services.Services
                 BrandId = model.BrandId,
                 CategoryId = model.CategoryId,
                 UnitId = model.UnitId,
-                StatusId = (int) ProductStatusId.SELLING, //default status is selling
+                StatusId = (int)ProductStatusId.SELLING, //default status is selling
                 IsActive = true, // default is active (published)
                 Thumbnail = model.Thumbnail
             };
@@ -304,6 +309,37 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.Success(ResponseConstants.Delete("sản phẩm", true), null);
             }
             return ResponseModel.Error(ResponseConstants.Delete("sản phẩm", false));
+        }
+
+        public async Task<ResponseModel> GetProductStatsAsync(ProductStatsQueryModel queryModel)
+        {
+            var from = queryModel.From ?? DateTime.Now.AddDays(-30);
+            var to = queryModel.To ?? DateTime.Now;
+            var query = _productRepository.GetProductQueryNoInclude().Where(p => p.CreatedAt >= from && p.CreatedAt <= to);
+            var orderDetailQuery = _orderDetailRepository.GetOrderDetailQuery()
+                .Where(od => od.CreatedAt >= from && od.CreatedAt <= to
+                && od.Order.StatusId == (int)OrderStatusId.DELIVERED);
+            //get total products sold
+            var totalProductsSold = await orderDetailQuery.SumAsync(o => o.Quantity);
+            //get total products sold per category
+            var categoryQuery = query.Include(p => p.Category);
+            var totalSoldPerCategory = await categoryQuery.Join(orderDetailQuery, p => p.Id, od => od.ProductId, (p, od) => new { p.Category!.Name, od.Quantity })
+            .GroupBy(x => x.Name)
+            .Select(g => new { Category = g.Key, TotalSold = g.Sum(x => x.Quantity) })
+            .ToDictionaryAsync(x => x.Category, x => x.TotalSold);
+            //get total products sold per brand
+            var brandQuery = query.Include(p => p.Brand);
+            var totalSoldPerBrand = await brandQuery.Join(orderDetailQuery, p => p.Id, od => od.ProductId, (p, od) => new { p.Brand!.Name, od.Quantity })
+            .GroupBy(x => x.Name)
+            .Select(g => new { Brand = g.Key, TotalSold = g.Sum(x => x.Quantity) })
+            .ToDictionaryAsync(x => x.Brand, x => x.TotalSold);
+            var stats = new ProductStatsModel
+            {
+                TotalSold = totalProductsSold,
+                TotalSoldPerCategory = totalSoldPerCategory,
+                TotalSoldPerBrand = totalSoldPerBrand
+            };
+            return ResponseModel.Success(ResponseConstants.Get("thống kê sản phẩm", true), stats);
         }
     }
 }

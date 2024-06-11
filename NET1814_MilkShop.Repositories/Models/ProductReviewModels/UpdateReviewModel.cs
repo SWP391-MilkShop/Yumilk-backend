@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace NET1814_MilkShop.Repositories.Models.ProductReviewModels
+﻿namespace NET1814_MilkShop.Repositories.Models.ProductReviewModels
 {
     public class UpdateReviewModel
     {

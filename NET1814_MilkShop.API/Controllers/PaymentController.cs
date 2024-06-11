@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
 using NET1814_MilkShop.API.CoreHelpers.Extensions;
-using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
 

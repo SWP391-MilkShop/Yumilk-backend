@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
-using NET1814_MilkShop.API.CoreHelpers.Extensions;
-using NET1814_MilkShop.Repositories.Models.OrderModels;
+﻿using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
 
@@ -21,66 +17,6 @@ namespace NET1814_MilkShop.API.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        [Route("/api/dashboard/orders")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> GetOrders([FromQuery] OrderQueryModel queryModel)
-        {
-            _logger.Information("Get all orders");
-            var response = await _orderService.GetOrderAsync(queryModel);
-            /*if (response.Status == "Error")
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);*/
-            return ResponseExtension.Result(response);
-        }
 
-        #region OrderHistory
-
-        [HttpGet]
-        [Route("/api/customer/orders")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
-        [ServiceFilter(typeof(UserExistsFilter))]
-        public async Task<IActionResult> GetOrderHistory([FromQuery] OrderHistoryQueryModel model)
-        {
-            _logger.Information("Get order history");
-            var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
-            var res = await _orderService.GetOrderHistoryAsync(userId, model);
-            return ResponseExtension.Result(res);
-        }
-
-        [HttpGet("/api/customer/orders/{id}")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
-        [ServiceFilter(typeof(UserExistsFilter))]
-        public async Task<IActionResult> GetOrderHistoryDetail(Guid id)
-        {
-            _logger.Information("Get order detail history");
-            var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
-            var res = await _orderService.GetOrderHistoryDetailAsync(userId, id);
-            return ResponseExtension.Result(res);
-        }
-
-        [HttpPatch("/api/customer/orders/{id}/cancel")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
-        [ServiceFilter(typeof(UserExistsFilter))]
-        public async Task<IActionResult> CancelOrder(Guid id)
-        {
-            _logger.Information("Cancel order");
-            var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
-            var res = await _orderService.CancelOrderAsync(userId, id);
-            return ResponseExtension.Result(res);
-        }
-
-        #endregion
-        [HttpPatch]
-        [Route("/api/dashboard/orders/{id}/status")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> UpdateOrderStatus(Guid id, [FromBody] OrderStatusModel model)
-        {
-            _logger.Information("Update order status");
-            var response = await _orderService.UpdateOrderStatusAsync(id, model);
-            return ResponseExtension.Result(response);
-        }
     }
 }

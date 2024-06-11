@@ -15,7 +15,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <param name="includeOrderCount"></param>
         /// <returns></returns>
         IQueryable<Product> GetProductsQuery(bool includeRating, bool includeOrderCount);
-
+        IQueryable<Product> GetProductsQuery();
+        IQueryable<Product> GetProductQueryNoInclude();
         /// <summary>
         /// Get product by id with corresponding brand, category, unit, product status
         /// And product reviews, order details if includeRating and includeOrderCount is true
@@ -25,6 +26,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <param name="includeOrderCount"></param>
         /// <returns></returns>
         Task<Product?> GetByIdAsync(Guid id, bool includeRating, bool includeOrderCount);
+        Task<Product?> GetByIdAsync(Guid id);
 
         /// <summary>
         ///  Get product by id without including brand, category, unit, product status
@@ -87,5 +89,9 @@ namespace NET1814_MilkShop.Repositories.Repositories
             return _query.AnyAsync(x => x.Id == id);
         }
 
+        public IQueryable<Product> GetProductQueryNoInclude()
+        {
+            return _query;
+        }
     }
 }

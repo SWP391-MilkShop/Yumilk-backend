@@ -80,7 +80,7 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
         {
             _context.Dispose();
         }
-        
+
         public void Detach<TEntity>(TEntity entity) where TEntity : class
         {
             _context.Entry(entity).State = EntityState.Detached;

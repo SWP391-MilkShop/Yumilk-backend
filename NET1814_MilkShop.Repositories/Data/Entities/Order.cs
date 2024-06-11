@@ -15,7 +15,7 @@ public partial class Order : IAuditableEntity
 
     public decimal ShippingFee { get; set; }
 
-    public decimal TotalAmount { get; set; }
+    public decimal TotalAmount { get; set; } // TotalPrice + ShippingFee
 
     public int VoucherId { get; set; }
 

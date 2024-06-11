@@ -1,15 +1,15 @@
-﻿using System.Net;
-using System.Net.Mail;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using NET1814_MilkShop.Repositories.Models.MailModels;
 using NET1814_MilkShop.Services.CoreHelpers;
+using System.Net;
+using System.Net.Mail;
 
 namespace NET1814_MilkShop.Services.Services
 {
     public interface IEmailService
     {
         void SendPasswordResetEmail(string receiveEmail, string token, string name);
-        void SendVerificationEmail(string receiveEmail, string token,string name);
+        void SendVerificationEmail(string receiveEmail, string token, string name);
     }
 
     public class EmailService : IEmailService
@@ -61,13 +61,13 @@ namespace NET1814_MilkShop.Services.Services
             string name
         )
         {
-                var model = new SendMailModel
-                {
-                    Receiver = receiveEmail,
-                    Subject = "Password Reset",
-                    Body = MailBody.ResetPassword(name,token)
-                };
-                SendMail(model);
+            var model = new SendMailModel
+            {
+                Receiver = receiveEmail,
+                Subject = "Đặt lại mật khẩu",
+                Body = MailBody.ResetPassword(name, token)
+            };
+            SendMail(model);
         }
 
         public void SendVerificationEmail( /*CustomerModel user*/
@@ -76,13 +76,13 @@ namespace NET1814_MilkShop.Services.Services
             string name
         )
         {
-                var model = new SendMailModel
-                {
-                    Receiver = receiveEmail,
-                    Subject = "Account Verification",
-                    Body = MailBody.ActivateAccount(name, token)
-                };
-                SendMail(model);
+            var model = new SendMailModel
+            {
+                Receiver = receiveEmail,
+                Subject = "Kích hoạt tài khoản",
+                Body = MailBody.ActivateAccount(name, token)
+            };
+            SendMail(model);
         }
     }
 }
