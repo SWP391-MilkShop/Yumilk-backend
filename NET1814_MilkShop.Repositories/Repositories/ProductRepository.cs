@@ -18,7 +18,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <param name="id"></param>
         /// <returns></returns>
         Task<Product?> GetByIdAsync(Guid id);
-        
+
         /// <summary>
         ///  Get product by id without including brand, category, unit, product status
         /// </summary>

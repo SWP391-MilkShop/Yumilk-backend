@@ -53,12 +53,12 @@ namespace NET1814_MilkShop.Services.Services
             }
             //include order details
             var order = await _orderRepository.GetByIdAsync(model.OrderId, includeDetails: true);
-            if (order == null) 
+            if (order == null)
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Đơn hàng"));
             }
             var IsContain = order.OrderDetails.Any(x => x.ProductId == productId);
-            if (!IsContain || order.StatusId != (int) OrderStatusId.DELIVERED) // Để tạm 4 là đã giao hàng
+            if (!IsContain || order.StatusId != (int)OrderStatusId.DELIVERED) // Để tạm 4 là đã giao hàng
             {
                 return ResponseModel.BadRequest(ResponseConstants.ReviewConstraint);
             }
@@ -78,7 +78,7 @@ namespace NET1814_MilkShop.Services.Services
             };
             _productReviewRepository.Add(review);
             var result = await _unitOfWork.SaveChangesAsync();
-            if(result > 0)
+            if (result > 0)
             {
                 return ResponseModel.Success(ResponseConstants.Create("đánh giá sản phẩm", true), null);
             }

@@ -17,6 +17,6 @@ namespace NET1814_MilkShop.API.Controllers
             _logger = logger;
         }
 
-        
+
     }
 }

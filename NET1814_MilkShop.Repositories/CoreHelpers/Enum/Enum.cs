@@ -2,7 +2,7 @@
 {
     public enum OrderStatusId
     {
-        PENDING =1,
+        PENDING = 1,
         PROCESSING = 2,
         SHIPPING = 3,
         DELIVERED = 4,
@@ -18,6 +18,6 @@
     {
         SELLING = 1,
         PRE_ORDER = 2,
-        OUT_OF_STOCK = 3 
+        OUT_OF_STOCK = 3
     }
 }

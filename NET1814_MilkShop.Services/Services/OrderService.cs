@@ -226,7 +226,8 @@ namespace NET1814_MilkShop.Services.Services
                     .Where(u => u.OrderId == o.Id)
                     .Select(h => new
                     {
-                        h.Product.Name, h.Thumbnail
+                        h.Product.Name,
+                        h.Thumbnail
                     })
             });
 
@@ -374,7 +375,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> GetOrderStatsAsync(OrderStatsQueryModel queryModel)
         {
-            if(queryModel.FromOrderDate > DateTime.Now)
+            if (queryModel.FromOrderDate > DateTime.Now)
             {
                 return ResponseModel.BadRequest(ResponseConstants.InvalidFromDate);
             }
@@ -389,7 +390,7 @@ namespace NET1814_MilkShop.Services.Services
             var to = queryModel.ToOrderDate ?? DateTime.Now;
             query = query.Where(o => o.CreatedAt >= from && o.CreatedAt <= to);
             // only count delivered orders
-            var delivered = query.Where(o => o.StatusId == (int) OrderStatusId.DELIVERED);
+            var delivered = query.Where(o => o.StatusId == (int)OrderStatusId.DELIVERED);
             var totalOrdersPerStatus = await query.GroupBy(o => o.Status).ToDictionaryAsync(g => g.Key!.Name.ToUpper(), g => g.Count());
             var stats = new OrderStatsModel
             {

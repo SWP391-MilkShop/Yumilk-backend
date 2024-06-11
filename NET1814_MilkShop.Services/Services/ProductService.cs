@@ -170,7 +170,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> CreateProductAsync(CreateProductModel model)
         {
-            if(model.SalePrice > model.OriginalPrice)
+            if (model.SalePrice > model.OriginalPrice)
             {
                 return ResponseModel.BadRequest(ResponseConstants.InvalidSalePrice);
             }
@@ -201,7 +201,7 @@ namespace NET1814_MilkShop.Services.Services
                 BrandId = model.BrandId,
                 CategoryId = model.CategoryId,
                 UnitId = model.UnitId,
-                StatusId = (int) ProductStatusId.SELLING, //default status is selling
+                StatusId = (int)ProductStatusId.SELLING, //default status is selling
                 IsActive = true, // default is active (published)
                 Thumbnail = model.Thumbnail
             };
