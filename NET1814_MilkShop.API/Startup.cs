@@ -95,6 +95,8 @@ namespace NET1814_MilkShop.API
                     .GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
             //Add Database
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+            //Add HttpClient
+            services.AddHttpClient();
             //Add Exception Handler
             services.AddExceptionHandler<ExceptionLoggingHandler>();
             services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -251,6 +253,8 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IImageService, ImageService>();
 
             services.AddScoped<IPaymentService, PaymentService>();
+
+            services.AddScoped<IShippingService, ShippingService>();
             //Add Extensions
             services.AddScoped<IJwtTokenExtension, JwtTokenExtension>();
             //Add Filters
