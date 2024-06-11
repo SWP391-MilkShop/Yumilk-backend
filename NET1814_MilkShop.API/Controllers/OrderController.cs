@@ -35,7 +35,24 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);*/
             return ResponseExtension.Result(response);
         }
-
+        /// <summary>
+        /// Get order stats
+        /// Total number of orders
+        /// Total number of orders per status
+        /// Total revenue (only count orders that have been delivered)
+        /// Total shipping fee (only count orders that have been delivered)
+        /// </summary>
+        /// <param name="queryModel"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("/api/dashboard/orders/stats")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> GetOrderStats([FromQuery] OrderStatsQueryModel queryModel)
+        {
+            _logger.Information("Get order stats");
+            var response = await _orderService.GetOrderStatsAsync(queryModel);
+            return ResponseExtension.Result(response);
+        }
         [HttpPatch]
         [Route("/api/dashboard/orders/{id}/status")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]

@@ -6,7 +6,16 @@ namespace NET1814_MilkShop.Repositories.Repositories
 {
     public interface IOrderRepository
     {
-        IQueryable<Order> GetOrdersQuery();
+        /// <summary>
+        /// Get order query with status and customer and order details
+        /// </summary>
+        /// <returns></returns>
+        IQueryable<Order> GetOrderQuery();
+        /// <summary>
+        /// Get order query with status
+        /// </summary>
+        /// <returns></returns>
+        IQueryable<Order> GetOrderQueryWithStatus();
         IQueryable<Order> GetOrderHistory(Guid customerId);
         /// <summary>
         /// Get order by id include order details if includeDetails is true
@@ -32,7 +41,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
         }
 
-        public IQueryable<Order> GetOrdersQuery()
+        public IQueryable<Order> GetOrderQuery()
         {
             //return _context.Orders.Include(o => o.Status).Include(o => o.Customer).AsNoTracking();
             return _query.Include(o => o.Status)
@@ -99,6 +108,11 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             var query = includeDetails ? _query.Include(o => o.OrderDetails) : _query;
             return query.FirstOrDefaultAsync(o => o.Id == id);
+        }
+
+        public IQueryable<Order> GetOrderQueryWithStatus()
+        {
+            return _query.Include(o => o.Status);
         }
     }
 }
