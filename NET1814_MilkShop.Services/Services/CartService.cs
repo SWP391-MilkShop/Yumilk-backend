@@ -62,7 +62,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Khách hàng"));
             }
-            var product = await _productRepository.GetByIdAsync(model.ProductId);
+            var product = await _productRepository.GetByIdNoIncludeAsync(model.ProductId);
             // Check if product is not exist or not active
             if (product == null || !product.IsActive)
             {

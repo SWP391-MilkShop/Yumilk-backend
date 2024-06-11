@@ -24,6 +24,12 @@
 
         public string Status { get; set; } = null!;
 
+        public double AverageRating { get; set; }
+
+        public int OrderCount { get; set; }
+
         public bool IsActive { get; set; }
+
+        public DateTime CreatedAt { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
+using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Repositories.Repositories
 {
@@ -8,15 +9,23 @@ namespace NET1814_MilkShop.Repositories.Repositories
     {
         /// <summary>
         /// Get all products with corresponding brand, category, unit, product status
+        /// And product reviews, order details if includeRating and includeOrderCount is true
         /// </summary>
+        /// <param name="includeRating"></param>
+        /// <param name="includeOrderCount"></param>
         /// <returns></returns>
+        IQueryable<Product> GetProductsQuery(bool includeRating, bool includeOrderCount);
         IQueryable<Product> GetProductsQuery();
         IQueryable<Product> GetProductQueryNoInclude();
         /// <summary>
         /// Get product by id with corresponding brand, category, unit, product status
+        /// And product reviews, order details if includeRating and includeOrderCount is true
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="includeRating"></param>
+        /// <param name="includeOrderCount"></param>
         /// <returns></returns>
+        Task<Product?> GetByIdAsync(Guid id, bool includeRating, bool includeOrderCount);
         Task<Product?> GetByIdAsync(Guid id);
 
         /// <summary>
@@ -24,7 +33,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<Product?> GetIdNoIncludeAsync(Guid id);
+        Task<Product?> GetByIdNoIncludeAsync(Guid id);
 
         /// <summary>
         /// Get product by name for checking duplicate
@@ -43,32 +52,29 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public ProductRepository(AppDbContext context)
             : base(context) { }
 
-        public IQueryable<Product> GetProductsQuery()
+        public IQueryable<Product> GetProductsQuery(bool includeRating, bool includeOrderCount)
         {
-            //return _context
-            //    .Products.Include(p => p.Brand)
-            //    .Include(p => p.Category)
-            //    .Include(p => p.Unit)
-            //    .AsNoTracking();
-            return _query
-                .Include(p => p.Brand)
+            var query = includeRating ? _query.Include(p => p.ProductReviews) : _query;
+            query = includeOrderCount ? query.Include(p => p.OrderDetails) : query;
+            query =  _query.Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.Unit)
-                .Include(p => p.ProductStatus);
+                .Include(p => p.ProductStatus).AsSplitQuery();
+            return query;
         }
 
-        public override Task<Product?> GetByIdAsync(Guid id)
+        public Task<Product?> GetByIdAsync(Guid id, bool includeRating, bool includeOrderCount)
         {
-            return _query
-                .Include(p => p.Brand)
+            var query = includeRating ? _query.Include(p => p.ProductReviews) : _query;
+            query = includeOrderCount ? query.Include(p => p.OrderDetails) : query;
+            query = _query.Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.Unit)
-                .Include(p => p.ProductStatus)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .Include(p => p.ProductStatus).AsSplitQuery();
+            return query.FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<Product?> GetIdNoIncludeAsync(Guid id)
+        public async Task<Product?> GetByIdNoIncludeAsync(Guid id)
         {
             return await _query.FirstOrDefaultAsync(p => p.Id == id);
         }
