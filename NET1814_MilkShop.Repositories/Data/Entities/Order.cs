@@ -23,6 +23,12 @@ public partial class Order : IAuditableEntity
     public string ReceiverName { get; set; } = null!;
 
     public string Address { get; set; } = null!;
+    
+    [Column("district_id")]
+    public int DistrictId { get; set; }
+    
+    [Column("ward_code")]
+    public int WardCode { get; set; }
 
     public string PhoneNumber { get; set; } = null!;
 

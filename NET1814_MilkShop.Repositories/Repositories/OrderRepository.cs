@@ -73,7 +73,6 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             return await _query
                 .Include(o => o.OrderDetails)
-                .ThenInclude(o => o.Product)
                 .Where(x => x.OrderCode != null)
                 .ToListAsync();
         }
