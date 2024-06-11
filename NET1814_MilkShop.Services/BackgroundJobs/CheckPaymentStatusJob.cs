@@ -1,6 +1,7 @@
 using Quartz;
 using Microsoft.Extensions.Logging;
 using Net.payOS.Types;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.Services;
@@ -14,16 +15,19 @@ public class CheckPaymentStatusJob : IJob
     private readonly IPaymentService _paymentService;
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
+    private readonly IShippingService _shippingService;
     private readonly IUnitOfWork _unitOfWork;
 
     public CheckPaymentStatusJob(ILogger<CheckPaymentStatusJob> logger,
         IPaymentService paymentService,
+        IShippingService shippingService,
         IProductRepository productRepository,
         IOrderRepository orderRepository,
         IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _paymentService = paymentService;
+        _shippingService = shippingService;
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
@@ -50,13 +54,18 @@ public class CheckPaymentStatusJob : IJob
                     continue;
                 }
 
-                if (order.StatusId == 5)
+                switch (order.StatusId)
                 {
-                    _logger.LogInformation("OrderId {OrderId} code {OrderCode} is already cancelled and updated in product quantity",
-                        order.Id,order.OrderCode.Value);
-                    continue;
+                    case 5:
+                        _logger.LogInformation("OrderId {OrderId} code {OrderCode} is already cancelled and updated to {cancelled}",
+                            order.Id,order.OrderCode.Value,OrderStatusId.CANCELLED.ToString());
+                        continue;
+                    case 2:
+                        _logger.LogInformation("OrderId {OrderId} code {OrderCode} is already paid and updated to {processing}",
+                            order.Id,order.OrderCode.Value,OrderStatusId.PROCESSING.ToString());
+                        continue;
                 }
-                
+
                 //Gọi API lấy payment status của PayOS
                 await Task.Delay(300); //Tranh request qua nhieu trong thoi gian ngan tranh bi block
                 var paymentStatus = await _paymentService.GetPaymentLinkInformation(order.OrderCode.Value);
@@ -70,6 +79,28 @@ public class CheckPaymentStatusJob : IJob
                 _logger.LogInformation("paymentStatus.Data: {Data}", paymentStatus.Data);
                 
                 var paymentData = paymentStatus.Data as PaymentLinkInformation;
+                
+                if ("PAID".Equals(paymentData!.status))
+                {
+                    _logger.LogInformation("Payment for order {OrderId} is paid", order.Id);
+                    var res = await _shippingService.CreateOrderShippingAsync(order.Id);
+                    if (res.StatusCode == 200)
+                    {
+                        var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(order.Id);
+                        existOrder!.StatusId = 2; //Processing
+                        _orderRepository.Update(existOrder); 
+                        var payResult = await _unitOfWork.SaveChangesAsync();
+                        if (payResult < 0)
+                        {
+                            _logger.LogInformation("Update order status for order {OrderId} failed", order.Id);
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Create order shipping for order {OrderId} failed", order.Id);
+                    }
+                    continue;
+                }
                 if (!"CANCELLED".Equals(paymentData.status) && !"EXPIRED".Equals(paymentData.status)) continue;
                 
                 _logger.LogInformation("Payment for order {OrderId} is cancelled or expired", order.Id);
@@ -78,7 +109,7 @@ public class CheckPaymentStatusJob : IJob
                 {
                     var product = await _productRepository.GetIdNoIncludeAsync(orderDetail.ProductId);
                     product.Quantity += orderDetail.Quantity;
-                    orderDetail.Product.Quantity = product.Quantity;
+                    _productRepository.Update(product);
                 }   
                 order.StatusId = 5; // Cancelled
                 _orderRepository.Update(order);
@@ -87,11 +118,10 @@ public class CheckPaymentStatusJob : IJob
                 {
                     _unitOfWork.Detach(orderDetail.Product);
                 }
-                
-                _logger.LogInformation(
-                    result > 0
-                        ? "Update order status for order {OrderId} successfully"
-                        : "Update order status for order {OrderId} failed", order.Id);
+                if (result < 0)
+                {
+                    _logger.LogInformation("Update order status for order {OrderId} failed", order.Id);
+                }
                 
             }
             catch (Exception e)
