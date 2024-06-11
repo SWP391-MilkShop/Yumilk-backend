@@ -100,6 +100,8 @@ public class CheckoutService : ICheckoutService
                 + address.DistrictName
                 + ", "
                 + address.ProvinceName,
+            WardCode = address.WardCode,
+            DistrictId = address.DistrictId,
             PhoneNumber = address.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
             Note = model.Note,
             PaymentMethod = model.PaymentMethod,
