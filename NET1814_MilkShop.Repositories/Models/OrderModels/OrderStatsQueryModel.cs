@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace NET1814_MilkShop.Repositories.Models.OrderModels
+﻿namespace NET1814_MilkShop.Repositories.Models.OrderModels
 {
     public class OrderStatsQueryModel
     {

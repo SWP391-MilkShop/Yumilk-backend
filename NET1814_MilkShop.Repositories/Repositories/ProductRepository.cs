@@ -11,7 +11,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// </summary>
         /// <returns></returns>
         IQueryable<Product> GetProductsQuery();
-
+        IQueryable<Product> GetProductQueryNoInclude();
         /// <summary>
         /// Get product by id with corresponding brand, category, unit, product status
         /// </summary>
@@ -81,6 +81,11 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public Task<bool> IsExistAsync(Guid id)
         {
             return _query.AnyAsync(x => x.Id == id);
+        }
+
+        public IQueryable<Product> GetProductQueryNoInclude()
+        {
+            return _query;
         }
     }
 }
