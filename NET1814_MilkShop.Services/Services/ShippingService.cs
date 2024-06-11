@@ -214,7 +214,7 @@ public class ShippingService : IShippingService
                 Price = x.UnitPrice.ToInt()
             }).ToList()
         };
-        var url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create";
+        var url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/preview";
         
         var json = JsonConvert.SerializeObject(request);
         // Create the content for the POST request

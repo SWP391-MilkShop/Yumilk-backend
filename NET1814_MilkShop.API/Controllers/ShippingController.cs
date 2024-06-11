@@ -76,6 +76,11 @@ public class ShippingController : ControllerBase
         return ResponseExtension.Result(response);
     }
     
+    /// <summary>
+    /// Get order detail orderCode này là của ghn
+    /// </summary>
+    /// <param name="orderCode"></param>
+    /// <returns></returns>
     [HttpGet("order/detail/{orderCode}")]
     public async Task<IActionResult> PreviewOrder(string orderCode)
     {
