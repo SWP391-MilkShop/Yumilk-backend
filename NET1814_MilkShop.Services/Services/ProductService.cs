@@ -81,6 +81,8 @@ namespace NET1814_MilkShop.Services.Services
             var category = StringExtension.Normalize(queryModel.Category);
             var unit = StringExtension.Normalize(queryModel.Unit);
             var status = StringExtension.Normalize(queryModel.Status);
+            var minPrice = queryModel.MinPrice <=0 ? 0 : queryModel.MinPrice;
+            var maxPrice = queryModel.MaxPrice <= 0 ? 0 : queryModel.MaxPrice;
             #region Filter, Search
             //thu gọn thành 1 where thôi
             query = query.Where(p =>
@@ -88,19 +90,19 @@ namespace NET1814_MilkShop.Services.Services
                 //search theo name, description, brand, unit, category
                 && (
                     string.IsNullOrEmpty(searchTerm)
-                    || p.Name.ToLower().Contains(searchTerm)
+                    || p.Name.Contains(searchTerm)
                     || p.Description!.Contains(searchTerm)
                     || p.Brand!.Name.Contains(searchTerm)
                     || p.Unit!.Name.Contains(searchTerm)
                     || p.Category!.Name.Contains(searchTerm)
                 )
                 //filter theo brand, category, unit, status, minPrice, maxPrice
-                && (string.IsNullOrEmpty(brand) || string.Equals(p.Brand, brand))
-                && (string.IsNullOrEmpty(category) || string.Equals(p.Category, category))
-                && (string.IsNullOrEmpty(unit) || string.Equals(p.Unit, unit))
-                && (string.IsNullOrEmpty(status) || string.Equals(p.ProductStatus!.Name, status))
-                && (queryModel.MinPrice <= 0 || p.SalePrice >= queryModel.MinPrice)
-                && (queryModel.MaxPrice <= 0 || p.SalePrice <= queryModel.MaxPrice)
+                && (string.IsNullOrEmpty(brand) || p.Brand!.Name == brand)
+                && (string.IsNullOrEmpty(category) || p.Category!.Name == category)
+                && (string.IsNullOrEmpty(unit) || p.Unit!.Name == unit)
+                && (string.IsNullOrEmpty(status) || p.ProductStatus!.Name == status)
+                && (minPrice == 0 || (p.SalePrice == 0 ? p.OriginalPrice >= minPrice : p.SalePrice >= minPrice))
+                && (maxPrice == 0 || (p.SalePrice == 0 ? p.OriginalPrice <= maxPrice : p.SalePrice <= maxPrice))
             );
 
             #endregion
@@ -146,10 +148,10 @@ namespace NET1814_MilkShop.Services.Services
             queryModel.SortColumn?.ToLower().Replace(" ", "") switch
             {
                 "name" => p => p.Name,
-                "saleprice" => p => p.SalePrice,
+                "saleprice" => p => p.SalePrice == 0 ? p.OriginalPrice : p.SalePrice,
                 "quantity" => p => p.Quantity,
                 "createdat" => p => p.CreatedAt,
-                "rating" => p => p.ProductReviews.Any() ? p.ProductReviews.Average(pr => (double)pr.Rating) : 0.0,
+                "rating" => p => p.ProductReviews.Average(pr => (double) pr.Rating),
                 "ordercount" => p => p.OrderDetails.Sum(od => od.Quantity),
                 _ => product => product.Id,
             };

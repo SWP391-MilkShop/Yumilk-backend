@@ -15,7 +15,6 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <param name="includeOrderCount"></param>
         /// <returns></returns>
         IQueryable<Product> GetProductsQuery(bool includeRating, bool includeOrderCount);
-        IQueryable<Product> GetProductsQuery();
         IQueryable<Product> GetProductQueryNoInclude();
         /// <summary>
         /// Get product by id with corresponding brand, category, unit, product status
@@ -26,7 +25,6 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <param name="includeOrderCount"></param>
         /// <returns></returns>
         Task<Product?> GetByIdAsync(Guid id, bool includeRating, bool includeOrderCount);
-        Task<Product?> GetByIdAsync(Guid id);
 
         /// <summary>
         ///  Get product by id without including brand, category, unit, product status
@@ -56,7 +54,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             var query = includeRating ? _query.Include(p => p.ProductReviews) : _query;
             query = includeOrderCount ? query.Include(p => p.OrderDetails) : query;
-            query =  _query.Include(p => p.Brand)
+            query =  query.Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.Unit)
                 .Include(p => p.ProductStatus).AsSplitQuery();
@@ -67,7 +65,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             var query = includeRating ? _query.Include(p => p.ProductReviews) : _query;
             query = includeOrderCount ? query.Include(p => p.OrderDetails) : query;
-            query = _query.Include(p => p.Brand)
+            query = query.Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.Unit)
                 .Include(p => p.ProductStatus).AsSplitQuery();
