@@ -7,6 +7,8 @@ using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -19,6 +21,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetUsersAsync(UserQueryModel request);
         Task<ResponseModel> UpdateUserAsync(Guid id, UpdateUserModel model);
         Task<bool> IsExistAsync(Guid id);
+        Task<ResponseModel> GetCustomersStatsAsync(CustomersStatsQueryModel model);
     }
 
     public sealed class UserService : IUserService
@@ -61,7 +64,6 @@ namespace NET1814_MilkShop.Services.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-
         public async Task<ResponseModel> CreateUserAsync(CreateUserModel model)
         {
             var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
@@ -87,6 +89,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.Create("tài khoản", true), null);
             }
+
             return ResponseModel.Error(ResponseConstants.Create("tài khoản", false));
         }
 
@@ -105,9 +108,9 @@ namespace NET1814_MilkShop.Services.Services
             if (!string.IsNullOrEmpty(request.RoleIds))
             {
                 var roleIds = request.RoleIds.Split(',')
-                             .Select(roleIdStr => int.TryParse(roleIdStr, out var roleId) ? roleId : (int?)null)
-                             .Where(roleId => roleId.HasValue)
-                             .ToList();
+                    .Select(roleIdStr => int.TryParse(roleIdStr, out var roleId) ? roleId : (int?)null)
+                    .Where(roleId => roleId.HasValue)
+                    .ToList();
                 query = query.Where(u => roleIds.Contains(u.RoleId));
             }
 
@@ -118,6 +121,7 @@ namespace NET1814_MilkShop.Services.Services
                     && (!request.IsBanned.HasValue || u.IsBanned == request.IsBanned.Value)
                 );
             }
+
             //sort
             query = "desc".Equals(request.SortOrder?.ToLower())
                 ? query.OrderByDescending(GetSortProperty(request))
@@ -149,6 +153,7 @@ namespace NET1814_MilkShop.Services.Services
             };
             return keySelector;
         }
+
         private static UserModel ToUserModel(User user)
         {
             return new UserModel
@@ -162,9 +167,36 @@ namespace NET1814_MilkShop.Services.Services
                 IsBanned = user.IsBanned
             };
         }
+
         public async Task<bool> IsExistAsync(Guid id)
         {
             return await _userRepository.IsExistAsync(id);
+        }
+
+        public async Task<ResponseModel> GetCustomersStatsAsync(CustomersStatsQueryModel model)
+        {
+            if (model.From > DateTime.Now || model.From > model.To)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+            }
+
+            var query = _userRepository.GetUserQueryIncludeCustomer();
+            // default is from last 30 days
+            var from = model.From ?? DateTime.Now.AddDays(-30);
+            // default is now
+            var to = model.To ?? DateTime.Now;
+            query = query.Where(o => o.Customer!.CreatedAt >= from && o.Customer!.CreatedAt <= to);
+            // count customer who have already bought
+            var totalCustomerBought = query
+                .Where(x => x.Customer.Orders != null &&
+                            x.Customer.Orders.Any(order => order.StatusId == (int)OrderStatusId.DELIVERED))
+                .Distinct();
+            var resp = new CustomerStatsModel()
+            {
+                TotalCustomers = await query.CountAsync(),
+                TotalBoughtCustomer = await totalCustomerBought.CountAsync()
+            };
+            return ResponseModel.Success(ResponseConstants.Get("thống kê người dùng", true), resp);
         }
 
         public async Task<ResponseModel> ChangePasswordAsync(Guid userId, ChangePasswordModel model)
@@ -203,6 +235,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
             }
+
             user.IsBanned = model.IsBanned;
             _userRepository.Update(user);
             var result = await _unitOfWork.SaveChangesAsync();
@@ -210,6 +243,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.Update("người dùng", true), ToUserModel(user));
             }
+
             return ResponseModel.Error(ResponseConstants.Update("người dùng", false));
         }
     }
