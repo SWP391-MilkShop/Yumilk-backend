@@ -16,11 +16,19 @@
 
         public string? Thumbnail { get; set; }
 
+        public int CategoryId { get; set; }
+
         public string Category { get; set; } = null!;
+
+        public int BrandId { get; set; }
 
         public string Brand { get; set; } = null!;
 
+        public int UnitId { get; set; }
+
         public string Unit { get; set; } = null!;
+
+        public int StatusId { get; set; }
 
         public string Status { get; set; } = null!;
 
