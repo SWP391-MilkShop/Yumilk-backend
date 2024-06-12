@@ -1,7 +1,9 @@
 ﻿using System.Linq.Expressions;
+using System.Numerics;
 using Azure;
 using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
@@ -25,13 +27,15 @@ namespace NET1814_MilkShop.Services.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IProductRepository _productRepository;
+        private readonly IShippingService _shippingService;
 
         public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork,
-            IProductRepository productRepository)
+            IProductRepository productRepository,IShippingService shippingService)
         {
             _orderRepository = orderRepository;
             _unitOfWork = unitOfWork;
             _productRepository = productRepository;
+            _shippingService = shippingService;
         }
 
         /// <summary>
@@ -301,7 +305,7 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
             }
 
-            if (order.StatusId != 1)
+            if (order.StatusId != 1 && order.StatusId != 2)
             {
                 return ResponseModel.BadRequest("Đơn hàng đang trong quá trình giao nên bạn không thể hủy.");
             }
@@ -358,6 +362,22 @@ namespace NET1814_MilkShop.Services.Services
             if (order.StatusId == model.StatusId)
             {
                 return ResponseModel.Success(ResponseConstants.NoChangeIsMade, null);
+            }
+
+            if (order.StatusId > model.StatusId)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.Update("trạng thái đơn hàng", false));
+            }
+
+            if (model.StatusId == (int)OrderStatusId.SHIPPING)
+            {
+                var orderShippingAsync = await _shippingService.CreateOrderShippingAsync(id);
+                if (orderShippingAsync.StatusCode != 200)
+                {
+                    return orderShippingAsync;
+                }
+                return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng",true),
+                    orderShippingAsync.Data);
             }
 
             order.StatusId = model.StatusId;

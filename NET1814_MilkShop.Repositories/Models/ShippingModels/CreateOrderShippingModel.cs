@@ -47,6 +47,4 @@ public class Item
     public string? ProductName { get; set; }
     [JsonProperty("quantity")]
     public int Quantity { get; set; }
-    [JsonProperty("price")]
-    public int Price { get; set; }
 }

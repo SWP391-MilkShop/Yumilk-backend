@@ -83,22 +83,15 @@ public class CheckPaymentStatusJob : IJob
                 if ("PAID".Equals(paymentData!.status))
                 {
                     _logger.LogInformation("Payment for order {OrderId} is paid", order.Id);
-                    var res = await _shippingService.CreateOrderShippingAsync(order.Id);
-                    if (res.StatusCode == 200)
-                    {
                         var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(order.Id);
-                        existOrder!.StatusId = 2; //Processing
+                        existOrder!.StatusId = (int)OrderStatusId.PROCESSING; //Processing
                         _orderRepository.Update(existOrder); 
                         var payResult = await _unitOfWork.SaveChangesAsync();
                         if (payResult < 0)
                         {
                             _logger.LogInformation("Update order status for order {OrderId} failed", order.Id);
                         }
-                    }
-                    else
-                    {
-                        _logger.LogInformation("Create order shipping for order {OrderId} failed", order.Id);
-                    }
+
                     continue;
                 }
                 if (!"CANCELLED".Equals(paymentData.status) && !"EXPIRED".Equals(paymentData.status)) continue;
