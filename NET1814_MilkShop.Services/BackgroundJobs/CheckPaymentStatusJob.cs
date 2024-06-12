@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Net.payOS.Types;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.Services;
@@ -14,16 +15,19 @@ public class CheckPaymentStatusJob : IJob
     private readonly IPaymentService _paymentService;
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
+    private readonly IShippingService _shippingService;
     private readonly IUnitOfWork _unitOfWork;
 
     public CheckPaymentStatusJob(ILogger<CheckPaymentStatusJob> logger,
         IPaymentService paymentService,
+        IShippingService shippingService,
         IProductRepository productRepository,
         IOrderRepository orderRepository,
         IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _paymentService = paymentService;
+        _shippingService = shippingService;
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
@@ -50,8 +54,16 @@ public class CheckPaymentStatusJob : IJob
                     continue;
                 }
 
-                if (order.StatusId == 5)
+                switch (order.StatusId)
                 {
+                    case 5:
+                        _logger.LogInformation("OrderId {OrderId} code {OrderCode} is already cancelled and updated to {cancelled}",
+                            order.Id,order.OrderCode.Value,OrderStatusId.CANCELLED.ToString());
+                        continue;
+                    case 2:
+                        _logger.LogInformation("OrderId {OrderId} code {OrderCode} is already paid and updated to {processing}",
+                            order.Id,order.OrderCode.Value,OrderStatusId.PROCESSING.ToString());
+                        continue;
                     _logger.LogInformation("OrderId {OrderId} code {OrderCode} is already cancelled and updated in product quantity",
                         order.Id, order.OrderCode.Value);
                     continue;
@@ -70,6 +82,21 @@ public class CheckPaymentStatusJob : IJob
                 _logger.LogInformation("paymentStatus.Data: {Data}", paymentStatus.Data);
 
                 var paymentData = paymentStatus.Data as PaymentLinkInformation;
+                
+                if ("PAID".Equals(paymentData!.status))
+                {
+                    _logger.LogInformation("Payment for order {OrderId} is paid", order.Id);
+                        var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(order.Id);
+                        existOrder!.StatusId = (int)OrderStatusId.PROCESSING; //Processing
+                        _orderRepository.Update(existOrder); 
+                        var payResult = await _unitOfWork.SaveChangesAsync();
+                        if (payResult < 0)
+                        {
+                            _logger.LogInformation("Update order status for order {OrderId} failed", order.Id);
+                        }
+
+                    continue;
+                }
                 if (!"CANCELLED".Equals(paymentData.status) && !"EXPIRED".Equals(paymentData.status)) continue;
 
                 _logger.LogInformation("Payment for order {OrderId} is cancelled or expired", order.Id);
@@ -78,6 +105,8 @@ public class CheckPaymentStatusJob : IJob
                 {
                     var product = await _productRepository.GetByIdNoIncludeAsync(orderDetail.ProductId);
                     product.Quantity += orderDetail.Quantity;
+                    _productRepository.Update(product);
+                }   
                     orderDetail.Product.Quantity = product.Quantity;
                 }
                 order.StatusId = 5; // Cancelled
@@ -88,6 +117,10 @@ public class CheckPaymentStatusJob : IJob
                     _unitOfWork.Detach(orderDetail.Product);
                 }
 
+                if (result < 0)
+                {
+                    _logger.LogInformation("Update order status for order {OrderId} failed", order.Id);
+                }            
                 _logger.LogInformation(
                     result > 0
                         ? "Update order status for order {OrderId} successfully"
