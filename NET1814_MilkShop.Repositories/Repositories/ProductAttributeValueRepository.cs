@@ -20,11 +20,13 @@ public class ProductAttributeValueRepository
         IProductAttributeValueRepository
 {
     public ProductAttributeValueRepository(AppDbContext context)
-        : base(context) { }
+        : base(context)
+    {
+    }
 
     public IQueryable<ProductAttributeValue> GetProductAttributeValue()
     {
-        return _query;
+        return _query.Include(x => x.Attribute);
     }
 
     public async Task<Product?> GetProductById(Guid id)

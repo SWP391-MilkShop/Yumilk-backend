@@ -16,6 +16,7 @@ public interface IProductAttributeValueService
         Guid id,
         ProductAttributeValueQueryModel queryModel
     );
+
     Task<ResponseModel> AddProductAttributeValue(Guid pid, int aid, CreateUpdatePavModel model);
     Task<ResponseModel> UpdateProductAttributeValue(Guid pid, int aid, CreateUpdatePavModel model);
     Task<ResponseModel> DeleteProductAttributeValue(Guid pid, int aid);
@@ -68,6 +69,7 @@ public class ProductAttributeValueService : IProductAttributeValueService
         {
             ProductId = x.ProductId,
             AttributeId = x.AttributeId,
+            AttributeName = x.Attribute.Name,
             Value = x.Value
         });
 
