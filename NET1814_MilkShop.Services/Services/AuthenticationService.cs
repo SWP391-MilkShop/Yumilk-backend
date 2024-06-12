@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
@@ -7,6 +6,7 @@ using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -123,7 +123,7 @@ namespace NET1814_MilkShop.Services.Services
                 model.Password
             );
             if (existingUser != null && existingUser.RoleId == (int)RoleId.CUSTOMER)
-                //Only customer can login, others will say wrong username or password
+            //Only customer can login, others will say wrong username or password
             {
                 //check if user is banned
                 if (existingUser.IsBanned)
@@ -142,7 +142,7 @@ namespace NET1814_MilkShop.Services.Services
                     Username = existingUser.Username,
                     FirstName = existingUser.FirstName,
                     LastName = existingUser.LastName,
-                    RoleId = existingUser.RoleId,
+                    Role = existingUser.Role!.Name,
                     AccessToken = token.ToString(),
                     RefreshToken = refreshToken.ToString(),
                     IsActive = existingUser.IsActive,
@@ -218,8 +218,7 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Reset
                     );
-                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken,
-                        customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
                 }
             }
@@ -306,8 +305,7 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Authentication
                     );
-                    _emailService.SendVerificationEmail(customer.Email, verifyToken,
-                        customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendVerificationEmail(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ActivateAccountLink, null);
                 }
             }
@@ -322,7 +320,7 @@ namespace NET1814_MilkShop.Services.Services
                 model.Password
             );
             if (existingUser != null && existingUser.RoleId != (int)RoleId.CUSTOMER)
-                //Only admin,staff can login others will response wrong username or password
+            //Only admin,staff can login others will response wrong username or password
             {
                 //check if user is banned
                 if (existingUser.IsBanned)
@@ -341,9 +339,10 @@ namespace NET1814_MilkShop.Services.Services
                     Username = existingUser.Username,
                     FirstName = existingUser.FirstName,
                     LastName = existingUser.LastName,
-                    RoleId = existingUser.RoleId,
+                    Role = existingUser.Role!.Name,
                     AccessToken = token.ToString(),
                     RefreshToken = refreshToken.ToString(),
+                    IsBanned = existingUser.IsBanned,
                     IsActive = existingUser.IsActive
                 };
                 return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);

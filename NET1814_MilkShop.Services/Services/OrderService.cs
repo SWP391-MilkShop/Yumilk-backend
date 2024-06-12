@@ -1,13 +1,13 @@
-﻿using System.Linq.Expressions;
-using Azure;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
+using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -18,6 +18,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetOrderHistoryDetailAsync(Guid userId, Guid id);
         Task<ResponseModel> CancelOrderAsync(Guid userId, Guid orderId);
         Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model);
+        Task<ResponseModel> GetOrderStatsAsync(OrderStatsQueryModel queryModel);
     }
 
     public class OrderService : IOrderService
@@ -41,7 +42,7 @@ namespace NET1814_MilkShop.Services.Services
         /// <returns>trả về danh sách các order của hệ thống</returns>
         public async Task<ResponseModel> GetOrderAsync(OrderQueryModel model)
         {
-            var query = _orderRepository.GetOrdersQuery();
+            var query = _orderRepository.GetOrderQuery();
 
             #region(filter)
 
@@ -225,7 +226,8 @@ namespace NET1814_MilkShop.Services.Services
                     .Where(u => u.OrderId == o.Id)
                     .Select(h => new
                     {
-                        h.Product.Name, h.Thumbnail
+                        h.Product.Name,
+                        h.Thumbnail
                     })
             });
 
@@ -369,6 +371,39 @@ namespace NET1814_MilkShop.Services.Services
             }
 
             return ResponseModel.Error(ResponseConstants.Update("trạng thái đơn hàng", false));
+        }
+
+        public async Task<ResponseModel> GetOrderStatsAsync(OrderStatsQueryModel queryModel)
+        {
+            if (queryModel.FromOrderDate > DateTime.Now)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.InvalidFromDate);
+            }
+            if (queryModel.FromOrderDate > queryModel.ToOrderDate)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+            }
+            var query = _orderRepository.GetOrderQueryWithStatus();
+            // default is from last 30 days
+            var from = queryModel.FromOrderDate ?? DateTime.Now.AddDays(-30);
+            // default is now
+            var to = queryModel.ToOrderDate ?? DateTime.Now;
+            query = query.Where(o => o.CreatedAt >= from && o.CreatedAt <= to);
+            // only count delivered orders
+            var delivered = query.Where(o => o.StatusId == (int)OrderStatusId.DELIVERED);
+            var totalOrdersPerStatus = await query.GroupBy(o => o.Status).ToDictionaryAsync(g => g.Key!.Name.ToUpper(), g => g.Count());
+            var stats = new OrderStatsModel
+            {
+                TotalOrders = await query.CountAsync(),
+                TotalRevenue = await delivered.SumAsync(o => o.TotalPrice),
+                TotalShippingFee = await delivered.SumAsync(o => o.ShippingFee),
+            };
+            foreach (var status in Enum.GetNames(typeof(OrderStatusId)))
+            {
+                stats.TotalOrdersPerStatus[status] = totalOrdersPerStatus.GetValueOrDefault(status, 0);
+            }
+            return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng", true), stats);
+
         }
     }
 }

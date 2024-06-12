@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
 using NET1814_MilkShop.API.CoreHelpers.Extensions;
-using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Models.AddressModels;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Models.UserModels;
@@ -256,7 +255,7 @@ namespace NET1814_MilkShop.API.Controllers
             return ResponseExtension.Result(response);
         }
         #endregion
-        
+
         #region OrderHistory
 
         [HttpGet]

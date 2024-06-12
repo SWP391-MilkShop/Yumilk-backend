@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
@@ -7,6 +6,7 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
+using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -102,9 +102,12 @@ namespace NET1814_MilkShop.Services.Services
                 || u.LastName.Contains(searchTerm)
             );
 
-            if (!string.IsNullOrEmpty(request.Role))
+            if (!string.IsNullOrEmpty(request.RoleIds))
             {
-                var roleIds = request.Role.Split(',').Select(int.Parse).ToList();
+                var roleIds = request.RoleIds.Split(',')
+                             .Select(roleIdStr => int.TryParse(roleIdStr, out var roleId) ? roleId : (int?)null)
+                             .Where(roleId => roleId.HasValue)
+                             .ToList();
                 query = query.Where(u => roleIds.Contains(u.RoleId));
             }
 
@@ -119,16 +122,7 @@ namespace NET1814_MilkShop.Services.Services
             query = "desc".Equals(request.SortOrder?.ToLower())
                 ? query.OrderByDescending(GetSortProperty(request))
                 : query.OrderBy(GetSortProperty(request));
-            var result = query.Select(u => new UserModel
-            {
-                Id = u.Id.ToString(),
-                Username = u.Username,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                Role = u.Role!.Name,
-                IsActive = u.IsActive,
-                IsBanned = u.IsBanned
-            });
+            var result = query.Select(u => ToUserModel(u));
             //page
             var users = await PagedList<UserModel>.CreateAsync(
                 result,
@@ -155,7 +149,19 @@ namespace NET1814_MilkShop.Services.Services
             };
             return keySelector;
         }
-
+        private static UserModel ToUserModel(User user)
+        {
+            return new UserModel
+            {
+                Id = user.Id.ToString(),
+                Username = user.Username,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role!.Name,
+                IsActive = user.IsActive,
+                IsBanned = user.IsBanned
+            };
+        }
         public async Task<bool> IsExistAsync(Guid id)
         {
             return await _userRepository.IsExistAsync(id);
@@ -202,7 +208,7 @@ namespace NET1814_MilkShop.Services.Services
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
-                return ResponseModel.Success(ResponseConstants.Update("người dùng", true), null);
+                return ResponseModel.Success(ResponseConstants.Update("người dùng", true), ToUserModel(user));
             }
             return ResponseModel.Error(ResponseConstants.Update("người dùng", false));
         }

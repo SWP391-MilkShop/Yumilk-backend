@@ -1,6 +1,5 @@
-﻿using System.Linq.Expressions;
-using System.Text.RegularExpressions;
-using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
@@ -8,6 +7,8 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -40,7 +41,7 @@ namespace NET1814_MilkShop.Services.Services
         {
             return new CustomerModel
             {
-                UserID = customer.UserId.ToString(),
+                UserId = customer.UserId.ToString(),
                 Username = user.Username,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
@@ -48,6 +49,7 @@ namespace NET1814_MilkShop.Services.Services
                 PhoneNumber = customer.PhoneNumber,
                 Email = customer.Email,
                 Points = customer.Points,
+                Role = user.Role!.Name,
                 ProfilePictureUrl = customer.ProfilePictureUrl,
                 IsActive = user.IsActive,
                 IsBanned = user.IsBanned
@@ -56,17 +58,17 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> GetCustomersAsync(CustomerQueryModel request)
         {
-            var query = _customerRepository.GetCustomersQuery();
+            var query = _customerRepository.GetCustomersQuery().Where(c => c.User.RoleId == (int) RoleId.CUSTOMER);
             var searchTerm = StringExtension.Normalize(request.SearchTerm);
             //filter
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 query = query.Where(c =>
                     c.User.Username.ToLower().Contains(searchTerm)
-                    || c.Email.ToLower().Contains(searchTerm)
-                    || c.PhoneNumber.ToLower().Contains(searchTerm)
-                    || c.User.FirstName.ToLower().Contains(searchTerm)
-                    || c.User.LastName.ToLower().Contains(searchTerm)
+                    || c.Email!.Contains(searchTerm)
+                    || c.PhoneNumber!.Contains(searchTerm)
+                    || c.User.FirstName.Contains(searchTerm)
+                    || c.User.LastName.Contains(searchTerm)
                 );
             }
 
@@ -97,7 +99,7 @@ namespace NET1814_MilkShop.Services.Services
             CustomerQueryModel request
         )
         {
-            Expression<Func<Customer, object>> keySelector = request.SortColumn?.ToLower().Replace(" ","") switch
+            Expression<Func<Customer, object>> keySelector = request.SortColumn?.ToLower().Replace(" ", "") switch
             {
                 "point" => customer => customer.Points,
                 "email" => customer => customer.Email!,

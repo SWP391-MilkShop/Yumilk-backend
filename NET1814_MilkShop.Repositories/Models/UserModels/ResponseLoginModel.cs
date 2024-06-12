@@ -12,10 +12,11 @@
         public string? PhoneNumber { get; set; }
         public string? ProfilePictureUrl { get; set; }
         public string? GoogleId { get; set; }
-        public int RoleId { get; set; }
+        public string? Role { get; set; }
         public int Points { get; set; }
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
+        public bool IsBanned { get; set; }
         public bool IsActive { get; set; } = true;
 
         public bool IsBanned { get; set; }

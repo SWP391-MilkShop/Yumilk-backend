@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
@@ -9,6 +8,7 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
+using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -62,13 +62,13 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Khách hàng"));
             }
-            var product = await _productRepository.GetByIdAsync(model.ProductId);
+            var product = await _productRepository.GetByIdNoIncludeAsync(model.ProductId);
             // Check if product is not exist or not active
             if (product == null || !product.IsActive)
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
             }
-            if(product.StatusId == (int) ProductStatusId.OUT_OF_STOCK)
+            if (product.StatusId == (int)ProductStatusId.OUT_OF_STOCK)
             {
                 return ResponseModel.BadRequest(ResponseConstants.OutOfStock);
             }
@@ -136,7 +136,7 @@ namespace NET1814_MilkShop.Services.Services
                     isChanged = true;
                     continue;
                 }
-                if(cartDetail.Product.StatusId == (int)ProductStatusId.OUT_OF_STOCK)
+                if (cartDetail.Product.StatusId == (int)ProductStatusId.OUT_OF_STOCK)
                 {
                     _cartDetailRepository.Remove(cartDetail);
                     messages.Add($"Sản phẩm {cartDetail.Product.Name} đã hết hàng");
@@ -182,8 +182,8 @@ namespace NET1814_MilkShop.Services.Services
                     TotalPrice = 0,
                     TotalQuantity = 0,
                     CartItems = PagedList<CartDetailModel>.Create(
-                        new List<CartDetailModel>().AsQueryable(), 
-                        model.Page, 
+                        new List<CartDetailModel>().AsQueryable(),
+                        model.Page,
                         model.PageSize)
                 };
                 return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", true), newCart);
