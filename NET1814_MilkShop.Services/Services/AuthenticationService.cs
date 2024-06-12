@@ -141,9 +141,10 @@ namespace NET1814_MilkShop.Services.Services
                     Username = existingUser.Username,
                     FirstName = existingUser.FirstName,
                     LastName = existingUser.LastName,
-                    RoleId = existingUser.RoleId,
+                    Role = existingUser.Role!.Name,
                     AccessToken = token.ToString(),
                     RefreshToken = refreshToken.ToString(),
+                    IsBanned = existingUser.IsBanned,
                     IsActive = existingUser.IsActive
                 };
                 var customer = await _customerRepository.GetByIdAsync(existingUser.Id);
@@ -325,9 +326,10 @@ namespace NET1814_MilkShop.Services.Services
                     Username = existingUser.Username,
                     FirstName = existingUser.FirstName,
                     LastName = existingUser.LastName,
-                    RoleId = existingUser.RoleId,
+                    Role = existingUser.Role!.Name,
                     AccessToken = token.ToString(),
                     RefreshToken = refreshToken.ToString(),
+                    IsBanned = existingUser.IsBanned,
                     IsActive = existingUser.IsActive
                 };
                 return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
