@@ -67,10 +67,6 @@ public class CheckPaymentStatusJob : IJob
                             "OrderId {OrderId} code {OrderCode} is already paid and updated to {processing}",
                             order.Id, order.OrderCode.Value, OrderStatusId.PROCESSING.ToString());
                         continue;
-                        _logger.LogInformation(
-                            "OrderId {OrderId} code {OrderCode} is already cancelled and updated in product quantity",
-                            order.Id, order.OrderCode.Value);
-                        continue;
                 }
 
                 //Gọi API lấy payment status của PayOS
@@ -111,7 +107,6 @@ public class CheckPaymentStatusJob : IJob
                     var product = await _productRepository.GetByIdNoIncludeAsync(orderDetail.ProductId);
                     product.Quantity += orderDetail.Quantity;
                     _productRepository.Update(product);
-                    orderDetail.Product.Quantity = product.Quantity;
                 }
 
 
