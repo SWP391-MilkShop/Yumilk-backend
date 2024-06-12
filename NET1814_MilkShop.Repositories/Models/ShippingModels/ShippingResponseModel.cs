@@ -113,6 +113,16 @@ public class OrderDetailInformation
     public string? Note { get; set; }
     [JsonProperty("pickup_time")]
     public DateTime PickupTime { get; set; }
+    [JsonProperty("log")]
+    public List<Log> Logs { get; set; }
     [JsonPropertyName("items")]
     public List<Item> Items { get; set; }
+}
+
+public class Log
+{
+    [JsonProperty("status")]
+    public string? Status { get; set; }
+    [JsonProperty("updated_date")]
+    public string? UpdatedDate { get; set; }
 }
