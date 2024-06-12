@@ -1,9 +1,11 @@
 using System.Net;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ShipModels;
 using NET1814_MilkShop.Repositories.Repositories;
+using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using Newtonsoft.Json;
 
@@ -26,8 +28,12 @@ public class ShippingService : IShippingService
     private readonly string Token;
     private readonly string ShopId;
     private readonly IOrderRepository _orderRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ShippingService(IConfiguration configuration, HttpClient client,IOrderRepository orderRepository)
+    public ShippingService(IConfiguration configuration,
+        HttpClient client,
+        IOrderRepository orderRepository,
+        IUnitOfWork unitOfWork)
     {
         _configuration = configuration;
         Token = _configuration["GHN:Token"];
@@ -35,6 +41,7 @@ public class ShippingService : IShippingService
         _client = client;
         _client.DefaultRequestHeaders.Add("Token", Token);
         _orderRepository = orderRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<ResponseModel> GetProvinceAsync()
@@ -120,8 +127,8 @@ public class ShippingService : IShippingService
         _client.DefaultRequestHeaders.Add("ShopId", ShopId);
         
         var url = $"https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?" +
-                  $"to_ward_code={request.FromWardCode}&to_district_id={request.FromDistrictId}&weight=2000" +
-                  $"&service_id=53320&service_type_id=2";
+                  $"to_ward_code={request.FromWardCode}&to_district_id={request.FromDistrictId}&weight=200" +
+                  $"&service_id=0&service_type_id=2";
         
         var response = await _client.GetAsync(url);
         
@@ -163,8 +170,7 @@ public class ShippingService : IShippingService
             Items = order.OrderDetails.Select(x => new Item
             {
                 ProductName = x.ProductName,
-                Quantity = x.Quantity,
-                Price = x.UnitPrice.ToInt()
+                Quantity = x.Quantity
             }).ToList()
         };
         var url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create";
@@ -210,10 +216,10 @@ public class ShippingService : IShippingService
             Items = order.OrderDetails.Select(x => new Item
             {
                 ProductName = x.ProductName,
-                Quantity = x.Quantity,
-                Price = x.UnitPrice.ToInt()
+                Quantity = x.Quantity
             }).ToList()
         };
+        
         var url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/preview";
         
         var json = JsonConvert.SerializeObject(request);
