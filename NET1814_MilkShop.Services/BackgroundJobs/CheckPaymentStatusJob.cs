@@ -7,8 +7,9 @@ using NET1814_MilkShop.Services.Services;
 using Quartz;
 
 namespace NET1814_MilkShop.Services.BackgroundJobs;
+
 [DisallowConcurrentExecution] //Nếu chưa ra kết quả trong khoảng thời gian đưa
-                              //thì chờ cho đến khi Job trước đó hoàn thành
+//thì chờ cho đến khi Job trước đó hoàn thành
 public class CheckPaymentStatusJob : IJob
 {
     private readonly ILogger<CheckPaymentStatusJob> _logger;
@@ -57,16 +58,19 @@ public class CheckPaymentStatusJob : IJob
                 switch (order.StatusId)
                 {
                     case 5:
-                        _logger.LogInformation("OrderId {OrderId} code {OrderCode} is already cancelled and updated to {cancelled}",
-                            order.Id,order.OrderCode.Value,OrderStatusId.CANCELLED.ToString());
+                        _logger.LogInformation(
+                            "OrderId {OrderId} code {OrderCode} is already cancelled and updated to {cancelled}",
+                            order.Id, order.OrderCode.Value, OrderStatusId.CANCELLED.ToString());
                         continue;
                     case 2:
-                        _logger.LogInformation("OrderId {OrderId} code {OrderCode} is already paid and updated to {processing}",
-                            order.Id,order.OrderCode.Value,OrderStatusId.PROCESSING.ToString());
+                        _logger.LogInformation(
+                            "OrderId {OrderId} code {OrderCode} is already paid and updated to {processing}",
+                            order.Id, order.OrderCode.Value, OrderStatusId.PROCESSING.ToString());
                         continue;
-                    _logger.LogInformation("OrderId {OrderId} code {OrderCode} is already cancelled and updated in product quantity",
-                        order.Id, order.OrderCode.Value);
-                    continue;
+                        _logger.LogInformation(
+                            "OrderId {OrderId} code {OrderCode} is already cancelled and updated in product quantity",
+                            order.Id, order.OrderCode.Value);
+                        continue;
                 }
 
                 //Gọi API lấy payment status của PayOS
@@ -82,21 +86,22 @@ public class CheckPaymentStatusJob : IJob
                 _logger.LogInformation("paymentStatus.Data: {Data}", paymentStatus.Data);
 
                 var paymentData = paymentStatus.Data as PaymentLinkInformation;
-                
+
                 if ("PAID".Equals(paymentData!.status))
                 {
                     _logger.LogInformation("Payment for order {OrderId} is paid", order.Id);
-                        var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(order.Id);
-                        existOrder!.StatusId = (int)OrderStatusId.PROCESSING; //Processing
-                        _orderRepository.Update(existOrder); 
-                        var payResult = await _unitOfWork.SaveChangesAsync();
-                        if (payResult < 0)
-                        {
-                            _logger.LogInformation("Update order status for order {OrderId} failed", order.Id);
-                        }
+                    var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(order.Id);
+                    existOrder!.StatusId = (int)OrderStatusId.PROCESSING; //Processing
+                    _orderRepository.Update(existOrder);
+                    var payResult = await _unitOfWork.SaveChangesAsync();
+                    if (payResult < 0)
+                    {
+                        _logger.LogInformation("Update order status for order {OrderId} failed", order.Id);
+                    }
 
                     continue;
                 }
+
                 if (!"CANCELLED".Equals(paymentData.status) && !"EXPIRED".Equals(paymentData.status)) continue;
 
                 _logger.LogInformation("Payment for order {OrderId} is cancelled or expired", order.Id);
@@ -106,9 +111,10 @@ public class CheckPaymentStatusJob : IJob
                     var product = await _productRepository.GetByIdNoIncludeAsync(orderDetail.ProductId);
                     product.Quantity += orderDetail.Quantity;
                     _productRepository.Update(product);
-                }   
                     orderDetail.Product.Quantity = product.Quantity;
                 }
+
+
                 order.StatusId = 5; // Cancelled
                 _orderRepository.Update(order);
                 var result = await _unitOfWork.SaveChangesAsync();
@@ -120,7 +126,8 @@ public class CheckPaymentStatusJob : IJob
                 if (result < 0)
                 {
                     _logger.LogInformation("Update order status for order {OrderId} failed", order.Id);
-                }            
+                }
+
                 _logger.LogInformation(
                     result > 0
                         ? "Update order status for order {OrderId} successfully"
