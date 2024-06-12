@@ -92,7 +92,7 @@ namespace NET1814_MilkShop.Services.Services
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
-                RoleId = (int) RoleId.CUSTOMER,
+                RoleId = (int)RoleId.CUSTOMER,
                 VerificationCode = token,
                 IsActive = false,
             };
@@ -109,9 +109,10 @@ namespace NET1814_MilkShop.Services.Services
             var jwtVeriryToken = _jwtTokenExtension.CreateJwtToken(user, TokenType.Authentication);
             if (result > 0)
             {
-                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken,model.FirstName);
+                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken, model.FirstName);
                 return ResponseModel.Success(ResponseConstants.Register(true), null);
             }
+
             return ResponseModel.Error(ResponseConstants.Register(false));
         }
 
@@ -121,8 +122,8 @@ namespace NET1814_MilkShop.Services.Services
                 model.Username,
                 model.Password
             );
-            if (existingUser != null && existingUser.RoleId == (int) RoleId.CUSTOMER)
-            //Only customer can login, others will say wrong username or password
+            if (existingUser != null && existingUser.RoleId == (int)RoleId.CUSTOMER)
+                //Only customer can login, others will say wrong username or password
             {
                 //check if user is banned
                 if (existingUser.IsBanned)
@@ -144,7 +145,8 @@ namespace NET1814_MilkShop.Services.Services
                     RoleId = existingUser.RoleId,
                     AccessToken = token.ToString(),
                     RefreshToken = refreshToken.ToString(),
-                    IsActive = existingUser.IsActive
+                    IsActive = existingUser.IsActive,
+                    IsBanned = existingUser.IsBanned
                 };
                 var customer = await _customerRepository.GetByIdAsync(existingUser.Id);
                 if (customer != null)
@@ -158,6 +160,7 @@ namespace NET1814_MilkShop.Services.Services
 
                 return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
             }
+
             return ResponseModel.BadRequest(ResponseConstants.Login(false));
         }
 
@@ -175,10 +178,12 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest(ResponseConstants.Expired("Token"));
             }
+
             if (isExist == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
             }
+
             if (verifyToken.Equals(isExist.VerificationCode))
             {
                 isExist.IsActive = true;
@@ -189,8 +194,10 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     return ResponseModel.Success(ResponseConstants.Verify(true), null);
                 }
+
                 return ResponseModel.Error(ResponseConstants.Verify(false));
             }
+
             return ResponseModel.BadRequest(ResponseConstants.WrongCode);
         }
 
@@ -211,10 +218,12 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Reset
                     );
-                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken,customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken,
+                        customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
                 }
             }
+
             return ResponseModel.Success(ResponseConstants.NotFound("Email"), null);
         }
 
@@ -230,6 +239,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
             }
+
             if (verifyToken.Equals(isExist.ResetPasswordCode))
             {
                 isExist.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -240,8 +250,10 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     return ResponseModel.Success(ResponseConstants.ChangePassword(true), null);
                 }
+
                 return ResponseModel.Error(ResponseConstants.ChangePassword(false));
             }
+
             return ResponseModel.BadRequest(ResponseConstants.WrongCode);
         }
 
@@ -269,6 +281,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest(ResponseConstants.Expired("Refresh token"));
             }
+
             var newToken = _jwtTokenExtension.CreateJwtToken(userExisted, TokenType.Access);
             return ResponseModel.Success(ResponseConstants.Create("Access Token", true), newToken);
         }
@@ -280,6 +293,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Email"), null);
             }
+
             if (!customer.User.IsActive)
             {
                 string token = _jwtTokenExtension.CreateVerifyCode();
@@ -292,10 +306,12 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Authentication
                     );
-                    _emailService.SendVerificationEmail(customer.Email, verifyToken,customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendVerificationEmail(customer.Email, verifyToken,
+                        customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ActivateAccountLink, null);
                 }
             }
+
             return ResponseModel.BadRequest(ResponseConstants.AccountActivated);
         }
 
@@ -305,8 +321,8 @@ namespace NET1814_MilkShop.Services.Services
                 model.Username,
                 model.Password
             );
-            if (existingUser != null && existingUser.RoleId != (int) RoleId.CUSTOMER)
-            //Only admin,staff can login others will response wrong username or password
+            if (existingUser != null && existingUser.RoleId != (int)RoleId.CUSTOMER)
+                //Only admin,staff can login others will response wrong username or password
             {
                 //check if user is banned
                 if (existingUser.IsBanned)
@@ -332,6 +348,7 @@ namespace NET1814_MilkShop.Services.Services
                 };
                 return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
             }
+
             return ResponseModel.BadRequest(ResponseConstants.Login(false));
         }
     }
