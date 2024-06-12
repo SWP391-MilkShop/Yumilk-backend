@@ -22,7 +22,9 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <returns></returns>
         public async Task<User?> GetUserByUserNameNPassword(string username, string password)
         {
-            var user = await _query.FirstOrDefaultAsync(x => x.Username.Equals(username));
+            var user = await _query
+                .Include(x => x.Role)
+                .FirstOrDefaultAsync(x => x.Username.Equals(username));
             //var user = await _context
             //    .Users.AsNoTracking()
             //    .FirstOrDefaultAsync(x => x.Username.Equals(username));

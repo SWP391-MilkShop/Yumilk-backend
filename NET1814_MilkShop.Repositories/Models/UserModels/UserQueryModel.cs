@@ -2,8 +2,15 @@ namespace NET1814_MilkShop.Repositories.Models.UserModels;
 
 public class UserQueryModel : QueryModel
 {
-    //SearchTerm tu QueryModel se duoc su dung de tim kiem theo UserName,FirstName,LastName
-    public string? Role { get; set; }
+    /// <summary>
+    /// Search by username, first name, last name
+    /// </summary>
+    public new  string? SearchTerm { get; set; }
+    /// <summary>
+    /// Filter by Role Id
+    /// Ex. 1,2,3 or 1, 2 or 1 
+    /// </summary>
+    public string? RoleIds { get; set; }
 
     public bool? IsActive { get; set; }
 

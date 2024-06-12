@@ -85,10 +85,10 @@ namespace NET1814_MilkShop.API
 
             //Add Dependency Injection
             AddDI(services);
-            
+
             //Add Infrastructure BackgroundJob
             QuartzExtenstionHosting.AddQuartzBackgroundJobs(services);
-            
+
             //Add Email Setting
             services.Configure<EmailSettingModel>(
                 _configuration
@@ -228,6 +228,8 @@ namespace NET1814_MilkShop.API
 
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IOrderService, OrderService>();
+
+            services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
 
             services.AddScoped<IProductAttributeRepository, ProductAttributeRepository>();
             services.AddScoped<IProductAttributeService, ProductAttributeService>();

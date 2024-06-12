@@ -14,7 +14,7 @@ public class OrderHistoryQueryModel : QueryModel
 
     public DateTime? FromOrderDate { get; set; }
     public DateTime? ToOrderDate { get; set; }
-    
+
     /// <summary>
     /// order status theo id từ 1-5
     /// </summary>

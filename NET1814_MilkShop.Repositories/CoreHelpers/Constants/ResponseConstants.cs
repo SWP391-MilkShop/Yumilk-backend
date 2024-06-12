@@ -195,6 +195,7 @@
 
         public const string InvalidUrl = "Url không hợp lệ";
         public const string InvalidFilterDate = "Ngày bắt đầu phải trước hoặc trùng với ngày kết thúc";
+        public const string InvalidFromDate = "Ngày bắt đầu không thể lớn hơn ngày hiện tại";
         #region Review
 
         public const string ReviewConstraint = "Bạn không thể đánh giá sản phẩm khi chưa mua hàng hoặc đơn hàng chưa được giao";

@@ -43,7 +43,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public IQueryable<Customer> GetCustomersQuery()
         {
-            var query = _query.Include(x => x.User);
+            //Them role de return role thay vi roleId
+            var query = _query.Include(x => x.User).ThenInclude(x => x.Role);
             return query;
         }
 

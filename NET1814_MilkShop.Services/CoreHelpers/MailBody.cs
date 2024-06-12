@@ -1059,7 +1059,7 @@ public static class MailBody
         body = body.Replace("{{name}}", customerName);
         body = body.Replace(
             "{{action_url}}",
-            verifyLink+$"{token}" 
+            verifyLink + $"{token}"
         );
         body = body.Replace("{{support_url}}", "https://milkshop.azurewebsites.net/api");
         body = body.Replace("[Product Name]", "Yumilk shop");
