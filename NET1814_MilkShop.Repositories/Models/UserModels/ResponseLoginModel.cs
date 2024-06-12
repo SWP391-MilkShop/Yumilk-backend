@@ -18,7 +18,5 @@
         public string? RefreshToken { get; set; }
         public bool IsBanned { get; set; }
         public bool IsActive { get; set; } = true;
-
-        public bool IsBanned { get; set; }
     }
 }
