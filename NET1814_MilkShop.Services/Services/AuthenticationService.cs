@@ -109,7 +109,7 @@ namespace NET1814_MilkShop.Services.Services
             var jwtVeriryToken = _jwtTokenExtension.CreateJwtToken(user, TokenType.Authentication);
             if (result > 0)
             {
-                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken, model.FirstName);
+                await _emailService.SendVerificationEmailAsync(model.Email, jwtVeriryToken, model.FirstName);
                 return ResponseModel.Success(ResponseConstants.Register(true), null);
             }
 
@@ -218,7 +218,7 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Reset
                     );
-                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    await _emailService.SendPasswordResetEmailAsync(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
                 }
             }
@@ -305,7 +305,7 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Authentication
                     );
-                    _emailService.SendVerificationEmail(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    await _emailService.SendVerificationEmailAsync(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ActivateAccountLink, null);
                 }
             }

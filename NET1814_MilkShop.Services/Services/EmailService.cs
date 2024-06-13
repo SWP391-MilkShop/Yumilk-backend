@@ -8,8 +8,8 @@ namespace NET1814_MilkShop.Services.Services
 {
     public interface IEmailService
     {
-        void SendPasswordResetEmail(string receiveEmail, string token, string name);
-        void SendVerificationEmail(string receiveEmail, string token, string name);
+        Task SendPasswordResetEmailAsync(string receiveEmail, string token, string name);
+        Task SendVerificationEmailAsync(string receiveEmail, string token, string name);
     }
 
     public class EmailService : IEmailService
@@ -21,7 +21,7 @@ namespace NET1814_MilkShop.Services.Services
             _emailSettingModel = options.Value;
         }
 
-        public void SendMail(SendMailModel model)
+        private async Task SendMailAsync(SendMailModel model)
         {
             var fromEmailAddress = _emailSettingModel.FromEmailAddress;
             var fromDisplayName = _emailSettingModel.FromDisplayName;
@@ -52,10 +52,10 @@ namespace NET1814_MilkShop.Services.Services
             );
             smtp.Credentials = network;
             //Send mail
-            smtp.Send(mailMessage);
+            await smtp.SendMailAsync(mailMessage);
         }
 
-        public void SendPasswordResetEmail( /*CustomerModel user*/
+        public async Task SendPasswordResetEmailAsync( /*CustomerModel user*/
             string receiveEmail,
             string token,
             string name
@@ -67,10 +67,10 @@ namespace NET1814_MilkShop.Services.Services
                 Subject = "Đặt lại mật khẩu",
                 Body = MailBody.ResetPassword(name, token)
             };
-            SendMail(model);
+            await SendMailAsync(model);
         }
 
-        public void SendVerificationEmail( /*CustomerModel user*/
+        public async Task SendVerificationEmailAsync( /*CustomerModel user*/
             string receiveEmail,
             string token,
             string name
@@ -82,7 +82,7 @@ namespace NET1814_MilkShop.Services.Services
                 Subject = "Kích hoạt tài khoản",
                 Body = MailBody.ActivateAccount(name, token)
             };
-            SendMail(model);
+           await SendMailAsync(model);
         }
     }
 }
