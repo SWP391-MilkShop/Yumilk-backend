@@ -18,7 +18,7 @@ namespace NET1814_MilkShop.API.Infrastructure
                 Instance = httpContext.Request.Path,
                 Status = httpContext.Response.StatusCode,
                 Title = "An error occurred while processing your request",
-                Detail = GetHelpLink(exception),
+                Detail = GetHelpLink(exception) + $"\n Exception: {exception.Message}\nInnerException: {exception.InnerException}",
                 Type = "Error" //cai nay nen de documentation link
             };
             await httpContext.Response.WriteAsJsonAsync(
