@@ -111,9 +111,8 @@ public class ProductAttributeValueService : IProductAttributeValueService
         var isExistBoth = await _proAttValueRepository.GetProdAttValue(pid, aid);
         if (isExistBoth != null)
         {
-            return ResponseModel.Success(
-                ResponseConstants.Exist("Giá trị ứng với thuộc tính của sản phẩm"),
-                null
+            return ResponseModel.BadRequest(
+                ResponseConstants.Exist("Giá trị ứng với thuộc tính của sản phẩm")
             );
         }
 
@@ -194,9 +193,8 @@ public class ProductAttributeValueService : IProductAttributeValueService
                 null
             );
         }
-
-        isExist.DeletedAt = DateTime.Now;
-        _proAttValueRepository.Update(isExist);
+        
+        _proAttValueRepository.Remove(isExist);
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
         {
