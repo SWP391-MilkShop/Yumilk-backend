@@ -8,6 +8,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
     {
         /*Task<List<User>> GetUsersAsync();*/
         IQueryable<User> GetUsersQuery();
+
+        IQueryable<User> GetUserQueryIncludeCustomer();
         Task<User?> GetByUsernameAsync(string username);
         Task<string?> GetVerificationTokenAsync(string username);
         Task<User?> GetByIdAsync(Guid id);
@@ -20,12 +22,19 @@ namespace NET1814_MilkShop.Repositories.Repositories
     public sealed class UserRepository : Repository<User>, IUserRepository
     {
         public UserRepository(AppDbContext context)
-            : base(context) { }
+            : base(context)
+        {
+        }
 
         public IQueryable<User> GetUsersQuery()
         {
             //var query = _context.Users.Include(u => u.Role).AsNoTracking();
             return _query.Include(u => u.Role);
+        }
+
+        public IQueryable<User> GetUserQueryIncludeCustomer()
+        {
+            return _query.Include(x => x.Customer).ThenInclude(o => o.Orders);
         }
 
         public async Task<User?> GetByUsernameAsync(string username)
@@ -38,6 +47,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             {
                 return user;
             }
+
             return null;
         }
 
@@ -48,6 +58,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             {
                 return null;
             }
+
             return user.VerificationCode;
         }
 

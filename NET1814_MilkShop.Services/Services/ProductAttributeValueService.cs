@@ -16,6 +16,7 @@ public interface IProductAttributeValueService
         Guid id,
         ProductAttributeValueQueryModel queryModel
     );
+
     Task<ResponseModel> AddProductAttributeValue(Guid pid, int aid, CreateUpdatePavModel model);
     Task<ResponseModel> UpdateProductAttributeValue(Guid pid, int aid, CreateUpdatePavModel model);
     Task<ResponseModel> DeleteProductAttributeValue(Guid pid, int aid);
@@ -68,6 +69,7 @@ public class ProductAttributeValueService : IProductAttributeValueService
         {
             ProductId = x.ProductId,
             AttributeId = x.AttributeId,
+            AttributeName = x.Attribute.Name,
             Value = x.Value
         });
 
@@ -109,9 +111,8 @@ public class ProductAttributeValueService : IProductAttributeValueService
         var isExistBoth = await _proAttValueRepository.GetProdAttValue(pid, aid);
         if (isExistBoth != null)
         {
-            return ResponseModel.Success(
-                ResponseConstants.Exist("Giá trị ứng với thuộc tính của sản phẩm"),
-                null
+            return ResponseModel.BadRequest(
+                ResponseConstants.Exist("Giá trị ứng với thuộc tính của sản phẩm")
             );
         }
 
@@ -192,9 +193,8 @@ public class ProductAttributeValueService : IProductAttributeValueService
                 null
             );
         }
-
-        isExist.DeletedAt = DateTime.Now;
-        _proAttValueRepository.Update(isExist);
+        
+        _proAttValueRepository.Remove(isExist);
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
         {

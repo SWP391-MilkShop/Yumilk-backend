@@ -157,6 +157,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPost("brands")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> AddBrand([FromBody] CreateBrandModel model)
         {
             _logger.Information("Add Brand");
@@ -172,6 +173,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPatch("brands/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> UpdateBrand(int id, [FromBody] UpdateBrandModel model)
         {
             _logger.Information("Update Brand");
@@ -187,6 +189,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpDelete("brands/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> DeleteBrand(int id)
         {
             _logger.Information("Delete Brand");
@@ -211,7 +214,6 @@ namespace NET1814_MilkShop.API.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpGet("units")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> GetUnits([FromQuery] UnitQueryModel request)
         {
             _logger.Information("Get all units");
@@ -523,6 +525,7 @@ namespace NET1814_MilkShop.API.Controllers
         #endregion
 
         #region ProductImage
+
         [HttpGet("{id}/images")]
         public async Task<IActionResult> GetProductImages(Guid id)
         {
@@ -562,6 +565,7 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _productImageService.DeleteProductImageAsync(id);
             return ResponseExtension.Result(response);
         }
+
         #endregion
 
         #region ProductReview
@@ -573,6 +577,7 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _productReviewService.GetProductReviewsAsync(productId, queryModel);
             return ResponseExtension.Result(response);
         }
+
         /// <summary>
         /// Create review using order id to make sure the customer has bought the product
         /// </summary>
@@ -587,6 +592,7 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _productReviewService.CreateProductReviewAsync(productId, model);
             return ResponseExtension.Result(response);
         }
+
         [HttpPatch("reviews/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
         public async Task<IActionResult> UpdateProductReview(int id, [FromBody] UpdateReviewModel model)
@@ -595,6 +601,7 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _productReviewService.UpdateProductReviewAsync(id, model);
             return ResponseExtension.Result(response);
         }
+
         [HttpDelete("reviews/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2,3")]
         public async Task<IActionResult> DeleteProductReview(int id)
