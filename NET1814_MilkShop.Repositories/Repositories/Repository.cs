@@ -26,10 +26,15 @@ namespace NET1814_MilkShop.Repositories.Repositories
             _context.Set<TEntity>().Update(entity);
         }
 
+        /// <summary>
+        /// Hard delete entity
+        /// </summary>
+        /// <param name="entity"></param>
         public virtual void Remove(TEntity entity)
         {
             _context.Set<TEntity>().Remove(entity);
         }
+
         /// <summary>
         /// Soft delete entity
         /// </summary>
@@ -39,7 +44,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
             entity.DeletedAt = DateTime.Now;
             _context.Set<TEntity>().Update(entity);
         }
-        public virtual async Task<TEntity?> GetById(Guid id)
+
+        public virtual async Task<TEntity?> GetByIdAsync(Guid id)
         {
             var entity = await _context.Set<TEntity>().FindAsync(id);
             if (entity != null && entity.DeletedAt == null)
@@ -49,7 +55,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             return null;
         }
 
-        public virtual async Task<TEntity?> GetById(int id)
+        public virtual async Task<TEntity?> GetByIdAsync(int id)
         {
             var entity = await _context.Set<TEntity>().FindAsync(id);
             if (entity != null && entity.DeletedAt == null)

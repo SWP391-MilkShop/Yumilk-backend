@@ -1,10 +1,9 @@
-﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
-using System.ComponentModel;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("OrderDetails")]
+[Table("order_details")]
 public partial class OrderDetail : IAuditableEntity
 {
     public Guid OrderId { get; set; }
@@ -19,8 +18,8 @@ public partial class OrderDetail : IAuditableEntity
 
     public decimal ItemPrice { get; set; }
 
-    [DefaultValue(false)]
-    public bool IsActive { get; set; }
+    [Column("thumbnail", TypeName = "nvarchar(255)")]
+    public string? Thumbnail { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }

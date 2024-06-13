@@ -30,6 +30,7 @@ public partial class User : IAuditableEntity
 
     [DefaultValue(false)]
     public bool IsActive { get; set; }
+
     [Column("is_banned")]
     [DefaultValue(false)]
     public bool IsBanned { get; set; }

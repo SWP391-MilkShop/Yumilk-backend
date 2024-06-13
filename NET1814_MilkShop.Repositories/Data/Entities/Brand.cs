@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("Brands")]
@@ -14,6 +13,7 @@ public partial class Brand : IAuditableEntity
     public string Name { get; set; } = null!;
 
     public string? Description { get; set; }
+
     [Column("logo", TypeName = "nvarchar(255)")] //url
     public string? Logo { get; set; }
 

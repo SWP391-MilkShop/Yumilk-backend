@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
@@ -6,6 +5,7 @@ using NET1814_MilkShop.Repositories.Models.ProductAttributeModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
+using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -22,14 +22,18 @@ namespace NET1814_MilkShop.Services.Services
         private readonly IProductAttributeRepository _productAttribute;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ProductAttributeService(IProductAttributeRepository productAttribute, IUnitOfWork unitOfWork)
+        public ProductAttributeService(
+            IProductAttributeRepository productAttribute,
+            IUnitOfWork unitOfWork
+        )
         {
             _productAttribute = productAttribute;
             _unitOfWork = unitOfWork;
         }
 
-
-        public async Task<ResponseModel> GetProductAttributesAsync(ProductAttributeQueryModel queryModel)
+        public async Task<ResponseModel> GetProductAttributesAsync(
+            ProductAttributeQueryModel queryModel
+        )
         {
             var query = _productAttribute.GetProductAttributes();
 
@@ -43,7 +47,9 @@ namespace NET1814_MilkShop.Services.Services
             if (!string.IsNullOrEmpty(queryModel.SearchTerm))
             {
                 query = query.Where(x =>
-                    x.Name.Contains(queryModel.SearchTerm) || x.Description.Contains(queryModel.SearchTerm));
+                    x.Name.Contains(queryModel.SearchTerm)
+                    || x.Description.Contains(queryModel.SearchTerm)
+                );
             }
 
             #endregion
@@ -65,7 +71,11 @@ namespace NET1814_MilkShop.Services.Services
 
             #region paging
 
-            var pPage = await PagedList<ProductAttribute>.CreateAsync(query, queryModel.Page, queryModel.PageSize);
+            var pPage = await PagedList<ProductAttribute>.CreateAsync(
+                query,
+                queryModel.Page,
+                queryModel.PageSize
+            );
 
             #endregion
 
@@ -78,7 +88,10 @@ namespace NET1814_MilkShop.Services.Services
                     : "Danh sách thuộc tính sản phẩm rỗng",
                 Status = "Success"
             };*/
-            return ResponseModel.Success(ResponseConstants.Get("các thuộc tính sản phẩm", pPage.TotalCount > 0), pPage);
+            return ResponseModel.Success(
+                ResponseConstants.Get("các thuộc tính sản phẩm", pPage.TotalCount > 0),
+                pPage
+            );
         }
 
         public async Task<ResponseModel> AddProductAttributeAsync(CreateProductAttributeModel model)
@@ -91,10 +104,7 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Thuộc tính sản phẩm đã tồn tại! Thêm một thuộc tính mới thất bại!",
                     Status = "Error"
                 };*/
-                return ResponseModel.BadRequest(
-                    ResponseConstants.Exist(
-                        "Thuộc tính sản phẩm")
-                    );
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Thuộc tính sản phẩm"));
             }
 
             var entity = new ProductAttribute
@@ -112,13 +122,15 @@ namespace NET1814_MilkShop.Services.Services
                 Message = "Thêm mới thuộc tính sản phẩm thành công!"
             };*/
             return ResponseModel.Success(
-                ResponseConstants.Create(
-                    "thuộc tính sản phẩm", true),
+                ResponseConstants.Create("thuộc tính sản phẩm", true),
                 entity
             );
         }
 
-        public async Task<ResponseModel> UpdateProductAttributeAsync(int id, UpdateProductAttributeModel model)
+        public async Task<ResponseModel> UpdateProductAttributeAsync(
+            int id,
+            UpdateProductAttributeModel model
+        )
         {
             var isExistId = await _productAttribute.GetProductAttributeById(id);
             if (isExistId == null)
@@ -128,10 +140,7 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Không tìm thấy thuộc tính sản phẩm",
                     Status = "Error"
                 };*/
-                return ResponseModel.BadRequest(
-                    ResponseConstants.NotFound(
-                        "Thuộc tính sản phẩm")
-                );
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Thuộc tính sản phẩm"));
             }
 
             if (!string.IsNullOrEmpty(model.Name))
@@ -144,18 +153,15 @@ namespace NET1814_MilkShop.Services.Services
                         Message = "Tên thuộc tính đã tồn tại",
                         Status = "Error"
                     };*/
-                    return ResponseModel.BadRequest(
-                        ResponseConstants.Exist(
-                            "Tên thuộc tính")
-                    );
-                    
+                    return ResponseModel.BadRequest(ResponseConstants.Exist("Tên thuộc tính"));
                 }
 
                 isExistId.Name = model.Name;
             }
 
-            isExistId.Description =
-                !string.IsNullOrEmpty(model.Description) ? model.Description : isExistId.Description;
+            isExistId.Description = !string.IsNullOrEmpty(model.Description)
+                ? model.Description
+                : isExistId.Description;
             isExistId.IsActive = model.IsActive;
             _productAttribute.Update(isExistId);
             var res = await _unitOfWork.SaveChangesAsync();
@@ -167,8 +173,7 @@ namespace NET1814_MilkShop.Services.Services
                     Status = "Success",
                 };*/
                 return ResponseModel.Success(
-                    ResponseConstants.Update(
-                        "Thuộc tính sản phẩm", true),
+                    ResponseConstants.Update("Thuộc tính sản phẩm", true),
                     null
                 );
             }
@@ -178,10 +183,7 @@ namespace NET1814_MilkShop.Services.Services
                 Message = "Cập nhật thuộc tính sản phẩm thất bại",
                 Status = "Error"
             };*/
-            return ResponseModel.BadRequest(
-                ResponseConstants.Update(
-                    "Thuộc tính sản phẩm", false)
-            );
+            return ResponseModel.BadRequest(ResponseConstants.Update("Thuộc tính sản phẩm", false));
         }
 
         public async Task<ResponseModel> DeleteProductAttributeAsync(int id)
@@ -194,11 +196,7 @@ namespace NET1814_MilkShop.Services.Services
                     Status = "Error",
                     Message = "Thuộc tính sản phẩm không tồn tại"
                 };*/
-                return ResponseModel.BadRequest(
-                    ResponseConstants.NotFound(
-                        "thuộc tính sản phẩm"
-                    )
-                );
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("thuộc tính sản phẩm"));
             }
 
             isExistId.DeletedAt = DateTime.Now;
@@ -212,11 +210,9 @@ namespace NET1814_MilkShop.Services.Services
                     Message = "Xóa thuộc tính sản phẩm thành công"
                 };*/
                 return ResponseModel.Success(
-                    ResponseConstants.Delete(
-                        "thuộc tính sản phẩm", true),
+                    ResponseConstants.Delete("thuộc tính sản phẩm", true),
                     null
                 );
-                
             }
 
             /*return new ResponseModel
@@ -224,15 +220,11 @@ namespace NET1814_MilkShop.Services.Services
                 Status = "Success",
                 Message = "Xóa thuộc tính sản phẩm thất bại"
             };*/
-            return ResponseModel.Error(
-                ResponseConstants.Delete(
-                    "thuộc tính sản phẩm", false)
-            );
-            
+            return ResponseModel.Error(ResponseConstants.Delete("thuộc tính sản phẩm", false));
         }
 
         private Expression<Func<ProductAttribute, object>> GetSortProperty(ProductAttributeQueryModel queryModel)
-            => queryModel.SortColumn?.ToLower() switch
+            => queryModel.SortColumn?.ToLower().Replace(" ", "") switch
             {
                 "name" => p => p.Name,
                 _ => p => p.Id

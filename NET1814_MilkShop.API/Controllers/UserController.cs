@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
 using NET1814_MilkShop.API.CoreHelpers.Extensions;
-using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Models.AddressModels;
+using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Models.UserModels;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
@@ -20,6 +20,7 @@ namespace NET1814_MilkShop.API.Controllers
         private readonly IUserService _userService;
         private readonly ICustomerService _customerService;
         private readonly IAddressService _addressService;
+        private readonly IOrderService _orderService;
 
         public UserController(ILogger logger, IServiceProvider serviceProvider)
         {
@@ -27,8 +28,20 @@ namespace NET1814_MilkShop.API.Controllers
             _userService = serviceProvider.GetRequiredService<IUserService>();
             _customerService = serviceProvider.GetRequiredService<ICustomerService>();
             _addressService = serviceProvider.GetRequiredService<IAddressService>();
+            _orderService = serviceProvider.GetRequiredService<IOrderService>();
         }
+
         #region User
+
+        [HttpPost("users")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserModel model)
+        {
+            _logger.Information("Create user");
+            var response = await _userService.CreateUserAsync(model);
+            return ResponseExtension.Result(response);
+        }
+
         [HttpGet("users")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         [ServiceFilter(typeof(UserExistsFilter))]
@@ -41,9 +54,10 @@ namespace NET1814_MilkShop.API.Controllers
                 return BadRequest(response);
             }
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
+
         [HttpPatch("users/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserModel model)
@@ -105,6 +119,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);*/
             return ResponseExtension.Result(response);
         }
+
         /// <summary>
         /// Only Customer can change profile info?
         /// </summary>
@@ -145,13 +160,14 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);*/
             return ResponseExtension.Result(response);
         }
+
         /// <summary>
         /// Feature only available for Customer role
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         [Route("user/account/addresses")]
-        [Authorize(AuthenticationSchemes = "Access",Roles = "3")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> GetCustomerAddresses()
         {
@@ -165,7 +181,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);*/
             return ResponseExtension.Result(response);
         }
-        
+
         /// <summary>
         /// Feature only available for Customer role,
         /// max 3 addresses and cannot set first address to non-default
@@ -174,9 +190,11 @@ namespace NET1814_MilkShop.API.Controllers
         [HttpPost]
         /*[Route("api/user/change-password")]*/
         [Route("user/account/addresses")]
-        [Authorize(AuthenticationSchemes = "Access",Roles = "3")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
         [ServiceFilter(typeof(UserExistsFilter))]
-        public async Task<IActionResult> CreateCustomerAddress([FromBody] CreateAddressModel request)
+        public async Task<IActionResult> CreateCustomerAddress(
+            [FromBody] CreateAddressModel request
+        )
         {
             _logger.Information("Create customer address");
             var customerId = (HttpContext.Items["UserId"] as Guid?)!.Value;
@@ -200,11 +218,12 @@ namespace NET1814_MilkShop.API.Controllers
         [ServiceFilter(typeof(UserExistsFilter))]
         public async Task<IActionResult> UpdateCustomerAddress(
             int id,
-            [FromBody] UpdateAddressModel request)
+            [FromBody] UpdateAddressModel request
+        )
         {
             _logger.Information("Update Customer Address");
             var customerId = (HttpContext.Items["UserId"] as Guid?)!.Value;
-            var response = await _addressService.UpdateAddressAsync(customerId,id,request);
+            var response = await _addressService.UpdateAddressAsync(customerId, id, request);
             /*if (response.Status == "Error")
             {
                 return BadRequest(response);
@@ -212,6 +231,7 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);*/
             return ResponseExtension.Result(response);
         }
+
         /// <summary>
         /// feature only available for Customer role,
         /// cannot delete with address that is default
@@ -234,6 +254,44 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);*/
             return ResponseExtension.Result(response);
         }
+        #endregion
+
+        #region OrderHistory
+
+        [HttpGet]
+        [Route("/api/customer/orders")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        [ServiceFilter(typeof(UserExistsFilter))]
+        public async Task<IActionResult> GetOrderHistory([FromQuery] OrderHistoryQueryModel model)
+        {
+            _logger.Information("Get order history");
+            var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
+            var res = await _orderService.GetOrderHistoryAsync(userId, model);
+            return ResponseExtension.Result(res);
+        }
+
+        [HttpGet("/api/customer/orders/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        [ServiceFilter(typeof(UserExistsFilter))]
+        public async Task<IActionResult> GetOrderHistoryDetail(Guid id)
+        {
+            _logger.Information("Get order detail history");
+            var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
+            var res = await _orderService.GetOrderHistoryDetailAsync(userId, id);
+            return ResponseExtension.Result(res);
+        }
+
+        [HttpPatch("/api/customer/orders/{id}/cancel")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        [ServiceFilter(typeof(UserExistsFilter))]
+        public async Task<IActionResult> CancelOrder(Guid id)
+        {
+            _logger.Information("Cancel order");
+            var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
+            var res = await _orderService.CancelOrderAsync(userId, id);
+            return ResponseExtension.Result(res);
+        }
+
         #endregion
     }
 }

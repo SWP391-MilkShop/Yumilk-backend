@@ -11,11 +11,13 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> UploadImageAsync(ImageUploadModel model);
         Task<ResponseModel> GetImageAsync(string imageHash);
     }
+
     public class ImageService : IImageService
     {
         private readonly IConfiguration _configuration;
         private readonly string ClientId;
         private readonly string ApiUrl;
+
         public ImageService(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -28,7 +30,7 @@ namespace NET1814_MilkShop.Services.Services
             using var client = new HttpClient();
 
             // Add the client_id to the Authorization header
-            client.DefaultRequestHeaders.Add("Authorization", "Client-ID " + _configuration["Imgur:ClientId"]);
+            client.DefaultRequestHeaders.Add("Authorization", "Client-ID " + ClientId);
 
             // Send the GET request to the Imgur API
             var response = await client.GetAsync($"https://api.imgur.com/3/image/{imageHash}");
@@ -43,7 +45,10 @@ namespace NET1814_MilkShop.Services.Services
             switch (imgurResponse.Status)
             {
                 case 200:
-                    return ResponseModel.Success("Tải thông tin hình ảnh thành công", imgurResponse.Data);
+                    return ResponseModel.Success(
+                        "Tải thông tin hình ảnh thành công",
+                        imgurResponse.Data
+                    );
                 case 400:
                     return ResponseModel.BadRequest("Yêu cầu không hợp lệ");
                 case 404:
@@ -52,7 +57,6 @@ namespace NET1814_MilkShop.Services.Services
                     return ResponseModel.Error("Đã xảy ra lỗi khi tải thông tin hình ảnh");
             }
         }
-
 
         public async Task<ResponseModel> UploadImageAsync(ImageUploadModel model)
         {
@@ -84,7 +88,7 @@ namespace NET1814_MilkShop.Services.Services
 
             // Convert the response content to a ResponseModel
             var imgurResponse = JsonConvert.DeserializeObject<ImgurResponse>(responseContent);
-            if(imgurResponse == null)
+            if (imgurResponse == null)
             {
                 return ResponseModel.Error("Đã xảy ra lỗi khi đăng tải hình ảnh");
             }
@@ -92,7 +96,10 @@ namespace NET1814_MilkShop.Services.Services
             switch (imgurResponse.Status)
             {
                 case 200:
-                    return ResponseModel.Success("Đăng tải hình ảnh thành công", imgurResponse.Data);
+                    return ResponseModel.Success(
+                        "Đăng tải hình ảnh thành công",
+                        imgurResponse.Data
+                    );
                 case 400:
                     return ResponseModel.BadRequest("Yêu cầu không hợp lệ");
                 case 404:

@@ -28,6 +28,7 @@ namespace NET1814_MilkShop.Repositories.Models.UserModels
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Password and confirmation does not match!")]
         public string ConfirmPassword { get; set; } = null!;
+
         /// <summary>
         /// Range 1-2
         /// </summary>

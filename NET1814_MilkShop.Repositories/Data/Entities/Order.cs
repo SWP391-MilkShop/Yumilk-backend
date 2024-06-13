@@ -1,10 +1,9 @@
 ﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("Orders")]
+[Table("orders")]
 public partial class Order : IAuditableEntity
 {
     [Key]
@@ -16,11 +15,20 @@ public partial class Order : IAuditableEntity
 
     public decimal ShippingFee { get; set; }
 
-    public decimal TotalAmount { get; set; }
+    public decimal TotalAmount { get; set; } // TotalPrice + ShippingFee
 
     public int VoucherId { get; set; }
 
+    [Column("receiver_name", TypeName = "nvarchar(255)")]
+    public string ReceiverName { get; set; } = null!;
+
     public string Address { get; set; } = null!;
+    
+    [Column("district_id")]
+    public int DistrictId { get; set; }
+    
+    [Column("ward_code")]
+    public int WardCode { get; set; }
 
     public string PhoneNumber { get; set; } = null!;
 
@@ -28,6 +36,9 @@ public partial class Order : IAuditableEntity
 
     [Column("payment_method", TypeName = "varchar(255)")]
     public string? PaymentMethod { get; set; }
+
+    [Column("order_code", TypeName = "int")]
+    public int? OrderCode { get; set; }
 
     [Column("payment_date", TypeName = "datetime2")]
     public DateTime? PaymentDate { get; set; }

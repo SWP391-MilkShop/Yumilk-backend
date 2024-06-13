@@ -1,5 +1,4 @@
-﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
-using System.ComponentModel;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,11 +9,9 @@ public partial class Cart : IAuditableEntity
 {
     [Key]
     public int Id { get; set; }
+    [Required]
+    public Guid CustomerId { get; set; }
 
-    public Guid? CustomerId { get; set; }
-
-    [DefaultValue(false)]
-    public bool IsActive { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }

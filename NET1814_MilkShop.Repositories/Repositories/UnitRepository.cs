@@ -7,7 +7,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
     public interface IUnitRepository
     {
         IQueryable<Unit> GetUnitsQuery();
-        Task<Unit?> GetById(int id);
+        Task<Unit?> GetByIdAsync(int id);
         void Add(Unit unit);
         void Update(Unit unit);
         void Delete(Unit unit);

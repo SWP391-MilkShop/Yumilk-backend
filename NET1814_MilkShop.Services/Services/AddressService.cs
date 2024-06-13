@@ -7,6 +7,7 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 
 namespace NET1814_MilkShop.Services.Services;
+
 public interface IAddressService
 {
     Task<ResponseModel> CreateAddressAsync(Guid customerId, CreateAddressModel model);
@@ -73,21 +74,27 @@ public class AddressService : IAddressService
     public async Task<ResponseModel> GetAddressesByCustomerId(Guid customerId)
     {
         var customerAddresses = _addressRepository.GetCustomerAddresses(customerId);
-        var result = customerAddresses.Select(customerAddress => new AddressModel
-        {
-            Id = customerAddress.Id,
-            ReceiverName = customerAddress.ReceiverName,
-            ReceiverPhone = customerAddress.PhoneNumber,
-            Address = customerAddress.Address,
-            WardName = customerAddress.WardName,
-            DistrictName = customerAddress.DistrictName,
-            ProvinceName = customerAddress.ProvinceName,
-            IsDefault = customerAddress.IsDefault
-        });
+        var result = await customerAddresses
+            .Select(customerAddress => new AddressModel
+            {
+                Id = customerAddress.Id,
+                ReceiverName = customerAddress.ReceiverName,
+                ReceiverPhone = customerAddress.PhoneNumber,
+                Address = customerAddress.Address,
+                WardName = customerAddress.WardName,
+                DistrictName = customerAddress.DistrictName,
+                ProvinceName = customerAddress.ProvinceName,
+                IsDefault = customerAddress.IsDefault
+            })
+            .ToListAsync();
         return ResponseModel.Success(ResponseConstants.Get("địa chỉ", result.Any()), result);
     }
 
-    public async Task<ResponseModel> UpdateAddressAsync(Guid customerId, int id, UpdateAddressModel model)
+    public async Task<ResponseModel> UpdateAddressAsync(
+        Guid customerId,
+        int id,
+        UpdateAddressModel model
+    )
     {
         var customerAddresses = _addressRepository.GetCustomerAddresses(customerId);
         var address = await customerAddresses.FirstOrDefaultAsync(x => x.Id == id);

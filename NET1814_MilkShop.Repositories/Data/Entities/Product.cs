@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("Products")]
+[Table("products")]
 public partial class Product : IAuditableEntity
 {
     [Key]
@@ -20,6 +20,7 @@ public partial class Product : IAuditableEntity
     public decimal OriginalPrice { get; set; }
 
     public decimal SalePrice { get; set; }
+
     [Column("thumbnail", TypeName = "nvarchar(255)")]
     public string? Thumbnail { get; set; }
 
@@ -62,4 +63,6 @@ public partial class Product : IAuditableEntity
 
     public virtual ProductStatus? ProductStatus { get; set; }
     public virtual Unit? Unit { get; set; }
+
+    public virtual ICollection<ProductReview> ProductReviews { get; set; } = [];
 }

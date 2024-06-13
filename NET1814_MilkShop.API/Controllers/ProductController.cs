@@ -7,6 +7,7 @@ using NET1814_MilkShop.Repositories.Models.CategoryModels;
 using NET1814_MilkShop.Repositories.Models.ProductAttributeModels;
 using NET1814_MilkShop.Repositories.Models.ProductAttributeValueModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
+using NET1814_MilkShop.Repositories.Models.ProductReviewModels;
 using NET1814_MilkShop.Repositories.Models.UnitModels;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
@@ -25,6 +26,7 @@ namespace NET1814_MilkShop.API.Controllers
         private readonly IProductAttributeService _productAttributeService;
         private readonly IProductAttributeValueService _productAttributeValueService;
         private readonly IProductImageService _productImageService;
+        private readonly IProductReviewService _productReviewService;
 
         public ProductController(ILogger logger, IServiceProvider serviceProvider)
         {
@@ -36,6 +38,7 @@ namespace NET1814_MilkShop.API.Controllers
             _productAttributeService = serviceProvider.GetRequiredService<IProductAttributeService>();
             _productAttributeValueService = serviceProvider.GetRequiredService<IProductAttributeValueService>();
             _productImageService = serviceProvider.GetRequiredService<IProductImageService>();
+            _productReviewService = serviceProvider.GetRequiredService<IProductReviewService>();
         }
 
         #region Product
@@ -57,9 +60,7 @@ namespace NET1814_MilkShop.API.Controllers
                     Status = "Error"
                 };
                 return BadRequest(responseError);*/
-                var res = ResponseModel.BadRequest(
-                    " Giá nhỏ nhất phải nhỏ hơn giá lớn nhất"
-                );
+                var res = ResponseModel.BadRequest(" Giá nhỏ nhất phải nhỏ hơn giá lớn nhất");
                 return ResponseExtension.Result(res);
             }
 
@@ -70,7 +71,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -85,7 +86,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -101,7 +102,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -117,7 +118,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -133,7 +134,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -151,11 +152,12 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
         [HttpPost("brands")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> AddBrand([FromBody] CreateBrandModel model)
         {
             _logger.Information("Add Brand");
@@ -166,12 +168,12 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
-            
         }
 
         [HttpPatch("brands/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> UpdateBrand(int id, [FromBody] UpdateBrandModel model)
         {
             _logger.Information("Update Brand");
@@ -182,12 +184,12 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
-            
         }
 
         [HttpDelete("brands/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> DeleteBrand(int id)
         {
             _logger.Information("Delete Brand");
@@ -198,7 +200,7 @@ namespace NET1814_MilkShop.API.Controllers
             }
 
             return Ok(response);*/
-            
+
             return ResponseExtension.Result(response);
         }
 
@@ -212,7 +214,6 @@ namespace NET1814_MilkShop.API.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpGet("units")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> GetUnits([FromQuery] UnitQueryModel request)
         {
             _logger.Information("Get all units");
@@ -377,10 +378,12 @@ namespace NET1814_MilkShop.API.Controllers
         #region ProductAttribute
 
         [HttpGet("attributes")]
-        public async Task<IActionResult> GetProductAttributes([FromQuery] ProductAttributeQueryModel queryModel)
+        public async Task<IActionResult> GetProductAttributes(
+            [FromQuery] ProductAttributeQueryModel queryModel
+        )
         {
             _logger.Information("Get Product Attributes");
-            var res = await _productAttributeService.GetProductAttributesAsync(queryModel);/*
+            var res = await _productAttributeService.GetProductAttributesAsync(queryModel); /*
             if (res.Status == "Error")
             {
                 return BadRequest(res);
@@ -391,7 +394,9 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPost("attributes")]
-        public async Task<IActionResult> AddProductAttribute([FromBody] CreateProductAttributeModel model)
+        public async Task<IActionResult> AddProductAttribute(
+            [FromBody] CreateProductAttributeModel model
+        )
         {
             _logger.Information("Add Product Attribute");
             var res = await _productAttributeService.AddProductAttributeAsync(model);
@@ -405,7 +410,10 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPatch("attributes/{id}")]
-        public async Task<IActionResult> UpdateProductAttribute(int id, [FromBody] UpdateProductAttributeModel model)
+        public async Task<IActionResult> UpdateProductAttribute(
+            int id,
+            [FromBody] UpdateProductAttributeModel model
+        )
         {
             _logger.Information("Update Product Attribute");
             var res = await _productAttributeService.UpdateProductAttributeAsync(id, model);
@@ -437,7 +445,10 @@ namespace NET1814_MilkShop.API.Controllers
         #region ProductAttributeValue
 
         [HttpGet("{id}/attributes/values")]
-        public async Task<IActionResult> GetProductAttributeValue(Guid id, [FromQuery] ProductAttributeValueQueryModel model)
+        public async Task<IActionResult> GetProductAttributeValue(
+            Guid id,
+            [FromQuery] ProductAttributeValueQueryModel model
+        )
         {
             _logger.Information("Get Product Attribute Value");
             var res = await _productAttributeValueService.GetProductAttributeValue(id, model);
@@ -451,10 +462,18 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPost("{id}/attributes/{attributeId}/values")]
-        public async Task<IActionResult> AddProAttValues(Guid id, int attributeId, [FromBody] CreateUpdatePavModel model)
+        public async Task<IActionResult> AddProAttValues(
+            Guid id,
+            int attributeId,
+            [FromBody] CreateUpdatePavModel model
+        )
         {
             _logger.Information("Add Product Attribute Value");
-            var res = await _productAttributeValueService.AddProductAttributeValue(id, attributeId, model);
+            var res = await _productAttributeValueService.AddProductAttributeValue(
+                id,
+                attributeId,
+                model
+            );
             /*if (res.Status == "Error")
             {
                 return BadRequest(res);
@@ -465,10 +484,18 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         [HttpPatch("{id}/attributes/{attributeId}/values")]
-        public async Task<IActionResult> UpdateProAttValues(Guid id, int attributeId, [FromBody] CreateUpdatePavModel model)
+        public async Task<IActionResult> UpdateProAttValues(
+            Guid id,
+            int attributeId,
+            [FromBody] CreateUpdatePavModel model
+        )
         {
             _logger.Information("Update Product Attribute Value");
-            var res = await _productAttributeValueService.UpdateProductAttributeValue(id, attributeId, model);
+            var res = await _productAttributeValueService.UpdateProductAttributeValue(
+                id,
+                attributeId,
+                model
+            );
             /*if (res.Status == "Error")
             {
                 return BadRequest(res);
@@ -482,7 +509,10 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> DeleteProAttValues(Guid id, int attributeId)
         {
             _logger.Information("Delete Product Attribute Value");
-            var res = await _productAttributeValueService.DeleteProductAttributeValue(id, attributeId);
+            var res = await _productAttributeValueService.DeleteProductAttributeValue(
+                id,
+                attributeId
+            );
             /*if (res.Status == "Error")
             {
                 return BadRequest(res);
@@ -495,6 +525,7 @@ namespace NET1814_MilkShop.API.Controllers
         #endregion
 
         #region ProductImage
+
         [HttpGet("{id}/images")]
         public async Task<IActionResult> GetProductImages(Guid id)
         {
@@ -502,44 +533,84 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _productImageService.GetByProductIdAsync(id);
             return ResponseExtension.Result(response);
         }
+
         /// <summary>
-        /// Add new image by product id
+        /// Upload product images (max 10 images per product)
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="imageUrl"></param>
+        /// <param name="images"></param>
         /// <returns></returns>
         [HttpPost("{id}/images")]
-        public async Task<IActionResult> CreateProductImage(Guid id, [FromBody] string imageUrl)
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> CreateProductImage(
+            Guid id,
+            [FromForm] List<IFormFile> images
+        )
         {
-            _logger.Information("Add Product Image");
-            var response = await _productImageService.CreateProductImageAsync(id, imageUrl);
+            _logger.Information("Upload Product Image");
+            var response = await _productImageService.CreateProductImageAsync(id, images);
             return ResponseExtension.Result(response);
         }
+
         /// <summary>
-        /// Update by image id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="imageUrl"></param>
-        /// <returns></returns>
-        [HttpPatch("images/{id}")]
-        public async Task<IActionResult> UpdateProductImage(int id, [FromBody] string imageUrl)
-        {
-            _logger.Information("Update Product Image");
-            var response = await _productImageService.UpdateProductImageAsync(id, imageUrl);
-            return ResponseExtension.Result(response);
-        }
-        /// <summary>
-        /// Delete by image id
+        /// Delete by image id (Hard delete)
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete("images/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
         public async Task<IActionResult> DeleteProductImage(int id)
         {
             _logger.Information("Delete Product Image");
             var response = await _productImageService.DeleteProductImageAsync(id);
             return ResponseExtension.Result(response);
         }
+
+        #endregion
+
+        #region ProductReview
+
+        [HttpGet("{productId}/reviews")]
+        public async Task<IActionResult> GetProductReviews(Guid productId, [FromQuery] ReviewQueryModel queryModel)
+        {
+            _logger.Information("Get Product Reviews");
+            var response = await _productReviewService.GetProductReviewsAsync(productId, queryModel);
+            return ResponseExtension.Result(response);
+        }
+
+        /// <summary>
+        /// Create review using order id to make sure the customer has bought the product
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost("{productId}/reviews")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        public async Task<IActionResult> CreateProductReview(Guid productId, [FromBody] CreateReviewModel model)
+        {
+            _logger.Information("Create Product Review");
+            var response = await _productReviewService.CreateProductReviewAsync(productId, model);
+            return ResponseExtension.Result(response);
+        }
+
+        [HttpPatch("reviews/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+        public async Task<IActionResult> UpdateProductReview(int id, [FromBody] UpdateReviewModel model)
+        {
+            _logger.Information("Update Product Review");
+            var response = await _productReviewService.UpdateProductReviewAsync(id, model);
+            return ResponseExtension.Result(response);
+        }
+
+        [HttpDelete("reviews/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2,3")]
+        public async Task<IActionResult> DeleteProductReview(int id)
+        {
+            _logger.Information("Delete Product Review");
+            var response = await _productReviewService.DeleteProductReviewAsync(id);
+            return ResponseExtension.Result(response);
+        }
+
         #endregion
     }
 }

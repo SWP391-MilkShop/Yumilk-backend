@@ -12,7 +12,6 @@ using NET1814_MilkShop.Services.Services;
 using System.Reflection;
 using System.Text;
 
-
 namespace NET1814_MilkShop.API
 {
     public class Startup
@@ -30,7 +29,10 @@ namespace NET1814_MilkShop.API
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(o =>
             {
-                o.SwaggerDoc("v1", new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" });
+                o.SwaggerDoc(
+                    "v1",
+                    new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" }
+                );
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var APIXmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 o.IncludeXmlComments(APIXmlPath);
@@ -83,12 +85,18 @@ namespace NET1814_MilkShop.API
 
             //Add Dependency Injection
             AddDI(services);
+
+            //Add Infrastructure BackgroundJob
+            QuartzExtenstionHosting.AddQuartzBackgroundJobs(services);
+
             //Add Email Setting
             services.Configure<EmailSettingModel>(
                 _configuration
                     .GetSection("EmailSettings")); //fix EmailSetting thanh EmailSettings ngồi mò gần 2 tiếng :D
             //Add Database
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+            //Add HttpClient
+            services.AddHttpClient();
             //Add Exception Handler
             services.AddExceptionHandler<ExceptionLoggingHandler>();
             services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -158,8 +166,8 @@ namespace NET1814_MilkShop.API
         {
             if (env.IsDevelopment())
             {
-                
             }
+
             app.UseDeveloperExceptionPage();
 
             var isUserSwagger = _configuration.GetValue<bool>("UseSwagger", false);
@@ -188,6 +196,7 @@ namespace NET1814_MilkShop.API
             app.MapControllers();
         }
 
+
         private static void AddDI(IServiceCollection services)
         {
             services.AddScoped<IUserRepository, UserRepository>();
@@ -213,9 +222,14 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IUnitRepository, UnitRepository>();
             services.AddScoped<IUnitService, UnitService>();
 
+            services.AddScoped<ICartDetailRepository, CartDetailRepository>();
+            services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<ICartService, CartService>();
+
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IOrderService, OrderService>();
 
+            services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
 
             services.AddScoped<IProductAttributeRepository, ProductAttributeRepository>();
             services.AddScoped<IProductAttributeService, ProductAttributeService>();
@@ -226,15 +240,23 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
             services.AddScoped<IProductImageService, ProductImageService>();
 
+            services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
+            services.AddScoped<IProductReviewService, ProductReviewService>();
+
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<IAddressService, AddressService>();
 
+            services.AddScoped<ICheckoutService, CheckoutService>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<IEmailService, EmailService>();
 
             services.AddScoped<IImageService, ImageService>();
+
+            services.AddScoped<IPaymentService, PaymentService>();
+
+            services.AddScoped<IShippingService, ShippingService>();
             //Add Extensions
             services.AddScoped<IJwtTokenExtension, JwtTokenExtension>();
             //Add Filters

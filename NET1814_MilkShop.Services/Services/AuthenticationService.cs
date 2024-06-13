@@ -1,4 +1,5 @@
 ﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
@@ -11,14 +12,13 @@ namespace NET1814_MilkShop.Services.Services
 {
     public interface IAuthenticationService
     {
-        Task<ResponseModel> SignUpAsync(SignUpModel model, string environment);
-        Task<ResponseModel> CreateUserAsync(CreateUserModel model);
+        Task<ResponseModel> SignUpAsync(SignUpModel model);
         Task<ResponseModel> LoginAsync(RequestLoginModel model);
         Task<ResponseModel> VerifyAccountAsync(string token);
-        Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request, string environment);
+        Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request);
         Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
         Task<ResponseModel> RefreshTokenAsync(string token);
-        Task<ResponseModel> ActivateAccountAsync(string email, string environment);
+        Task<ResponseModel> ActivateAccountAsync(string email);
         Task<ResponseModel> DashBoardLoginAsync(RequestLoginModel model);
     }
 
@@ -49,44 +49,11 @@ namespace NET1814_MilkShop.Services.Services
         }
 
         /// <summary>
-        /// Admin có thể tạo tài khoản cho nhân viên hoặc admin khác
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        public async Task<ResponseModel> CreateUserAsync(CreateUserModel model)
-        {
-            var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
-            if (existingUser != null)
-            {
-                return ResponseModel.BadRequest(ResponseConstants.Exist("Tên đăng nhập"));
-            }
-
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Username = model.Username,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
-                RoleId = model.RoleId,
-                IsActive = true, //no activation required
-                IsBanned = false
-            };
-            _userRepository.Add(user);
-            var result = await _unitOfWork.SaveChangesAsync();
-            if (result > 0)
-            {
-                return ResponseModel.Success(ResponseConstants.Create("tài khoản", true), null);
-            }
-            return ResponseModel.Error(ResponseConstants.Create("tài khoản", false));
-        }
-
-        /// <summary>
         /// Người dùng đăng ký tài khoản
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public async Task<ResponseModel> SignUpAsync(SignUpModel model, string environment)
+        public async Task<ResponseModel> SignUpAsync(SignUpModel model)
         {
             var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
             if (existingUser != null)
@@ -95,7 +62,9 @@ namespace NET1814_MilkShop.Services.Services
             }
 
             /*var IsCustomerExist = await _customerRepository.IsCustomerExistAsync(model.Email, model.PhoneNumber);*/
-            var isPhoneNumberExist = await _customerRepository.IsExistPhoneNumberAsync(model.PhoneNumber);
+            var isPhoneNumberExist = await _customerRepository.IsExistPhoneNumberAsync(
+                model.PhoneNumber
+            );
             if (isPhoneNumberExist)
             {
                 return ResponseModel.BadRequest(ResponseConstants.Exist("Số điện thoại"));
@@ -123,7 +92,7 @@ namespace NET1814_MilkShop.Services.Services
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
-                RoleId = 3,
+                RoleId = (int)RoleId.CUSTOMER,
                 VerificationCode = token,
                 IsActive = false,
             };
@@ -140,9 +109,10 @@ namespace NET1814_MilkShop.Services.Services
             var jwtVeriryToken = _jwtTokenExtension.CreateJwtToken(user, TokenType.Authentication);
             if (result > 0)
             {
-                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken, environment);
+                _emailService.SendVerificationEmail(model.Email, jwtVeriryToken, model.FirstName);
                 return ResponseModel.Success(ResponseConstants.Register(true), null);
             }
+
             return ResponseModel.Error(ResponseConstants.Register(false));
         }
 
@@ -152,7 +122,7 @@ namespace NET1814_MilkShop.Services.Services
                 model.Username,
                 model.Password
             );
-            if (existingUser != null && existingUser.RoleId == 3)
+            if (existingUser != null && existingUser.RoleId == (int)RoleId.CUSTOMER)
             //Only customer can login, others will say wrong username or password
             {
                 //check if user is banned
@@ -172,12 +142,13 @@ namespace NET1814_MilkShop.Services.Services
                     Username = existingUser.Username,
                     FirstName = existingUser.FirstName,
                     LastName = existingUser.LastName,
-                    RoleId = existingUser.RoleId,
+                    Role = existingUser.Role!.Name,
                     AccessToken = token.ToString(),
                     RefreshToken = refreshToken.ToString(),
-                    IsActive = existingUser.IsActive
+                    IsActive = existingUser.IsActive,
+                    IsBanned = existingUser.IsBanned
                 };
-                var customer = await _customerRepository.GetById(existingUser.Id);
+                var customer = await _customerRepository.GetByIdAsync(existingUser.Id);
                 if (customer != null)
                 {
                     responseLogin.Email = customer.Email;
@@ -189,6 +160,7 @@ namespace NET1814_MilkShop.Services.Services
 
                 return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
             }
+
             return ResponseModel.BadRequest(ResponseConstants.Login(false));
         }
 
@@ -201,15 +173,17 @@ namespace NET1814_MilkShop.Services.Services
             var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
             var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
             var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
-            var isExist = await _userRepository.GetById(Guid.Parse(userID));
+            var isExist = await _userRepository.GetByIdAsync(Guid.Parse(userID));
             if (expirationTime < DateTime.UtcNow)
             {
                 return ResponseModel.BadRequest(ResponseConstants.Expired("Token"));
             }
+
             if (isExist == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
             }
+
             if (verifyToken.Equals(isExist.VerificationCode))
             {
                 isExist.IsActive = true;
@@ -220,13 +194,16 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     return ResponseModel.Success(ResponseConstants.Verify(true), null);
                 }
+
                 return ResponseModel.Error(ResponseConstants.Verify(false));
             }
+
             return ResponseModel.BadRequest(ResponseConstants.WrongCode);
         }
 
-        public async Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request,
-                                                                      string environment)
+        public async Task<ResponseModel> ForgotPasswordAsync(
+            ForgotPasswordModel request
+        )
         {
             var customer = await _customerRepository.GetByEmailAsync(request.Email);
             if (customer != null)
@@ -241,11 +218,11 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Reset
                     );
-                    _emailService.SendPasswordResetEmail(customer.Email,
-                        verifyToken, environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendPasswordResetEmail(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
                 }
             }
+
             return ResponseModel.Success(ResponseConstants.NotFound("Email"), null);
         }
 
@@ -256,11 +233,12 @@ namespace NET1814_MilkShop.Services.Services
             var tokenS = jsonToken as JwtSecurityToken;
             var userID = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
             var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
-            var isExist = await _userRepository.GetById(Guid.Parse(userID));
+            var isExist = await _userRepository.GetByIdAsync(Guid.Parse(userID));
             if (isExist == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
             }
+
             if (verifyToken.Equals(isExist.ResetPasswordCode))
             {
                 isExist.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -271,10 +249,13 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     return ResponseModel.Success(ResponseConstants.ChangePassword(true), null);
                 }
+
                 return ResponseModel.Error(ResponseConstants.ChangePassword(false));
             }
+
             return ResponseModel.BadRequest(ResponseConstants.WrongCode);
         }
+
         public async Task<ResponseModel> RefreshTokenAsync(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -284,7 +265,7 @@ namespace NET1814_MilkShop.Services.Services
             var tokenType = tokenS.Claims.First(claim => claim.Type == "tokenType").Value;
             var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
             var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
-            var userExisted = await _userRepository.GetById(Guid.Parse(userId));
+            var userExisted = await _userRepository.GetByIdAsync(Guid.Parse(userId));
             if (userExisted == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
@@ -299,17 +280,19 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest(ResponseConstants.Expired("Refresh token"));
             }
+
             var newToken = _jwtTokenExtension.CreateJwtToken(userExisted, TokenType.Access);
             return ResponseModel.Success(ResponseConstants.Create("Access Token", true), newToken);
         }
 
-        public async Task<ResponseModel> ActivateAccountAsync(string email, string environment)
+        public async Task<ResponseModel> ActivateAccountAsync(string email)
         {
             var customer = await _customerRepository.GetByEmailAsync(email);
             if (customer == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Email"), null);
             }
+
             if (!customer.User.IsActive)
             {
                 string token = _jwtTokenExtension.CreateVerifyCode();
@@ -322,11 +305,11 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Authentication
                     );
-                    _emailService.SendVerificationEmail(customer.Email,
-                        verifyToken, environment); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    _emailService.SendVerificationEmail(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ActivateAccountLink, null);
                 }
             }
+
             return ResponseModel.BadRequest(ResponseConstants.AccountActivated);
         }
 
@@ -336,7 +319,7 @@ namespace NET1814_MilkShop.Services.Services
                 model.Username,
                 model.Password
             );
-            if (existingUser != null && existingUser.RoleId != 3)
+            if (existingUser != null && existingUser.RoleId != (int)RoleId.CUSTOMER)
             //Only admin,staff can login others will response wrong username or password
             {
                 //check if user is banned
@@ -356,13 +339,15 @@ namespace NET1814_MilkShop.Services.Services
                     Username = existingUser.Username,
                     FirstName = existingUser.FirstName,
                     LastName = existingUser.LastName,
-                    RoleId = existingUser.RoleId,
+                    Role = existingUser.Role!.Name,
                     AccessToken = token.ToString(),
                     RefreshToken = refreshToken.ToString(),
+                    IsBanned = existingUser.IsBanned,
                     IsActive = existingUser.IsActive
                 };
                 return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
             }
+
             return ResponseModel.BadRequest(ResponseConstants.Login(false));
         }
     }

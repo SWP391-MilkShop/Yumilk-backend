@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using NET1814_MilkShop.Repositories.Models.MailModels;
+using NET1814_MilkShop.Services.CoreHelpers;
 using System.Net;
 using System.Net.Mail;
 
@@ -7,8 +8,8 @@ namespace NET1814_MilkShop.Services.Services
 {
     public interface IEmailService
     {
-        void SendPasswordResetEmail(string receiveEmail, string token, string environment);
-        void SendVerificationEmail(string receiveEmail, string token, string environment);
+        void SendPasswordResetEmail(string receiveEmail, string token, string name);
+        void SendVerificationEmail(string receiveEmail, string token, string name);
     }
 
     public class EmailService : IEmailService
@@ -34,7 +35,7 @@ namespace NET1814_MilkShop.Services.Services
                 Subject = model.Subject,
                 Body = model.Body,
                 //có thể dùng html format để làm mail đẹp hơn
-                IsBodyHtml = false,
+                IsBodyHtml = true,
             };
             mailMessage.From = new MailAddress(fromEmailAddress, fromDisplayName);
             mailMessage.To.Add(model.Receiver);
@@ -57,66 +58,31 @@ namespace NET1814_MilkShop.Services.Services
         public void SendPasswordResetEmail( /*CustomerModel user*/
             string receiveEmail,
             string token,
-            string environment
+            string name
         )
         {
-            if ("Development".Equals(environment))
+            var model = new SendMailModel
             {
-                var model = new SendMailModel
-                {
-                    Receiver = receiveEmail,
-                    Subject = "Password Reset",
-                    Body =
-                        "Please click the link below to reset your password\n\n"
-                        + $"https://localhost:5000/api/authentication/reset-password?token={token}"
-                };
-                SendMail(model);
-            } else if ("Production".Equals(environment))
-            {
-                var model = new SendMailModel
-                {
-                    Receiver = receiveEmail,
-                    Subject = "Password Reset",
-                    Body =
-                        "Please click the link below to reset your password\n\n"
-                        + $"https://milkshop.azurewebsites.net/api" +
-                        $"/authentication/reset-password?token={token}"
-                };
-                SendMail(model);
-            }
+                Receiver = receiveEmail,
+                Subject = "Đặt lại mật khẩu",
+                Body = MailBody.ResetPassword(name, token)
+            };
+            SendMail(model);
         }
 
         public void SendVerificationEmail( /*CustomerModel user*/
             string receiveEmail,
             string token,
-            string environment
+            string name
         )
         {
-            if ("Development".Equals(environment))
+            var model = new SendMailModel
             {
-                var model = new SendMailModel
-                {
-                    Receiver = receiveEmail,
-                    Subject = "Account Verification",
-                    Body =
-                        "Please click the link below to verify your account\n\n"
-                        + $"https://localhost:5000/api/authentication/verify?token={token}"
-                };
-                SendMail(model);
-            } 
-            else if ("Production".Equals(environment))
-            {
-                var model = new SendMailModel
-                {
-                    Receiver = receiveEmail,
-                    Subject = "Account Verification",
-                    Body =
-                        "Please click the link below to verify your account\n\n"
-                        + $"https://milkshop.azurewebsites.net/api/" +
-                        $"authentication/verify?token={token}"
-                };
-                SendMail(model);
-            } 
+                Receiver = receiveEmail,
+                Subject = "Kích hoạt tài khoản",
+                Body = MailBody.ActivateAccount(name, token)
+            };
+            SendMail(model);
         }
     }
 }

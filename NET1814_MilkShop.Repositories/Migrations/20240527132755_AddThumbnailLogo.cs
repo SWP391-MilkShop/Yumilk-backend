@@ -19,31 +19,30 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(2000)",
                 oldNullable: true,
-                oldCollation: "Latin1_General_CS_AI");
+                oldCollation: "Latin1_General_CS_AI"
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "thumbnail",
                 table: "products",
                 type: "nvarchar(255)",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "logo",
                 table: "brands",
                 type: "nvarchar(255)",
-                nullable: true);
+                nullable: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "thumbnail",
-                table: "products");
+            migrationBuilder.DropColumn(name: "thumbnail", table: "products");
 
-            migrationBuilder.DropColumn(
-                name: "logo",
-                table: "brands");
+            migrationBuilder.DropColumn(name: "logo", table: "brands");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
@@ -54,7 +53,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)",
                 oldNullable: true,
-                oldCollation: "Latin1_General_CS_AI");
+                oldCollation: "Latin1_General_CS_AI"
+            );
         }
     }
 }
