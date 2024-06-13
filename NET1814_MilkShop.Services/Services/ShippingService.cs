@@ -54,10 +54,10 @@ public class ShippingService : IShippingService
         
         var responseModel = JsonConvert.DeserializeObject<ShippingResponseModel<List<ProvinceData>>>(responseContent);
         
-
         switch (response.StatusCode)
         {
-            case HttpStatusCode.OK:
+            case HttpStatusCode.OK: 
+                responseModel!.Data = responseModel.Data!.OrderBy(o=>o.ProvinceId).ToList();
                 return ResponseModel.Success(
                     "Lấy tỉnh/thành phố thành công",
                     responseModel.Data
@@ -118,7 +118,7 @@ public class ShippingService : IShippingService
             case HttpStatusCode.BadRequest:
                 return ResponseModel.BadRequest(responseModel.Message);
             default:
-                return ResponseModel.Error("Đã xảy ra lỗi khi lấy phường");
+                return ResponseModel.Error("Đã xảy ra lỗi khi lấy phường/xã");
         }
     }
 
