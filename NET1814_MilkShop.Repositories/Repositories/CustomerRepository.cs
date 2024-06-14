@@ -53,7 +53,9 @@ namespace NET1814_MilkShop.Repositories.Repositories
             //return await _context
             //    .Customers.Include(x => x.User)
             //    .FirstOrDefaultAsync(x => x.UserId == id);
-            return await _query.Include(x => x.User).FirstOrDefaultAsync(x => x.UserId == id);
+            return await _query.Include(x => x.User)
+                .ThenInclude(o=>o.Role)
+                .FirstOrDefaultAsync(x => x.UserId == id);
         }
 
         public async Task<bool> IsExistAsync(Guid id)
