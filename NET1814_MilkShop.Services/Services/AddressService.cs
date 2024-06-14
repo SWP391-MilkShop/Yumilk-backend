@@ -81,8 +81,11 @@ public class AddressService : IAddressService
                 ReceiverName = customerAddress.ReceiverName,
                 ReceiverPhone = customerAddress.PhoneNumber,
                 Address = customerAddress.Address,
+                WardCode = customerAddress.WardCode,
                 WardName = customerAddress.WardName,
+                DistrictId = customerAddress.DistrictId,
                 DistrictName = customerAddress.DistrictName,
+                ProvinceId = customerAddress.ProvinceId,
                 ProvinceName = customerAddress.ProvinceName,
                 IsDefault = customerAddress.IsDefault
             })
