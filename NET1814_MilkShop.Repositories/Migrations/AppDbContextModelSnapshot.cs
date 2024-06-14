@@ -282,8 +282,10 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("user_id");
 
-                    b.Property<int>("WardCode")
-                        .HasColumnType("int")
+                    b.Property<string>("WardCode")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
                         .HasColumnName("ward_code");
 
                     b.Property<string>("WardName")
@@ -373,8 +375,10 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("int")
                         .HasColumnName("voucher_id");
 
-                    b.Property<int>("WardCode")
-                        .HasColumnType("int")
+                    b.Property<string>("WardCode")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
                         .HasColumnName("ward_code");
 
                     b.HasKey("Id");

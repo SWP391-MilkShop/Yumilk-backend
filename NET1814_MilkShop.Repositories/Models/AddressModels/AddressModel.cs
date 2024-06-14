@@ -9,7 +9,7 @@ public class AddressModel
 
     public string? Address { get; set; }
     
-    public int? WardCode { get; set; }
+    public string? WardCode { get; set; }
 
     public string? WardName { get; set; }
     

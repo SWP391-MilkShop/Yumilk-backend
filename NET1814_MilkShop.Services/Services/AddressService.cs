@@ -53,7 +53,7 @@ public class AddressService : IAddressService
             ReceiverName = model.ReceiverName,
             PhoneNumber = model.ReceiverPhone,
             Address = model.Address,
-            WardCode = model.WardId,
+            WardCode = model.WardCode,
             WardName = model.WardName,
             DistrictId = model.DistrictId,
             DistrictName = model.DistrictName,
@@ -122,7 +122,7 @@ public class AddressService : IAddressService
         address.ReceiverName = model.ReceiverName;
         address.PhoneNumber = model.ReceiverPhone;
         address.Address = model.Address;
-        address.WardCode = model.WardId;
+        address.WardCode = model.WardCode;
         address.WardName = model.WardName;
         address.DistrictId = model.DistrictId;
         address.DistrictName = model.DistrictName;
