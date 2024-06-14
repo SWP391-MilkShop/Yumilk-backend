@@ -11,11 +11,14 @@ public partial class Order : IAuditableEntity
 
     public Guid? CustomerId { get; set; }
 
-    public decimal TotalPrice { get; set; }
+    public int TotalPrice { get; set; }
 
-    public decimal ShippingFee { get; set; }
+    public int ShippingFee { get; set; }
 
-    public decimal TotalAmount { get; set; } // TotalPrice + ShippingFee
+    public int TotalAmount { get; set; } // TotalPrice + ShippingFee
+
+    [Column("total_gram")]
+    public int TotalGram { get; set; }
 
     public int VoucherId { get; set; }
 
