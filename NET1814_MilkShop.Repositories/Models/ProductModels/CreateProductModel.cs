@@ -15,10 +15,10 @@ namespace NET1814_MilkShop.Repositories.Models.ProductModels
 
         [Required(ErrorMessage = "Original Price is required")]
         [Range(0, double.MaxValue, ErrorMessage = "Original Price must be greater than 0")]
-        public decimal OriginalPrice { get; set; }
+        public int OriginalPrice { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "Sale Price must be greater than 0")]
-        public decimal SalePrice { get; set; }
+        public int SalePrice { get; set; }
         public string? Thumbnail { get; set; }
 
         [Required(ErrorMessage = "Category is required")]

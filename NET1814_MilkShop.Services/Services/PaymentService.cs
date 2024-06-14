@@ -50,7 +50,7 @@ public class PaymentService : IPaymentService
                 .OrderDetails.Select(item => new ItemData(
                     item.Product.Name,
                     item.Quantity,
-                    item.ItemPrice.ToInt()
+                    item.ItemPrice
                 ))
                 .ToList();
             if (items.Count <= 0)
@@ -64,7 +64,7 @@ public class PaymentService : IPaymentService
             var expiredAt = (int)DateTimeOffset.UtcNow.AddMinutes(15).ToUnixTimeSeconds();
             var paymentData = new PaymentData(
                 (long)order.OrderCode,
-                order.TotalAmount.ToInt(),
+                order.TotalAmount,
                 description,
                 items,
                 _configuration["PayOS:CancelUrl"]!,

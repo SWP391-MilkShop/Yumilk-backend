@@ -176,9 +176,9 @@ public class CheckoutService : ICheckoutService
         return orderCode;
     }
 
-    private decimal GetTotalPrice(List<CartDetail> list)
+    private int GetTotalPrice(List<CartDetail> list)
     {
-        decimal total = 0;
+        int total = 0;
         foreach (var x in list)
         {
             var price = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice;

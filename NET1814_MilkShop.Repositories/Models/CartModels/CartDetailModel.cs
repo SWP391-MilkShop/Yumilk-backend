@@ -6,7 +6,7 @@
         public string ProductName { get; set; } = "";
         public string? Thumbnail { get; set; }
         public int Quantity { get; set; }
-        public decimal OriginalPrice { get; set; }
-        public decimal SalePrice { get; set; }
+        public int OriginalPrice { get; set; }
+        public int SalePrice { get; set; }
     }
 }

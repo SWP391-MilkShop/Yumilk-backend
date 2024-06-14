@@ -166,7 +166,7 @@ public class ShippingService : IShippingService
             ToAddress = order.Address,
             ToDistrictId = order.DistrictId,
             ToWardCode = order.WardCode.ToString(),
-            CodAmount = order.PaymentMethod == "COD" ? order.TotalAmount.ToInt() : 0,
+            CodAmount = order.PaymentMethod == "COD" ? order.TotalAmount : 0,
             Items = order.OrderDetails.Select(x => new Item
             {
                 ProductName = x.ProductName,
@@ -212,7 +212,7 @@ public class ShippingService : IShippingService
             ToAddress = order.Address,
             ToDistrictId = order.DistrictId,
             ToWardCode = order.WardCode.ToString(),
-            CodAmount = order.PaymentMethod == "COD" ? order.TotalAmount.ToInt() : 0,
+            CodAmount = order.PaymentMethod == "COD" ? order.TotalAmount : 0,
             Items = order.OrderDetails.Select(x => new Item
             {
                 ProductName = x.ProductName,

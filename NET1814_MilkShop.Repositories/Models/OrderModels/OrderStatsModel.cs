@@ -22,10 +22,10 @@ namespace NET1814_MilkShop.Repositories.Models.OrderModels
         /// <summary>
         /// Only count orders that have been delivered
         /// </summary>
-        public decimal TotalRevenue { get; set; }
+        public int TotalRevenue { get; set; }
         /// <summary>
         /// Only count orders that have been delivered
         /// </summary>
-        public decimal TotalShippingFee { get; set; }
+        public int TotalShippingFee { get; set; }
     }
 }

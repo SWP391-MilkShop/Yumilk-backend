@@ -114,9 +114,9 @@ public class OrderDetailInformation
     [JsonProperty("pickup_time")]
     public DateTime PickupTime { get; set; }
     [JsonProperty("log")]
-    public List<Log> Logs { get; set; }
+    public List<Log> Logs { get; set; } = [];
     [JsonPropertyName("items")]
-    public List<Item> Items { get; set; }
+    public List<Item> Items { get; set; } = [];
 }
 
 public class Log
