@@ -87,7 +87,7 @@ public class CheckPaymentStatusJob : IJob
                 {
                     _logger.LogInformation("Payment for order {OrderId} is paid", order.Id);
                     var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(order.Id);
-                    if (existOrder!.OrderDetails.Any(x => x.Product.StatusId == (int)OrderStatusId.PREORDER))
+                    if (existOrder!.OrderDetails.Any(x => x.Product.StatusId == (int)ProductStatusId.PREORDER))
                     {
                         _logger.LogInformation("Order {OrderId} has preorder product", order.Id);
                         existOrder.StatusId = (int)OrderStatusId.PREORDER; //Preorder
@@ -96,6 +96,8 @@ public class CheckPaymentStatusJob : IJob
                     {
                         existOrder!.StatusId = (int)OrderStatusId.PROCESSING; //Processing
                     }
+
+                    existOrder.PaymentDate = DateTime.UtcNow;
                     _orderRepository.Update(existOrder);
                     var payResult = await _unitOfWork.SaveChangesAsync();
                     if (payResult < 0)
