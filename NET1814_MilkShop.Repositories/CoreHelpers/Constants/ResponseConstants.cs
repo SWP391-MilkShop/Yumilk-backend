@@ -207,6 +207,8 @@
         public const string OutOfStock = "Sản phẩm đã hết hàng";
         public const string NotEnoughQuantity = "Số lượng sản phẩm không đủ";
         public const string InvalidSalePrice = "Giá khuyến mãi phải nhỏ hơn giá gốc";
+        public const string InvalidQuantity = "Số lượng sản phẩm phải lớn hơn 0";
+        public const string NoQuantityPreorder = "Không thể set số lượng tồn cho sản phẩm Pre-order";
 
         #endregion
         #region Cart

@@ -4,6 +4,7 @@ using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.BrandModels;
 using NET1814_MilkShop.Repositories.Models.CategoryModels;
+using NET1814_MilkShop.Repositories.Models.PreorderModels;
 using NET1814_MilkShop.Repositories.Models.ProductAttributeModels;
 using NET1814_MilkShop.Repositories.Models.ProductAttributeValueModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
@@ -45,6 +46,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         /// <summary>
         /// Filter products by category, brand, unit, status, min price, max price
+        /// <para> Default status is selling</para>
         /// </summary>
         /// <param name="queryModel"></param>
         /// <returns></returns>
@@ -611,6 +613,24 @@ namespace NET1814_MilkShop.API.Controllers
             return ResponseExtension.Result(response);
         }
 
+        #endregion
+
+        #region Preorder Product
+        /// <summary>
+        /// Need to set the product status to PREORDER to update preorder info
+        /// <para> max expected preorder days is 30 days </para>
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPatch("/{productId}/preorder")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> UpdatePreorderProduct(Guid productId, [FromBody] UpdatePreorderProductModel model)
+        {
+            _logger.Information("Update Preorder Product");
+            var response = await _productService.UpdatePreorderProductAsync(productId, model);
+            return ResponseExtension.Result(response);
+        }
         #endregion
     }
 }
