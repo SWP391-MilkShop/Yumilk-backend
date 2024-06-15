@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities
 {
     [Table("preorder_product")]
-    public class PreorderProduct
+    public class PreorderProduct : IAuditableEntity
     {
         [Column("product_id")]
         [Key]
@@ -24,5 +25,14 @@ namespace NET1814_MilkShop.Repositories.Data.Entities
         public int ExpectedPreOrderDays { get; set; } //so ngay du kien nhap hang
 
         public virtual Product Product { get; set; } = null!;
+
+        [Column("created_at", TypeName = "datetime2")]
+        public DateTime CreatedAt { get; set; }
+
+        [Column("modified_at", TypeName = "datetime2")]
+        public DateTime? ModifiedAt { get; set; }
+
+        [Column("deleted_at", TypeName = "datetime2")]
+        public DateTime? DeletedAt { get; set; }
     }
 }
