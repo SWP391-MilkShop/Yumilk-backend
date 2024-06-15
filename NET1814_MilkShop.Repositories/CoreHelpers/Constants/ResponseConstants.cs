@@ -224,6 +224,7 @@
                 ? "Thêm sản phẩm vào giỏ hàng thành công"
                 : "Thêm sản phẩm vào giỏ hàng không thành công";
         }
+        public const string NoPreorderCart = "Không thể thêm sản phẩm Pre-order vào giỏ hàng";
 
         public const string CartIsEmpty = "Giỏ hàng của bạn hiện tại đang rỗng!";
 
