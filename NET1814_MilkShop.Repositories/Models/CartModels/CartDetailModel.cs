@@ -8,5 +8,6 @@
         public int Quantity { get; set; }
         public decimal OriginalPrice { get; set; }
         public decimal SalePrice { get; set; }
+        public int ProductQuantity { get; set; }
     }
 }
