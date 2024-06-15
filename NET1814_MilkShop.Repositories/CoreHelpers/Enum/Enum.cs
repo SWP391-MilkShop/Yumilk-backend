@@ -18,7 +18,7 @@
     public enum ProductStatusId
     {
         SELLING = 1,
-        PRE_ORDER = 2, //move out of product
+        PREORDER = 2, //move out of product
         OUT_OF_STOCK = 3
     }
 }
