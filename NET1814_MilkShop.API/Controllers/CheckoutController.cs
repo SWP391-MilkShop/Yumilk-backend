@@ -31,4 +31,15 @@ public class CheckoutController : ControllerBase
         var res = await _checkoutService.Checkout(userId, model);
         return ResponseExtension.Result(res);
     }
+
+    [HttpPost("preorder")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+    [ServiceFilter(typeof(UserExistsFilter))]
+    public async Task<IActionResult> PreOrderCheckout([FromBody] PreorderCheckoutModel model)
+    {
+        _logger.Information("PreOrderCheckout");
+        var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
+        var res = await _checkoutService.PreOrderCheckout(userId, model);
+        return ResponseExtension.Result(res);
+    }
 }
