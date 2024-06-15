@@ -1,5 +1,8 @@
 ﻿namespace NET1814_MilkShop.Repositories.Models
 {
+    /// <summary>
+    /// SearchTerm, SortColumn, SortOrder, Page, PageSize
+    /// </summary>
     public abstract class QueryModel //Neu chi dung de ke thua thi nen dung abstract
     {
         public string? SearchTerm { get; set; }

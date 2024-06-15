@@ -37,6 +37,7 @@ namespace NET1814_MilkShop.Repositories.Data
         public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
         public virtual DbSet<Voucher> Vouchers { get; set; }
         public virtual DbSet<UserVoucher> UserVouchers { get; set; }
+        public virtual DbSet<Post> Posts { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -246,6 +246,9 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<IAddressService, AddressService>();
 
+            services.AddScoped<IPostRepository, PostRepository>();
+            services.AddScoped<IPostService, PostService>();
+
             services.AddScoped<ICheckoutService, CheckoutService>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
