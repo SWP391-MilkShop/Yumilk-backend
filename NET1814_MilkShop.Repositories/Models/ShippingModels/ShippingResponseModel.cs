@@ -28,7 +28,7 @@ public class DistrictData
 
 public class WardData
 {
-    public int WardCode { get; set; }
+    public string? WardCode { get; set; }
     public int DistrictId { get; set; }
     public string? WardName { get; set; }
 }

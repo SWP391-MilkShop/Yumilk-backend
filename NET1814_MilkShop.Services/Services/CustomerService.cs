@@ -182,7 +182,17 @@ namespace NET1814_MilkShop.Services.Services
                     };*/
                     return ResponseModel.BadRequest(ResponseConstants.InvalidPhoneNumber);
                 }
-                customer.PhoneNumber = changeUserInfoModel.PhoneNumber;
+                
+                if (!customer.PhoneNumber.Equals(changeUserInfoModel.PhoneNumber))
+                {
+                    if (await _customerRepository.IsExistPhoneNumberAsync(changeUserInfoModel.PhoneNumber))
+                    {
+                        return ResponseModel.BadRequest("Số điện thoại đã tồn tại trong hệ thống!");
+                    }
+
+                    customer.PhoneNumber = changeUserInfoModel.PhoneNumber;
+                }
+                
             }
 
             if (!string.IsNullOrWhiteSpace(changeUserInfoModel.ProfilePictureUrl))

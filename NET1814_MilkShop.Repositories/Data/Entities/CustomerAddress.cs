@@ -28,7 +28,8 @@ public partial class CustomerAddress : IAuditableEntity
     public string? DistrictName { get; set; }
 
     [Column("ward_code")]
-    public int WardCode { get; set; }
+    [StringLength(255)]
+    public string WardCode { get; set; }
 
     [Column("ward_name")]
     [StringLength(255)]

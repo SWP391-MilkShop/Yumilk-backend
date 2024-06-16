@@ -312,8 +312,9 @@ namespace NET1814_MilkShop.Repositories.Data
                     .HasColumnType("uniqueidentifier")
                     .HasColumnName("user_id");
 
-                b.Property<int>("WardCode")
-                    .HasColumnType("int")
+                b.Property<string>("WardCode")
+                    .HasMaxLength(255)
+                    .HasColumnType("nvarchar(255)")
                     .HasColumnName("ward_code");
 
                 b.Property<string>("WardName")

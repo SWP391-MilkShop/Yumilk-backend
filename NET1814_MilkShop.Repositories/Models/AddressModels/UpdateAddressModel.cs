@@ -24,7 +24,7 @@ public class UpdateAddressModel
     public string? DistrictName { get; set; }
 
     [Required(ErrorMessage = "WardId is required")]
-    public int WardId { get; set; }
+    public string WardCode { get; set; }
 
     [Required(ErrorMessage = "WardName is required")]
     public string? WardName { get; set; }

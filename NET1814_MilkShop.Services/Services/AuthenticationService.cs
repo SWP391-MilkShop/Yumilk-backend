@@ -223,7 +223,7 @@ namespace NET1814_MilkShop.Services.Services
                 }
             }
 
-            return ResponseModel.Success(ResponseConstants.NotFound("Email"), null);
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Email"));
         }
 
         public async Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request)

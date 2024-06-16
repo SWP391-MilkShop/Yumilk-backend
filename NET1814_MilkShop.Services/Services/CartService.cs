@@ -211,6 +211,7 @@ namespace NET1814_MilkShop.Services.Services
                 ProductId = x.ProductId,
                 Quantity = x.Quantity,
                 ProductName = x.Product.Name,
+                ProductQuantity = x.Product.Quantity,
                 Thumbnail = x.Product.Thumbnail,
                 OriginalPrice = x.Product.OriginalPrice,
                 SalePrice = x.Product.SalePrice

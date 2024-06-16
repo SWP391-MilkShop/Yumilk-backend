@@ -203,9 +203,9 @@ public class ShippingService : IShippingService
             ToPhone = order.PhoneNumber,
             ToAddress = order.Address,
             ToDistrictId = order.DistrictId,
-            ToWardCode = order.WardCode.ToString(),
             Weight = order.TotalGram,
             CodAmount = order.PaymentMethod == "COD" ? order.TotalAmount : 0,
+            ToWardCode = order.WardCode,
             Items = order.OrderDetails.Select(x => new Item
             {
                 ProductName = x.ProductName,
@@ -261,8 +261,9 @@ public class ShippingService : IShippingService
             ToPhone = order.PhoneNumber,
             ToAddress = order.Address,
             ToDistrictId = order.DistrictId,
-            ToWardCode = order.WardCode.ToString(),
+            ToWardCode = order.WardCode,
             CodAmount = order.PaymentMethod == "COD" ? order.TotalAmount : 0,
+            /*ToWardCode = order.WardCode.ToString(),*/
             Items = order.OrderDetails.Select(x => new Item
             {
                 ProductName = x.ProductName,

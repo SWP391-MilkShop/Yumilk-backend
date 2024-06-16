@@ -30,8 +30,9 @@ public partial class Order : IAuditableEntity
     [Column("district_id")]
     public int DistrictId { get; set; }
     
-    [Column("ward_code")]
-    public int WardCode { get; set; }
+    [Column("ward_code",TypeName="nvarchar(255)")]
+    [StringLength(255)]
+    public string WardCode { get; set; }
 
     public string PhoneNumber { get; set; } = null!;
 

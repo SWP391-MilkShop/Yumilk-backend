@@ -53,7 +53,7 @@ public class AddressService : IAddressService
             ReceiverName = model.ReceiverName,
             PhoneNumber = model.ReceiverPhone,
             Address = model.Address,
-            WardCode = model.WardId,
+            WardCode = model.WardCode,
             WardName = model.WardName,
             DistrictId = model.DistrictId,
             DistrictName = model.DistrictName,
@@ -81,8 +81,11 @@ public class AddressService : IAddressService
                 ReceiverName = customerAddress.ReceiverName,
                 ReceiverPhone = customerAddress.PhoneNumber,
                 Address = customerAddress.Address,
+                WardCode = customerAddress.WardCode,
                 WardName = customerAddress.WardName,
+                DistrictId = customerAddress.DistrictId,
                 DistrictName = customerAddress.DistrictName,
+                ProvinceId = customerAddress.ProvinceId,
                 ProvinceName = customerAddress.ProvinceName,
                 IsDefault = customerAddress.IsDefault
             })
@@ -110,7 +113,7 @@ public class AddressService : IAddressService
         if (model.IsDefault && countCustomerAddress > 1)
         {
             var getDefaultAddress = await _addressRepository.GetByDefault(customerId);
-            if (getDefaultAddress != null)
+            if (getDefaultAddress != null && getDefaultAddress.Id != id)
             {
                 getDefaultAddress.IsDefault = false;
                 _addressRepository.Update(getDefaultAddress);
@@ -119,13 +122,13 @@ public class AddressService : IAddressService
         address.ReceiverName = model.ReceiverName;
         address.PhoneNumber = model.ReceiverPhone;
         address.Address = model.Address;
-        address.WardCode = model.WardId;
+        address.WardCode = model.WardCode;
         address.WardName = model.WardName;
         address.DistrictId = model.DistrictId;
         address.DistrictName = model.DistrictName;
         address.ProvinceName = model.ProvinceName;
         address.ProvinceId = model.ProvinceId;
-        address.IsDefault = model.IsDefault;
+        address.IsDefault = address.IsDefault || model.IsDefault;
         _addressRepository.Update(address);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
