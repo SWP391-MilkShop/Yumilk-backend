@@ -41,12 +41,17 @@ public class ShippingController : ControllerBase
         var response = await _shippingService.GetWardAsync(districtId);
         return ResponseExtension.Result(response);
     }
-    
-    [HttpGet("fee")]
-    public async Task<IActionResult> GetShippingFee([FromQuery]ShippingFeeRequestModel request)
+
+    /// <summary>
+    /// Get shipping fee of order
+    /// </summary>
+    /// <param name="orderId"></param>
+    /// <returns></returns>
+    [HttpGet("fee/{orderId}")]
+    public async Task<IActionResult> GetShippingFee(Guid orderId)
     {
         _logger.Information("Get shipping fee");
-        var response = await _shippingService.GetShippingFeeAsync(request);
+        var response = await _shippingService.GetShippingFeeAsync(orderId);
         return ResponseExtension.Result(response);
     }
     
@@ -77,16 +82,28 @@ public class ShippingController : ControllerBase
     }
     
     /// <summary>
-    /// Get order detail orderCode này là của ghn
+    /// Get order detail by our Guid orderId (not ghn shippingCode)
     /// </summary>
     /// <param name="orderCode"></param>
     /// <returns></returns>
-    [HttpGet("order/detail/{orderCode}")]
-    public async Task<IActionResult> PreviewOrder(string orderCode)
+    [HttpGet("order/detail/{orderId}")]
+    public async Task<IActionResult> GetOrderDetail(Guid orderId)
     {
         _logger.Information("Get shipping order detail");
-        var response = await _shippingService.GetOrderDetailAsync(orderCode);
+        var response = await _shippingService.GetOrderDetailAsync(orderId);
         return ResponseExtension.Result(response);
     }
     
+    /// <summary>
+    /// Cancel shipping order by our Guid orderId (not ghn shippingCode)
+    /// </summary>
+    /// <param name="orderId"></param>
+    /// <returns></returns>
+    [HttpGet("order/cancel/{orderId}")]
+    public async Task<IActionResult> CancelOrder(Guid orderId)
+    {
+        _logger.Information("Cancel shipping order");
+        var response = await _shippingService.CancelOrderShippingAsync(orderId);
+        return ResponseExtension.Result(response);
+    }
 }
