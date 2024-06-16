@@ -232,7 +232,8 @@ namespace NET1814_MilkShop.Services.Services
                     .Select(h => new
                     {
                         h.Product.Name,
-                        h.Thumbnail
+                        h.Thumbnail,
+                        h.CreatedAt
                     })
             });
 
@@ -290,7 +291,8 @@ namespace NET1814_MilkShop.Services.Services
                 ShippingFee = order.ShippingFee,
                 TotalAmount = order.TotalAmount,
                 PaymentMethod = order.PaymentMethod,
-                OrderStatus = order.Status!.Name
+                OrderStatus = order.Status!.Name,
+                CreatedAt = order.CreatedAt
             };
             return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
         }

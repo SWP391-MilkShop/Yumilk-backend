@@ -1,11 +1,14 @@
+using Net.payOS.Types;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.CheckoutModels;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
+using NET1814_MilkShop.Repositories.Models.PaymentModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
+using Newtonsoft.Json;
 
 namespace NET1814_MilkShop.Services.Services;
 
@@ -160,12 +163,22 @@ public class CheckoutService : ICheckoutService
                 Address = orders.Address,
                 PhoneNumber = orders.PhoneNumber,
                 Note = orders.Note,
+                PaymentMethod = orders.PaymentMethod,
+                CreatedAt = orders.CreatedAt,
                 OrderDetail = ToOrderDetailModel(cartTemp),
             };
             if (model.PaymentMethod == "PAYOS")
             {
                 var paymentLink = await _paymentService.CreatePaymentLink(orders.OrderCode.Value);
-                return paymentLink;
+                if (paymentLink.Status == "ERROR")
+                {
+                    return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
+                }
+
+                var json = JsonConvert.SerializeObject(paymentLink.Data);
+                var paymentData = JsonConvert.DeserializeObject<PaymentDataModel>(json);
+                resp.OrderCode = paymentData!.OrderCode;
+                resp.CheckoutUrl = paymentData!.CheckoutUrl;
             }
 
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
