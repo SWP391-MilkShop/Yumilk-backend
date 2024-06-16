@@ -7,7 +7,9 @@
         public string Message { get; set; } = null!;
         public object? Data { get; set; }
 
-        public ResponseModel() { }
+        public ResponseModel()
+        {
+        }
 
         private ResponseModel(int statusCode, string status, string message, object? data)
         {
@@ -56,6 +58,11 @@
         public static ResponseModel BadRequest(string message)
         {
             return new ResponseModel(400, "Bad Request", message, null);
+        }
+
+        public static ResponseModel BadRequest(string message, object? data)
+        {
+            return new ResponseModel(400, "Bad Request", message, data);
         }
     }
 }

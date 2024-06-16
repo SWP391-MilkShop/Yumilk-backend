@@ -15,7 +15,7 @@ namespace NET1814_MilkShop.Services.Services;
 public interface IShippingService
 {
     Task<ResponseModel> GetProvinceAsync();
-    Task<ResponseModel> GetDistrictAsync(int provinceId); 
+    Task<ResponseModel> GetDistrictAsync(int provinceId);
     Task<ResponseModel> GetWardAsync(int districtId);
     Task<ResponseModel> GetShippingFeeAsync(Guid orderId);
     Task<ResponseModel> CreateOrderShippingAsync(Guid orderId);
@@ -75,7 +75,6 @@ public class ShippingService : IShippingService
 
     public async Task<ResponseModel> GetDistrictAsync(int provinceId)
     {
-
         var url = $"https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district?province_id={provinceId}";
 
         var response = await _client.GetAsync(url);
@@ -102,7 +101,6 @@ public class ShippingService : IShippingService
 
     public async Task<ResponseModel> GetWardAsync(int districtId)
     {
-
         var url = $"https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id={districtId}";
 
         var response = await _client.GetAsync(url);
@@ -161,6 +159,31 @@ public class ShippingService : IShippingService
                 return ResponseModel.BadRequest(responseModel.Message);
             default:
                 return ResponseModel.Error("Đã xảy ra lỗi khi lấy phí vận chuyển");
+        }
+    }
+
+    public async Task<ResponseModel> GetExpectedDeliveryTime(DeliveryTimeRequestModel request)
+    {
+        _client.DefaultRequestHeaders.Add("ShopId", ShopId);
+        var url = $"https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime?" +
+                  $"from_district_id={request.FromDistrictId}&from_ward_code={request.FromWardCode}&to_district_id={request.ToDistrictId}&to_ward_code={request.ToWardCode}" +
+                  $"&service_id=53320";
+        var response = await _client.GetAsync(url);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var responseModel = JsonConvert.DeserializeObject<ShippingResponseModel<ExpectedDeliveryTime>>(responseContent);
+        switch (response.StatusCode)
+        {
+            case HttpStatusCode.OK:
+                var date = responseModel.Data!.LeadTime?.Split(" ")[0];
+                var expectedDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(date!)).UtcDateTime;
+                return ResponseModel.Success(
+                    "Lấy ngày dự kiến giao hàng thành công",
+                    expectedDate.ToString("dd/MM/yyyy")
+                );
+            case HttpStatusCode.BadRequest:
+                return ResponseModel.BadRequest(responseModel.Message);
+            default:
+                return ResponseModel.Error("Đã xảy ra lỗi khi lấy ngày dự kiến giao hàng");
         }
     }
 

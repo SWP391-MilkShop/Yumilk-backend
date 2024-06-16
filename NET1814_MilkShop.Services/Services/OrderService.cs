@@ -33,7 +33,7 @@ namespace NET1814_MilkShop.Services.Services
         private readonly IShippingService _shippingService;
 
         public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork,
-            IProductRepository productRepository,IShippingService shippingService)
+            IProductRepository productRepository, IShippingService shippingService)
         {
             _orderRepository = orderRepository;
             _unitOfWork = unitOfWork;
@@ -233,7 +233,8 @@ namespace NET1814_MilkShop.Services.Services
                     .Select(h => new
                     {
                         h.Product.Name,
-                        h.Thumbnail
+                        h.Thumbnail,
+                        h.CreatedAt
                     })
             });
 
@@ -291,7 +292,8 @@ namespace NET1814_MilkShop.Services.Services
                 ShippingFee = order.ShippingFee,
                 TotalAmount = order.TotalAmount,
                 PaymentMethod = order.PaymentMethod,
-                OrderStatus = order.Status!.Name
+                OrderStatus = order.Status!.Name,
+                CreatedAt = order.CreatedAt
             };
             return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
         }
@@ -408,10 +410,12 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest(ResponseConstants.InvalidFromDate);
             }
+
             if (queryModel.FromOrderDate > queryModel.ToOrderDate)
             {
                 return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
             }
+
             var query = _orderRepository.GetOrderQueryWithStatus();
             // default is from last 30 days
             var from = queryModel.FromOrderDate ?? DateTime.Now.AddDays(-30);
@@ -420,7 +424,8 @@ namespace NET1814_MilkShop.Services.Services
             query = query.Where(o => o.CreatedAt >= from && o.CreatedAt <= to);
             // only count delivered orders
             var delivered = query.Where(o => o.StatusId == (int)OrderStatusId.DELIVERED);
-            var totalOrdersPerStatus = await query.GroupBy(o => o.Status).ToDictionaryAsync(g => g.Key!.Name.ToUpper(), g => g.Count());
+            var totalOrdersPerStatus = await query.GroupBy(o => o.Status)
+                .ToDictionaryAsync(g => g.Key!.Name.ToUpper(), g => g.Count());
             var stats = new OrderStatsModel
             {
                 TotalOrders = await query.CountAsync(),
@@ -431,8 +436,8 @@ namespace NET1814_MilkShop.Services.Services
             {
                 stats.TotalOrdersPerStatus[status] = totalOrdersPerStatus.GetValueOrDefault(status, 0);
             }
-            return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng", true), stats);
 
+            return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng", true), stats);
         }
         
         public async Task<ResponseModel> CancelOrderAdminStaffAsync(Guid id)
