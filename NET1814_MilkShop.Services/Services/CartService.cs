@@ -73,7 +73,7 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.BadRequest(ResponseConstants.OutOfStock);
             }
             // Check if product is in pre-order status
-            if (product.StatusId == (int)ProductStatusId.PRE_ORDER)
+            if (product.StatusId == (int)ProductStatusId.PREORDER)
             {
                 return ResponseModel.BadRequest(ResponseConstants.NoPreorderCart);
             }
@@ -149,7 +149,7 @@ namespace NET1814_MilkShop.Services.Services
                     continue;
                 }
                 // Check if product is in pre-order status
-                if (cartDetail.Product.StatusId == (int)ProductStatusId.PRE_ORDER)
+                if (cartDetail.Product.StatusId == (int)ProductStatusId.PREORDER)
                 {
                     _cartDetailRepository.Remove(cartDetail);
                     messages.Add($"Sản phẩm {cartDetail.Product.Name} đang trong chế độ đặt trước");
