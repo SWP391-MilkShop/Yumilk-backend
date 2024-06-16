@@ -211,6 +211,8 @@ namespace NET1814_MilkShop.API
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();
 
+            services.AddScoped<IPreorderProductRepository, PreorderProductRepository>();
+
             services.AddScoped<IBrandRepository, BrandRepository>();
             services.AddScoped<IBrandService, BrandService>();
 

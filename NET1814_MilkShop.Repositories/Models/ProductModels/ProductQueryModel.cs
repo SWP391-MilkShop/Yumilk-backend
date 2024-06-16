@@ -7,6 +7,10 @@ namespace NET1814_MilkShop.Repositories.Models.ProductModels
         public string? Category { get; set; }
         public string? Brand { get; set; }
         public string? Unit { get; set; }
+        /// <summary>
+        /// SELLING | PREORDER | OUT OF STOCK
+        /// <para>Default is SELLING</para>
+        /// </summary>
         public string? Status { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "Min price must be greater than 0")]

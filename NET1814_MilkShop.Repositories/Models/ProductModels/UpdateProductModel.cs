@@ -14,13 +14,13 @@ namespace NET1814_MilkShop.Repositories.Models.ProductModels
         public int? SalePrice { get; set; }
         public string? Thumbnail { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Category must be greater than 1")]
-        public int? CategoryId { get; set; }
+        public int CategoryId { get; set; } = 0;
         [Range(1, int.MaxValue, ErrorMessage = "Brand must be greater than 1")]
-        public int? BrandId { get; set; }
+        public int BrandId { get; set; } = 0;
         [Range(1, int.MaxValue, ErrorMessage = "Unit must be greater than 1")]
-        public int? UnitId { get; set; }
-        [Range(1, int.MaxValue, ErrorMessage = "Status must be greater than 1")]
-        public int? StatusId { get; set; }
+        public int UnitId { get; set; } = 0;
+        [Range(1, 3, ErrorMessage = "Status must be in range 1-3")]
+        public int StatusId { get; set; } = 0;
         public bool IsActive { get; set; } = true;
 
     }
