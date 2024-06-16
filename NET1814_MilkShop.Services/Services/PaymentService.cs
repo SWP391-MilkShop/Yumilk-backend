@@ -60,7 +60,7 @@ public class PaymentService : IPaymentService
             var customerName = $"{order.Customer?.User.FirstName} {order.Customer?.User.LastName}";
             var customerEmail = order.Customer?.Email;
             var customerPhone = order.Customer?.PhoneNumber;
-            var description = $"{orderCode} Shipfee:{(int)order.ShippingFee}đ";
+            var description = $"{orderCode} Shipfee: {(int)order.ShippingFee}đ";
             var expiredAt = (int)DateTimeOffset.UtcNow.AddMinutes(15).ToUnixTimeSeconds();
             var paymentData = new PaymentData(
                 (long)order.OrderCode,

@@ -1,17 +1,21 @@
+using Net.payOS.Types;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.CheckoutModels;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
+using NET1814_MilkShop.Repositories.Models.PaymentModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
+using Newtonsoft.Json;
 
 namespace NET1814_MilkShop.Services.Services;
 
 public interface ICheckoutService
 {
     Task<ResponseModel> Checkout(Guid userId, CheckoutModel model);
+    Task<ResponseModel> PreOrderCheckout(Guid userId, PreorderCheckoutModel model);
 }
 
 public class CheckoutService : ICheckoutService
@@ -22,6 +26,7 @@ public class CheckoutService : ICheckoutService
     private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPaymentService _paymentService;
+    private readonly IPreorderProductRepository _preorderProductRepository;
 
     public CheckoutService(
         IUnitOfWork unitOfWork,
@@ -29,7 +34,8 @@ public class CheckoutService : ICheckoutService
         IProductRepository productRepository,
         ICartRepository cartRepository,
         ICustomerRepository customerRepository,
-        IPaymentService paymentService
+        IPaymentService paymentService,
+        IPreorderProductRepository preorderProductRepository
     )
     {
         _customerRepository = customerRepository;
@@ -38,8 +44,15 @@ public class CheckoutService : ICheckoutService
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
         _paymentService = paymentService;
+        _preorderProductRepository = preorderProductRepository;
     }
 
+    /// <summary>
+    /// checkout cart
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
     public async Task<ResponseModel> Checkout(Guid userId, CheckoutModel model)
     {
         var cart = await _cartRepository.GetByCustomerIdAsync(userId, true);
@@ -72,12 +85,12 @@ public class CheckoutService : ICheckoutService
                 Message =
                     $"Số lượng sản phẩm bạn mua ({x.Quantity}) đã vượt quá số lượng sản phẩm còn lại của cửa hàng ({x.Product.Quantity}). Vui lòng kiểm tra lại giỏ hàng của quý khách!"
             });
-            return ResponseModel.Success(ResponseConstants.OverLimit("số lượng sản phẩm"), resp);
+            return ResponseModel.BadRequest(ResponseConstants.OverLimit("Số lượng sản phẩm"), resp);
         }
 
         // lấy address theo address id
-        var address = await _customerRepository.GetCustomerAddressById(model.AddressId);
-        if (address == null)
+        var customerAddress = await _customerRepository.GetCustomerAddressById(model.AddressId);
+        if (customerAddress == null || customerAddress.UserId != userId)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Địa chỉ"));
         }
@@ -91,18 +104,18 @@ public class CheckoutService : ICheckoutService
             ShippingFee = model.ShippingFee,
             TotalAmount = GetTotalPrice(cart.CartDetails.ToList()) + model.ShippingFee,
             VoucherId = 1, // de tam 1 voucher
-            ReceiverName = address.ReceiverName ?? "",
+            ReceiverName = customerAddress.ReceiverName ?? "",
             Address =
-                address.Address
+                customerAddress.Address
                 + ", "
-                + address.WardName
+                + customerAddress.WardName
                 + ", "
-                + address.DistrictName
+                + customerAddress.DistrictName
                 + ", "
-                + address.ProvinceName,
-            WardCode = address.WardCode,
-            DistrictId = address.DistrictId,
-            PhoneNumber = address.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
+                + customerAddress.ProvinceName,
+            WardCode = customerAddress.WardCode,
+            DistrictId = customerAddress.DistrictId,
+            PhoneNumber = customerAddress.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
             Note = model.Note,
             PaymentMethod = model.PaymentMethod,
             StatusId = (int)OrderStatusId.PENDING,
@@ -150,15 +163,122 @@ public class CheckoutService : ICheckoutService
                 Address = orders.Address,
                 PhoneNumber = orders.PhoneNumber,
                 Note = orders.Note,
+                PaymentMethod = orders.PaymentMethod,
+                CreatedAt = orders.CreatedAt,
                 OrderDetail = ToOrderDetailModel(cartTemp),
             };
             if (model.PaymentMethod == "PAYOS")
             {
                 var paymentLink = await _paymentService.CreatePaymentLink(orders.OrderCode.Value);
-                return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), paymentLink);
+                if (paymentLink.Status == "ERROR")
+                {
+                    return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
+                }
+
+                var json = JsonConvert.SerializeObject(paymentLink.Data);
+                var paymentData = JsonConvert.DeserializeObject<PaymentDataModel>(json);
+                resp.OrderCode = paymentData!.OrderCode;
+                resp.CheckoutUrl = paymentData!.CheckoutUrl;
             }
 
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
+        }
+
+        return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
+    }
+
+    /// <summary>
+    /// checkout preorder
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
+    public async Task<ResponseModel> PreOrderCheckout(Guid userId, PreorderCheckoutModel model)
+    {
+        var product = await _preorderProductRepository.GetByProductIdAsync(model.ProductId);
+        if (product == null || product.Product.StatusId != (int)ProductStatusId.PREORDER)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm") +
+                                            " hoặc sản phẩm đang không trong quá trình Pre-order");
+        }
+
+        if (DateTime.Now < product.StartDate ||
+            DateTime.Now > product.EndDate)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotInPreOrder);
+        }
+
+        if (model.Quantity + product.Product.Quantity > product.MaxPreOrderQuantity)
+        {
+            var resp = new CheckoutQuantityResponseModel
+            {
+                ProductName = product.Product.Name,
+                Quantity = model.Quantity,
+                Message =
+                    $"Số lượng sản phẩm bạn mua ({model.Quantity}) đã vượt quá " +
+                    $"số lượng sản phẩm tối đa cho phép ({product.MaxPreOrderQuantity - product.Product.Quantity})."
+            };
+            return ResponseModel.BadRequest(ResponseConstants.OverLimit("Số lượng sản phẩm"), resp);
+        }
+
+        var customerAddress = await _customerRepository.GetCustomerAddressById(model.AddressId);
+        if (customerAddress == null || customerAddress.UserId != userId)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Địa chỉ"));
+        }
+
+        var preOrder = new Order
+        {
+            Id = Guid.NewGuid(),
+            CustomerId = userId,
+            TotalPrice = product.Product.SalePrice == 0
+                ? (product.Product.OriginalPrice * model.Quantity)
+                : (product.Product.SalePrice * model.Quantity),
+            ShippingFee = model.ShippingFee,
+            TotalAmount = product.Product.SalePrice == 0
+                ? (product.Product.OriginalPrice * model.Quantity)
+                : (product.Product.SalePrice * model.Quantity) + model.ShippingFee,
+            VoucherId = 1, // de tam 1 voucher
+            ReceiverName = customerAddress.ReceiverName + "",
+            Address =
+                customerAddress.Address
+                + ", "
+                + customerAddress.WardName
+                + ", "
+                + customerAddress.DistrictName
+                + ", "
+                + customerAddress.ProvinceName,
+            WardCode = customerAddress.WardCode,
+            DistrictId = customerAddress.DistrictId,
+            PhoneNumber = customerAddress.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
+            Note = model.Note,
+            PaymentMethod = "PAYOS",
+            StatusId = (int)OrderStatusId.PENDING,
+            OrderCode = await GenerateOrderCode(),
+            TotalGram = product.Product.Unit!.Gram * model.Quantity,
+        };
+        _orderRepository.Add(preOrder);
+        var preOrderDetail = new OrderDetail
+        {
+            OrderId = preOrder.Id,
+            ProductId = product.ProductId,
+            Quantity = model.Quantity,
+            UnitPrice = product.Product.SalePrice == 0 ? product.Product.OriginalPrice : product.Product.SalePrice,
+            ProductName = product.Product.Name,
+            ItemPrice =
+                model.Quantity
+                * (product.Product.SalePrice == 0
+                    ? product.Product.OriginalPrice
+                    : product.Product.SalePrice) //check sale price va original price
+        };
+        _orderRepository.Add(preOrderDetail);
+        product.Product.Quantity += model.Quantity;
+        _productRepository.Update(product.Product);
+        var res = await _unitOfWork.SaveChangesAsync();
+        if (res > 0)
+        {
+            var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);
+            return paymentLink;
         }
 
         return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
