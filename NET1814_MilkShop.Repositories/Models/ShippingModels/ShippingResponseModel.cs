@@ -1,7 +1,8 @@
 using System.Text.Json.Serialization;
+using NET1814_MilkShop.Repositories.Models.ShipModels;
 using Newtonsoft.Json;
 
-namespace NET1814_MilkShop.Repositories.Models.ShipModels;
+namespace NET1814_MilkShop.Repositories.Models.ShippingModels;
 
 public class ShippingResponseModel<TValue> where TValue : class
 {
@@ -49,6 +50,16 @@ public class OrderResponseData
     public int? TotalFee { get; set; }
     [JsonProperty("expected_delivery_time")]
     public string? ExpectedDeliveryTime { get; set; }
+}
+
+public class CancelResponseData
+{
+    [JsonProperty("order_code")]
+    public string? OrderCode { get; set; }
+    [JsonProperty("result")]
+    public string? Result { get; set; }
+    [JsonProperty("message")]
+    public string? Message { get; set;}
 }
 
 public class OrderDetailInformation
@@ -113,6 +124,8 @@ public class OrderDetailInformation
     public string? Note { get; set; }
     [JsonProperty("pickup_time")]
     public DateTime PickupTime { get; set; }
+    [JsonProperty("leadtime")]
+    public DateTime ExpectedDeliveryTime { get; set; }
     [JsonProperty("log")]
     public List<Log> Logs { get; set; } = [];
     [JsonPropertyName("items")]
