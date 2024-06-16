@@ -21,6 +21,11 @@ public class CheckoutController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// checkout order
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>
     [HttpPost]
     [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
     [ServiceFilter(typeof(UserExistsFilter))]
@@ -32,6 +37,11 @@ public class CheckoutController : ControllerBase
         return ResponseExtension.Result(res);
     }
 
+    /// <summary>
+    /// checkout preorder
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>
     [HttpPost("preorder")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
     [ServiceFilter(typeof(UserExistsFilter))]

@@ -32,7 +32,11 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         #region User
-
+        /// <summary>
+        /// create user (admin)
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("users")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserModel model)
@@ -41,7 +45,12 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _userService.CreateUserAsync(model);
             return ResponseExtension.Result(response);
         }
-
+        
+        /// <summary>
+        /// Get all users (admin)
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpGet("users")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         [ServiceFilter(typeof(UserExistsFilter))]
@@ -58,6 +67,12 @@ namespace NET1814_MilkShop.API.Controllers
             return ResponseExtension.Result(response);
         }
 
+        /// <summary>
+        /// Update specific user (admin)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPatch("users/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserModel model)
@@ -68,6 +83,11 @@ namespace NET1814_MilkShop.API.Controllers
         #endregion
 
         #region  Customer
+        /// <summary>
+        /// Get all customer (admin)
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("customers")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
@@ -83,7 +103,12 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);*/
             return ResponseExtension.Result(response);
         }
-
+        
+        /// <summary>
+        /// Get customer by id (admin)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("customers/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
@@ -102,6 +127,10 @@ namespace NET1814_MilkShop.API.Controllers
         #endregion
 
         #region Account
+        /// <summary>
+        /// get current user (profile info)
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         /*[Route("api/user/me")]*/
         [Route("user/account/profile")]
@@ -143,6 +172,11 @@ namespace NET1814_MilkShop.API.Controllers
             return ResponseExtension.Result(response);
         }
 
+        /// <summary>
+        /// change password
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPatch]
         /*[Route("api/user/change-password")]*/
         [Route("user/account/change-password")]
@@ -257,7 +291,11 @@ namespace NET1814_MilkShop.API.Controllers
         #endregion
 
         #region OrderHistory
-
+        /// <summary>
+        /// get all order history of customer
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("/api/customer/orders")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
@@ -270,6 +308,11 @@ namespace NET1814_MilkShop.API.Controllers
             return ResponseExtension.Result(res);
         }
 
+        /// <summary>
+        /// get order detail history
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("/api/customer/orders/{id}")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
         [ServiceFilter(typeof(UserExistsFilter))]
@@ -281,6 +324,11 @@ namespace NET1814_MilkShop.API.Controllers
             return ResponseExtension.Result(res);
         }
 
+        /// <summary>
+        /// cancel order
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPatch("/api/customer/orders/{id}/cancel")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
         [ServiceFilter(typeof(UserExistsFilter))]
