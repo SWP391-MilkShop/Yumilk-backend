@@ -119,7 +119,8 @@ public class CheckoutService : ICheckoutService
             Note = model.Note,
             PaymentMethod = model.PaymentMethod,
             StatusId = (int)OrderStatusId.PENDING,
-            OrderCode = await GenerateOrderCode()
+            OrderCode = await GenerateOrderCode(),
+            TotalGram = GetTotalGram(cart.CartDetails.ToList())
         };
         _orderRepository.Add(orders);
 
@@ -159,6 +160,7 @@ public class CheckoutService : ICheckoutService
                 CustomerId = orders.CustomerId,
                 FullName = orders.ReceiverName,
                 TotalAmount = orders.TotalAmount,
+                TotalGram = orders.TotalGram,
                 ShippingFee = orders.ShippingFee,
                 Address = orders.Address,
                 PhoneNumber = orders.PhoneNumber,
@@ -304,10 +306,18 @@ public class CheckoutService : ICheckoutService
             var price = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice;
             total += x.Quantity * price;
         }
-
         return total;
     }
-
+    private int  GetTotalGram(List<CartDetail> list)
+    {
+        var totalGram = 0;
+        foreach (var x in list)
+        {
+            var gram = x.Product.Unit!.Gram;
+            totalGram += x.Quantity * gram;
+        }
+        return totalGram;
+    }
     private IEnumerable<CheckoutOrderDetailModel> ToOrderDetailModel(List<CartDetail> list)
     {
         var res = list.Select(x => new CheckoutOrderDetailModel

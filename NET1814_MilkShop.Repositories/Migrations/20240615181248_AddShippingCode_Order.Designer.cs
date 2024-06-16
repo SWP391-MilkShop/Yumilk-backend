@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NET1814_MilkShop.Repositories.Data;
 
@@ -11,9 +12,11 @@ using NET1814_MilkShop.Repositories.Data;
 namespace NET1814_MilkShop.Repositories.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240615181248_AddShippingCode_Order")]
+    partial class AddShippingCode_Order
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -485,14 +488,6 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("product_id");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("deleted_at");
-
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("end_date");
@@ -504,10 +499,6 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<int>("MaxPreOrderQuantity")
                         .HasColumnType("int")
                         .HasColumnName("max_preorder_quantity");
-
-                    b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("modified_at");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2")

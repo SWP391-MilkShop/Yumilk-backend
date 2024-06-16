@@ -67,6 +67,16 @@ public class CheckPaymentStatusJob : IJob
                             "OrderId {OrderId} code {OrderCode} is already paid and updated to {processing}",
                             order.Id, order.OrderCode.Value, OrderStatusId.PROCESSING.ToString());
                         continue;
+                    case 3:
+                        _logger.LogInformation(
+                            "OrderId {OrderId} code {OrderCode} is in {shipping} status",
+                            order.Id, order.OrderCode.Value, OrderStatusId.SHIPPING.ToString());
+                        continue;
+                    case 4:
+                        _logger.LogInformation(
+                            "OrderId {OrderId} code {OrderCode} is in {preorder} status",
+                            order.Id, order.OrderCode.Value, OrderStatusId.PREORDER.ToString());
+                        continue;
                 }
 
                 //Gọi API lấy payment status của PayOS
