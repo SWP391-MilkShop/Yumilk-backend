@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json;
 
-namespace NET1814_MilkShop.Repositories.Models.ShipModels;
+namespace NET1814_MilkShop.Repositories.Models.ShippingModels;
 
 public class CreateOrderShippingModel
 {
@@ -34,7 +34,7 @@ public class CreateOrderShippingModel
     [JsonProperty("cod_amount")]
     public int CodAmount { get; set; }
     [JsonProperty("weight")]
-    public int Weight { get; set; } = 200; //Set cứng vì GHN bắt buộc cần Weight :D
+    public int Weight { get; set; } //Set cứng vì GHN bắt buộc cần Weight :D
     [JsonProperty("service_type_id")]
     public int ServiceTypeId { get; set; } = 2; //2: E-commerce Delivery
     [JsonProperty("items")]

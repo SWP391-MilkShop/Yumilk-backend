@@ -52,6 +52,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
                 return _query
                     .Include(x => x.CartDetails)
                     .ThenInclude(x => x.Product)
+                    .ThenInclude(x=>x.Unit)
                     .FirstOrDefaultAsync(x => x.CustomerId == customerId);
             }
 
