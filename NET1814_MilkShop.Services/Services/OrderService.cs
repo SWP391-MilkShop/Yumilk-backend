@@ -1,6 +1,4 @@
 using System.Linq.Expressions;
-using System.Numerics;
-using Azure;
 using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
@@ -10,7 +8,6 @@ using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
-using System.Linq.Expressions;
 
 namespace NET1814_MilkShop.Services.Services
 {
