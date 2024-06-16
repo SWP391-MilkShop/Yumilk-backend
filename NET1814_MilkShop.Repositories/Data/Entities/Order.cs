@@ -11,11 +11,14 @@ public partial class Order : IAuditableEntity
 
     public Guid? CustomerId { get; set; }
 
-    public decimal TotalPrice { get; set; }
+    public int TotalPrice { get; set; }
 
-    public decimal ShippingFee { get; set; }
+    public int ShippingFee { get; set; }
 
-    public decimal TotalAmount { get; set; } // TotalPrice + ShippingFee
+    public int TotalAmount { get; set; } // TotalPrice + ShippingFee
+
+    [Column("total_gram")]
+    public int TotalGram { get; set; }
 
     public int VoucherId { get; set; }
 
@@ -40,6 +43,10 @@ public partial class Order : IAuditableEntity
 
     [Column("order_code", TypeName = "int")]
     public int? OrderCode { get; set; }
+    
+    [Column("shipping_code",TypeName = "nvarchar(255)")]
+    [StringLength(255)]
+    public string? ShippingCode { get; set; }
 
     [Column("payment_date", TypeName = "datetime2")]
     public DateTime? PaymentDate { get; set; }

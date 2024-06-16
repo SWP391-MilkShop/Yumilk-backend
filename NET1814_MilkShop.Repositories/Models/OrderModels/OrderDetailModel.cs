@@ -6,11 +6,12 @@ public class OrderDetailModel
     public string? PhoneNumber { get; set; }
     public string? Address { get; set; }
     public string? Note { get; set; }
-    public List<CheckoutOrderDetailModel> OrderDetail { get; set; }
-    public decimal TotalPrice { get; set; }
-    public decimal ShippingFee { get; set; }
-    public decimal TotalAmount { get; set; }
+    public List<CheckoutOrderDetailModel> OrderDetail { get; set; } = [];
+    public int TotalPrice { get; set; }
+    public int ShippingFee { get; set; }
+    public int TotalAmount { get; set; }
     public string? PaymentMethod { get; set; }
 
     public string? OrderStatus { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

@@ -20,5 +20,14 @@ namespace NET1814_MilkShop.Services.CoreHelpers.Extensions
             //Normalize for Unicode normalization
             return input.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormC);
         }
+        public static string? RemoveSpace(this string? input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
+            //Replace all spaces with empty string
+            return input.Replace(" ", "");
+        }
     }
 }

@@ -50,7 +50,7 @@ public class PaymentService : IPaymentService
                 .OrderDetails.Select(item => new ItemData(
                     item.Product.Name,
                     item.Quantity,
-                    item.ItemPrice.ToInt()
+                    item.ItemPrice
                 ))
                 .ToList();
             if (items.Count <= 0)
@@ -60,11 +60,11 @@ public class PaymentService : IPaymentService
             var customerName = $"{order.Customer?.User.FirstName} {order.Customer?.User.LastName}";
             var customerEmail = order.Customer?.Email;
             var customerPhone = order.Customer?.PhoneNumber;
-            var description = $"{orderCode} Shipfee:{(int)order.ShippingFee}đ";
+            var description = $"{orderCode} Shipfee: {(int)order.ShippingFee}đ";
             var expiredAt = (int)DateTimeOffset.UtcNow.AddMinutes(15).ToUnixTimeSeconds();
             var paymentData = new PaymentData(
                 (long)order.OrderCode,
-                order.TotalAmount.ToInt(),
+                order.TotalAmount,
                 description,
                 items,
                 _configuration["PayOS:CancelUrl"]!,

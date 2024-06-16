@@ -207,7 +207,9 @@
         public const string OutOfStock = "Sản phẩm đã hết hàng";
         public const string NotEnoughQuantity = "Số lượng sản phẩm không đủ";
         public const string InvalidSalePrice = "Giá khuyến mãi phải nhỏ hơn giá gốc";
-
+        public const string InvalidQuantity = "Số lượng sản phẩm phải lớn hơn 0";
+        public const string NoQuantityPreorder = "Không thể set số lượng tồn cho sản phẩm Pre-order";
+        public const string NotInPreOrder = "Sản phẩm đang không trong quá trình Pre-order";
         #endregion
         #region Cart
 
@@ -222,6 +224,7 @@
                 ? "Thêm sản phẩm vào giỏ hàng thành công"
                 : "Thêm sản phẩm vào giỏ hàng không thành công";
         }
+        public const string NoPreorderCart = "Không thể thêm sản phẩm Pre-order vào giỏ hàng";
 
         public const string CartIsEmpty = "Giỏ hàng của bạn hiện tại đang rỗng!";
 

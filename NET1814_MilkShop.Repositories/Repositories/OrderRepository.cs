@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
+using NET1814_MilkShop.Repositories.Migrations;
 
 namespace NET1814_MilkShop.Repositories.Repositories
 {
@@ -11,12 +12,15 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// </summary>
         /// <returns></returns>
         IQueryable<Order> GetOrderQuery();
+
         /// <summary>
         /// Get order query with status
         /// </summary>
         /// <returns></returns>
         IQueryable<Order> GetOrderQueryWithStatus();
+
         IQueryable<Order> GetOrderHistory(Guid customerId);
+
         /// <summary>
         /// Get order by id include order details if includeDetails is true
         /// </summary>
@@ -24,6 +28,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <param name="includeDetails"></param>
         /// <returns></returns>
         Task<Order?> GetByIdAsync(Guid id, bool includeDetails);
+
         void Add(Order order);
         void Update(Order order);
         void AddRange(IEnumerable<OrderDetail> list);
@@ -32,6 +37,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<List<Order>?> GetAllCodeAsync();
         Task<Order?> GetByOrderIdAsync(Guid orderId, bool include);
         Task<bool> IsExistOrderCode(int id);
+        void Add(OrderDetail orderDetail);
     }
 
     public class OrderRepository : Repository<Order>, IOrderRepository
@@ -74,7 +80,8 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public async Task<Order?> GetByIdNoInlcudeAsync(Guid id)
         {
-            return await _query.FirstOrDefaultAsync(x => x.Id == id);
+            return await _query.Include(x => x.OrderDetails).ThenInclude(x => x.Product)
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
 
@@ -101,6 +108,11 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public async Task<bool> IsExistOrderCode(int id)
         {
             return await _query.AnyAsync(x => x.OrderCode == id);
+        }
+
+        public void Add(OrderDetail orderDetail)
+        {
+            _context.OrderDetails.Add(orderDetail);
         }
 
         public Task<Order?> GetByIdAsync(Guid id, bool includeDetails)

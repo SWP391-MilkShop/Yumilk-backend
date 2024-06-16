@@ -4,7 +4,7 @@
     {
         public Guid Id { get; set; }
         public Guid CustomerId { get; set; }
-        public decimal TotalAmount { get; set; }
+        public int TotalAmount { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
         public string? PaymentMethod { get; set; }

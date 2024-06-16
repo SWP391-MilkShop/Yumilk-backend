@@ -67,6 +67,16 @@ public class CheckPaymentStatusJob : IJob
                             "OrderId {OrderId} code {OrderCode} is already paid and updated to {processing}",
                             order.Id, order.OrderCode.Value, OrderStatusId.PROCESSING.ToString());
                         continue;
+                    case 3:
+                        _logger.LogInformation(
+                            "OrderId {OrderId} code {OrderCode} is in {shipping} status",
+                            order.Id, order.OrderCode.Value, OrderStatusId.SHIPPING.ToString());
+                        continue;
+                    case 4:
+                        _logger.LogInformation(
+                            "OrderId {OrderId} code {OrderCode} is in {preorder} status",
+                            order.Id, order.OrderCode.Value, OrderStatusId.PREORDER.ToString());
+                        continue;
                 }
 
                 //Gọi API lấy payment status của PayOS
@@ -87,7 +97,17 @@ public class CheckPaymentStatusJob : IJob
                 {
                     _logger.LogInformation("Payment for order {OrderId} is paid", order.Id);
                     var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(order.Id);
-                    existOrder!.StatusId = (int)OrderStatusId.PROCESSING; //Processing
+                    if (existOrder!.OrderDetails.Any(x => x.Product.StatusId == (int)ProductStatusId.PREORDER))
+                    {
+                        _logger.LogInformation("Order {OrderId} has preorder product", order.Id);
+                        existOrder.StatusId = (int)OrderStatusId.PREORDER; //Preorder
+                    }
+                    else
+                    {
+                        existOrder!.StatusId = (int)OrderStatusId.PROCESSING; //Processing
+                    }
+
+                    existOrder.PaymentDate = DateTime.UtcNow;
                     _orderRepository.Update(existOrder);
                     var payResult = await _unitOfWork.SaveChangesAsync();
                     if (payResult < 0)
@@ -105,7 +125,15 @@ public class CheckPaymentStatusJob : IJob
                 foreach (var orderDetail in order.OrderDetails)
                 {
                     var product = await _productRepository.GetByIdNoIncludeAsync(orderDetail.ProductId);
-                    product.Quantity += orderDetail.Quantity;
+                    if (product!.OrderDetails.Any(x => x.Product.StatusId == (int)OrderStatusId.PREORDER))
+                    {
+                        product.Quantity -= orderDetail.Quantity;
+                    }
+                    else
+                    {
+                        product.Quantity += orderDetail.Quantity;
+                    }
+
                     _productRepository.Update(product);
                 }
 
@@ -127,7 +155,6 @@ public class CheckPaymentStatusJob : IJob
                     result > 0
                         ? "Update order status for order {OrderId} successfully"
                         : "Update order status for order {OrderId} failed", order.Id);
-
             }
             catch (Exception e)
             {

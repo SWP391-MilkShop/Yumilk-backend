@@ -15,11 +15,11 @@ public partial class Voucher : IAuditableEntity
 
     public string? Description { get; set; }
 
-    public decimal DiscountPercent { get; set; }
+    public int DiscountPercent { get; set; }
 
-    public decimal MaxDiscountAmount { get; set; }
+    public int MaxDiscountAmount { get; set; }
 
-    public decimal MinOrderValue { get; set; }
+    public int MinOrderValue { get; set; }
 
     public DateTime? StartDate { get; set; }
 

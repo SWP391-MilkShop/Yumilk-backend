@@ -4,13 +4,8 @@ namespace NET1814_MilkShop.Repositories.Models.OrderModels
 {
     public class OrderQueryModel : QueryModel
     {
-        [Range(
-            typeof(decimal),
-            "0",
-            "79228162514264337593543950335",
-            ErrorMessage = "Total amount must be >= 0"
-        )]
-        public decimal TotalAmount { get; set; } = 0;
+        [Range(0, int.MaxValue, ErrorMessage = "Total amount must be greater than or equal to 0")]
+        public int TotalAmount { get; set; } = 0;
 
         public string? Email { get; set; }
 

@@ -15,7 +15,9 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <param name="includeOrderCount"></param>
         /// <returns></returns>
         IQueryable<Product> GetProductsQuery(bool includeRating, bool includeOrderCount);
+
         IQueryable<Product> GetProductQueryNoInclude();
+
         /// <summary>
         /// Get product by id with corresponding brand, category, unit, product status
         /// And product reviews, order details if includeRating and includeOrderCount is true
@@ -39,22 +41,26 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// <param name="name"></param>
         /// <returns></returns>
         Task<Product?> GetByNameAsync(string name);
+
         void Add(Product product);
         void Update(Product product);
         void Delete(Product product);
         Task<bool> IsExistAsync(Guid id);
+        Task<Product?> GetByIdIncludePreorder(Guid id);
     }
 
     public sealed class ProductRepository : Repository<Product>, IProductRepository
     {
         public ProductRepository(AppDbContext context)
-            : base(context) { }
+            : base(context)
+        {
+        }
 
         public IQueryable<Product> GetProductsQuery(bool includeRating, bool includeOrderCount)
         {
             var query = includeRating ? _query.Include(p => p.ProductReviews) : _query;
             query = includeOrderCount ? query.Include(p => p.OrderDetails) : query;
-            query =  query.Include(p => p.Brand)
+            query = query.Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.Unit)
                 .Include(p => p.ProductStatus).AsSplitQuery();
@@ -87,9 +93,21 @@ namespace NET1814_MilkShop.Repositories.Repositories
             return _query.AnyAsync(x => x.Id == id);
         }
 
+        public async Task<Product?> GetByIdIncludePreorder(Guid id)
+        {
+            return await _query.Include(x => x.PreorderProduct)
+                .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
         public IQueryable<Product> GetProductQueryNoInclude()
         {
             return _query;
+        }
+
+        public override void Update(Product entity)
+        {
+            var tracker = _context.Attach(entity);
+            tracker.State = EntityState.Modified;
         }
     }
 }
