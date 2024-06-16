@@ -196,7 +196,7 @@ public class CheckoutService : ICheckoutService
     public async Task<ResponseModel> PreOrderCheckout(Guid userId, PreorderCheckoutModel model)
     {
         var product = await _preorderProductRepository.GetByProductIdAsync(model.ProductId);
-        if (product == null)
+        if (product == null || product.Product.StatusId != (int)ProductStatusId.PREORDER)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm") +
                                             " hoặc sản phẩm đang không trong quá trình Pre-order");
