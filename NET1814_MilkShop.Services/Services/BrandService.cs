@@ -12,6 +12,7 @@ namespace NET1814_MilkShop.Services.Services;
 public interface IBrandService
 {
     Task<ResponseModel> GetBrandsAsync(BrandQueryModel queryModel);
+    Task<ResponseModel> GetBrandByIdAsync(int id);
     Task<ResponseModel> CreateBrandAsync(CreateBrandModel model);
     Task<ResponseModel> UpdateBrandAsync(int id, UpdateBrandModel model);
     Task<ResponseModel> DeleteBrandAsync(int id);
@@ -83,6 +84,24 @@ public class BrandService : IBrandService
             ResponseConstants.Get("thương hiệu", brands.TotalCount > 0),
             brands
         );
+    }
+
+    public async Task<ResponseModel> GetBrandByIdAsync(int id)
+    {
+        var brand = await _brandRepository.GetByIdAsync(id);
+        if (brand == null)
+        {
+            return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
+        }
+
+        var model = new BrandModel
+        {
+            Id = brand.Id,
+            Name = brand.Name,
+            Description = brand.Description
+        };
+
+        return ResponseModel.Success(ResponseConstants.Get("thương hiệu", true), model);
     }
 
     public async Task<ResponseModel> CreateBrandAsync(CreateBrandModel model)
