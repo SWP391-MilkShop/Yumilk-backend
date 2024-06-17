@@ -67,25 +67,35 @@ public class CheckoutService : ICheckoutService
         }
 
         //check quantity coi còn hàng không
-        List<CartDetail> unavailableItems = new List<CartDetail>();
+        List<CheckoutQuantityResponseModel> unavailableItems = new List<CheckoutQuantityResponseModel>();
         foreach (var c in cart.CartDetails)
         {
             if (c.Quantity > c.Product.Quantity)
             {
-                unavailableItems.Add(c);
+                unavailableItems.Add(new CheckoutQuantityResponseModel
+                {
+                    ProductName = c.Product.Name,
+                    Quantity = c.Quantity,
+                    Message =
+                        $"Số lượng sản phẩm bạn mua ({c.Quantity}) đã vượt quá số lượng sản phẩm còn lại của cửa hàng ({c.Product.Quantity}). Vui lòng kiểm tra lại giỏ hàng của quý khách!"
+                });
+            }
+            else if (c.Product.StatusId == (int)ProductStatusId.OUT_OF_STOCK ||
+                     c.Product.StatusId == (int)ProductStatusId.PREORDER)
+            {
+                unavailableItems.Add(new CheckoutQuantityResponseModel
+                {
+                    ProductName = c.Product.Name,
+                    Quantity = c.Quantity,
+                    Message =
+                        $"Sản phẩm đã hết hàng hoặc đang trong quá trình pre-order. Vui lòng kiểm tra lại giỏ hàng của quý khách!"
+                });
             }
         }
 
         if (unavailableItems.Any())
         {
-            var resp = unavailableItems.Select(x => new CheckoutQuantityResponseModel()
-            {
-                ProductName = x.Product.Name,
-                Quantity = x.Quantity,
-                Message =
-                    $"Số lượng sản phẩm bạn mua ({x.Quantity}) đã vượt quá số lượng sản phẩm còn lại của cửa hàng ({x.Product.Quantity}). Vui lòng kiểm tra lại giỏ hàng của quý khách!"
-            });
-            return ResponseModel.BadRequest(ResponseConstants.OverLimit("Số lượng sản phẩm"), resp);
+            return ResponseModel.BadRequest(ResponseConstants.OverLimit("Số lượng sản phẩm"), unavailableItems);
         }
 
         // lấy address theo address id
@@ -302,7 +312,7 @@ public class CheckoutService : ICheckoutService
                     UnitPrice = preOrderDetail.UnitPrice,
                     ItemPrice = preOrderDetail.ItemPrice,
                     ThumbNail = preOrderDetail.Product.Thumbnail
-                },  
+                },
             };
             var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);
             if (paymentLink.Status == "ERROR")
