@@ -231,8 +231,8 @@ namespace NET1814_MilkShop.Services.Services
                     {
                         h.Product.Name,
                         h.Thumbnail,
-                        h.CreatedAt
-                    })
+                    }),
+                CreatedAt = o.CreatedAt
             });
 
             #endregion
@@ -379,14 +379,16 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     return orderShippingAsync;
                 }
+
                 order.StatusId = model.StatusId;
-                _orderRepository.Update(order); 
+                _orderRepository.Update(order);
                 var resultShipping = await _unitOfWork.SaveChangesAsync();
                 if (resultShipping < 0)
                 {
                     return ResponseModel.BadRequest("Có lỗi xảy ra khi cập nhật trạng thái đơn hàng");
                 }
-                return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng",true),
+
+                return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true),
                     orderShippingAsync.Data);
             }
 
@@ -436,7 +438,7 @@ namespace NET1814_MilkShop.Services.Services
 
             return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng", true), stats);
         }
-        
+
         public async Task<ResponseModel> CancelOrderAdminStaffAsync(Guid id)
         {
             var order = await _orderRepository.GetByOrderIdAsync(id, false);
@@ -444,23 +446,25 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
             }
-            
+
             order.StatusId = 5;
-             
+
             foreach (var o in order.OrderDetails)
             {
                 o.Product.Quantity += o.Quantity;
                 _productRepository.Update(o.Product);
             }
- 
+
             _orderRepository.Update(order);
             var res = await _unitOfWork.SaveChangesAsync();
             if (res > 0)
             {
-                return ResponseModel.Success(order.ShippingCode != null ? "Hủy thành công, đơn hàng có mã vận chuyển. Vui lòng hủy bên đơn vị vận chuyển" 
+                return ResponseModel.Success(order.ShippingCode != null
+                    ? "Hủy thành công, đơn hàng có mã vận chuyển. Vui lòng hủy bên đơn vị vận chuyển"
                     : ResponseConstants.Cancel("đơn hàng", true), null);
             }
-            return ResponseModel.Error(ResponseConstants.Cancel("đơn hàng", false));           
+
+            return ResponseModel.Error(ResponseConstants.Cancel("đơn hàng", false));
         }
     }
 }
