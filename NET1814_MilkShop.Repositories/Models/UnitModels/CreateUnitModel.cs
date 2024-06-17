@@ -9,4 +9,7 @@ public class CreateUnitModel
 
     [Required]
     public string Description { get; set; } = string.Empty;
+    [Required]
+    [Range(1,int.MaxValue)]
+    public int Gram { get; set; }
 }

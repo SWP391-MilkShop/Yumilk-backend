@@ -6,6 +6,7 @@
         public Guid CustomerId { get; set; }
         public int TotalPrice { get; set; }
         public int TotalQuantity { get; set; }
+        public int TotalGram { get; set; }
         public object CartItems { get; set; } = new List<CartDetailModel>();
     }
 }

@@ -8,6 +8,8 @@
         public int Quantity { get; set; }
         public int OriginalPrice { get; set; }
         public int SalePrice { get; set; }
+        
+        public int Gram { get; set; }
         public int ProductQuantity { get; set; }
 
     }
