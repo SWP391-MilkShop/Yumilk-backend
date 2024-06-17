@@ -36,26 +36,26 @@ public class PaymentController : ControllerBase
     /// <summary>
     /// Get payment link information by OrderCode in database
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="orderId"></param>
     /// <returns></returns>
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetPaymentLinkInformation(int id)
+    [HttpGet("{orderId}")]
+    public async Task<IActionResult> GetPaymentLinkInformation(Guid orderId)
     {
         _logger.Information("Get payment link information");
-        var response = await _paymentService.GetPaymentLinkInformation(id);
+        var response = await _paymentService.GetPaymentLinkInformation(orderId);
         return ResponseExtension.Result(response);
     }
 
     /// <summary>
     /// Cancel payment link by OrderCode in database
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="orderId"></param>
     /// <returns></returns>
-    [HttpPost("cancel/{id}")]
-    public async Task<IActionResult> CanclePaymentLink(int id)
+    [HttpPost("cancel/{orderId}")]
+    public async Task<IActionResult> CanclePaymentLink(Guid orderId)
     {
         _logger.Information("Cancel payment link");
-        var response = await _paymentService.CancelPaymentLink(id);
+        var response = await _paymentService.CancelPaymentLink(orderId);
         return ResponseExtension.Result(response);
     }
 }

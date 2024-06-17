@@ -81,7 +81,7 @@ public class CheckPaymentStatusJob : IJob
 
                 //Gọi API lấy payment status của PayOS
                 await Task.Delay(300); //Tranh request qua nhieu trong thoi gian ngan tranh bi block
-                var paymentStatus = await _paymentService.GetPaymentLinkInformation(order.OrderCode.Value);
+                var paymentStatus = await _paymentService.GetPaymentLinkInformation(order.Id);
                 _logger.LogInformation($"OrderId:{order.Id} code:{order.OrderCode.Value} --> " + paymentStatus.Message);
                 if (paymentStatus.StatusCode == 500)
                 {
