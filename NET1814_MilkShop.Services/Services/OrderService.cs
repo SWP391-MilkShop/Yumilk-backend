@@ -20,6 +20,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model);
         Task<ResponseModel> GetOrderStatsAsync(OrderStatsQueryModel queryModel);
         Task<ResponseModel> CancelOrderAdminStaffAsync(Guid id);
+        Task<ResponseModel> GetOrderHistoryDetailDashBoardAsync(Guid orderId);
     }
 
     public class OrderService : IOrderService
@@ -41,7 +42,7 @@ namespace NET1814_MilkShop.Services.Services
         }
 
         /// <summary>
-        /// đơn đặt hàng của các khách hàng
+        ///admin lấy đơn đặt hàng của các khách hàng
         /// </summary>
         /// <param name="model"></param>
         /// <returns>trả về danh sách các order của hệ thống</returns>
@@ -169,7 +170,7 @@ namespace NET1814_MilkShop.Services.Services
         }
 
         /// <summary>
-        /// lịch sử đặt hàng của khách hàng cụ thể
+        /// customẻ lấy lịch sử đặt hàng của mình
         /// </summary>
         /// <param name="customerId"></param>
         /// <param name="model"></param>
@@ -486,6 +487,41 @@ namespace NET1814_MilkShop.Services.Services
             }
 
             return ResponseModel.Error(ResponseConstants.Cancel("đơn hàng", false));
+        }
+
+        public async Task<ResponseModel> GetOrderHistoryDetailDashBoardAsync(Guid orderId)
+        {
+            var order = await _orderRepository.GetByOrderIdAsync(orderId, true);
+            if (order == null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Đơn hàng"));
+            }
+
+            var pModel = order.OrderDetails.Select(x => new CheckoutOrderDetailModel
+            {
+                ProductId = x.ProductId,
+                ProductName = x.ProductName,
+                Quantity = x.Quantity,
+                UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
+                ItemPrice = x.ItemPrice,
+                ThumbNail = x.Thumbnail
+            }).ToList();
+
+            var detail = new OrderDetailModel
+            {
+                RecieverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
+                PhoneNumber = order.PhoneNumber,
+                Address = order.Address,
+                Note = order.Note,
+                OrderDetail = pModel,
+                TotalPrice = order.TotalPrice,
+                ShippingFee = order.ShippingFee,
+                TotalAmount = order.TotalAmount,
+                PaymentMethod = order.PaymentMethod,
+                OrderStatus = order.Status!.Name,
+                CreatedAt = order.CreatedAt
+            };
+            return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
         }
     }
 }
