@@ -44,7 +44,7 @@ public class BrandService : IBrandService
         {
             query = query.Where(x =>
                 x.Name.Contains(queryModel.SearchTerm)
-                || x.Description.Contains(queryModel.SearchTerm)
+                || (x.Description != null && x.Description.Contains(queryModel.SearchTerm))
             );
         }
 
@@ -67,13 +67,15 @@ public class BrandService : IBrandService
         {
             Id = x.Id,
             Name = x.Name,
-            Description = x.Description
+            Description = x.Description,
+            IsActive = x.IsActive,
+            Logo = x.Logo
         });
 
         #region paging
 
-        var brands = await PagedList<Brand>.CreateAsync(
-            query,
+        var brands = await PagedList<BrandModel>.CreateAsync(
+            model,
             queryModel.Page,
             queryModel.PageSize
         );
@@ -98,7 +100,9 @@ public class BrandService : IBrandService
         {
             Id = brand.Id,
             Name = brand.Name,
-            Description = brand.Description
+            Description = brand.Description,
+            IsActive = brand.IsActive,
+            Logo = brand.Logo
         };
 
         return ResponseModel.Success(ResponseConstants.Get("thương hiệu", true), model);
