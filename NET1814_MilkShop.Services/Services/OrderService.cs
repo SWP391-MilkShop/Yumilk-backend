@@ -261,6 +261,12 @@ namespace NET1814_MilkShop.Services.Services
             );
         }
 
+        /// <summary>
+        /// customer lấy ra chi tiết của 1 đơn hàng cụ thể
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetOrderHistoryDetailAsync(Guid userId, Guid orderId)
         {
             var order = await _orderRepository.GetByOrderIdAsync(orderId, true);

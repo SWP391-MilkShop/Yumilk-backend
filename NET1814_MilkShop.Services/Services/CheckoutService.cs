@@ -214,7 +214,7 @@ public class CheckoutService : ICheckoutService
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm") +
                                             " hoặc sản phẩm đang không trong quá trình Pre-order");
         }
-
+        
         if (DateTime.Now < product.StartDate ||
             DateTime.Now > product.EndDate)
         {
