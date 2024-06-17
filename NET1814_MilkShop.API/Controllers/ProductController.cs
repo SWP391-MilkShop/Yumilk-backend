@@ -144,6 +144,14 @@ namespace NET1814_MilkShop.API.Controllers
 
         #region Brand
 
+        [HttpGet("brands/{id}")]
+        public async Task<IActionResult> GetBrandById(int id)
+        {
+            _logger.Information("Get brand by id");
+            var response = await _brandService.GetBrandByIdAsync(id);
+            return ResponseExtension.Result(response);
+        }
+
         [HttpGet("brands")]
         public async Task<IActionResult> GetBrands([FromQuery] BrandQueryModel queryModel)
         {
@@ -616,6 +624,7 @@ namespace NET1814_MilkShop.API.Controllers
         #endregion
 
         #region Preorder Product
+
         /// <summary>
         /// Need to set the product status to PREORDER to update preorder info
         /// <para> max expected preorder days is 30 days </para>
@@ -625,12 +634,14 @@ namespace NET1814_MilkShop.API.Controllers
         /// <returns></returns>
         [HttpPatch("/{productId}/preorder")]
         [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> UpdatePreorderProduct(Guid productId, [FromBody] UpdatePreorderProductModel model)
+        public async Task<IActionResult> UpdatePreorderProduct(Guid productId,
+            [FromBody] UpdatePreorderProductModel model)
         {
             _logger.Information("Update Preorder Product");
             var response = await _productService.UpdatePreorderProductAsync(productId, model);
             return ResponseExtension.Result(response);
         }
+
         #endregion
     }
 }
