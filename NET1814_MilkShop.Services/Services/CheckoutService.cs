@@ -136,7 +136,8 @@ public class CheckoutService : ICheckoutService
                 x.Quantity
                 * (x.Product.SalePrice == 0
                     ? x.Product.OriginalPrice
-                    : x.Product.SalePrice) //check sale price va original price
+                    : x.Product.SalePrice), //check sale price va original price
+            Thumbnail = x.Product.Thumbnail
         });
         var cartTemp = cart.CartDetails.ToList();
         _orderRepository.AddRange(orderDetailsList);
@@ -271,7 +272,8 @@ public class CheckoutService : ICheckoutService
                 model.Quantity
                 * (product.Product.SalePrice == 0
                     ? product.Product.OriginalPrice
-                    : product.Product.SalePrice) //check sale price va original price
+                    : product.Product.SalePrice), //check sale price va original price
+            Thumbnail = product.Product.Thumbnail
         };
         _orderRepository.Add(preOrderDetail);
         product.Product.Quantity += model.Quantity;
@@ -279,8 +281,40 @@ public class CheckoutService : ICheckoutService
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
         {
+            var resp = new CheckoutResponseModel
+            {
+                OrderId = preOrder.Id,
+                CustomerId = preOrder.CustomerId,
+                FullName = preOrder.ReceiverName,
+                TotalAmount = preOrder.TotalAmount,
+                TotalGram = preOrder.TotalGram,
+                ShippingFee = preOrder.ShippingFee,
+                Address = preOrder.Address,
+                PhoneNumber = preOrder.PhoneNumber,
+                Note = preOrder.Note,
+                PaymentMethod = preOrder.PaymentMethod,
+                CreatedAt = preOrder.CreatedAt,
+                OrderDetail = new CheckoutOrderDetailModel
+                {
+                    ProductId = preOrderDetail.ProductId,
+                    ProductName = preOrderDetail.ProductName,
+                    Quantity = preOrderDetail.Quantity,
+                    UnitPrice = preOrderDetail.UnitPrice,
+                    ItemPrice = preOrderDetail.ItemPrice,
+                    ThumbNail = preOrderDetail.Product.Thumbnail
+                },  
+            };
             var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);
-            return paymentLink;
+            if (paymentLink.Status == "ERROR")
+            {
+                return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
+            }
+
+            var json = JsonConvert.SerializeObject(paymentLink.Data);
+            var paymentData = JsonConvert.DeserializeObject<PaymentDataModel>(json);
+            resp.OrderCode = paymentData!.OrderCode;
+            resp.CheckoutUrl = paymentData!.CheckoutUrl;
+            return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
         return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
@@ -306,9 +340,11 @@ public class CheckoutService : ICheckoutService
             var price = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice;
             total += x.Quantity * price;
         }
+
         return total;
     }
-    private int  GetTotalGram(List<CartDetail> list)
+
+    private int GetTotalGram(List<CartDetail> list)
     {
         var totalGram = 0;
         foreach (var x in list)
@@ -316,8 +352,10 @@ public class CheckoutService : ICheckoutService
             var gram = x.Product.Unit!.Gram;
             totalGram += x.Quantity * gram;
         }
+
         return totalGram;
     }
+
     private IEnumerable<CheckoutOrderDetailModel> ToOrderDetailModel(List<CartDetail> list)
     {
         var res = list.Select(x => new CheckoutOrderDetailModel
@@ -328,7 +366,8 @@ public class CheckoutService : ICheckoutService
             UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
             ItemPrice =
                 x.Quantity
-                * (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice)
+                * (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice),
+            ThumbNail = x.Product.Thumbnail
         });
         return res;
     }
