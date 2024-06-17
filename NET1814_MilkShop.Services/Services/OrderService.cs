@@ -224,6 +224,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 OrderId = o.Id,
                 TotalAmount = o.TotalAmount,
+                PaymentMethod = o.PaymentMethod,
                 OrderStatus = o.Status!.Name,
                 ProductList = o.OrderDetails
                     .Where(u => u.OrderId == o.Id)
