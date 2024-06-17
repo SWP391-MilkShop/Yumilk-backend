@@ -17,7 +17,7 @@ public interface IShippingService
     Task<ResponseModel> GetProvinceAsync();
     Task<ResponseModel> GetDistrictAsync(int provinceId);
     Task<ResponseModel> GetWardAsync(int districtId);
-    Task<ResponseModel> GetShippingFeeAsync(Guid orderId);
+    Task<ResponseModel> GetShippingFeeAsync(ShippingFeeRequestModel model);
     Task<ResponseModel> CreateOrderShippingAsync(Guid orderId);
     Task<ResponseModel> PreviewOrderShippingAsync(Guid orderId);
     Task<ResponseModel> GetOrderDetailAsync(Guid orderId);
@@ -124,20 +124,9 @@ public class ShippingService : IShippingService
         }
     }
 
-    public async Task<ResponseModel> GetShippingFeeAsync(Guid orderId)
+    public async Task<ResponseModel> GetShippingFeeAsync(ShippingFeeRequestModel request)
     {
         _client.DefaultRequestHeaders.Add("ShopId", ShopId);
-        var order = await _orderRepository.GetByIdAsync(orderId,false);
-        if (order is null)
-        {
-            return ResponseModel.BadRequest("Đơn hàng không tồn tại");
-        }
-        var request = new ShippingFeeRequestModel
-        {
-            FromDistrictId = order.DistrictId,
-            FromWardCode = order.WardCode.ToString(),
-            TotalWeight = order.TotalGram
-        };
         var url = $"https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?" +
                   $"to_ward_code={request.FromWardCode}&to_district_id={request.FromDistrictId}&weight={request.TotalWeight}" +
                   $"&service_id=0&service_type_id=2";

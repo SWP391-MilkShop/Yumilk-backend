@@ -48,13 +48,13 @@ public class ShippingController : ControllerBase
     /// <summary>
     /// Get shipping fee of order
     /// </summary>
-    /// <param name="orderId"></param>
+    /// <param name="model"></param>
     /// <returns></returns>
-    [HttpGet("fee/{orderId}")]
-    public async Task<IActionResult> GetShippingFee(Guid orderId)
+    [HttpGet("fee")]
+    public async Task<IActionResult> GetShippingFee([FromQuery]ShippingFeeRequestModel model)
     {
         _logger.Information("Get shipping fee");
-        var response = await _shippingService.GetShippingFeeAsync(orderId);
+        var response = await _shippingService.GetShippingFeeAsync(model);
         return ResponseExtension.Result(response);
     }
 
