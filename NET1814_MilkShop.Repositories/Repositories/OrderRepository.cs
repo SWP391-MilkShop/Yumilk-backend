@@ -80,7 +80,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public async Task<Order?> GetByIdNoInlcudeAsync(Guid id)
         {
-            return await _query.Include(x => x.OrderDetails).ThenInclude(x => x.Product)
+            return await _query
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
