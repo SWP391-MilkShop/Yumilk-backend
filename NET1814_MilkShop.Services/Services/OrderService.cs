@@ -28,14 +28,16 @@ namespace NET1814_MilkShop.Services.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IProductRepository _productRepository;
         private readonly IShippingService _shippingService;
+        private readonly IPaymentService _paymentService;
 
         public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork,
-            IProductRepository productRepository, IShippingService shippingService)
+            IProductRepository productRepository, IShippingService shippingService, IPaymentService paymentService)
         {
             _orderRepository = orderRepository;
             _unitOfWork = unitOfWork;
             _productRepository = productRepository;
             _shippingService = shippingService;
+            _paymentService = paymentService;
         }
 
         /// <summary>
@@ -119,23 +121,29 @@ namespace NET1814_MilkShop.Services.Services
             #endregion
 
             // chuyển về OrderModel
-            var orderModelQuery = query.Select(x => new OrderModel
+            var orderModels = new List<OrderModel>();
+            foreach (var order in query.ToList())
             {
-                Id = x.Id,
-                CustomerId = x.Customer!.UserId,
-                TotalAmount = x.TotalAmount,
-                PhoneNumber = x.PhoneNumber,
-                Address = x.Address,
-                PaymentMethod = x.PaymentMethod,
-                OrderStatus = x.Status!.Name,
-                CreatedDate = x.CreatedAt,
-                PaymentDate = x.PaymentDate,
-            });
+                var orderModel = new OrderModel
+                {
+                    Id = order.Id,
+                    CustomerId = order.Customer!.UserId,
+                    TotalAmount = order.TotalAmount,
+                    PhoneNumber = order.PhoneNumber,
+                    Address = order.Address,
+                    PaymentMethod = order.PaymentMethod,
+                    OrderStatus = order.Status!.Name,
+                    CreatedDate = order.CreatedAt,
+                    PaymentDate = order.PaymentDate,
+                    PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null
+                };
+                orderModels.Add(orderModel);
+            }
 
             #region(paging)
 
-            var orders = await PagedList<OrderModel>.CreateAsync(
-                orderModelQuery,
+            var orders = PagedList<OrderModel>.Create(
+                orderModels.AsQueryable(),
                 model.Page,
                 model.PageSize
             );
@@ -152,6 +160,12 @@ namespace NET1814_MilkShop.Services.Services
                 ResponseConstants.Get("đơn hàng", orders.TotalCount > 0),
                 orders
             );
+        }
+
+        private async Task<object?> GetInformation(Order order)
+        {
+            var paymentData = await _paymentService.GetPaymentLinkInformation(order.Id);
+            return paymentData.StatusCode == 200 ? paymentData.Data : null;
         }
 
         /// <summary>
