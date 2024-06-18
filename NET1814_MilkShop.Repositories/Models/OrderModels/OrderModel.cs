@@ -9,8 +9,8 @@
         public string? Address { get; set; }
         public string? PaymentMethod { get; set; }
         public string? OrderStatus { get; set; }
-
         public DateTime? CreatedDate { get; set; }
         public DateTime? PaymentDate { get; set; }
+        public object? PaymentData { get; set; }
     }
 }

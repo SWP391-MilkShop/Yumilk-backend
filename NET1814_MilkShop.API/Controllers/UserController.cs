@@ -292,7 +292,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         #region OrderHistory
         /// <summary>
-        /// get all order history of customer
+        /// customer get all order history
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>

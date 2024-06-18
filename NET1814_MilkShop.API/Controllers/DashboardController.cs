@@ -106,7 +106,7 @@ namespace NET1814_MilkShop.API.Controllers
             var res = await _userService.GetCustomersStatsAsync(queryModel);
             return ResponseExtension.Result(res);
         }
-        
+
         /// <summary>
         /// Admin and Staff have full permission to cancel order (PREORDER, PROCESSING, SHIPPING).
         /// If an order is already in shipping, preorder status (order has been created in GHN),
@@ -122,6 +122,16 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Cancel order");
             var response = await _orderService.CancelOrderAdminStaffAsync(id);
             return ResponseExtension.Result(response);
+        }
+
+        [HttpGet]
+        [Route("orders/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> GetOrderHistoryDetail(Guid id)
+        {
+            _logger.Information("Get order detail history");
+            var res = await _orderService.GetOrderHistoryDetailDashBoardAsync(id);
+            return ResponseExtension.Result(res);
         }
     }
 }
