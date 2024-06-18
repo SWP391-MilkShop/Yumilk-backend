@@ -13,10 +13,10 @@ namespace NET1814_MilkShop.Repositories.Models.ProductModels
         /// </summary>
         public string? Status { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "Min price must be greater than 0")]
+        [Range(0, double.MaxValue, ErrorMessage = "Min price must be greater than or equal to 0")]
         public int MinPrice { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "Max price must be greater than 0")]
+        [Range(0, double.MaxValue, ErrorMessage = "Max price must be greater than or equal to 0")]
         public int MaxPrice { get; set; }
         public bool? IsActive { get; set; }
 

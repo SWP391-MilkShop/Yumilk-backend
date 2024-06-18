@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models.ShipModels;
-using NET1814_MilkShop.Repositories.Models.ShippingModels;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
 
@@ -11,8 +10,8 @@ namespace NET1814_MilkShop.API.Controllers;
 [Route("api/shipping")]
 public class ShippingController : ControllerBase
 {
-    private readonly IShippingService _shippingService;
     private readonly ILogger _logger;
+    private readonly IShippingService _shippingService;
 
     public ShippingController(IServiceProvider serviceProvider, ILogger logger)
     {
@@ -46,12 +45,12 @@ public class ShippingController : ControllerBase
 
 
     /// <summary>
-    /// Get shipping fee of order
+    ///     Get shipping fee of order
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
     [HttpGet("fee")]
-    public async Task<IActionResult> GetShippingFee([FromQuery]ShippingFeeRequestModel model)
+    public async Task<IActionResult> GetShippingFee([FromQuery] ShippingFeeRequestModel model)
     {
         _logger.Information("Get shipping fee");
         var response = await _shippingService.GetShippingFeeAsync(model);
@@ -59,7 +58,7 @@ public class ShippingController : ControllerBase
     }
 
     /// <summary>
-    /// Create order shipping in ghn
+    ///     Create order shipping in ghn
     /// </summary>
     /// <param name="orderId"></param>
     /// <returns></returns>
@@ -72,7 +71,7 @@ public class ShippingController : ControllerBase
     }
 
     /// <summary>
-    /// Preview order shipping in ghn
+    ///     Preview order shipping in ghn
     /// </summary>
     /// <param name="orderId"></param>
     /// <returns></returns>
@@ -85,9 +84,9 @@ public class ShippingController : ControllerBase
     }
 
     /// <summary>
-    /// Get order detail by our Guid orderId (not ghn shippingCode)
+    ///     Get order detail by our Guid orderId (not ghn shippingCode)
     /// </summary>
-    /// <param name="orderCode"></param>
+    /// <param name="orderId"></param>
     /// <returns></returns>
     [HttpGet("order/detail/{orderId}")]
     public async Task<IActionResult> GetOrderDetail(Guid orderId)
@@ -96,9 +95,9 @@ public class ShippingController : ControllerBase
         var response = await _shippingService.GetOrderDetailAsync(orderId);
         return ResponseExtension.Result(response);
     }
-    
+
     /// <summary>
-    /// Cancel shipping order by our Guid orderId (not ghn shippingCode)
+    ///     Cancel shipping order by our Guid orderId (not ghn shippingCode)
     /// </summary>
     /// <param name="orderId"></param>
     /// <returns></returns>
