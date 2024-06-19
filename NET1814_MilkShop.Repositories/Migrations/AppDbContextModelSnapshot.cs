@@ -161,9 +161,14 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("nvarchar(255)")
                         .UseCollation("Latin1_General_CI_AI");
 
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Name");
+
+                    b.HasIndex("ParentId");
 
                     b.ToTable("categories", (string)null);
                 });
@@ -1052,6 +1057,15 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Category", b =>
+                {
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Category", "Parent")
+                        .WithMany("SubCategories")
+                        .HasForeignKey("ParentId");
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Customer", b =>
                 {
                     b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.User", "User")
@@ -1260,6 +1274,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Category", b =>
                 {
                     b.Navigation("Products");
+
+                    b.Navigation("SubCategories");
                 });
 
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Customer", b =>

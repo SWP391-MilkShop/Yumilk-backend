@@ -8,7 +8,10 @@ namespace NET1814_MilkShop.Repositories.Data
     {
         private readonly IConfiguration _configuration;
 
-        public AppDbContext() { }
+        public AppDbContext(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
         public AppDbContext(DbContextOptions options, IConfiguration configuration)
             : base(options)
@@ -58,7 +61,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<DateTime>("CreatedAt")
                     .HasColumnType("datetime2")
@@ -101,7 +104,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<DateTime>("CreatedAt")
                     .HasColumnType("datetime2")
@@ -165,7 +168,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<DateTime>("CreatedAt")
                     .HasColumnType("datetime2")
@@ -259,7 +262,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<string>("Address")
                     .HasColumnType("nvarchar(2000)")
@@ -479,7 +482,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<DateTime>("CreatedAt")
                     .HasColumnType("datetime2")
@@ -621,7 +624,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<DateTime>("CreatedAt")
                     .HasColumnType("datetime2")
@@ -690,7 +693,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<DateTime>("CreatedAt")
                     .HasColumnType("datetime2")
@@ -726,7 +729,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<DateTime>("CreatedAt")
                     .HasColumnType("datetime2")
@@ -781,7 +784,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<DateTime>("CreatedAt")
                     .HasColumnType("datetime2")
@@ -813,7 +816,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<DateTime>("CreatedAt")
                     .HasColumnType("datetime2")
@@ -845,7 +848,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<DateTime>("CreatedAt")
                     .HasColumnType("datetime2")
@@ -983,7 +986,7 @@ namespace NET1814_MilkShop.Repositories.Data
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                b.Property<int>("Id").UseIdentityColumn();
 
                 b.Property<string>("Code")
                     .IsRequired()
