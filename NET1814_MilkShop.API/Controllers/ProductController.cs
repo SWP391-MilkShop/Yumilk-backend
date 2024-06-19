@@ -63,7 +63,13 @@ public class ProductController : Controller
     #endregion
 
     #region Product
-
+    [HttpGet("search-results")]
+    public async Task<IActionResult> GetSearchResults([FromQuery] ProductSearchModel queryModel)
+    {
+        _logger.Information("Get search results");
+        var response = await _productService.GetSearchResultsAsync(queryModel);
+        return ResponseExtension.Result(response);
+    }
     /// <summary>
     ///     Filter products by category, brand, unit, status, min price, max price
     ///     <para> Default status is selling</para>
@@ -77,6 +83,7 @@ public class ProductController : Controller
         var response = await _productService.GetProductsAsync(queryModel);
         return ResponseExtension.Result(response);
     }
+    
     /// <summary>
     /// Return additional information if the product is preordered
     /// </summary>

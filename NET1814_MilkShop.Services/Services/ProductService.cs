@@ -31,6 +31,7 @@ public interface IProductService
 
     Task<ResponseModel> GetProductStatsAsync(ProductStatsQueryModel queryModel);
     Task<ResponseModel> UpdatePreorderProductAsync(Guid productId, UpdatePreorderProductModel model);
+    Task<ResponseModel> GetSearchResultsAsync(ProductSearchModel queryModel);
 }
 
 public class ProductService : IProductService
@@ -115,9 +116,9 @@ public class ProductService : IProductService
         #region Sort
 
         if ("desc".Equals(queryModel.SortOrder?.ToLower()))
-            query = query.OrderByDescending(GetSortProperty(queryModel));
+            query = query.OrderByDescending(GetSortProperty(queryModel.SortColumn));
         else
-            query = query.OrderBy(GetSortProperty(queryModel));
+            query = query.OrderBy(GetSortProperty(queryModel.SortColumn));
 
         #endregion
 
@@ -346,6 +347,67 @@ public class ProductService : IProductService
         return ResponseModel.Error(ResponseConstants.Update("sản phẩm đặt trước", false));
     }
 
+    public async Task<ResponseModel> GetSearchResultsAsync(ProductSearchModel queryModel)
+    {
+        var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
+        var query = _productRepository.GetProductsQuery(true, false)
+            .Include(p => p.PreorderProduct).AsQueryable();
+        #region Search
+        //thu gọn thành 1 where thôi
+        query = query.Where(p =>
+            (p.IsActive)
+            //search theo name, description, brand, unit, category
+            && (
+                string.IsNullOrEmpty(searchTerm)
+                || p.Name.Contains(searchTerm)
+                || p.Description!.Contains(searchTerm)
+                || p.Brand!.Name.Contains(searchTerm)
+                || p.Unit!.Name.Contains(searchTerm)
+                || p.Category!.Name.Contains(searchTerm)
+            )
+            // exclude out of stock products
+            && p.StatusId != (int) ProductStatusId.OUT_OF_STOCK
+            //filter by active brand, category, unit
+            && (p.Brand!.IsActive && p.Category!.IsActive && p.Unit!.IsActive)
+        );
+        #endregion
+        
+        #region Sort
+
+        if ("desc".Equals(queryModel.SortOrder?.ToLower()))
+            query = query.OrderByDescending(GetSortProperty(queryModel.SortColumn));
+        else
+            query = query.OrderBy(GetSortProperty(queryModel.SortColumn));
+
+        #endregion
+
+        var searchResultModel = query.Select(p => new ProductSearchResultModel()
+        {
+            Name = p.Name,
+            Brand = p.Brand!.Name,
+            OriginalPrice = p.OriginalPrice,
+            SalePrice = p.SalePrice,
+            IsPreOrder = p.PreorderProduct != null,
+            AverageRating = p.ProductReviews.IsNullOrEmpty()
+                ? 0
+                : p.ProductReviews.Average(pr => (double)pr.Rating),
+            RatingCount = p.ProductReviews.Count,
+            Thumbnail = p.Thumbnail
+        });
+
+        #region Pagination
+        var searchResults = await PagedList<ProductSearchResultModel>.CreateAsync(
+            searchResultModel,
+            queryModel.Page,
+            queryModel.PageSize
+        );
+        #endregion
+        return ResponseModel.Success(
+            ResponseConstants.Get("kết quả tìm kiếm", searchResults.TotalCount > 0),
+            searchResults
+        );
+    }
+
     private static ProductModel ToProductModel(Product product)
     {
         return new ProductModel()
@@ -411,15 +473,15 @@ public class ProductService : IProductService
     }
 
     /// <summary>
-    ///     Get sort property as expression
+    /// Get sort property by column
     /// </summary>
-    /// <param name="queryModel"></param>
+    /// <param name="sortColumn"></param>
     /// <returns></returns>
     private static Expression<Func<Product, object>> GetSortProperty(
-        ProductQueryModel queryModel
+        string? sortColumn
     )
     {
-        return queryModel.SortColumn?.ToLower().Replace(" ", "") switch
+        return sortColumn?.ToLower().Replace(" ", "") switch
         {
             "name" => p => p.Name,
             "saleprice" => p => p.SalePrice == 0 ? p.OriginalPrice : p.SalePrice,
