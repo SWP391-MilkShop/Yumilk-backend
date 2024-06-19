@@ -27,6 +27,8 @@ public class CheckoutService : ICheckoutService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPaymentService _paymentService;
     private readonly IPreorderProductRepository _preorderProductRepository;
+    private readonly IEmailService _emailService;
+
 
     public CheckoutService(
         IUnitOfWork unitOfWork,
@@ -35,7 +37,7 @@ public class CheckoutService : ICheckoutService
         ICartRepository cartRepository,
         ICustomerRepository customerRepository,
         IPaymentService paymentService,
-        IPreorderProductRepository preorderProductRepository
+        IPreorderProductRepository preorderProductRepository, IEmailService emailService
     )
     {
         _customerRepository = customerRepository;
@@ -45,6 +47,7 @@ public class CheckoutService : ICheckoutService
         _unitOfWork = unitOfWork;
         _paymentService = paymentService;
         _preorderProductRepository = preorderProductRepository;
+        _emailService = emailService;
     }
 
     /// <summary>
@@ -105,6 +108,7 @@ public class CheckoutService : ICheckoutService
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Địa chỉ"));
         }
 
+        var customerEmail = await _customerRepository.GetCustomerEmail(userId);
         // thêm vào order
         var orders = new Order
         {
@@ -130,7 +134,8 @@ public class CheckoutService : ICheckoutService
             PaymentMethod = model.PaymentMethod,
             StatusId = (int)OrderStatusId.PENDING,
             OrderCode = await GenerateOrderCode(),
-            TotalGram = GetTotalGram(cart.CartDetails.ToList())
+            TotalGram = GetTotalGram(cart.CartDetails.ToList()),
+            Email = customerEmail,
         };
         _orderRepository.Add(orders);
 
@@ -170,6 +175,7 @@ public class CheckoutService : ICheckoutService
                 OrderId = orders.Id,
                 CustomerId = orders.CustomerId,
                 FullName = orders.ReceiverName,
+                Email = customerEmail,
                 TotalAmount = orders.TotalAmount,
                 TotalGram = orders.TotalGram,
                 ShippingFee = orders.ShippingFee,
@@ -194,6 +200,7 @@ public class CheckoutService : ICheckoutService
                 resp.CheckoutUrl = paymentData!.CheckoutUrl;
             }
 
+            await _emailService.SendPurchaseEmailAsync(customerEmail, orders.ReceiverName);
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
@@ -214,7 +221,7 @@ public class CheckoutService : ICheckoutService
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm") +
                                             " hoặc sản phẩm đang không trong quá trình Pre-order");
         }
-        
+
         if (DateTime.Now < product.StartDate ||
             DateTime.Now > product.EndDate)
         {
@@ -240,6 +247,7 @@ public class CheckoutService : ICheckoutService
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Địa chỉ"));
         }
 
+        var customerEmail = await _customerRepository.GetCustomerEmail(userId);
         var preOrder = new Order
         {
             Id = Guid.NewGuid(),
@@ -269,6 +277,7 @@ public class CheckoutService : ICheckoutService
             StatusId = (int)OrderStatusId.PENDING,
             OrderCode = await GenerateOrderCode(),
             TotalGram = product.Product.Unit!.Gram * model.Quantity,
+            Email = customerEmail,
         };
         _orderRepository.Add(preOrder);
         var preOrderDetail = new OrderDetail
@@ -296,6 +305,7 @@ public class CheckoutService : ICheckoutService
                 OrderId = preOrder.Id,
                 CustomerId = preOrder.CustomerId,
                 FullName = preOrder.ReceiverName,
+                Email = customerEmail,
                 TotalAmount = preOrder.TotalAmount,
                 TotalGram = preOrder.TotalGram,
                 ShippingFee = preOrder.ShippingFee,
@@ -324,6 +334,7 @@ public class CheckoutService : ICheckoutService
             var paymentData = JsonConvert.DeserializeObject<PaymentDataModel>(json);
             resp.OrderCode = paymentData!.OrderCode;
             resp.CheckoutUrl = paymentData!.CheckoutUrl;
+            await _emailService.SendPurchaseEmailAsync(customerEmail, preOrder.ReceiverName);
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 

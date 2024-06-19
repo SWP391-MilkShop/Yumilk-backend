@@ -34,7 +34,7 @@ public class PaymentController : ControllerBase
     }
 
     /// <summary>
-    /// Get payment link information by OrderCode in database
+    /// Get payment link information by OrderId in database
     /// </summary>
     /// <param name="orderId"></param>
     /// <returns></returns>
@@ -47,7 +47,7 @@ public class PaymentController : ControllerBase
     }
 
     /// <summary>
-    /// Cancel payment link by OrderCode in database
+    /// Cancel payment link by OrderId in database
     /// </summary>
     /// <param name="orderId"></param>
     /// <returns></returns>
