@@ -2,6 +2,10 @@
 {
     public class CategoryQueryModel : QueryModel
     {
+        /// <summary>
+        /// Set parent id to get sub categories
+        /// </summary>
+        public int ParentId { get; set; } = 0;
         public bool IsActive { get; set; } = true;
 
         /// <summary>

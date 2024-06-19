@@ -103,6 +103,7 @@ namespace NET1814_MilkShop.Services.Services
             var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
             query = query.Where(p =>
                 p.IsActive == queryModel.IsActive
+                && (queryModel.ParentId == 0 || p.ParentId == queryModel.ParentId)
                 && (string.IsNullOrEmpty(searchTerm) || p.Name.ToLower().Contains(searchTerm))
             );
             if ("desc".Equals(queryModel.SortOrder?.ToLower()))
