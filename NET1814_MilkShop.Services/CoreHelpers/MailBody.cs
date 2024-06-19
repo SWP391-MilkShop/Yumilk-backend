@@ -2,8 +2,9 @@ namespace NET1814_MilkShop.Services.CoreHelpers;
 
 public static class MailBody
 {
-  public static readonly string verifyLink = "https://yumilk.vercel.app/verify?token=";
-  public static readonly string resetLink = "https://yumilk.vercel.app/reset-password?token=";
+    public static readonly string verifyLink = "https://yumilk.vercel.app/verify?token=";
+    public static readonly string resetLink = "https://yumilk.vercel.app/reset-password?token=";
+
     public static string ResetPassword(string customerName, string token)
     {
         string body =
@@ -527,7 +528,7 @@ public static class MailBody
         body = body.Replace("{{name}}", customerName);
         body = body.Replace(
             "{{action_url}}",
-            resetLink+$"{token}"
+            resetLink + $"{token}"
         );
         body = body.Replace("{{support_url}}", "https://milkshop.azurewebsites.net/api");
         body = body.Replace("[Product Name]", "Yumilk shop");
@@ -1065,6 +1066,25 @@ public static class MailBody
         body = body.Replace("[Product Name]", "Yumilk shop");
         body = body.Replace("[Team]", "Yumilk Team");
         body = body.Replace("[Company Name, LLC]", "Yumilk");
+        return body;
+    }
+
+    public static string PurchaseSuccess(string customerName)
+    {
+        string body = @"
+<html>
+  <body>
+    <h1>Cảm ơn bạn đã mua hàng tại cửa hàng của chúng tôi!</h1>
+    <p>Thân gửi {{customerName}},</p>
+    <p>Chúng tôi viết thư này để bày tỏ lòng biết ơn sâu sắc vì bạn đã mua hàng tại cửa hàng của chúng tôi gần đây. Chúng tôi thực sự đánh giá cao sự kinh doanh của bạn và biết ơn vì sự tin tưởng bạn đã đặt cho chúng tôi.</p>
+    <p>Chúng tôi hy vọng bạn hài lòng với việc mua hàng. Nếu bạn có bất kỳ câu hỏi nào hoặc nếu có bất kỳ cách nào chúng tôi có thể hỗ trợ bạn thêm, xin vui lòng liên hệ với chúng tôi.</p>
+    <p>Một lần nữa, cảm ơn bạn đã mua hàng. Chúng tôi mong được phục vụ bạn lại trong tương lai.</p>
+    <p>Trân trọng,</p>
+    <p>Yumilk Shop</p>
+  </body>
+</html>
+";
+        body = body.Replace("{{customerName}}", customerName);
         return body;
     }
 }

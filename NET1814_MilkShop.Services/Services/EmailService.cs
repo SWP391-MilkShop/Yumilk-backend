@@ -10,6 +10,7 @@ namespace NET1814_MilkShop.Services.Services
     {
         Task SendPasswordResetEmailAsync(string receiveEmail, string token, string name);
         Task SendVerificationEmailAsync(string receiveEmail, string token, string name);
+        Task SendPurchaseEmailAsync(string receiveEmail, string name);
     }
 
     public class EmailService : IEmailService
@@ -82,7 +83,21 @@ namespace NET1814_MilkShop.Services.Services
                 Subject = "Kích hoạt tài khoản",
                 Body = MailBody.ActivateAccount(name, token)
             };
-           await SendMailAsync(model);
+            await SendMailAsync(model);
+        }
+
+        public async Task SendPurchaseEmailAsync(
+            string receiveEmail,
+            string name
+        )
+        {
+            var model = new SendMailModel
+            {
+                Receiver = receiveEmail,
+                Subject = "Xác nhận đơn hàng",
+                Body = MailBody.PurchaseSuccess(name)
+            };
+            await SendMailAsync(model);
         }
     }
 }

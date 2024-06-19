@@ -6,8 +6,10 @@ public class CheckoutResponseModel
     public int? OrderCode { get; set; } = null;
     public Guid? CustomerId { get; set; }
     public string? FullName { get; set; }
+
+    public string? Email { get; set; }
     public int TotalAmount { get; set; }
-    
+
     public int TotalGram { get; set; }
     public int ShippingFee { get; set; }
     public string? Address { get; set; }
