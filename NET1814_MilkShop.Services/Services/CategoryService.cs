@@ -7,6 +7,7 @@ using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -32,15 +33,25 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> CreateCategoryAsync(CreateCategoryModel model)
         {
-            var isExist = await _categoryRepository.IsExistAsync(model.Name);
+            if (model.ParentId != null && model.ParentId != 0)
+            {
+                var parentCategory = await _categoryRepository.GetByIdAsync(model.ParentId.Value);
+                if (parentCategory == null)
+                {
+                    return ResponseModel.BadRequest(ResponseConstants.NotFound("Danh mục cha"));
+                }
+            }
+            var isExist = await _categoryRepository.IsExistAsync(model.Name, model.ParentId);
             if (isExist)
             {
-                return ResponseModel.BadRequest(ResponseConstants.Exist("Danh mục"));
+                return ResponseModel.BadRequest("Danh mục đã tồn tại dưới danh mục cha này");
             }
+
             var category = new Category
             {
                 Name = model.Name,
                 Description = model.Description,
+                ParentId = model.ParentId == 0 ? null : model.ParentId,
                 IsActive = true
             };
             _categoryRepository.Add(category);
@@ -49,16 +60,31 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.Create("danh mục", true), null);
             }
+
             return ResponseModel.Error(ResponseConstants.Create("danh mục", false));
         }
 
         public async Task<ResponseModel> DeleteCategoryAsync(int id)
         {
-            var category = await _categoryRepository.GetByIdAsync(id);
+            var query = _categoryRepository.GetCategoriesQuery()
+                .Include(x => x.Products)
+                .Include(x => x.SubCategories).AsQueryable();
+            var category = await query.FirstOrDefaultAsync(x => x.Id == id);
             if (category == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
             }
+
+            if (category.Products.Any())
+            {
+                return ResponseModel.BadRequest("Không thể xóa danh mục này vì có sản phẩm thuộc danh mục này");
+            }
+
+            if (category.SubCategories.Any())
+            {
+                return ResponseModel.BadRequest("Không thể xóa danh mục này vì có danh mục con thuộc danh mục này");
+            }
+
             category.DeletedAt = DateTime.Now;
             _categoryRepository.Update(category);
             var result = await _unitOfWork.SaveChangesAsync();
@@ -66,15 +92,18 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.Delete("danh mục", true), null);
             }
+
             return ResponseModel.Error(ResponseConstants.Delete("danh mục", false));
         }
 
         public async Task<ResponseModel> GetCategoriesAsync(CategoryQueryModel queryModel)
         {
-            var query = _categoryRepository.GetCategoriesQuery();
+            var query = _categoryRepository.GetCategoriesQuery()
+                .Include(x => x.Parent).AsQueryable();
             var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
             query = query.Where(p =>
                 p.IsActive == queryModel.IsActive
+                && (queryModel.ParentId == 0 || p.ParentId == queryModel.ParentId)
                 && (string.IsNullOrEmpty(searchTerm) || p.Name.ToLower().Contains(searchTerm))
             );
             if ("desc".Equals(queryModel.SortOrder?.ToLower()))
@@ -85,11 +114,14 @@ namespace NET1814_MilkShop.Services.Services
             {
                 query = query.OrderBy(GetSortProperty(queryModel));
             }
+
             var categoryModelQuery = query.Select(c => new CategoryModel
             {
                 Id = c.Id,
                 Name = c.Name,
                 Description = c.Description,
+                ParentId = c.ParentId,
+                ParentName = c.Parent != null ? c.Parent.Name : null,
                 IsActive = c.IsActive
             });
             var categories = await PagedList<CategoryModel>.CreateAsync(
@@ -114,16 +146,21 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> GetCategoryByIdAsync(int id)
         {
-            var category = await _categoryRepository.GetByIdAsync(id);
-            if (category == null || !category.IsActive)
+            var query = _categoryRepository.GetCategoriesQuery()
+                .Include(x => x.Parent).AsQueryable();
+            var category = await query.FirstOrDefaultAsync(x => x.Id == id);
+            if (category is not { IsActive: true })
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
             }
+
             var categoryModel = new CategoryModel
             {
                 Id = category.Id,
                 Name = category.Name,
                 Description = category.Description,
+                ParentId = category.ParentId,
+                ParentName = category.Parent?.Name,
                 IsActive = category.IsActive
             };
             return ResponseModel.Success(ResponseConstants.Get("danh mục", true), categoryModel);
@@ -136,23 +173,19 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
             }
+
             if (!string.IsNullOrEmpty(model.Name))
             {
                 // Check if category name is changed
-                if (
-                    !string.Equals(
-                        model.Name,
-                        existingCategory.Name,
-                        StringComparison.OrdinalIgnoreCase
-                    )
-                )
+                if (!string.Equals(model.Name, existingCategory.Name, StringComparison.OrdinalIgnoreCase))
                 {
-                    var isExist = await _categoryRepository.IsExistAsync(model.Name);
+                    var isExist = await _categoryRepository.IsExistAsync(model.Name, existingCategory.ParentId);
                     if (isExist)
                     {
-                        return ResponseModel.BadRequest(ResponseConstants.Exist("Danh mục"));
+                        return ResponseModel.BadRequest("Danh mục đã tồn tại dưới danh mục cha này");
                     }
                 }
+
                 existingCategory.Name = model.Name;
             }
             existingCategory.Description = string.IsNullOrEmpty(model.Description)
@@ -165,6 +198,7 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.Update("danh mục", true), null);
             }
+
             return ResponseModel.Error(ResponseConstants.Update("danh mục", false));
         }
     }
