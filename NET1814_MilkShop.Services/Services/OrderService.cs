@@ -137,7 +137,6 @@ namespace NET1814_MilkShop.Services.Services
                     OrderStatus = order.Status!.Name,
                     CreatedDate = order.CreatedAt,
                     PaymentDate = order.PaymentDate,
-                    PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null
                 };
                 orderModels.Add(orderModel);
             }
@@ -314,7 +313,8 @@ namespace NET1814_MilkShop.Services.Services
                 TotalAmount = order.TotalAmount,
                 PaymentMethod = order.PaymentMethod,
                 OrderStatus = order.Status!.Name,
-                CreatedAt = order.CreatedAt
+                CreatedAt = order.CreatedAt,
+                PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null
             };
             return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
         }
@@ -526,12 +526,12 @@ namespace NET1814_MilkShop.Services.Services
 
             var pModel = order.OrderDetails.Select(x => new CheckoutOrderDetailModel
             {
-               ProductId = x.ProductId,
+                ProductId = x.ProductId,
                 ProductName = x.ProductName,
                 Quantity = x.Quantity,
                 UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
                 ItemPrice = x.ItemPrice,
-                 ThumbNail = x.Thumbnail
+                ThumbNail = x.Thumbnail
             }).ToList();
 
             var detail = new OrderDetailModel
@@ -547,7 +547,8 @@ namespace NET1814_MilkShop.Services.Services
                 TotalAmount = order.TotalAmount,
                 PaymentMethod = order.PaymentMethod,
                 OrderStatus = order.Status!.Name,
-                CreatedAt = order.CreatedAt
+                CreatedAt = order.CreatedAt,
+                PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null
             };
             return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
         }

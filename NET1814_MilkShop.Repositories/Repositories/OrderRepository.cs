@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Migrations;
@@ -38,6 +39,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         Task<Order?> GetByOrderIdAsync(Guid orderId, bool include);
         Task<bool> IsExistOrderCode(int id);
         void Add(OrderDetail orderDetail);
+        Task<bool> IsExistPreorderProductAsync(Guid orderId);
     }
 
     public class OrderRepository : Repository<Order>, IOrderRepository
@@ -113,6 +115,13 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public void Add(OrderDetail orderDetail)
         {
             _context.OrderDetails.Add(orderDetail);
+        }
+
+        public async Task<bool> IsExistPreorderProductAsync(Guid orderId)
+        {
+            var order = await _query.Include(x => x.OrderDetails).ThenInclude(k => k.Product)
+                .FirstOrDefaultAsync(x => x.Id == orderId);
+            return order!.OrderDetails.Any(o => o.Product.StatusId == (int)ProductStatusId.PREORDER);
         }
 
         public Task<Order?> GetByIdAsync(Guid id, bool includeDetails)
