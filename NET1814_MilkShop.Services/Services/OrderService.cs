@@ -110,14 +110,9 @@ namespace NET1814_MilkShop.Services.Services
 
             #region(sorting)
 
-            if ("desc".Equals(model.SortOrder?.ToLower()))
-            {
-                query = query.OrderByDescending(GetSortProperty(model));
-            }
-            else
-            {
-                query = query.OrderBy(GetSortProperty(model));
-            }
+            query = "desc".Equals(model.SortOrder?.ToLower())
+                ? query.OrderByDescending(GetSortProperty(model))
+                : query.OrderBy(GetSortProperty(model));
 
             #endregion
 
@@ -319,6 +314,12 @@ namespace NET1814_MilkShop.Services.Services
             return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
         }
 
+        /// <summary>
+        /// customer cancel order
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> CancelOrderAsync(Guid userId, Guid orderId)
         {
             var message = "";
@@ -382,10 +383,10 @@ namespace NET1814_MilkShop.Services.Services
             queryModel.SortColumn?.ToLower().Replace(" ", "") switch
             {
                 "totalamount" => order => order.TotalAmount,
-                "createdat" => order => order.CreatedAt,
                 "paymentdate" => order =>
                     order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
-                _ => order => order.Id, //chưa biết mặc định sort theo cái gì nên để tạm là id
+                "orderid" => order => order.Id,
+                _ => order => order.CreatedAt, //mặc định là sort theo createdat
             };
 
         public async Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model)
