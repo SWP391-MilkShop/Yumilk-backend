@@ -63,7 +63,13 @@ public class ProductController : Controller
     #endregion
 
     #region Product
-
+    [HttpGet("search")]
+    public async Task<IActionResult> GetSearchResults([FromQuery] ProductSearchModel queryModel)
+    {
+        _logger.Information("Get search results");
+        var response = await _productService.GetSearchResultsAsync(queryModel);
+        return ResponseExtension.Result(response);
+    }
     /// <summary>
     ///     Filter products by category, brand, unit, status, min price, max price
     ///     <para> Default status is selling</para>
@@ -77,7 +83,12 @@ public class ProductController : Controller
         var response = await _productService.GetProductsAsync(queryModel);
         return ResponseExtension.Result(response);
     }
-
+    
+    /// <summary>
+    /// Return additional information if the product is preordered
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProductById(Guid id)
     {
@@ -99,29 +110,21 @@ public class ProductController : Controller
     {
         _logger.Information("Create product");
         var response = await _productService.CreateProductAsync(model);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
-
         return ResponseExtension.Result(response);
     }
-
+    /// <summary>
+    /// Leave the Ids as 0 for no update
+    /// <para>Leave the price as null for no update</para>
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
     [HttpPatch("{id}")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] UpdateProductModel model)
     {
         _logger.Information("Update product");
         var response = await _productService.UpdateProductAsync(id, model);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
-
         return ResponseExtension.Result(response);
     }
 
@@ -131,13 +134,6 @@ public class ProductController : Controller
     {
         _logger.Information("Delete product");
         var response = await _productService.DeleteProductAsync(id);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
-
         return ResponseExtension.Result(response);
     }
 
@@ -157,13 +153,6 @@ public class ProductController : Controller
     public async Task<IActionResult> GetBrands([FromQuery] BrandQueryModel queryModel)
     {
         var response = await _brandService.GetBrandsAsync(queryModel);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
-
         return ResponseExtension.Result(response);
     }
 
@@ -173,12 +162,6 @@ public class ProductController : Controller
     {
         _logger.Information("Add Brand");
         var response = await _brandService.CreateBrandAsync(model);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
 
         return ResponseExtension.Result(response);
     }
@@ -189,13 +172,6 @@ public class ProductController : Controller
     {
         _logger.Information("Update Brand");
         var response = await _brandService.UpdateBrandAsync(id, model);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
-
         return ResponseExtension.Result(response);
     }
 
@@ -205,13 +181,6 @@ public class ProductController : Controller
     {
         _logger.Information("Delete Brand");
         var response = await _brandService.DeleteBrandAsync(id);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
-
         return ResponseExtension.Result(response);
     }
 
@@ -229,12 +198,6 @@ public class ProductController : Controller
     {
         _logger.Information("Get all units");
         var response = await _unitService.GetUnitsAsync(request);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -243,12 +206,6 @@ public class ProductController : Controller
     {
         _logger.Information("Get unit by id");
         var response = await _unitService.GetUnitByIdAsync(id);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -258,12 +215,6 @@ public class ProductController : Controller
     {
         _logger.Information("Create unit");
         var response = await _unitService.CreateUnitAsync(model);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -273,12 +224,6 @@ public class ProductController : Controller
     {
         _logger.Information("Update unit");
         var response = await _unitService.UpdateUnitAsync(id, model);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -288,12 +233,6 @@ public class ProductController : Controller
     {
         _logger.Information("Delete unit");
         var response = await _unitService.DeleteUnitAsync(id);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -306,12 +245,6 @@ public class ProductController : Controller
     {
         _logger.Information("Get all categories");
         var response = await _categoryService.GetCategoriesAsync(queryModel);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -321,12 +254,6 @@ public class ProductController : Controller
     {
         _logger.Information("Get category by id");
         var response = await _categoryService.GetCategoryByIdAsync(id);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -336,12 +263,6 @@ public class ProductController : Controller
     {
         _logger.Information("Create category");
         var response = await _categoryService.CreateCategoryAsync(model);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -360,12 +281,6 @@ public class ProductController : Controller
     {
         _logger.Information("Update category");
         var response = await _categoryService.UpdateCategoryAsync(id, model);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -375,12 +290,6 @@ public class ProductController : Controller
     {
         _logger.Information("Delete category");
         var response = await _categoryService.DeleteCategoryAsync(id);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -394,13 +303,7 @@ public class ProductController : Controller
     )
     {
         _logger.Information("Get Product Attributes");
-        var res = await _productAttributeService.GetProductAttributesAsync(queryModel); /*
-        if (res.Status == "Error")
-        {
-            return BadRequest(res);
-        }
-
-        return Ok(res);*/
+        var res = await _productAttributeService.GetProductAttributesAsync(queryModel); 
         return ResponseExtension.Result(res);
     }
 
@@ -411,12 +314,6 @@ public class ProductController : Controller
     {
         _logger.Information("Add Product Attribute");
         var res = await _productAttributeService.AddProductAttributeAsync(model);
-        /*if (res.Status == "Error")
-        {
-            return BadRequest(res);
-        }
-
-        return Ok(res);*/
         return ResponseExtension.Result(res);
     }
 
@@ -428,12 +325,6 @@ public class ProductController : Controller
     {
         _logger.Information("Update Product Attribute");
         var res = await _productAttributeService.UpdateProductAttributeAsync(id, model);
-        /*if (res.Status == "Error")
-        {
-            return BadRequest(res);
-        }
-
-        return Ok(res);*/
         return ResponseExtension.Result(res);
     }
 
@@ -442,12 +333,6 @@ public class ProductController : Controller
     {
         _logger.Information("Delete Product Attribute");
         var res = await _productAttributeService.DeleteProductAttributeAsync(id);
-        /*if (res.Status == "Error")
-        {
-            return BadRequest(res);
-        }
-
-        return Ok(res);*/
         return ResponseExtension.Result(res);
     }
 
@@ -463,12 +348,6 @@ public class ProductController : Controller
     {
         _logger.Information("Get Product Attribute Value");
         var res = await _productAttributeValueService.GetProductAttributeValue(id, model);
-        /*if (res.Status == "Error")
-        {
-            return BadRequest(res);
-        }
-
-        return Ok(res);*/
         return ResponseExtension.Result(res);
     }
 
@@ -485,12 +364,7 @@ public class ProductController : Controller
             attributeId,
             model
         );
-        /*if (res.Status == "Error")
-        {
-            return BadRequest(res);
-        }
-
-        return Ok(res);*/
+        
         return ResponseExtension.Result(res);
     }
 
@@ -507,12 +381,7 @@ public class ProductController : Controller
             attributeId,
             model
         );
-        /*if (res.Status == "Error")
-        {
-            return BadRequest(res);
-        }
-
-        return Ok(res);*/
+        
         return ResponseExtension.Result(res);
     }
 
@@ -524,12 +393,7 @@ public class ProductController : Controller
             id,
             attributeId
         );
-        /*if (res.Status == "Error")
-        {
-            return BadRequest(res);
-        }
-
-        return Ok(res);*/
+        
         return ResponseExtension.Result(res);
     }
 

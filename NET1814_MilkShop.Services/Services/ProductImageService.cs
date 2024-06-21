@@ -16,7 +16,7 @@ namespace NET1814_MilkShop.Services.Services
         /// Use imgur api to upload image and save image url to database
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="imageUrl"></param>
+        /// <param name="images"></param>
         /// <returns></returns>
         Task<ResponseModel> CreateProductImageAsync(Guid id, List<IFormFile> images);
 

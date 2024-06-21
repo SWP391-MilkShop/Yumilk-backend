@@ -31,6 +31,7 @@ public interface IProductService
 
     Task<ResponseModel> GetProductStatsAsync(ProductStatsQueryModel queryModel);
     Task<ResponseModel> UpdatePreorderProductAsync(Guid productId, UpdatePreorderProductModel model);
+    Task<ResponseModel> GetSearchResultsAsync(ProductSearchModel queryModel);
 }
 
 public class ProductService : IProductService
@@ -67,23 +68,27 @@ public class ProductService : IProductService
         {
             return ResponseModel.BadRequest(" Giá nhỏ nhất phải nhỏ hơn giá lớn nhất");
         }
+
         //normalize search term, brand, category, unit, status
         var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
-        var brand = StringExtension.Normalize(queryModel.Brand);
-        var category = StringExtension.Normalize(queryModel.Category);
-        var unit = StringExtension.Normalize(queryModel.Unit);
+        HashSet<int> categoryIds = [];
+        foreach (var categoryId in queryModel.CategoryIds)
+        {
+            var childCategoryIds = await _categoryRepository.GetChildCategoryIds(categoryId);
+            categoryIds.UnionWith(childCategoryIds);
+        }
+
         var minPrice = queryModel.MinPrice;
         var maxPrice = queryModel.MaxPrice;
-        string? status = StringExtension.Normalize(queryModel.Status);
-        status = status?.RemoveSpace();
         var query = _productRepository.GetProductsQuery(true, true);
-        if (status == "preorder") query = query.Include(p => p.PreorderProduct);
+        if (queryModel.StatusId == (int)ProductStatusId.PREORDER)
+        {
+            query = query.Include(p => p.PreorderProduct);
+        }
 
         #region Filter, Search
 
         //thu gọn thành 1 where thôi
-        //filter theo status (default is selling)
-        query = query.Where(GetStatusProperty(status));
         query = query.Where(p =>
             (!queryModel.IsActive.HasValue || p.IsActive == queryModel.IsActive.Value)
             //search theo name, description, brand, unit, category
@@ -95,12 +100,17 @@ public class ProductService : IProductService
                 || p.Unit!.Name.Contains(searchTerm)
                 || p.Category!.Name.Contains(searchTerm)
             )
+            && p.StatusId == queryModel.StatusId //filter theo status (default is selling)
             //filter theo brand, category, unit, status, minPrice, maxPrice
-            && (string.IsNullOrEmpty(brand) || p.Brand!.Name == brand)
-            && (string.IsNullOrEmpty(category) || p.Category!.Name == category)
-            && (string.IsNullOrEmpty(unit) || p.Unit!.Name == unit)
+            && (categoryIds.IsNullOrEmpty() || categoryIds.Contains(p.CategoryId))
+            && (queryModel.BrandIds.IsNullOrEmpty() || queryModel.BrandIds.Contains(p.BrandId))
+            && (queryModel.UnitIds.IsNullOrEmpty() || queryModel.UnitIds.Contains(p.UnitId))
             && (minPrice == 0 || (p.SalePrice == 0 ? p.OriginalPrice >= minPrice : p.SalePrice >= minPrice))
             && (maxPrice == 0 || (p.SalePrice == 0 ? p.OriginalPrice <= maxPrice : p.SalePrice <= maxPrice))
+            // filter product on sale
+            && (!queryModel.OnSale || p.SalePrice != 0)
+            //filter by active brand, category, unit
+            && (p.Brand!.IsActive && p.Category!.IsActive && p.Unit!.IsActive)
         );
 
         #endregion
@@ -108,15 +118,15 @@ public class ProductService : IProductService
         #region Sort
 
         if ("desc".Equals(queryModel.SortOrder?.ToLower()))
-            query = query.OrderByDescending(GetSortProperty(queryModel));
+            query = query.OrderByDescending(GetSortProperty(queryModel.SortColumn));
         else
-            query = query.OrderBy(GetSortProperty(queryModel));
+            query = query.OrderBy(GetSortProperty(queryModel.SortColumn));
 
         #endregion
 
         #region Pagination
 
-        if (status == "preorder")
+        if (queryModel.StatusId == (int)ProductStatusId.PREORDER)
         {
             var productModelQuery = query.Select(p => ToPreorderProductModel(p));
             var products = await PagedList<PreorderProductModel>.CreateAsync(
@@ -141,14 +151,26 @@ public class ProductService : IProductService
         #endregion
     }
 
+    /// <summary>
+    /// Get product by id
+    /// <para>Return preorder product if status is preorder</para>
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ResponseModel> GetProductByIdAsync(Guid id)
     {
         var product = await _productRepository.GetByIdAsync(id, true, true);
         if (product == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
-
+        if (product.StatusId != (int)ProductStatusId.PREORDER)
+            return ResponseModel.Success(
+                ResponseConstants.Get("sản phẩm", true),
+                ToProductModel(product)
+            );
+        var preorderProduct = await _preorderProductRepository.GetByIdAsync(id);
+        product.PreorderProduct = preorderProduct;
         return ResponseModel.Success(
-            ResponseConstants.Get("sản phẩm", true),
-            ToProductModel(product)
+            ResponseConstants.Get("sản phẩm đặt trước", true),
+            ToPreorderProductModel(product)
         );
     }
 
@@ -327,6 +349,68 @@ public class ProductService : IProductService
         return ResponseModel.Error(ResponseConstants.Update("sản phẩm đặt trước", false));
     }
 
+    public async Task<ResponseModel> GetSearchResultsAsync(ProductSearchModel queryModel)
+    {
+        var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
+        var query = _productRepository.GetProductsQuery(true, false)
+            .Include(p => p.PreorderProduct).AsQueryable();
+        #region Search
+        //thu gọn thành 1 where thôi
+        query = query.Where(p =>
+            (p.IsActive)
+            //search theo name, description, brand, unit, category
+            && (
+                string.IsNullOrEmpty(searchTerm)
+                || p.Name.Contains(searchTerm)
+                || p.Description!.Contains(searchTerm)
+                || p.Brand!.Name.Contains(searchTerm)
+                || p.Unit!.Name.Contains(searchTerm)
+                || p.Category!.Name.Contains(searchTerm)
+            )
+            // exclude out of stock products
+            && p.StatusId != (int) ProductStatusId.OUT_OF_STOCK
+            //filter by active brand, category, unit
+            && (p.Brand!.IsActive && p.Category!.IsActive && p.Unit!.IsActive)
+        );
+        #endregion
+        
+        #region Sort
+
+        if ("desc".Equals(queryModel.SortOrder?.ToLower()))
+            query = query.OrderByDescending(GetSortProperty(queryModel.SortColumn));
+        else
+            query = query.OrderBy(GetSortProperty(queryModel.SortColumn));
+
+        #endregion
+
+        var searchResultModel = query.Select(p => new ProductSearchResultModel()
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Brand = p.Brand!.Name,
+            OriginalPrice = p.OriginalPrice,
+            SalePrice = p.SalePrice,
+            IsPreOrder = p.PreorderProduct != null,
+            AverageRating = p.ProductReviews.IsNullOrEmpty()
+                ? 0
+                : p.ProductReviews.Average(pr => (double)pr.Rating),
+            RatingCount = p.ProductReviews.Count,
+            Thumbnail = p.Thumbnail
+        });
+
+        #region Pagination
+        var searchResults = await PagedList<ProductSearchResultModel>.CreateAsync(
+            searchResultModel,
+            queryModel.Page,
+            queryModel.PageSize
+        );
+        #endregion
+        return ResponseModel.Success(
+            ResponseConstants.Get("kết quả tìm kiếm", searchResults.TotalCount > 0),
+            searchResults
+        );
+    }
+
     private static ProductModel ToProductModel(Product product)
     {
         return new ProductModel()
@@ -392,15 +476,15 @@ public class ProductService : IProductService
     }
 
     /// <summary>
-    ///     Get sort property as expression
+    /// Get sort property by column
     /// </summary>
-    /// <param name="queryModel"></param>
+    /// <param name="sortColumn"></param>
     /// <returns></returns>
     private static Expression<Func<Product, object>> GetSortProperty(
-        ProductQueryModel queryModel
+        string? sortColumn
     )
     {
-        return queryModel.SortColumn?.ToLower().Replace(" ", "") switch
+        return sortColumn?.ToLower().Replace(" ", "") switch
         {
             "name" => p => p.Name,
             "saleprice" => p => p.SalePrice == 0 ? p.OriginalPrice : p.SalePrice,
@@ -409,21 +493,6 @@ public class ProductService : IProductService
             "rating" => p => p.ProductReviews.Average(pr => (double)pr.Rating),
             "ordercount" => p => p.OrderDetails.Sum(od => od.Quantity),
             _ => product => product.Id
-        };
-    }
-
-    private static Expression<Func<Product, bool>> GetStatusProperty(
-        string? status
-    )
-    {
-        // If status is null, default to an empty string to match the default case in the switch expression
-        var normalizedStatus = status ?? "";
-        return normalizedStatus switch
-        {
-            "selling" => p => p.StatusId == (int)ProductStatusId.SELLING,
-            "preorder" => p => p.StatusId == (int)ProductStatusId.PREORDER,
-            "outofstock" => p => p.StatusId == (int)ProductStatusId.OUT_OF_STOCK,
-            _ => p => p.StatusId == (int)ProductStatusId.SELLING
         };
     }
 
