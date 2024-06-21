@@ -63,7 +63,7 @@ public class ProductController : Controller
     #endregion
 
     #region Product
-    [HttpGet("search-results")]
+    [HttpGet("search")]
     public async Task<IActionResult> GetSearchResults([FromQuery] ProductSearchModel queryModel)
     {
         _logger.Information("Get search results");

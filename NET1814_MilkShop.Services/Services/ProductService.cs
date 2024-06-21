@@ -107,6 +107,8 @@ public class ProductService : IProductService
             && (queryModel.UnitIds.IsNullOrEmpty() || queryModel.UnitIds.Contains(p.UnitId))
             && (minPrice == 0 || (p.SalePrice == 0 ? p.OriginalPrice >= minPrice : p.SalePrice >= minPrice))
             && (maxPrice == 0 || (p.SalePrice == 0 ? p.OriginalPrice <= maxPrice : p.SalePrice <= maxPrice))
+            // filter product on sale
+            && (!queryModel.OnSale || p.SalePrice != 0)
             //filter by active brand, category, unit
             && (p.Brand!.IsActive && p.Category!.IsActive && p.Unit!.IsActive)
         );
@@ -383,6 +385,7 @@ public class ProductService : IProductService
 
         var searchResultModel = query.Select(p => new ProductSearchResultModel()
         {
+            Id = p.Id,
             Name = p.Name,
             Brand = p.Brand!.Name,
             OriginalPrice = p.OriginalPrice,
