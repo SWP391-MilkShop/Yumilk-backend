@@ -15,4 +15,6 @@ public class OrderDetailModel
 
     public string? OrderStatus { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    public object? PaymentData { get; set; }
 }
