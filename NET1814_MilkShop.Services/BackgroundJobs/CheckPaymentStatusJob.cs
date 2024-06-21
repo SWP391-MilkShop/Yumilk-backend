@@ -97,8 +97,11 @@ public class CheckPaymentStatusJob : IJob
                 {
                     _logger.LogInformation("Payment for order {OrderId} is paid", order.Id);
                     var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(order.Id);
-                    var product = await _productRepository.GetByIdNoIncludeAsync(order.OrderDetails.Select(x => x.ProductId).FirstOrDefault());
-                    if (product!.StatusId == (int)ProductStatusId.PREORDER)
+                    //Check if order has preorder product
+                    var existPreorder =
+                        await _orderRepository
+                            .IsExistPreorderProductAsync(order.Id);
+                    if (existPreorder)
                     {
                         _logger.LogInformation("Order {OrderId} has preorder product", order.Id);
                         existOrder.StatusId = (int)OrderStatusId.PREORDER; //Preorder

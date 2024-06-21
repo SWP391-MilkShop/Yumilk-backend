@@ -21,12 +21,15 @@ namespace NET1814_MilkShop.Repositories.Repositories
         void Remove(Customer customer);
 
         Task<CustomerAddress?> GetCustomerAddressById(int addressId);
+        Task<string?> GetCustomerEmail(Guid userId);
     }
 
     public sealed class CustomerRepository : Repository<Customer>, ICustomerRepository
     {
         public CustomerRepository(AppDbContext context)
-            : base(context) { }
+            : base(context)
+        {
+        }
 
         public async Task<Customer?> GetByEmailAsync(string email)
         {
@@ -54,7 +57,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             //    .Customers.Include(x => x.User)
             //    .FirstOrDefaultAsync(x => x.UserId == id);
             return await _query.Include(x => x.User)
-                .ThenInclude(o=>o.Role)
+                .ThenInclude(o => o.Role)
                 .FirstOrDefaultAsync(x => x.UserId == id);
         }
 
@@ -80,6 +83,11 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public async Task<CustomerAddress?> GetCustomerAddressById(int addressId)
         {
             return await _context.CustomerAddresses.FirstOrDefaultAsync(x => x.Id == addressId);
+        }
+
+        public async Task<string?> GetCustomerEmail(Guid userId)
+        {
+            return await _context.Customers.Where(x => x.UserId == userId).Select(x => x.Email).FirstOrDefaultAsync();
         }
         /*public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
         {
