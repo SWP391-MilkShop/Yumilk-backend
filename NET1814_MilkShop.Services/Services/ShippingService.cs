@@ -214,6 +214,7 @@ public class ShippingService : IShippingService
         {
             case HttpStatusCode.OK:
                 order.ShippingCode = responseModel.Data.OrderCode;
+                order.StatusId = (int)OrderStatusId.SHIPPING;
                 _orderRepository.Update(order);
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result < 0)

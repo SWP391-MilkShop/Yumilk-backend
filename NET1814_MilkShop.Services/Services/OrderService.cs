@@ -401,15 +401,6 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     return orderShippingAsync;
                 }
-
-                order.StatusId = model.StatusId;
-                _orderRepository.Update(order);
-                var resultShipping = await _unitOfWork.SaveChangesAsync();
-                if (resultShipping < 0)
-                {
-                    return ResponseModel.BadRequest("Có lỗi xảy ra khi cập nhật trạng thái đơn hàng");
-                }
-
                 return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true),
                     orderShippingAsync.Data);
             }
