@@ -3,7 +3,17 @@
     public class ProductStatsModel
     {
         public int TotalSold { get; set; }
-        public IDictionary<string, int> TotalSoldPerCategory { get; set; } = new Dictionary<string, int>();
-        public IDictionary<string, int> TotalSoldPerBrand { get; set; } = new Dictionary<string, int>();
+        public int TotalRevenue { get; set; }
+        public IDictionary<string, CategoryBrandStats> StatsPerCategory { get; set; } = 
+            new Dictionary<string, CategoryBrandStats>();
+
+        public IDictionary<string, CategoryBrandStats> StatsPerBrand { get; set; } =
+            new Dictionary<string, CategoryBrandStats>();
+    }
+
+    public class CategoryBrandStats
+    {
+        public int TotalSold { get; set; }
+        public int TotalRevenue { get; set; }
     }
 }
