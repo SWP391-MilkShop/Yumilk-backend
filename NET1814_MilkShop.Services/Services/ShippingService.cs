@@ -151,30 +151,30 @@ public class ShippingService : IShippingService
         }
     }
 
-    public async Task<ResponseModel> GetExpectedDeliveryTime(DeliveryTimeRequestModel request)
-    {
-        _client.DefaultRequestHeaders.Add("ShopId", ShopId);
-        var url = $"https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime?" +
-                  $"from_district_id={request.FromDistrictId}&from_ward_code={request.FromWardCode}&to_district_id={request.ToDistrictId}&to_ward_code={request.ToWardCode}" +
-                  $"&service_id=53320";
-        var response = await _client.GetAsync(url);
-        var responseContent = await response.Content.ReadAsStringAsync();
-        var responseModel = JsonConvert.DeserializeObject<ShippingResponseModel<ExpectedDeliveryTime>>(responseContent);
-        switch (response.StatusCode)
-        {
-            case HttpStatusCode.OK:
-                var date = responseModel.Data!.LeadTime?.Split(" ")[0];
-                var expectedDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(date!)).UtcDateTime;
-                return ResponseModel.Success(
-                    "Lấy ngày dự kiến giao hàng thành công",
-                    expectedDate.ToString("dd/MM/yyyy")
-                );
-            case HttpStatusCode.BadRequest:
-                return ResponseModel.BadRequest(responseModel.Message);
-            default:
-                return ResponseModel.Error("Đã xảy ra lỗi khi lấy ngày dự kiến giao hàng");
-        }
-    }
+    // public async Task<ResponseModel> GetExpectedDeliveryTime(DeliveryTimeRequestModel request)
+    // {
+    //     _client.DefaultRequestHeaders.Add("ShopId", ShopId);
+    //     var url = $"https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime?" +
+    //               $"from_district_id={request.FromDistrictId}&from_ward_code={request.FromWardCode}&to_district_id={request.ToDistrictId}&to_ward_code={request.ToWardCode}" +
+    //               $"&service_id=53320";
+    //     var response = await _client.GetAsync(url);
+    //     var responseContent = await response.Content.ReadAsStringAsync();
+    //     var responseModel = JsonConvert.DeserializeObject<ShippingResponseModel<ExpectedDeliveryTime>>(responseContent);
+    //     switch (response.StatusCode)
+    //     {
+    //         case HttpStatusCode.OK:
+    //             var date = responseModel.Data!.LeadTime?.Split(" ")[0];
+    //             var expectedDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(date!)).UtcDateTime;
+    //             return ResponseModel.Success(
+    //                 "Lấy ngày dự kiến giao hàng thành công",
+    //                 expectedDate.ToString("dd/MM/yyyy")
+    //             );
+    //         case HttpStatusCode.BadRequest:
+    //             return ResponseModel.BadRequest(responseModel.Message);
+    //         default:
+    //             return ResponseModel.Error("Đã xảy ra lỗi khi lấy ngày dự kiến giao hàng");
+    //     }
+    // }
 
     public async Task<ResponseModel> CreateOrderShippingAsync(Guid orderId)
     {
@@ -223,6 +223,7 @@ public class ShippingService : IShippingService
                         "Đã tạo đơn hàng vận chuyển nhưng không thể cập nhật mã đơn hàng vận chuyển trong hệ thống",
                         responseModel.Data);
                 }
+
                 _unitOfWork.Detach(order);
                 return ResponseModel.Success(
                     "Tạo đơn hàng vận chuyển thành công",
@@ -286,7 +287,6 @@ public class ShippingService : IShippingService
 
     public async Task<ResponseModel> GetOrderDetailAsync(Guid orderId)
     {
-        
         var order = await _orderRepository.GetByIdAsync(orderId, false);
 
         if (order is null)
@@ -298,6 +298,7 @@ public class ShippingService : IShippingService
         {
             return ResponseModel.BadRequest("Đơn hàng chưa có mã vận chuyển");
         }
+
         var orderCode = order.ShippingCode;
         var response =
             await _client.GetAsync(
