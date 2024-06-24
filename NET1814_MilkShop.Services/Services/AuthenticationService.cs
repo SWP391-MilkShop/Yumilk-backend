@@ -7,6 +7,7 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using System.IdentityModel.Tokens.Jwt;
+using FirebaseAdmin.Auth;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -20,6 +21,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> RefreshTokenAsync(string token);
         Task<ResponseModel> ActivateAccountAsync(string email);
         Task<ResponseModel> DashBoardLoginAsync(RequestLoginModel model);
+        Task<ResponseModel> GoogleLoginAsync(string token);
     }
 
     public sealed class AuthenticationService : IAuthenticationService
@@ -123,7 +125,7 @@ namespace NET1814_MilkShop.Services.Services
                 model.Password
             );
             if (existingUser != null && existingUser.RoleId == (int)RoleId.CUSTOMER)
-            //Only customer can login, others will say wrong username or password
+                //Only customer can login, others will say wrong username or password
             {
                 //check if user is banned
                 if (existingUser.IsBanned)
@@ -218,7 +220,8 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Reset
                     );
-                    await _emailService.SendPasswordResetEmailAsync(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    await _emailService.SendPasswordResetEmailAsync(customer.Email, verifyToken,
+                        customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
                 }
             }
@@ -305,7 +308,8 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Authentication
                     );
-                    await _emailService.SendVerificationEmailAsync(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    await _emailService.SendVerificationEmailAsync(customer.Email, verifyToken,
+                        customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ActivateAccountLink, null);
                 }
             }
@@ -320,7 +324,7 @@ namespace NET1814_MilkShop.Services.Services
                 model.Password
             );
             if (existingUser != null && existingUser.RoleId != (int)RoleId.CUSTOMER)
-            //Only admin,staff can login others will response wrong username or password
+                //Only admin,staff can login others will response wrong username or password
             {
                 //check if user is banned
                 if (existingUser.IsBanned)
@@ -349,6 +353,13 @@ namespace NET1814_MilkShop.Services.Services
             }
 
             return ResponseModel.BadRequest(ResponseConstants.Login(false));
+        }
+
+        public async Task<ResponseModel> GoogleLoginAsync(string token)
+        {
+            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+            string uid = decodedToken.Uid;
+            return ResponseModel.Success("Login success", uid);
         }
     }
 }
