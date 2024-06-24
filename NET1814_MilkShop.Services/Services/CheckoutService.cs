@@ -119,7 +119,7 @@ public class CheckoutService : ICheckoutService
             TotalAmount = model.PaymentMethod == "COD"
                 ? GetTotalPrice(cart.CartDetails.ToList())
                 : GetTotalPrice(cart.CartDetails.ToList()) + model.ShippingFee,
-            VoucherId = 1, // de tam 1 voucher
+            VoucherId = 2, // de tam 1 voucher
             ReceiverName = customerAddress.ReceiverName ?? "",
             Address =
                 customerAddress.Address
