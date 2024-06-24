@@ -979,7 +979,7 @@ public static class MailBody
   <![endif]-->
   </head>
   <body>
-    <span class=""preheader"">Sử dụng liên kết này để đặt lại mật khẩu của bạn. Liên kết chỉ có hiệu lực trong 1 giờ.</span>
+    <span class=""preheader"">Sử dụng liên kết này để kích hoạt tài khoản. Liên kết chỉ có hiệu lực trong 1 giờ.</span>
     <table class=""email-wrapper"" width=""100%"" cellpadding=""0"" cellspacing=""0"" role=""presentation"">
       <tr>
         <td align=""center"">
@@ -1510,7 +1510,7 @@ public static class MailBody
           <![endif]-->
           </head>
           <body>
-            <span class=""preheader"">Sử dụng liên kết này để đặt lại mật khẩu của bạn. Liên kết chỉ có hiệu lực trong 1 giờ.</span>
+            <span class=""preheader"">Cảm ơn bạn đã tin tưởng mua hàng của chúng tôi.</span>
             <table class=""email-wrapper"" width=""100%"" cellpadding=""0"" cellspacing=""0"" role=""presentation"">
               <tr>
                 <td align=""center"">
