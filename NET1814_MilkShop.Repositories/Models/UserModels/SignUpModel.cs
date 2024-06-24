@@ -16,7 +16,7 @@ namespace NET1814_MilkShop.Repositories.Models.UserModels
 
         [Required(ErrorMessage = "Phone number is required!")]
         [DataType(DataType.PhoneNumber, ErrorMessage = "Invalid Phone Number!")]
-        [RegularExpression(@"^([0-9]{10})$", ErrorMessage = "Invalid Phone Number!")]
+        [RegularExpression(@"^(0|\+84)(3|5|7|8|9)\d{8}$", ErrorMessage = "Invalid Phone Number!")]
         public string PhoneNumber { get; set; } = null!;
 
         [
