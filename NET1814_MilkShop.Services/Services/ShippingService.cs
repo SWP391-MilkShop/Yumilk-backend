@@ -253,7 +253,6 @@ public class ShippingService : IShippingService
             ToDistrictId = order.DistrictId,
             ToWardCode = order.WardCode,
             CodAmount = order.PaymentMethod == "COD" ? order.TotalAmount : 0,
-            /*ToWardCode = order.WardCode.ToString(),*/
             Items = order.OrderDetails.Select(x => new Item
             {
                 ProductName = x.ProductName,
