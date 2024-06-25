@@ -2,7 +2,7 @@
 {
     public class CustomerModel
     {
-        public string UserId { get; set; } = null!;
+        public string UserID { get; set; } = null!;
         public string Username { get; set; } = null!;
         public string? FirstName { get; set; }
         public string? LastName { get; set; }

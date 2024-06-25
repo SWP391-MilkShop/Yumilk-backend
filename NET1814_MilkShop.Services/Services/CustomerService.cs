@@ -41,7 +41,7 @@ namespace NET1814_MilkShop.Services.Services
         {
             return new CustomerModel
             {
-                UserId = customer.UserId.ToString(),
+                UserID = customer.UserId.ToString(),
                 Username = user.Username,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
