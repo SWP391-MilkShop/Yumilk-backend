@@ -52,12 +52,9 @@ public class OrderResponseData
 
 public class CancelResponseData
 {
-    [JsonProperty("order_code")]
-    public string? OrderCode { get; set; }
-    [JsonProperty("result")]
-    public string? Result { get; set; }
-    [JsonProperty("message")]
-    public string? Message { get; set;}
+    [JsonProperty("order_code")] public string? OrderCode { get; set; }
+    [JsonProperty("result")] public string? Result { get; set; }
+    [JsonProperty("message")] public string? Message { get; set; }
 }
 
 public class OrderDetailInformation
@@ -87,12 +84,15 @@ public class OrderDetailInformation
     [JsonProperty("is_cod_transferred")] public bool IsCodTransferred { get; set; }
     [JsonProperty("is_cod_collected")] public bool IsCodCollected { get; set; }
     [JsonProperty("cod_failed_amount")] public int CodFailedAmount { get; set; }
+
     [JsonProperty("cod_failed_collect_date")]
     public object? CodFailedCollectDate { get; set; }
+
     [JsonProperty("required_note")] public string? RequiredNote { get; set; }
     [JsonProperty("content")] public string? Content { get; set; }
     [JsonProperty("note")] public string? Note { get; set; }
     [JsonProperty("pickup_time")] public DateTime PickupTime { get; set; }
+    [JsonProperty("leadtime")] public DateTime DeliveryTime { get; set; }
     [JsonProperty("log")] public List<Log> Logs { get; set; } = [];
     [JsonPropertyName("items")] public List<Item> Items { get; set; } = [];
 }
@@ -105,5 +105,5 @@ public class Log
 
 public class ExpectedDeliveryTime
 {
-    [JsonProperty("leadtime")] public string? LeadTime { get; set; }
+    [JsonProperty("leadtime")] public DateTime DeliveryTime { get; set; }
 }
