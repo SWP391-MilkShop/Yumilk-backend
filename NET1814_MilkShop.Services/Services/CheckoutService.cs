@@ -320,7 +320,7 @@ public class CheckoutService : ICheckoutService
                     Quantity = preOrderDetail.Quantity,
                     UnitPrice = preOrderDetail.UnitPrice,
                     ItemPrice = preOrderDetail.ItemPrice,
-                    ThumbNail = preOrderDetail.Product.Thumbnail
+                    Thumbnail = preOrderDetail.Product.Thumbnail
                 },
             };
             var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);
@@ -387,7 +387,7 @@ public class CheckoutService : ICheckoutService
             ItemPrice =
                 x.Quantity
                 * (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice),
-            ThumbNail = x.Product.Thumbnail
+            Thumbnail = x.Product.Thumbnail
         });
         return res;
     }
