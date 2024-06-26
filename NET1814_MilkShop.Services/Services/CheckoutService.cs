@@ -28,6 +28,7 @@ public class CheckoutService : ICheckoutService
     private readonly IPaymentService _paymentService;
     private readonly IPreorderProductRepository _preorderProductRepository;
     private readonly IEmailService _emailService;
+    private readonly IUserRepository _userRepository;
 
 
     public CheckoutService(
@@ -37,7 +38,7 @@ public class CheckoutService : ICheckoutService
         ICartRepository cartRepository,
         ICustomerRepository customerRepository,
         IPaymentService paymentService,
-        IPreorderProductRepository preorderProductRepository, IEmailService emailService
+        IPreorderProductRepository preorderProductRepository, IEmailService emailService, IUserRepository userRepository
     )
     {
         _customerRepository = customerRepository;
@@ -48,6 +49,7 @@ public class CheckoutService : ICheckoutService
         _paymentService = paymentService;
         _preorderProductRepository = preorderProductRepository;
         _emailService = emailService;
+        _userRepository = userRepository;
     }
 
     /// <summary>
@@ -58,6 +60,12 @@ public class CheckoutService : ICheckoutService
     /// <returns></returns>
     public async Task<ResponseModel> Checkout(Guid userId, CheckoutModel model)
     {
+        var userActive = await _userRepository.GetByIdAsync(userId);
+        if (!userActive!.IsActive)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
+        }
+
         var cart = await _cartRepository.GetByCustomerIdAsync(userId, true);
         if (cart == null)
         {
@@ -217,6 +225,12 @@ public class CheckoutService : ICheckoutService
     /// <returns></returns>
     public async Task<ResponseModel> PreOrderCheckout(Guid userId, PreorderCheckoutModel model)
     {
+        var userActive = await _userRepository.GetByIdAsync(userId);
+        if (!userActive!.IsActive)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
+        }
+
         var product = await _preorderProductRepository.GetByProductIdAsync(model.ProductId);
         if (product == null || product.Product.StatusId != (int)ProductStatusId.PREORDER)
         {

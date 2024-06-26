@@ -27,7 +27,7 @@ namespace NET1814_MilkShop.API.CoreHelpers.ActionFilters
                 ?.Value;
             if (userIdStr == null)
             {
-                context.Result = new BadRequestObjectResult("UserId not found");
+                context.Result = new BadRequestObjectResult("Người dùng không tồn tại");
                 return;
             }
             var userId = Guid.Parse(userIdStr);
@@ -40,7 +40,7 @@ namespace NET1814_MilkShop.API.CoreHelpers.ActionFilters
                 bool isExist = await _userService.IsExistAsync(userId);
                 if (!isExist)
                 {
-                    context.Result = new NotFoundObjectResult("User not found");
+                    context.Result = new NotFoundObjectResult("Người dùng không tồn tại");
                     return;
                 }
             }
@@ -50,7 +50,7 @@ namespace NET1814_MilkShop.API.CoreHelpers.ActionFilters
                 bool isExist = await _customerService.IsExistAsync(userId);
                 if (!isExist)
                 {
-                    context.Result = new NotFoundObjectResult("User not found");
+                    context.Result = new NotFoundObjectResult("Người dùng không tồn tại");
                     return;
                 }
             }
