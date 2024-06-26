@@ -7,21 +7,18 @@ using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 
 namespace NET1814_MilkShop.Services.Services
 {
     public interface IUserService
     {
         Task<ResponseModel> ChangePasswordAsync(Guid userId, ChangePasswordModel model);
-
+        Task<ResponseModel> ChangeUsernameAsync(Guid userId, ChangeUsernameModel model);
         /*Task<ResponseModel> GetUsersAsync();*/
         Task<ResponseModel> CreateUserAsync(CreateUserModel model);
         Task<ResponseModel> GetUsersAsync(UserQueryModel request);
         Task<ResponseModel> UpdateUserAsync(Guid id, UpdateUserModel model);
         Task<bool> IsExistAsync(Guid id);
-        Task<ResponseModel> GetCustomersStatsAsync(CustomersStatsQueryModel model);
     }
 
     public sealed class UserService : IUserService
@@ -58,6 +55,39 @@ namespace NET1814_MilkShop.Services.Services
                 Status = "Success"
             };
         }*/
+
+        public async Task<ResponseModel> ChangeUsernameAsync(Guid userId, ChangeUsernameModel model)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if(user == null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Người dùng"), null);
+            }
+            //check if new username is the same as the old one
+            if (user.Username == model.NewUsername)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.SameUsername);
+            }
+            //check if new username is already taken
+            var existingUser = await _userRepository.GetByUsernameAsync(model.NewUsername);
+            if (existingUser != null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Tên đăng nhập"));
+            }
+            //check if password is correct
+            if(!BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
+            {
+                return ResponseModel.BadRequest(ResponseConstants.WrongPassword);
+            }
+            user.Username = model.NewUsername;
+            _userRepository.Update(user);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return ResponseModel.Success(ResponseConstants.Update("tên đăng nhập", true), null);
+            }
+            return ResponseModel.Error(ResponseConstants.Update("tên đăng nhập", false));
+        }
 
         /// <summary>
         /// Admin có thể tạo tài khoản cho nhân viên hoặc admin khác
@@ -101,8 +131,8 @@ namespace NET1814_MilkShop.Services.Services
             query = query.Where(u =>
                 string.IsNullOrEmpty(searchTerm)
                 || u.Username.ToLower().Contains(searchTerm)
-                || u.FirstName.Contains(searchTerm)
-                || u.LastName.Contains(searchTerm)
+                || u.FirstName != null && u.FirstName.Contains(searchTerm)
+                || u.LastName != null && u.LastName.Contains(searchTerm)
             );
 
             if (!string.IsNullOrEmpty(request.RoleIds))
@@ -172,38 +202,12 @@ namespace NET1814_MilkShop.Services.Services
         {
             return await _userRepository.IsExistAsync(id);
         }
-
-        public async Task<ResponseModel> GetCustomersStatsAsync(CustomersStatsQueryModel model)
-        {
-            if (model.From > DateTime.Now || model.From > model.To)
-            {
-                return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
-            }
-
-            var query = _userRepository.GetUserQueryIncludeCustomer();
-            // default is from last 30 days
-            var from = model.From ?? DateTime.Now.AddDays(-30);
-            // default is now
-            var to = model.To ?? DateTime.Now;
-            query = query.Where(o => o.Customer!.CreatedAt >= from && o.Customer!.CreatedAt <= to);
-            // count customer who have already bought
-            var totalCustomerBought = query
-                .Where(x => x.Customer.Orders != null &&
-                            x.Customer.Orders.Any(order => order.StatusId == (int)OrderStatusId.DELIVERED))
-                .Distinct();
-            var resp = new CustomerStatsModel()
-            {
-                TotalCustomers = await query.CountAsync(),
-                TotalBoughtCustomer = await totalCustomerBought.CountAsync()
-            };
-            return ResponseModel.Success(ResponseConstants.Get("thống kê người dùng", true), resp);
-        }
-
+        
         public async Task<ResponseModel> ChangePasswordAsync(Guid userId, ChangePasswordModel model)
         {
             if (string.Equals(model.OldPassword, model.NewPassword))
             {
-                return ResponseModel.BadRequest(ResponseConstants.PassSameNewPass);
+                return ResponseModel.BadRequest(ResponseConstants.SamePassword);
             }
 
             var user = await _userRepository.GetByIdAsync(userId);
@@ -233,7 +237,7 @@ namespace NET1814_MilkShop.Services.Services
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
-                return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Người dùng"), null);
             }
 
             user.IsBanned = model.IsBanned;

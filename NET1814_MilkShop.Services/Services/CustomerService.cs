@@ -61,7 +61,7 @@ namespace NET1814_MilkShop.Services.Services
         {
             var query = _customerRepository.GetCustomersQuery()
                 .Include(x => x.User)
-                .Where(c => c.User.Id == c.UserId);
+                .ThenInclude(x => x.Role).AsQueryable();
             var searchTerm = StringExtension.Normalize(request.SearchTerm);
             //filter
             if (!string.IsNullOrEmpty(searchTerm))
