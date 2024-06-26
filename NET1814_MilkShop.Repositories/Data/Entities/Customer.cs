@@ -10,8 +10,6 @@ public partial class Customer : IAuditableEntity
     [Key]
     public Guid UserId { get; set; }
 
-    public int Points { get; set; }
-
     [Column(TypeName = "nvarchar(20)")]
     public string? PhoneNumber { get; set; }
 
@@ -40,6 +38,4 @@ public partial class Customer : IAuditableEntity
     public virtual ICollection<Order> Orders { get; set; } = [];
 
     public virtual User User { get; set; } = null!;
-
-    public virtual ICollection<UserVoucher> UserVouchers { get; set; } = [];
 }

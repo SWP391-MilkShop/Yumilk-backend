@@ -1,4 +1,3 @@
-using Net.payOS.Types;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
@@ -119,7 +118,6 @@ public class CheckoutService : ICheckoutService
             TotalAmount = model.PaymentMethod == "COD"
                 ? GetTotalPrice(cart.CartDetails.ToList())
                 : GetTotalPrice(cart.CartDetails.ToList()) + model.ShippingFee,
-            VoucherId = 1, // de tam 1 voucher
             ReceiverName = customerAddress.ReceiverName ?? "",
             Address =
                 customerAddress.Address
@@ -199,7 +197,7 @@ public class CheckoutService : ICheckoutService
                 var json = JsonConvert.SerializeObject(paymentLink.Data);
                 var paymentData = JsonConvert.DeserializeObject<PaymentDataModel>(json);
                 resp.OrderCode = paymentData!.OrderCode;
-                resp.CheckoutUrl = paymentData!.CheckoutUrl;
+                resp.CheckoutUrl = paymentData.CheckoutUrl;
             }
 
             await _emailService.SendPurchaseEmailAsync(customerEmail, orders.ReceiverName);
@@ -261,7 +259,6 @@ public class CheckoutService : ICheckoutService
             TotalAmount = product.Product.SalePrice == 0
                 ? (product.Product.OriginalPrice * model.Quantity)
                 : (product.Product.SalePrice * model.Quantity) + model.ShippingFee,
-            VoucherId = 1, // de tam 1 voucher
             ReceiverName = customerAddress.ReceiverName + "",
             Address =
                 customerAddress.Address
@@ -335,7 +332,7 @@ public class CheckoutService : ICheckoutService
             var json = JsonConvert.SerializeObject(paymentLink.Data);
             var paymentData = JsonConvert.DeserializeObject<PaymentDataModel>(json);
             resp.OrderCode = paymentData!.OrderCode;
-            resp.CheckoutUrl = paymentData!.CheckoutUrl;
+            resp.CheckoutUrl = paymentData.CheckoutUrl;
             await _emailService.SendPurchaseEmailAsync(customerEmail, preOrder.ReceiverName);
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }

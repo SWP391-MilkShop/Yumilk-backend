@@ -38,9 +38,6 @@ namespace NET1814_MilkShop.Repositories.Data
         public virtual DbSet<ProductAttributeValue> ProductAttributeValues { get; set; }
         public virtual DbSet<ProductImage> ProductImages { get; set; }
         public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
-        public virtual DbSet<Voucher> Vouchers { get; set; }
-        public virtual DbSet<UserVoucher> UserVouchers { get; set; }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured)
@@ -230,10 +227,7 @@ namespace NET1814_MilkShop.Repositories.Data
                 b.Property<string>("PhoneNumber")
                     .HasColumnType("nvarchar(20)")
                     .HasColumnName("phone_number");
-
-                b.Property<int>("Points")
-                    .HasColumnType("int")
-                    .HasColumnName("points");
+                
 
                 b.Property<string>("ProfilePictureUrl")
                     .HasColumnType("nvarchar(255)")
@@ -407,10 +401,6 @@ namespace NET1814_MilkShop.Repositories.Data
                     .HasColumnType("int")
                     .HasColumnName("total_price");
 
-                b.Property<int>("VoucherId")
-                    .HasColumnType("int")
-                    .HasColumnName("voucher_id");
-
                 b.Property<string>("WardCode")
                     .HasMaxLength(255)
                     .HasColumnType("nvarchar(255)")
@@ -421,8 +411,6 @@ namespace NET1814_MilkShop.Repositories.Data
                 b.HasIndex("CustomerId");
 
                 b.HasIndex("StatusId");
-
-                b.HasIndex("VoucherId");
 
                 b.ToTable("orders", null as string);
             });
@@ -946,96 +934,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                 b.ToTable("users", null as string);
             });
-
-            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.UserVoucher", b =>
-            {
-                b.Property<Guid>("CustomerId")
-                    .HasColumnType("uniqueidentifier")
-                    .HasColumnName("customer_id");
-
-                b.Property<int>("VoucherId")
-                    .HasColumnType("int")
-                    .HasColumnName("voucher_id");
-
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2")
-                    .HasColumnName("created_at");
-
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnType("datetime2")
-                    .HasColumnName("deleted_at");
-
-                b.Property<bool>("IsActive")
-                    .HasColumnType("bit")
-                    .HasColumnName("is_active");
-
-                b.Property<DateTime?>("ModifiedAt")
-                    .HasColumnType("datetime2")
-                    .HasColumnName("modified_at");
-
-                b.HasKey("CustomerId", "VoucherId");
-
-                b.HasIndex("VoucherId");
-
-                b.ToTable("user_vouchers", null as string);
-            });
-
-            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Voucher", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
-
-                b.Property<int>("Id").UseIdentityColumn();
-
-                b.Property<string>("Code")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(50)");
-
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2")
-                    .HasColumnName("created_at");
-
-                b.Property<DateTime?>("DeletedAt")
-                    .HasColumnType("datetime2")
-                    .HasColumnName("deleted_at");
-
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(2000)");
-
-                b.Property<int>("DiscountPercent")
-                    .HasColumnType("int")
-                    .HasColumnName("discount_percent");
-
-                b.Property<DateTime?>("EndDate")
-                    .HasColumnType("datetime2")
-                    .HasColumnName("end_date");
-
-                b.Property<bool>("IsActive")
-                    .HasColumnType("bit")
-                    .HasColumnName("is_active");
-
-                b.Property<int>("MaxDiscountAmount")
-                    .HasColumnType("int")
-                    .HasColumnName("max_discount_amount");
-
-                b.Property<int>("MinOrderValue")
-                    .HasColumnType("int")
-                    .HasColumnName("min_order_value");
-
-                b.Property<DateTime?>("ModifiedAt")
-                    .HasColumnType("datetime2")
-                    .HasColumnName("modified_at");
-
-                b.Property<DateTime?>("StartDate")
-                    .HasColumnType("datetime2")
-                    .HasColumnName("start_date");
-
-                b.HasKey("Id");
-
-                b.ToTable("vouchers", null as string);
-            });
-
+            
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Cart", b =>
             {
                 b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Customer", "Customer")
@@ -1097,18 +996,10 @@ namespace NET1814_MilkShop.Repositories.Data
                     .HasForeignKey("StatusId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
-
-                b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Voucher", "Voucher")
-                    .WithMany("Orders")
-                    .HasForeignKey("VoucherId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-
+                
                 b.Navigation("Customer");
 
                 b.Navigation("Status");
-
-                b.Navigation("Voucher");
             });
 
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.OrderDetail", b =>
@@ -1241,25 +1132,7 @@ namespace NET1814_MilkShop.Repositories.Data
 
                 b.Navigation("Role");
             });
-
-            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.UserVoucher", b =>
-            {
-                b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Customer", "Customer")
-                    .WithMany("UserVouchers")
-                    .HasForeignKey("CustomerId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-
-                b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Voucher", "Voucher")
-                    .WithMany("UserVouchers")
-                    .HasForeignKey("VoucherId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-
-                b.Navigation("Customer");
-
-                b.Navigation("Voucher");
-            });
+            
 
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Brand", b =>
             {
@@ -1283,8 +1156,6 @@ namespace NET1814_MilkShop.Repositories.Data
                 b.Navigation("CustomerAddresses");
 
                 b.Navigation("Orders");
-
-                b.Navigation("UserVouchers");
             });
 
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Order", b =>
@@ -1330,13 +1201,6 @@ namespace NET1814_MilkShop.Repositories.Data
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.User", b =>
             {
                 b.Navigation("Customer");
-            });
-
-            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Voucher", b =>
-            {
-                b.Navigation("Orders");
-
-                b.Navigation("UserVouchers");
             });
         }
     }
