@@ -113,7 +113,8 @@ public class ProductController : Controller
         return ResponseExtension.Result(response);
     }
     /// <summary>
-    /// Leave the Ids as 0 for no update
+    /// Cant change product status if in active order (not DELIVERED OR CANCELLED)
+    /// <para>Leave the Ids as 0 for no update</para>
     /// <para>Leave the price as null for no update</para>
     /// </summary>
     /// <param name="id"></param>
