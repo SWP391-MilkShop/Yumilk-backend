@@ -11,6 +11,8 @@ namespace NET1814_MilkShop.Services.Services
         Task SendPasswordResetEmailAsync(string receiveEmail, string token, string name);
         Task SendVerificationEmailAsync(string receiveEmail, string token, string name);
         Task SendPurchaseEmailAsync(string receiveEmail, string name);
+        Task SendGoogleAccountAsync(string receiveEmail, string userFullName, string username, string password);
+        Task SendActiveEmailAsync(string email, string userFullName);
     }
 
     public class EmailService : IEmailService
@@ -96,6 +98,29 @@ namespace NET1814_MilkShop.Services.Services
                 Receiver = receiveEmail,
                 Subject = "Xác nhận đơn hàng",
                 Body = MailBody.PurchaseSuccess(name)
+            };
+            await SendMailAsync(model);
+        }
+
+        public async Task SendGoogleAccountAsync(string receiveEmail, string userFullName, string username,
+            string password)
+        {
+            var model = new SendMailModel
+            {
+                Receiver = receiveEmail,
+                Subject = "Tài khoản Google",
+                Body = MailBody.GoogleAccount(userFullName, username, password)
+            };
+            await SendMailAsync(model);
+        }
+
+        public async Task SendActiveEmailAsync(string email, string userFullName)
+        {
+            var model = new SendMailModel
+            {
+                Receiver = email,
+                Subject = "Kích hoạt tài khoản",
+                Body = MailBody.GoogleActivateAccount(userFullName)
             };
             await SendMailAsync(model);
         }
