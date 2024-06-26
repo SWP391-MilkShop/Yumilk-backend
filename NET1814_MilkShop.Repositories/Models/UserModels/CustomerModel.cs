@@ -11,7 +11,6 @@
         public string? Role { get; set; }
         public string? ProfilePictureUrl { get; set; }
         public string? GoogleId { get; set; }
-        public int Points { get; set; }
         public bool? IsActive { get; set; }
         public bool IsBanned { get; set; }
     }
