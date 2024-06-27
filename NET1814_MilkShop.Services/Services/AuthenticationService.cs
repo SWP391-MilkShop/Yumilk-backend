@@ -364,7 +364,6 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.BadRequest("Đã xảy ra lỗi trong quá trình xác thực tài khoản Google");
             }
 
-            var flag = false;
             var firebase = JsonConvert.DeserializeObject<FirebaseModel>(decodedToken.Claims["firebase"].ToString()!);
             var googleId = firebase!.Identities.GoogleId[0];
             var isVerifyEmail = decodedToken.Claims["email_verified"].ToString();
@@ -412,7 +411,6 @@ namespace NET1814_MilkShop.Services.Services
                 _customerRepository.Add(customerGoogle);
                 // gửi email username và password cho người dùng
                 await _emailService.SendGoogleAccountAsync(userEmail!, userFullName, username, password);
-                flag = true;
             }
             else // đã tồn tại gmail trong hệ thống
             {
@@ -440,43 +438,37 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     return ResponseModel.BadRequest("Tài khoản Google đã được liên kết với một tài khoản khác");
                 }
-
-                flag = true;
             }
 
-            if (flag)
+
+            await _unitOfWork.SaveChangesAsync();
+            var jwtToken = _jwtTokenExtension.CreateJwtToken(tempUser, TokenType.Access);
+            var refreshToken = _jwtTokenExtension.CreateJwtToken(
+                tempUser,
+                TokenType.Refresh
+            );
+            var responseLogin = new ResponseLoginModel
             {
-                await _unitOfWork.SaveChangesAsync();
-                var jwtToken = _jwtTokenExtension.CreateJwtToken(tempUser, TokenType.Access);
-                var refreshToken = _jwtTokenExtension.CreateJwtToken(
-                    tempUser,
-                    TokenType.Refresh
-                );
-                var responseLogin = new ResponseLoginModel
-                {
-                    UserID = tempUser.Id.ToString(),
-                    Username = tempUser.Username,
-                    FirstName = tempUser.FirstName,
-                    LastName = tempUser.LastName,
-                    Role = RoleId.CUSTOMER.ToString(),
-                    AccessToken = jwtToken,
-                    RefreshToken = refreshToken,
-                    IsActive = tempUser.IsActive,
-                    IsBanned = tempUser.IsBanned
-                };
-                var customer = await _customerRepository.GetByIdAsync(tempUser.Id);
-                if (customer != null)
-                {
-                    responseLogin.Email = customer.Email;
-                    responseLogin.PhoneNumber = customer.PhoneNumber;
-                    responseLogin.ProfilePictureUrl = customer.ProfilePictureUrl;
-                    responseLogin.GoogleId = customer.GoogleId;
-                }
-
-                return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
+                UserID = tempUser.Id.ToString(),
+                Username = tempUser.Username,
+                FirstName = tempUser.FirstName,
+                LastName = tempUser.LastName,
+                Role = RoleId.CUSTOMER.ToString(),
+                AccessToken = jwtToken,
+                RefreshToken = refreshToken,
+                IsActive = tempUser.IsActive,
+                IsBanned = tempUser.IsBanned
+            };
+            var customer = await _customerRepository.GetByIdAsync(tempUser.Id);
+            if (customer != null)
+            {
+                responseLogin.Email = customer.Email;
+                responseLogin.PhoneNumber = customer.PhoneNumber;
+                responseLogin.ProfilePictureUrl = customer.ProfilePictureUrl;
+                responseLogin.GoogleId = customer.GoogleId;
             }
 
-            return ResponseModel.BadRequest(ResponseConstants.Login(false));
+            return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
         }
     }
 }
