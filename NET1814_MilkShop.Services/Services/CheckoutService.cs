@@ -172,6 +172,11 @@ public class CheckoutService : ICheckoutService
         foreach (var c in cart.CartDetails)
         {
             c.Product.Quantity -= c.Quantity;
+            if (c.Product.Quantity == 0)
+            {
+                c.Product.StatusId = (int)ProductStatusId.OUT_OF_STOCK;
+            }
+
             _productRepository.Update(c.Product);
         }
 
