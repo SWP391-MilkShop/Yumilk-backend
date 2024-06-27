@@ -13,6 +13,8 @@ using System.Reflection;
 using System.Text;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using NET1814_MilkShop.Repositories.Models.GoogleAuthenticationModels;
+using Newtonsoft.Json;
 
 namespace NET1814_MilkShop.API
 {
@@ -90,9 +92,11 @@ namespace NET1814_MilkShop.API
             //Add Infrastructure BackgroundJob
             QuartzExtenstionHosting.AddQuartzBackgroundJobs(services);
             //Add Firebase
+            var firebaseConfig = _configuration.GetSection("FIREBASE_CONFIG").Get<FirebaseConfig>();
+            string firebaseConfigJson = JsonConvert.SerializeObject(firebaseConfig);
             FirebaseApp.Create(new AppOptions()
             {
-                Credential = GoogleCredential.FromJson(_configuration["FIREBASE_CONFIG"])
+                Credential = GoogleCredential.FromJson(firebaseConfigJson)
             });
             //Add Email Setting
             services.Configure<EmailSettingModel>(
