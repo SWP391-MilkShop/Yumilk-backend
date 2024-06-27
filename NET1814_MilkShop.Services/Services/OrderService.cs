@@ -294,7 +294,7 @@ namespace NET1814_MilkShop.Services.Services
                 Quantity = x.Quantity,
                 UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
                 ItemPrice = x.ItemPrice,
-                ThumbNail = x.Thumbnail
+                Thumbnail = x.Thumbnail
             }).ToList();
 
             var detail = new OrderDetailModel
@@ -539,7 +539,7 @@ namespace NET1814_MilkShop.Services.Services
                 Quantity = x.Quantity,
                 UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
                 ItemPrice = x.ItemPrice,
-                ThumbNail = x.Thumbnail
+                Thumbnail = x.Thumbnail
             }).ToList();
             var detail = new OrderDetailModel
             {

@@ -104,7 +104,6 @@ namespace NET1814_MilkShop.Services.Services
             var customer = new Customer
             {
                 UserId = user.Id,
-                Points = 0,
                 Email = model.Email,
                 PhoneNumber = model.PhoneNumber
             };
@@ -148,8 +147,8 @@ namespace NET1814_MilkShop.Services.Services
                     FirstName = existingUser.FirstName,
                     LastName = existingUser.LastName,
                     Role = existingUser.Role!.Name,
-                    AccessToken = token.ToString(),
-                    RefreshToken = refreshToken.ToString(),
+                    AccessToken = token,
+                    RefreshToken = refreshToken,
                     IsActive = existingUser.IsActive,
                     IsBanned = existingUser.IsBanned
                 };
@@ -160,7 +159,6 @@ namespace NET1814_MilkShop.Services.Services
                     responseLogin.PhoneNumber = customer.PhoneNumber;
                     responseLogin.ProfilePictureUrl = customer.ProfilePictureUrl;
                     responseLogin.GoogleId = customer.GoogleId;
-                    responseLogin.Points = customer.Points;
                 }
 
                 return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
@@ -174,11 +172,11 @@ namespace NET1814_MilkShop.Services.Services
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(token);
             var tokenS = jsonToken as JwtSecurityToken;
-            var userID = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
+            var userId = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
             var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
             var exp = tokenS.Claims.First(claim => claim.Type == "exp").Value;
             var expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).UtcDateTime;
-            var isExist = await _userRepository.GetByIdAsync(Guid.Parse(userID));
+            var isExist = await _userRepository.GetByIdAsync(Guid.Parse(userId));
             if (expirationTime < DateTime.UtcNow)
             {
                 return ResponseModel.BadRequest(ResponseConstants.Expired("Token"));
@@ -237,9 +235,9 @@ namespace NET1814_MilkShop.Services.Services
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(request.token);
             var tokenS = jsonToken as JwtSecurityToken;
-            var userID = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
+            var userId = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
             var verifyToken = tokenS.Claims.First(claim => claim.Type == "Token").Value;
-            var isExist = await _userRepository.GetByIdAsync(Guid.Parse(userID));
+            var isExist = await _userRepository.GetByIdAsync(Guid.Parse(userId));
             if (isExist == null)
             {
                 return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
@@ -347,8 +345,8 @@ namespace NET1814_MilkShop.Services.Services
                     FirstName = existingUser.FirstName,
                     LastName = existingUser.LastName,
                     Role = existingUser.Role!.Name,
-                    AccessToken = token.ToString(),
-                    RefreshToken = refreshToken.ToString(),
+                    AccessToken = token,
+                    RefreshToken = refreshToken,
                     IsBanned = existingUser.IsBanned,
                     IsActive = existingUser.IsActive
                 };

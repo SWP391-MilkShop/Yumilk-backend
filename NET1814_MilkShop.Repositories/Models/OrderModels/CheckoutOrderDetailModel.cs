@@ -7,5 +7,5 @@ public class CheckoutOrderDetailModel
     public int Quantity { get; set; }
     public int UnitPrice { get; set; }
     public int ItemPrice { get; set; }
-    public string? ThumbNail { get; set; }
+    public string? Thumbnail { get; set; }
 }

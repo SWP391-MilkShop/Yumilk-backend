@@ -19,8 +19,6 @@ public partial class Order : IAuditableEntity
 
     [Column("total_gram")] public int TotalGram { get; set; }
 
-    public int VoucherId { get; set; }
-
     [Column("receiver_name", TypeName = "nvarchar(255)")]
     public string ReceiverName { get; set; } = null!;
 
@@ -68,6 +66,4 @@ public partial class Order : IAuditableEntity
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
 
     public virtual OrderStatus? Status { get; set; }
-
-    public virtual Voucher? Voucher { get; set; }
 }
