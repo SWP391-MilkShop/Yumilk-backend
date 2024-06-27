@@ -28,6 +28,7 @@ public class CheckoutService : ICheckoutService
     private readonly IPreorderProductRepository _preorderProductRepository;
     private readonly IEmailService _emailService;
     private readonly IUserRepository _userRepository;
+    private readonly ICartDetailRepository _cartDetailRepository;
 
 
     public CheckoutService(
@@ -37,7 +38,8 @@ public class CheckoutService : ICheckoutService
         ICartRepository cartRepository,
         ICustomerRepository customerRepository,
         IPaymentService paymentService,
-        IPreorderProductRepository preorderProductRepository, IEmailService emailService, IUserRepository userRepository
+        IPreorderProductRepository preorderProductRepository, IEmailService emailService,
+        IUserRepository userRepository, ICartDetailRepository cartDetailRepository
     )
     {
         _customerRepository = customerRepository;
@@ -49,6 +51,7 @@ public class CheckoutService : ICheckoutService
         _preorderProductRepository = preorderProductRepository;
         _emailService = emailService;
         _userRepository = userRepository;
+        _cartDetailRepository = cartDetailRepository;
     }
 
     /// <summary>
@@ -65,7 +68,7 @@ public class CheckoutService : ICheckoutService
             return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
         }
 
-        var cart = await _cartRepository.GetByCustomerIdAsync(userId, true);
+        var cart = await _cartRepository.GetCartByCustomerId(userId);
         if (cart == null)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Giỏ hàng"));
@@ -164,8 +167,8 @@ public class CheckoutService : ICheckoutService
         });
         var cartTemp = cart.CartDetails.ToList();
         _orderRepository.AddRange(orderDetailsList);
-
         // xóa cart detail
+
         _cartRepository.RemoveRange(cart.CartDetails); ////tạo hàm mẫu ở order repo
 
         // cập nhật quantity trong product
@@ -213,7 +216,7 @@ public class CheckoutService : ICheckoutService
                 resp.CheckoutUrl = paymentData.CheckoutUrl;
             }
 
-            await _emailService.SendPurchaseEmailAsync(customerEmail, orders.ReceiverName);
+            await _emailService.SendPurchaseEmailAsync(customerEmail, userActive.FirstName);
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
@@ -352,7 +355,7 @@ public class CheckoutService : ICheckoutService
             var paymentData = JsonConvert.DeserializeObject<PaymentDataModel>(json);
             resp.OrderCode = paymentData!.OrderCode;
             resp.CheckoutUrl = paymentData.CheckoutUrl;
-            await _emailService.SendPurchaseEmailAsync(customerEmail, preOrder.ReceiverName);
+            await _emailService.SendPurchaseEmailAsync(customerEmail, userActive.FirstName);
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
