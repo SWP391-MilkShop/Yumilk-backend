@@ -11,18 +11,15 @@ namespace NET1814_MilkShop.API.Controllers
     public class ImageController : Controller
     {
         private readonly IImageService _imageService;
-        private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
 
         public ImageController(
             IServiceProvider serviceProvider,
-            ILogger logger,
-            IConfiguration configuration
+            ILogger logger
         )
         {
             _imageService = serviceProvider.GetRequiredService<IImageService>();
             _logger = logger;
-            _configuration = configuration;
         }
 
         /// <summary>

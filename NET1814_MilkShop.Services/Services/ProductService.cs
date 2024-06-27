@@ -226,7 +226,15 @@ public class ProductService : IProductService
     {
         var product = await _productRepository.GetByIdNoIncludeAsync(id);
         if (product == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
-
+        //check if product is ordered and status is changed
+        if (model.StatusId != 0 && product.StatusId != model.StatusId)
+        {
+            var isOrdered = await _orderDetailRepository.CheckActiveOrderProduct(id);
+            if (isOrdered)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
+            }
+        }
         //add preorder product if status is preorder and no preorder product exists
         if (model.StatusId == (int)ProductStatusId.PREORDER)
         {
@@ -281,7 +289,11 @@ public class ProductService : IProductService
     {
         var product = await _productRepository.GetByIdNoIncludeAsync(id);
         if (product == null) return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
-
+        var isOrdered = await _orderDetailRepository.CheckActiveOrderProduct(id);
+        if (isOrdered)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
+        }
         var preorderProduct = await _preorderProductRepository.GetByIdAsync(id);
         //delete preorder product if exists
         if (preorderProduct != null) _preorderProductRepository.Delete(preorderProduct);

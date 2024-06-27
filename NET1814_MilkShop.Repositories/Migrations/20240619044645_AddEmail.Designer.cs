@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NET1814_MilkShop.Repositories.Data;
 
@@ -11,9 +12,11 @@ using NET1814_MilkShop.Repositories.Data;
 namespace NET1814_MilkShop.Repositories.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240619044645_AddEmail")]
+    partial class AddEmail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -161,14 +164,9 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("nvarchar(255)")
                         .UseCollation("Latin1_General_CI_AI");
 
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Name");
-
-                    b.HasIndex("ParentId");
 
                     b.ToTable("categories", (string)null);
                 });
@@ -202,6 +200,10 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("phone_number");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int")
+                        .HasColumnName("points");
 
                     b.Property<string>("ProfilePictureUrl")
                         .HasColumnType("nvarchar(255)")
@@ -385,6 +387,10 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("int")
                         .HasColumnName("total_price");
 
+                    b.Property<int>("VoucherId")
+                        .HasColumnType("int")
+                        .HasColumnName("voucher_id");
+
                     b.Property<string>("WardCode")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -396,6 +402,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("StatusId");
+
+                    b.HasIndex("VoucherId");
 
                     b.ToTable("orders", (string)null);
                 });
@@ -932,6 +940,95 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.UserVoucher", b =>
+                {
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("customer_id");
+
+                    b.Property<int>("VoucherId")
+                        .HasColumnType("int")
+                        .HasColumnName("voucher_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("modified_at");
+
+                    b.HasKey("CustomerId", "VoucherId");
+
+                    b.HasIndex("VoucherId");
+
+                    b.ToTable("user_vouchers", (string)null);
+                });
+
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Voucher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("DiscountPercent")
+                        .HasColumnType("int")
+                        .HasColumnName("discount_percent");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("end_date");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<int>("MaxDiscountAmount")
+                        .HasColumnType("int")
+                        .HasColumnName("max_discount_amount");
+
+                    b.Property<int>("MinOrderValue")
+                        .HasColumnType("int")
+                        .HasColumnName("min_order_value");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("modified_at");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("start_date");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("vouchers", (string)null);
+                });
+
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Cart", b =>
                 {
                     b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Customer", "Customer")
@@ -960,15 +1057,6 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Navigation("Cart");
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Category", b =>
-                {
-                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Category", "Parent")
-                        .WithMany("SubCategories")
-                        .HasForeignKey("ParentId");
-
-                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Customer", b =>
@@ -1003,9 +1091,17 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Voucher", "Voucher")
+                        .WithMany("Orders")
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Customer");
 
                     b.Navigation("Status");
+
+                    b.Navigation("Voucher");
                 });
 
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.OrderDetail", b =>
@@ -1139,6 +1235,25 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.UserVoucher", b =>
+                {
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Customer", "Customer")
+                        .WithMany("UserVouchers")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Voucher", "Voucher")
+                        .WithMany("UserVouchers")
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Voucher");
+                });
+
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Brand", b =>
                 {
                     b.Navigation("Products");
@@ -1152,8 +1267,6 @@ namespace NET1814_MilkShop.Repositories.Migrations
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Category", b =>
                 {
                     b.Navigation("Products");
-
-                    b.Navigation("SubCategories");
                 });
 
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Customer", b =>
@@ -1163,6 +1276,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Navigation("CustomerAddresses");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("UserVouchers");
                 });
 
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Order", b =>
@@ -1208,6 +1323,13 @@ namespace NET1814_MilkShop.Repositories.Migrations
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.User", b =>
                 {
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Voucher", b =>
+                {
+                    b.Navigation("Orders");
+
+                    b.Navigation("UserVouchers");
                 });
 #pragma warning restore 612, 618
         }

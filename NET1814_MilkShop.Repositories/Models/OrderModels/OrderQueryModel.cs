@@ -26,5 +26,10 @@ namespace NET1814_MilkShop.Repositories.Models.OrderModels
         /// Sort by id, total amount, order date, payment date (default is id)
         /// </summary>
         public new string? SortColumn { get; set; }
+
+        /// <summary>
+        /// sort order asc or desc (default is desc by created at)
+        /// </summary>
+        public new string? SortOrder { get; set; } = "desc";
     }
 }

@@ -1,13 +1,13 @@
 ﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("orders")]
 public partial class Order : IAuditableEntity
 {
-    [Key]
-    public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; }
 
     public Guid? CustomerId { get; set; }
 
@@ -17,20 +17,16 @@ public partial class Order : IAuditableEntity
 
     public int TotalAmount { get; set; } // TotalPrice + ShippingFee
 
-    [Column("total_gram")]
-    public int TotalGram { get; set; }
-
-    public int VoucherId { get; set; }
+    [Column("total_gram")] public int TotalGram { get; set; }
 
     [Column("receiver_name", TypeName = "nvarchar(255)")]
     public string ReceiverName { get; set; } = null!;
 
     public string Address { get; set; } = null!;
-    
-    [Column("district_id")]
-    public int DistrictId { get; set; }
-    
-    [Column("ward_code",TypeName="nvarchar(255)")]
+
+    [Column("district_id")] public int DistrictId { get; set; }
+
+    [Column("ward_code", TypeName = "nvarchar(255)")]
     [StringLength(255)]
     public string WardCode { get; set; }
 
@@ -43,14 +39,18 @@ public partial class Order : IAuditableEntity
 
     [Column("order_code", TypeName = "int")]
     public int? OrderCode { get; set; }
-    
-    [Column("shipping_code",TypeName = "nvarchar(255)")]
+
+    [Column("shipping_code", TypeName = "nvarchar(255)")]
     [StringLength(255)]
     public string? ShippingCode { get; set; }
 
     [Column("payment_date", TypeName = "datetime2")]
     public DateTime? PaymentDate { get; set; }
+
     public int StatusId { get; set; }
+
+    [Column("email", TypeName = "nvarchar(255)")]
+    public string? Email { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
@@ -66,6 +66,4 @@ public partial class Order : IAuditableEntity
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
 
     public virtual OrderStatus? Status { get; set; }
-
-    public virtual Voucher? Voucher { get; set; }
 }

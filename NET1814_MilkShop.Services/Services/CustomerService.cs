@@ -41,14 +41,13 @@ namespace NET1814_MilkShop.Services.Services
         {
             return new CustomerModel
             {
-                UserId = customer.UserId.ToString(),
+                UserID = customer.UserId.ToString(),
                 Username = user.Username,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 GoogleId = customer.GoogleId,
                 PhoneNumber = customer.PhoneNumber,
                 Email = customer.Email,
-                Points = customer.Points,
                 Role = user.Role!.Name,
                 ProfilePictureUrl = customer.ProfilePictureUrl,
                 IsActive = user.IsActive,
@@ -67,11 +66,10 @@ namespace NET1814_MilkShop.Services.Services
                     c.User.Username.ToLower().Contains(searchTerm)
                     || c.Email!.Contains(searchTerm)
                     || c.PhoneNumber!.Contains(searchTerm)
-                    || c.User.FirstName.Contains(searchTerm)
-                    || c.User.LastName.Contains(searchTerm)
+                    || c.User.FirstName != null && c.User.FirstName.Contains(searchTerm)
+                    || c.User.LastName != null && c.User.LastName.Contains(searchTerm)
                 );
             }
-
             if (request.IsActive.HasValue || request.IsBanned.HasValue)
             {
                 query = query.Where(c =>
@@ -101,7 +99,6 @@ namespace NET1814_MilkShop.Services.Services
         {
             Expression<Func<Customer, object>> keySelector = request.SortColumn?.ToLower().Replace(" ", "") switch
             {
-                "point" => customer => customer.Points,
                 "email" => customer => customer.Email!,
                 "isactive" => customer => customer.User.IsActive,
                 "firstname" => customer => customer.User.FirstName!,

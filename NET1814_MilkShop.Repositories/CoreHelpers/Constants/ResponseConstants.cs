@@ -210,6 +210,7 @@
         public const string InvalidQuantity = "Số lượng sản phẩm phải lớn hơn 0";
         public const string NoQuantityPreorder = "Không thể set số lượng tồn cho sản phẩm Pre-order";
         public const string NotInPreOrder = "Sản phẩm đang không trong quá trình Pre-order";
+        public const string ProductOrdered = "Sản phẩm đang trong quá trình đặt hàng";
         #endregion
         #region Cart
 

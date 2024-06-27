@@ -57,22 +57,22 @@ public class CheckPaymentStatusJob : IJob
 
                 switch (order.StatusId)
                 {
-                    case 5:
+                    case (int) OrderStatusId.CANCELLED:
                         _logger.LogInformation(
                             "OrderId {OrderId} code {OrderCode} is already cancelled and updated to {cancelled}",
                             order.Id, order.OrderCode.Value, OrderStatusId.CANCELLED.ToString());
                         continue;
-                    case 2:
+                    case (int) OrderStatusId.PROCESSING:
                         _logger.LogInformation(
                             "OrderId {OrderId} code {OrderCode} is already paid and updated to {processing}",
                             order.Id, order.OrderCode.Value, OrderStatusId.PROCESSING.ToString());
                         continue;
-                    case 3:
+                    case (int) OrderStatusId.SHIPPING:
                         _logger.LogInformation(
                             "OrderId {OrderId} code {OrderCode} is in {shipping} status",
                             order.Id, order.OrderCode.Value, OrderStatusId.SHIPPING.ToString());
                         continue;
-                    case 4:
+                    case (int) OrderStatusId.PREORDER:
                         _logger.LogInformation(
                             "OrderId {OrderId} code {OrderCode} is in {preorder} status",
                             order.Id, order.OrderCode.Value, OrderStatusId.PREORDER.ToString());
@@ -88,7 +88,7 @@ public class CheckPaymentStatusJob : IJob
                     continue;
                 }
 
-                _logger.LogInformation("Type of paymentStatus.Data: {Type}", paymentStatus.Data.GetType());
+                _logger.LogInformation("Type of paymentStatus.Data: {Type}", paymentStatus.Data?.GetType());
                 _logger.LogInformation("paymentStatus.Data: {Data}", paymentStatus.Data);
 
                 var paymentData = paymentStatus.Data as PaymentLinkInformation;
@@ -97,8 +97,10 @@ public class CheckPaymentStatusJob : IJob
                 {
                     _logger.LogInformation("Payment for order {OrderId} is paid", order.Id);
                     var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(order.Id);
-                    var product = await _productRepository.GetByIdNoIncludeAsync(order.OrderDetails.Select(x => x.ProductId).FirstOrDefault());
-                    if (product!.StatusId == (int)ProductStatusId.PREORDER)
+                    //Check if order has preorder product
+                    var existPreorder =
+                        await _orderRepository.IsExistPreorderProductAsync(order.Id);
+                    if (existPreorder)
                     {
                         _logger.LogInformation("Order {OrderId} has preorder product", order.Id);
                         existOrder.StatusId = (int)OrderStatusId.PREORDER; //Preorder
@@ -139,7 +141,7 @@ public class CheckPaymentStatusJob : IJob
                 }
 
 
-                order.StatusId = 5; // Cancelled
+                order.StatusId = (int) OrderStatusId.CANCELLED;
                 _orderRepository.Update(order);
                 var result = await _unitOfWork.SaveChangesAsync();
                 foreach (var orderDetail in order.OrderDetails)
