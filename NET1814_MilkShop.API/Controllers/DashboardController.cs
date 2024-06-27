@@ -72,11 +72,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         /// <summary>
-        /// Get product stats
-        /// Total number of products sold
-        /// Total number of products sold per category
-        /// Total number of products sold per brand
-        /// (only count products that have been delivered)
+        /// Get product stats (total sold, revenue per brand, category)
         /// </summary>
         /// <param name="queryModel"></param>
         /// <returns></returns>
@@ -92,7 +88,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         /// <summary>
         /// Get users stats
-        /// Total customers
+        /// Total customers,
         /// Total customers who have bought any product
         /// </summary>
         /// <param name="queryModel"></param>
