@@ -12,5 +12,10 @@
         /// Format is mm-dd-yyyy or yyyy-mm-dd
         /// </summary>
         public DateTime? To { get; set; }
+
+        /// <summary>
+        /// Parent id (default is root category)
+        /// </summary>
+        public int ParentId { get; set; } = 0;
     }
 }
