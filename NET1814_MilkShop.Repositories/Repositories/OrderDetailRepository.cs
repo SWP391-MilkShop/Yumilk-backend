@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
 
@@ -32,8 +34,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public Task<bool> CheckActiveOrderProduct(Guid productId)
         {
-            return _query
-                .Include(od => od.Order)
+            return _query.Include(od => od.Order)
                 .AnyAsync(od => od.ProductId == productId
                                 && (od.Order.StatusId != (int)OrderStatusId.DELIVERED
                                 && od.Order.StatusId != (int)OrderStatusId.CANCELLED));
