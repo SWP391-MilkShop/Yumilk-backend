@@ -404,7 +404,6 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     UserId = user.Id,
                     Email = userEmail,
-                    Points = 0,
                     GoogleId = googleId,
                     ProfilePictureUrl = pictureUrl
                 };
@@ -472,7 +471,6 @@ namespace NET1814_MilkShop.Services.Services
                     responseLogin.PhoneNumber = customer.PhoneNumber;
                     responseLogin.ProfilePictureUrl = customer.ProfilePictureUrl;
                     responseLogin.GoogleId = customer.GoogleId;
-                    responseLogin.Points = customer.Points;
                 }
 
                 return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
