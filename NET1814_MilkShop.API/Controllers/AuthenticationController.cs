@@ -96,5 +96,13 @@ namespace NET1814_MilkShop.API.Controllers
             var response = await _authenticationService.ActivateAccountAsync(email);
             return ResponseExtension.Result(response);
         }
+
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin([FromQuery] string token)
+        {
+            _logger.Information("Google Login");
+            var response = await _authenticationService.GoogleLoginAsync(token);
+            return ResponseExtension.Result(response);
+        }
     }
 }

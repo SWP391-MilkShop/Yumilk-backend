@@ -11,6 +11,8 @@ using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using NET1814_MilkShop.Services.Services;
 using System.Reflection;
 using System.Text;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 namespace NET1814_MilkShop.API
 {
@@ -85,10 +87,13 @@ namespace NET1814_MilkShop.API
 
             //Add Dependency Injection
             AddDI(services);
-
             //Add Infrastructure BackgroundJob
             QuartzExtenstionHosting.AddQuartzBackgroundJobs(services);
-
+            //Add Firebase
+            FirebaseApp.Create(new AppOptions()
+            {
+                Credential = GoogleCredential.FromJson(_configuration["FIREBASE_CONFIG"])
+            });
             //Add Email Setting
             services.Configure<EmailSettingModel>(
                 _configuration

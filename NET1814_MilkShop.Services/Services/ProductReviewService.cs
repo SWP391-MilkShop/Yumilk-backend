@@ -121,7 +121,7 @@ public class ProductReviewService : IProductReviewService
         };
     }
 
-    private ReviewModel ToReviewModel(ProductReview productReview)
+    private static ReviewModel ToReviewModel(ProductReview productReview)
     {
         var customer = productReview.Customer;
         var model = new ReviewModel

@@ -7,6 +7,10 @@ using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using System.IdentityModel.Tokens.Jwt;
+using FirebaseAdmin.Auth;
+using Microsoft.IdentityModel.Tokens;
+using NET1814_MilkShop.Repositories.Models.GoogleAuthenticationModels;
+using Newtonsoft.Json;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -20,6 +24,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> RefreshTokenAsync(string token);
         Task<ResponseModel> ActivateAccountAsync(string email);
         Task<ResponseModel> DashBoardLoginAsync(RequestLoginModel model);
+        Task<ResponseModel> GoogleLoginAsync(string token);
     }
 
     public sealed class AuthenticationService : IAuthenticationService
@@ -122,7 +127,7 @@ namespace NET1814_MilkShop.Services.Services
                 model.Password
             );
             if (existingUser != null && existingUser.RoleId == (int)RoleId.CUSTOMER)
-            //Only customer can login, others will say wrong username or password
+                //Only customer can login, others will say wrong username or password
             {
                 //check if user is banned
                 if (existingUser.IsBanned)
@@ -216,7 +221,8 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Reset
                     );
-                    await _emailService.SendPasswordResetEmailAsync(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    await _emailService.SendPasswordResetEmailAsync(customer.Email, verifyToken,
+                        customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
                 }
             }
@@ -303,7 +309,8 @@ namespace NET1814_MilkShop.Services.Services
                         customer.User,
                         TokenType.Authentication
                     );
-                    await _emailService.SendVerificationEmailAsync(customer.Email, verifyToken, customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+                    await _emailService.SendVerificationEmailAsync(customer.Email, verifyToken,
+                        customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
                     return ResponseModel.Success(ResponseConstants.ActivateAccountLink, null);
                 }
             }
@@ -318,7 +325,7 @@ namespace NET1814_MilkShop.Services.Services
                 model.Password
             );
             if (existingUser != null && existingUser.RoleId != (int)RoleId.CUSTOMER)
-            //Only admin,staff can login others will response wrong username or password
+                //Only admin,staff can login others will response wrong username or password
             {
                 //check if user is banned
                 if (existingUser.IsBanned)
@@ -347,6 +354,121 @@ namespace NET1814_MilkShop.Services.Services
             }
 
             return ResponseModel.BadRequest(ResponseConstants.Login(false));
+        }
+
+        public async Task<ResponseModel> GoogleLoginAsync(string token)
+        {
+            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+            if (decodedToken == null)
+            {
+                return ResponseModel.BadRequest("Đã xảy ra lỗi trong quá trình xác thực tài khoản Google");
+            }
+
+            var firebase = JsonConvert.DeserializeObject<FirebaseModel>(decodedToken.Claims["firebase"].ToString()!);
+            var googleId = firebase!.Identities.GoogleId[0];
+            var isVerifyEmail = decodedToken.Claims["email_verified"].ToString();
+            // kiểm tra email đã đc google verify ?
+            if (isVerifyEmail == "False")
+            {
+                return ResponseModel.BadRequest("Tài khoản Google chưa được xác thực email");
+            }
+
+            User tempUser = null!;
+            var userEmail = decodedToken.Claims["email"].ToString();
+            var isExistUser = await _customerRepository.GetByEmailAsync(userEmail!);
+            if (isExistUser == null) // nếu chưa tồn tại người dùng thì tự động đăng ký
+            {
+                var userFullName = decodedToken.Claims["name"].ToString()!.Trim();
+                var userFirstName = userFullName.Contains(' ')
+                    ? userFullName.Substring(0, userFullName.IndexOf(' ')).Trim()
+                    : "";
+                var userLastName = userFullName.Contains(' ')
+                    ? userFullName.Substring(userFullName.IndexOf(' ')).Trim()
+                    : userFullName.Trim();
+                var username = Guid.NewGuid().ToString();
+                var password = Guid.NewGuid().ToString();
+                // tạo tài khoản mới
+                var user = new User
+                {
+                    Id = Guid.NewGuid(),
+                    Username = username,
+                    Password = BCrypt.Net.BCrypt.HashPassword(password),
+                    FirstName = userFirstName,
+                    LastName = userLastName,
+                    RoleId = (int)RoleId.CUSTOMER,
+                    IsActive = true
+                };
+                var pictureUrl = decodedToken.Claims["picture"].ToString(); // lấy ảnh đại diện từ google
+                var customerGoogle = new Customer
+                {
+                    UserId = user.Id,
+                    Email = userEmail,
+                    GoogleId = googleId,
+                    ProfilePictureUrl = pictureUrl
+                };
+                tempUser = user;
+                _userRepository.Add(user);
+                _customerRepository.Add(customerGoogle);
+                // gửi email username và password cho người dùng
+                await _emailService.SendGoogleAccountAsync(userEmail!, userFullName, username, password);
+            }
+            else // đã tồn tại gmail trong hệ thống
+            {
+                tempUser = isExistUser.User;
+                if (isExistUser.User.IsBanned)
+                {
+                    return ResponseModel.BadRequest(ResponseConstants.Banned);
+                }
+
+                // kiểm tra có ggid chưa ?
+                if (string.IsNullOrEmpty(isExistUser.GoogleId))
+                {
+                    // kiểm tra isactive
+                    if (!isExistUser.User.IsActive)
+                    {
+                        isExistUser.User.IsActive = true;
+                        await _emailService.SendActiveEmailAsync(isExistUser.Email!,
+                            isExistUser.User.FirstName + " " + isExistUser.User.LastName);
+                    }
+
+                    isExistUser.GoogleId = googleId;
+                    _userRepository.Update(isExistUser.User);
+                }
+                else if (isExistUser.GoogleId != googleId)
+                {
+                    return ResponseModel.BadRequest("Tài khoản Google đã được liên kết với một tài khoản khác");
+                }
+            }
+
+
+            await _unitOfWork.SaveChangesAsync();
+            var jwtToken = _jwtTokenExtension.CreateJwtToken(tempUser, TokenType.Access);
+            var refreshToken = _jwtTokenExtension.CreateJwtToken(
+                tempUser,
+                TokenType.Refresh
+            );
+            var responseLogin = new ResponseLoginModel
+            {
+                UserID = tempUser.Id.ToString(),
+                Username = tempUser.Username,
+                FirstName = tempUser.FirstName,
+                LastName = tempUser.LastName,
+                Role = RoleId.CUSTOMER.ToString(),
+                AccessToken = jwtToken,
+                RefreshToken = refreshToken,
+                IsActive = tempUser.IsActive,
+                IsBanned = tempUser.IsBanned
+            };
+            var customer = await _customerRepository.GetByIdAsync(tempUser.Id);
+            if (customer != null)
+            {
+                responseLogin.Email = customer.Email;
+                responseLogin.PhoneNumber = customer.PhoneNumber;
+                responseLogin.ProfilePictureUrl = customer.ProfilePictureUrl;
+                responseLogin.GoogleId = customer.GoogleId;
+            }
+
+            return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
         }
     }
 }
