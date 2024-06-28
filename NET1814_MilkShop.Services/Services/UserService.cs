@@ -69,7 +69,7 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.BadRequest(ResponseConstants.SameUsername);
             }
             //check if new username is already taken
-            var existingUser = await _userRepository.GetByUsernameAsync(model.NewUsername);
+            var existingUser = await _userRepository.GetByUsernameAsync(model.NewUsername, user.RoleId);
             if (existingUser != null)
             {
                 return ResponseModel.BadRequest(ResponseConstants.Exist("Tên đăng nhập"));
@@ -96,7 +96,7 @@ namespace NET1814_MilkShop.Services.Services
         /// <returns></returns>
         public async Task<ResponseModel> CreateUserAsync(CreateUserModel model)
         {
-            var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
+            var existingUser = await _userRepository.GetByUsernameAsync(model.Username, model.RoleId);
             if (existingUser != null)
             {
                 return ResponseModel.BadRequest(ResponseConstants.Exist("Tên đăng nhập"));

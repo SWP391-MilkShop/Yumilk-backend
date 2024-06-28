@@ -13,12 +13,22 @@ namespace NET1814_MilkShop.Services.Services
     public interface IAuthenticationService
     {
         Task<ResponseModel> SignUpAsync(SignUpModel model);
+        /// <summary>
+        /// Customer login
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         Task<ResponseModel> LoginAsync(RequestLoginModel model);
         Task<ResponseModel> VerifyAccountAsync(string token);
         Task<ResponseModel> ForgotPasswordAsync(ForgotPasswordModel request);
         Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request);
         Task<ResponseModel> RefreshTokenAsync(string token);
         Task<ResponseModel> ActivateAccountAsync(string email);
+        /// <summary>
+        /// Admin, Staff login
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         Task<ResponseModel> DashBoardLoginAsync(RequestLoginModel model);
     }
 
@@ -55,7 +65,7 @@ namespace NET1814_MilkShop.Services.Services
         /// <returns></returns>
         public async Task<ResponseModel> SignUpAsync(SignUpModel model)
         {
-            var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
+            var existingUser = await _userRepository.GetByUsernameAsync(model.Username, (int) RoleId.CUSTOMER);
             if (existingUser != null)
             {
                 return ResponseModel.BadRequest(ResponseConstants.Exist("Tên đăng nhập"));
@@ -119,7 +129,8 @@ namespace NET1814_MilkShop.Services.Services
         {
             var existingUser = await _authenticationRepository.GetUserByUserNameNPassword(
                 model.Username,
-                model.Password
+                model.Password,
+                isCustomer: true
             );
             if (existingUser != null && existingUser.RoleId == (int)RoleId.CUSTOMER)
             //Only customer can login, others will say wrong username or password
@@ -315,7 +326,8 @@ namespace NET1814_MilkShop.Services.Services
         {
             var existingUser = await _authenticationRepository.GetUserByUserNameNPassword(
                 model.Username,
-                model.Password
+                model.Password,
+                isCustomer: false
             );
             if (existingUser != null && existingUser.RoleId != (int)RoleId.CUSTOMER)
             //Only admin,staff can login others will response wrong username or password
