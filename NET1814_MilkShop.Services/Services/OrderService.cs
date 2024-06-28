@@ -105,7 +105,8 @@ namespace NET1814_MilkShop.Services.Services
 
             if (!string.IsNullOrEmpty(model.OrderStatus))
             {
-                query = query.Where(o => string.Equals(o.Status!.Name, model.OrderStatus));
+                query = query.Where(o =>
+                    string.Equals(o.Status!.Name, model.OrderStatus));
             }
 
             #endregion
@@ -116,32 +117,35 @@ namespace NET1814_MilkShop.Services.Services
                 ? query.OrderByDescending(GetSortProperty(model))
                 : query.OrderBy(GetSortProperty(model));
 
+            // tạm thời để pending lên đầu nhưng created_at sort ko chuẩn
+            var pendingOrders = query.Where(o => o.StatusId == (int)OrderStatusId.PENDING);
+
+            var otherOrders = query.Where(o => o.StatusId != (int)OrderStatusId.PENDING);
+
+            query = pendingOrders.Union(otherOrders);
+
             #endregion
 
             // chuyển về OrderModel
-            var orderModels = new List<OrderModel>();
-            foreach (var order in query.ToList())
+            var orderModels = query.Select(order => new OrderModel
             {
-                var orderModel = new OrderModel
-                {
-                    Id = order.Id,
-                    CustomerId = order.Customer!.UserId,
-                    TotalAmount = order.TotalAmount,
-                    PhoneNumber = order.PhoneNumber,
-                    Email = order.Email,
-                    Address = order.Address,
-                    PaymentMethod = order.PaymentMethod,
-                    OrderStatus = order.Status!.Name,
-                    CreatedDate = order.CreatedAt,
-                    PaymentDate = order.PaymentDate,
-                };
-                orderModels.Add(orderModel);
-            }
+                Id = order.Id,
+                CustomerId = order.Customer!.UserId,
+                TotalAmount = order.TotalAmount,
+                PhoneNumber = order.PhoneNumber,
+                Email = order.Email,
+                Address = order.Address,
+                PaymentMethod = order.PaymentMethod,
+                OrderStatus = order.Status!.Name,
+                CreatedDate = order.CreatedAt,
+                PaymentDate = order.PaymentDate,
+            });
+
 
             #region(paging)
 
-            var orders = PagedList<OrderModel>.Create(
-                orderModels.AsQueryable(),
+            var orders = await PagedList<OrderModel>.CreateAsync(
+                orderModels,
                 model.Page,
                 model.PageSize
             );
@@ -320,6 +324,7 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     return ResponseModel.Error(ResponseConstants.Get("chi tiết đơn hàng", false));
                 }
+
                 var json = JsonConvert.SerializeObject(orderDetail.Data);
                 var shippingData = JsonConvert.DeserializeObject<ExpectedDeliveryTime>(json);
                 var expectedDeliveryDate = shippingData!.DeliveryTime;
@@ -395,7 +400,7 @@ namespace NET1814_MilkShop.Services.Services
         private static Expression<Func<Order, object>> GetSortProperty<T>(
             T queryModel
         ) where T : QueryModel =>
-            queryModel.SortColumn?.ToLower().Replace(" ", "") switch
+            queryModel.SortColumn?.ToLower() switch
             {
                 "totalamount" => order => order.TotalAmount,
                 "paymentdate" => order =>
