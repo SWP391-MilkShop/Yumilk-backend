@@ -113,16 +113,17 @@ namespace NET1814_MilkShop.Services.Services
 
             #region(sorting)
 
+            //mặc định sort giảm dần theo created_at và tăng dần theo order status (PENDING)
             query = "desc".Equals(model.SortOrder?.ToLower())
-                ? query.OrderByDescending(GetSortProperty(model))
-                : query.OrderBy(GetSortProperty(model));
+                ? query.OrderBy(x => x.StatusId).ThenByDescending(GetSortProperty(model))
+                : query.OrderBy(x => x.StatusId).ThenBy(GetSortProperty(model));
 
             // tạm thời để pending lên đầu nhưng created_at sort ko chuẩn
-            var pendingOrders = query.Where(o => o.StatusId == (int)OrderStatusId.PENDING);
-
-            var otherOrders = query.Where(o => o.StatusId != (int)OrderStatusId.PENDING);
-
-            query = pendingOrders.Union(otherOrders);
+            // var pendingOrders = query.Where(o => o.StatusId == (int)OrderStatusId.PENDING);
+            //
+            // var otherOrders = query.Where(o => o.StatusId != (int)OrderStatusId.PENDING);
+            //
+            // query = pendingOrders.Union(otherOrders);
 
             #endregion
 
@@ -229,8 +230,8 @@ namespace NET1814_MilkShop.Services.Services
             #region sort
 
             query = "desc".Equals(model.SortOrder?.ToLower())
-                ? query.OrderByDescending(GetSortProperty(model))
-                : query.OrderBy(GetSortProperty(model));
+                ? query.OrderBy(x => x.StatusId).ThenByDescending(GetSortProperty(model))
+                : query.OrderBy(x => x.StatusId).ThenBy(GetSortProperty(model));
 
             #endregion
 
