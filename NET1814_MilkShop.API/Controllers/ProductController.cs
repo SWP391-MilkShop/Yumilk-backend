@@ -403,10 +403,10 @@ public class ProductController : Controller
     #region ProductImage
 
     [HttpGet("{id}/images")]
-    public async Task<IActionResult> GetProductImages(Guid id)
+    public async Task<IActionResult> GetProductImages(Guid id, [FromQuery] bool? isActive)
     {
         _logger.Information("Get Product Images");
-        var response = await _productImageService.GetByProductIdAsync(id);
+        var response = await _productImageService.GetByProductIdAsync(id, isActive);
         return ResponseExtension.Result(response);
     }
 
@@ -427,7 +427,14 @@ public class ProductController : Controller
         var response = await _productImageService.CreateProductImageAsync(id, images);
         return ResponseExtension.Result(response);
     }
-
+    [HttpPatch("images/{id}")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> UpdateProductImage(int id, [FromBody] bool isActive)
+    {
+        _logger.Information("Update Product Image");
+        var response = await _productImageService.UpdateProductImageAsync(id, isActive);
+        return ResponseExtension.Result(response);
+    }
     /// <summary>
     ///     Delete by image id (Hard delete)
     /// </summary>

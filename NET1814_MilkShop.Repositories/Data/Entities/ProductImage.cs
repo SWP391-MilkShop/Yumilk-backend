@@ -1,4 +1,5 @@
-﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
+﻿using System.ComponentModel;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,8 +15,8 @@ public partial class ProductImage : IAuditableEntity
 
     public string ImageUrl { get; set; } = null!;
 
-    //[DefaultValue(false)]
-    //public bool IsActive { get; set; }
+    [DefaultValue(false)]
+    public bool IsActive { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
