@@ -63,6 +63,11 @@ public class CheckoutService : ICheckoutService
     public async Task<ResponseModel> Checkout(Guid userId, CheckoutModel model)
     {
         var userActive = await _userRepository.GetByIdAsync(userId);
+        if (userActive!.IsBanned)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.Banned);
+        }
+
         if (!userActive!.IsActive)
         {
             return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
@@ -232,6 +237,11 @@ public class CheckoutService : ICheckoutService
     public async Task<ResponseModel> PreOrderCheckout(Guid userId, PreorderCheckoutModel model)
     {
         var userActive = await _userRepository.GetByIdAsync(userId);
+        if (userActive!.IsBanned)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.Banned);
+        }
+
         if (!userActive!.IsActive)
         {
             return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
