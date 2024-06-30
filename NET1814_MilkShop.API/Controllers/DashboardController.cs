@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
@@ -128,6 +130,26 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Get order detail history");
             var res = await _orderService.GetOrderHistoryDetailDashBoardAsync(id);
             return ResponseExtension.Result(res);
+        }
+
+
+        [HttpGet]
+        [Route("orders/export")]
+        public async Task<IActionResult> ExportOrderDashboardAsync()
+        {
+            var dt = await _orderService.ExportOrderDashboardAsync();
+            using (XLWorkbook wb = new XLWorkbook())
+            {
+                var worksheet = wb.AddWorksheet((System.Data.DataTable)dt.Data, "Orders");
+                worksheet.Columns().AdjustToContents();
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    wb.SaveAs(ms);
+                    var bytes = ms.ToArray();
+                    return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "Orders.xlsx");
+                }
+            }
         }
     }
 }

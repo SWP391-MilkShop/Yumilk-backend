@@ -1,4 +1,7 @@
+using System.Data;
 using System.Linq.Expressions;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
@@ -23,6 +26,7 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> GetOrderStatsAsync(OrderStatsQueryModel queryModel);
         Task<ResponseModel> CancelOrderAdminStaffAsync(Guid id);
         Task<ResponseModel> GetOrderHistoryDetailDashBoardAsync(Guid orderId);
+        Task<ResponseModel> ExportOrderDashboardAsync();
     }
 
     public class OrderService : IOrderService
@@ -463,7 +467,7 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
             }
 
-            var query = _orderRepository.GetOrderQueryWithStatus();
+            var query = _orderRepository.GetOrderQueryWithStatus(true);
             // default is from last 30 days
             var from = queryModel.FromOrderDate ?? DateTime.Now.AddDays(-30);
             // default is now
@@ -578,6 +582,53 @@ namespace NET1814_MilkShop.Services.Services
             }
 
             return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
+        }
+
+        public async Task<ResponseModel> ExportOrderDashboardAsync()
+        {
+            var dt = await GetOrderData();
+            return ResponseModel.Success(ResponseConstants.Get("dữ liệu đơn hàng", true), dt);
+            
+        }
+
+        private async Task<DataTable> GetOrderData()
+        {
+            DataTable dt = new DataTable();
+            dt.TableName = "Orders";
+            dt.Columns.Add("Order ID", typeof(Guid));
+            dt.Columns.Add("Customer ID", typeof(Guid));
+            dt.Columns.Add("Total Price", typeof(int));
+            dt.Columns.Add("Shipping Fee", typeof(int));
+            dt.Columns.Add("Total Amount", typeof(int));
+            dt.Columns.Add("Address", typeof(string));
+            dt.Columns.Add("Phone Number", typeof(string));
+            dt.Columns.Add("Note", typeof(string));
+            dt.Columns.Add("Status ID", typeof(int));
+            dt.Columns.Add("Payment Date", typeof(DateTime));
+            dt.Columns.Add("Payment Method", typeof(string));
+            dt.Columns.Add("Order Code", typeof(int));
+            dt.Columns.Add("Receiver Name", typeof(string));
+            dt.Columns.Add("District ID", typeof(int));
+            dt.Columns.Add("Ward Code", typeof(string));
+            dt.Columns.Add("Shipping Code", typeof(string));
+            dt.Columns.Add("Total Gram", typeof(int));
+            dt.Columns.Add("Email", typeof(string));
+            dt.Columns.Add("Created Date", typeof(DateTime));
+            dt.Columns.Add("Modified Date", typeof(DateTime));
+            dt.Columns.Add("Deleted Date", typeof(DateTime));
+            var orderList = await _orderRepository.GetOrderQueryWithStatus(false).ToListAsync();
+            if (orderList.Count > 0)
+            {
+                orderList.ForEach(item =>
+                {
+                    dt.Rows.Add(item.Id, item.CustomerId, item.TotalPrice, item.ShippingFee, item.TotalAmount,
+                        item.Address, item.PhoneNumber, item.Note, item.StatusId, item.PaymentDate, item.PaymentMethod,
+                        item.OrderCode, item.ReceiverName, item.DistrictId, item.WardCode, item.ShippingCode,
+                        item.TotalGram, item.Email, item.CreatedAt, item.ModifiedAt, item.DeletedAt);
+                });
+            }
+
+            return dt;
         }
     }
 }

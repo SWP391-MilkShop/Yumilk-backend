@@ -18,7 +18,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         /// Get order query with status
         /// </summary>
         /// <returns></returns>
-        IQueryable<Order> GetOrderQueryWithStatus();
+        IQueryable<Order> GetOrderQueryWithStatus(bool include);
 
         IQueryable<Order> GetOrderHistory(Guid customerId);
 
@@ -130,9 +130,9 @@ namespace NET1814_MilkShop.Repositories.Repositories
             return query.FirstOrDefaultAsync(o => o.Id == id);
         }
 
-        public IQueryable<Order> GetOrderQueryWithStatus()
+        public IQueryable<Order> GetOrderQueryWithStatus(bool include)
         {
-            return _query.Include(o => o.Status);
+            return include ? _query.Include(o => o.Status) : _query;
         }
     }
 }
