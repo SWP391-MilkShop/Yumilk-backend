@@ -386,6 +386,12 @@ namespace NET1814_MilkShop.Services.Services
                     ? userFullName.Substring(userFullName.IndexOf(' ')).Trim()
                     : userFullName.Trim();
                 var username = Guid.NewGuid().ToString();
+                //check trùng username
+                while (await _userRepository.GetByUsernameAsync(username) != null)
+                {
+                    username = Guid.NewGuid().ToString();
+                }
+
                 var password = Guid.NewGuid().ToString();
                 // tạo tài khoản mới
                 var user = new User
@@ -398,6 +404,7 @@ namespace NET1814_MilkShop.Services.Services
                     RoleId = (int)RoleId.CUSTOMER,
                     IsActive = true
                 };
+
                 var pictureUrl = decodedToken.Claims["picture"].ToString(); // lấy ảnh đại diện từ google
                 var customerGoogle = new Customer
                 {
