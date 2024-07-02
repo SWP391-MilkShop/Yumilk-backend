@@ -13,6 +13,8 @@ using System.Reflection;
 using System.Text;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using NET1814_MilkShop.API.SignalR;
 
 namespace NET1814_MilkShop.API
 {
@@ -94,6 +96,8 @@ namespace NET1814_MilkShop.API
             {
                 Credential = GoogleCredential.FromJson(_configuration["FIREBASE_CONFIG"])
             });
+            // Add SignalR
+            services.AddSignalR();
             //Add Email Setting
             services.Configure<EmailSettingModel>(
                 _configuration
@@ -144,6 +148,20 @@ namespace NET1814_MilkShop.API
                                 ),
                                 ClockSkew = TimeSpan.FromMinutes(0)
                             };
+                        o.Events = new JwtBearerEvents
+                        {
+                            OnMessageReceived = context =>
+                            {
+                                var accessToken = context.Request.Query["access_token"];
+                                var path = context.HttpContext.Request.Path;
+                                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                                {
+                                    context.Token = accessToken;
+                                }
+                        
+                                return Task.CompletedTask;
+                            }
+                        };
                     }
                 )
                 .AddJwtBearer(
@@ -197,6 +215,7 @@ namespace NET1814_MilkShop.API
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}"
                 );
+               endpoint.MapHub<MessageHub>("hubs/message");
             });
             app.MapControllers();
         }
