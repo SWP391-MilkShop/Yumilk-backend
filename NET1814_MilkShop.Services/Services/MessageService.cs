@@ -10,7 +10,7 @@ namespace NET1814_MilkShop.Services.Services;
 public interface IMessageService
 {
     // Task<ResponseModel> GetMessagesForUser(Guid userId);
-    // Task<ResponseModel> GetMessageThread(Guid currentUser, Guid recipientId);
+    Task<ResponseModel> GetMessageThread(Guid currentUserId, Guid recipientUserId);
     Task<ResponseModel> CreateMessage(Guid senderId, CreateMessageModel createMessageModel);
 }
 
@@ -32,10 +32,40 @@ public class MessageService : IMessageService
     //     throw new NotImplementedException();
     // }
     //
-    // public async Task<ResponseModel> GetMessageThread(Guid userId, Guid recipientId)
-    // {
-    //     throw new NotImplementedException();
-    // }
+    public async Task<ResponseModel> GetMessageThread(Guid currentUserId, Guid recipientUserId)
+    {
+        var messages = await _messageRepository.GetMessageThread(currentUserId, recipientUserId);
+        if (!messages.Any())
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Tin nhắn của bạn với người này"));
+        }
+
+        var unreadMessages = messages.Where(x => x.RecipientId == currentUserId && x.DateRead == null)
+            .ToList();
+        if (unreadMessages.Any())
+        {
+            foreach (var message in unreadMessages)
+            {
+                message.DateRead = DateTime.Now;
+                _messageRepository.Update(message);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        var resp = messages.Select(x => new MessageModel
+        {
+            Id = x.Id,
+            SenderId = x.SenderId,
+            SenderName = x.SenderName,
+            RecipientId = x.RecipientId,
+            RecipientName = x.RecipientName,
+            Content = x.Content,
+            DateRead = x.DateRead,
+            CreatedAt = x.CreatedAt
+        }).ToList();
+        return ResponseModel.Success(ResponseConstants.Get("tin nhắn", true), resp);
+    }
 
     public async Task<ResponseModel> CreateMessage(Guid senderId, CreateMessageModel createMessageModel)
     {
