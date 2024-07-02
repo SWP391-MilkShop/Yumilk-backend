@@ -32,5 +32,16 @@ namespace NET1814_MilkShop.API.Controllers
             var res = await _messageService.CreateMessage(senderId, model);
             return ResponseExtension.Result(res);
         }
+
+        [HttpGet("thread/{otherUserId}")]
+        [Authorize(AuthenticationSchemes = "Access")]
+        [ServiceFilter(typeof(UserExistsFilter))]
+        public async Task<IActionResult> GetMessageThread(Guid otherUserId)
+        {
+            _logger.Information("Get Message Thread");
+            var senderId = (HttpContext.Items["UserId"] as Guid?)!.Value;
+            var res = await _messageService.GetMessageThread(senderId, otherUserId);
+            return ResponseExtension.Result(res);
+        }
     }
 }
