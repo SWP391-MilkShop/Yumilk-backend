@@ -47,4 +47,6 @@ public partial class User : IAuditableEntity
     public virtual Customer? Customer { get; set; }
 
     public virtual Role? Role { get; set; }
+    public ICollection<Message> MessagesSent { get; set; }
+    public ICollection<Message> MessagesReceived { get; set; }
 }
