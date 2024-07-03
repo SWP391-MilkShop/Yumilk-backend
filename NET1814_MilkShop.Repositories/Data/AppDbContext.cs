@@ -39,6 +39,8 @@ namespace NET1814_MilkShop.Repositories.Data
         public virtual DbSet<ProductImage> ProductImages { get; set; }
         public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
         public virtual DbSet<Message> Messages { get; set; }
+        public virtual DbSet<Group> Groups { get; set; }
+        public virtual DbSet<Connection> Connections { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
