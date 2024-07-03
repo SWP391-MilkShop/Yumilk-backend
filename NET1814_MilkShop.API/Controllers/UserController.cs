@@ -164,11 +164,6 @@ namespace NET1814_MilkShop.API.Controllers
             _logger.Information("Change user info");
             var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
             var response = await _customerService.ChangeInfoAsync(userId, model);
-            /*if (response.Status == "Error")
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);*/
             return ResponseExtension.Result(response);
         }
 
@@ -194,7 +189,23 @@ namespace NET1814_MilkShop.API.Controllers
             return Ok(response);*/
             return ResponseExtension.Result(response);
         }
-
+        /// <summary>
+        /// change username
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPatch]
+        [Route("user/account/change-username")]
+        [Authorize(AuthenticationSchemes = "Access")]
+        [ServiceFilter(typeof(UserExistsFilter))]
+        public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameModel model)
+        {
+            _logger.Information("Change user username");
+            var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
+            var response = await _userService.ChangeUsernameAsync(userId, model);
+            return ResponseExtension.Result(response);
+        }
+        
         /// <summary>
         /// Feature only available for Customer role
         /// </summary>

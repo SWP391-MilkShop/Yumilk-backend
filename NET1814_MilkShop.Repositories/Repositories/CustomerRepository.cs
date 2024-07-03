@@ -7,6 +7,10 @@ namespace NET1814_MilkShop.Repositories.Repositories
     public interface ICustomerRepository
     {
         /*Task<List<Customer>> GetCustomersAsync();*/
+        /// <summary>
+        /// Get default query
+        /// </summary>
+        /// <returns />
         IQueryable<Customer> GetCustomersQuery();
         Task<Customer?> GetByEmailAsync(string email);
         Task<Customer?> GetByIdAsync(Guid id);
@@ -47,8 +51,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public IQueryable<Customer> GetCustomersQuery()
         {
             //Them role de return role thay vi roleId
-            var query = _query.Include(x => x.User).ThenInclude(x => x.Role);
-            return query;
+            return _query;
         }
 
         public override async Task<Customer?> GetByIdAsync(Guid id)

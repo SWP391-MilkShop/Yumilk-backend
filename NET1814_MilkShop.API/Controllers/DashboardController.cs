@@ -15,16 +15,15 @@ namespace NET1814_MilkShop.API.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly IProductService _productService;
-        private readonly IUserService _userService;
+        private readonly ICustomerService _customerService;
         private readonly ILogger _logger;
 
-        public DashboardController(IOrderService orderService, IProductService productService, ILogger logger,
-            IUserService userService)
+        public DashboardController(IOrderService orderService, IProductService productService, ILogger logger, ICustomerService customerService)
         {
             _orderService = orderService;
             _productService = productService;
-            _userService = userService;
             _logger = logger;
+            _customerService = customerService;
         }
 
         [HttpGet]
@@ -99,7 +98,7 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> GetCustomersStats([FromQuery] CustomersStatsQueryModel queryModel)
         {
             _logger.Information("Get users stats");
-            var res = await _userService.GetCustomersStatsAsync(queryModel);
+            var res = await _customerService.GetCustomersStatsAsync(queryModel);
             return ResponseExtension.Result(res);
         }
 

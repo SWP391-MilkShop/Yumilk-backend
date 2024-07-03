@@ -2,7 +2,6 @@
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
-using NET1814_MilkShop.Repositories.Migrations;
 
 namespace NET1814_MilkShop.Repositories.Repositories
 {

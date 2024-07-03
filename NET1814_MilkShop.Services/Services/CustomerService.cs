@@ -9,6 +9,7 @@ using NET1814_MilkShop.Services.CoreHelpers;
 using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -16,6 +17,7 @@ namespace NET1814_MilkShop.Services.Services
     {
         /*Task<ResponseModel> GetCustomersAsync();*/
         Task<ResponseModel> GetCustomersAsync(CustomerQueryModel request);
+        Task<ResponseModel> GetCustomersStatsAsync(CustomersStatsQueryModel model);
         Task<ResponseModel> GetByEmailAsync(string email);
         Task<ResponseModel> GetByIdAsync(Guid id);
         Task<ResponseModel> ChangeInfoAsync(Guid userId, ChangeUserInfoModel changeUserInfoModel);
@@ -57,7 +59,9 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> GetCustomersAsync(CustomerQueryModel request)
         {
-            var query = _customerRepository.GetCustomersQuery().Where(c => c.User.RoleId == (int) RoleId.CUSTOMER);
+            var query = _customerRepository.GetCustomersQuery()
+                .Include(x => x.User)
+                .ThenInclude(x => x.Role).AsQueryable();
             var searchTerm = StringExtension.Normalize(request.SearchTerm);
             //filter
             if (!string.IsNullOrEmpty(searchTerm))
@@ -70,6 +74,7 @@ namespace NET1814_MilkShop.Services.Services
                     || c.User.LastName != null && c.User.LastName.Contains(searchTerm)
                 );
             }
+
             if (request.IsActive.HasValue || request.IsBanned.HasValue)
             {
                 query = query.Where(c =>
@@ -77,6 +82,7 @@ namespace NET1814_MilkShop.Services.Services
                     && (!request.IsBanned.HasValue || c.User.IsBanned == request.IsBanned.Value)
                 );
             }
+
             //sort
             query = "desc".Equals(request.SortOrder?.ToLower())
                 ? query.OrderByDescending(GetSortProperty(request))
@@ -125,6 +131,7 @@ namespace NET1814_MilkShop.Services.Services
                     null
                 );
             }
+
             var customerModel = ToCustomerModel(customer, customer.User);
             /*return new ResponseModel
             {
@@ -146,6 +153,7 @@ namespace NET1814_MilkShop.Services.Services
                 /*return new ResponseModel { Message = "Customer not found", Status = "Error" };*/
                 return ResponseModel.Success(ResponseConstants.Get("khách hàng", false), null);
             }
+
             var customerModel = ToCustomerModel(customer, customer.User); /*
             return new ResponseModel
             {
@@ -179,7 +187,7 @@ namespace NET1814_MilkShop.Services.Services
                     };*/
                     return ResponseModel.BadRequest(ResponseConstants.InvalidPhoneNumber);
                 }
-                
+
                 if (!customer.PhoneNumber.Equals(changeUserInfoModel.PhoneNumber))
                 {
                     if (await _customerRepository.IsExistPhoneNumberAsync(changeUserInfoModel.PhoneNumber))
@@ -189,7 +197,6 @@ namespace NET1814_MilkShop.Services.Services
 
                     customer.PhoneNumber = changeUserInfoModel.PhoneNumber;
                 }
-                
             }
 
             if (!string.IsNullOrWhiteSpace(changeUserInfoModel.ProfilePictureUrl))
@@ -204,6 +211,7 @@ namespace NET1814_MilkShop.Services.Services
                     /*return new ResponseModel { Message = "Invalid URL!", Status = "Error" };*/
                     return ResponseModel.BadRequest(ResponseConstants.InvalidUrl);
                 }
+
                 customer.ProfilePictureUrl = changeUserInfoModel.ProfilePictureUrl;
             }
 
@@ -232,6 +240,7 @@ namespace NET1814_MilkShop.Services.Services
                     ToCustomerModel(customer, customer.User)
                 );
             }
+
             /*return new ResponseModel { Message = "Change user info failed", Status = "Error" };*/
             return ResponseModel.Error(ResponseConstants.ChangeInfo(false));
         }
@@ -255,5 +264,29 @@ namespace NET1814_MilkShop.Services.Services
         {
             return await _customerRepository.IsCustomerExistAsync(email, phoneNumber);
         }*/
+        public async Task<ResponseModel> GetCustomersStatsAsync(CustomersStatsQueryModel model)
+        {
+            if (model.From > DateTime.Now || model.From > model.To)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+            }
+
+            var query = _customerRepository.GetCustomersQuery()
+                .Include(c => c.Orders).AsQueryable();
+            // default is from last 30 days
+            var from = model.From ?? DateTime.Now.AddDays(-30);
+            // default is now
+            var to = model.To ?? DateTime.Now;
+            var totalCustomerBought = await query.Where(c => c.Orders.Any(o =>
+                o.CreatedAt >= from && o.CreatedAt <= to
+                                    && o.StatusId == (int)OrderStatusId.DELIVERED)).CountAsync();
+            var totalCustomer = await query.Where(c => c.CreatedAt >= from && c.CreatedAt <= to).CountAsync();
+            var resp = new CustomerStatsModel()
+            {
+                TotalNewCustomers = totalCustomer,
+                TotalCustomerBought = totalCustomerBought
+            };
+            return ResponseModel.Success(ResponseConstants.Get("thống kê người dùng", true), resp);
+        }
     }
 }

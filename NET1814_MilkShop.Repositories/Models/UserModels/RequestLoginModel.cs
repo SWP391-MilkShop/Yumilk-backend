@@ -5,9 +5,9 @@ namespace NET1814_MilkShop.Repositories.Models.UserModels
     public class RequestLoginModel
     {
         [Required(ErrorMessage = "Username is required")]
-        public string Username { get; set; }
+        public string Username { get; set; } = null!;
 
         [Required(ErrorMessage = "Password is required")]
-        public string Password { get; set; }
+        public string Password { get; set; } = null!;
     }
 }
