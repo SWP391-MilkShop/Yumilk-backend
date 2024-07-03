@@ -1,16 +1,15 @@
 using System.Linq.Expressions;
-using System.Numerics;
-using Azure;
 using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
+using NET1814_MilkShop.Repositories.Models.ShippingModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
 using NET1814_MilkShop.Services.CoreHelpers;
-using System.Linq.Expressions;
+using Newtonsoft.Json;
 
 namespace NET1814_MilkShop.Services.Services
 {
@@ -22,6 +21,8 @@ namespace NET1814_MilkShop.Services.Services
         Task<ResponseModel> CancelOrderAsync(Guid userId, Guid orderId);
         Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model);
         Task<ResponseModel> GetOrderStatsAsync(OrderStatsQueryModel queryModel);
+        Task<ResponseModel> CancelOrderAdminStaffAsync(Guid id);
+        Task<ResponseModel> GetOrderHistoryDetailDashBoardAsync(Guid orderId);
     }
 
     public class OrderService : IOrderService
@@ -30,18 +31,20 @@ namespace NET1814_MilkShop.Services.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IProductRepository _productRepository;
         private readonly IShippingService _shippingService;
+        private readonly IPaymentService _paymentService;
 
         public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork,
-            IProductRepository productRepository,IShippingService shippingService)
+            IProductRepository productRepository, IShippingService shippingService, IPaymentService paymentService)
         {
             _orderRepository = orderRepository;
             _unitOfWork = unitOfWork;
             _productRepository = productRepository;
             _shippingService = shippingService;
+            _paymentService = paymentService;
         }
 
         /// <summary>
-        /// đơn đặt hàng của các khách hàng
+        /// admin lấy đơn đặt hàng của các khách hàng
         /// </summary>
         /// <param name="model"></param>
         /// <returns>trả về danh sách các order của hệ thống</returns>
@@ -102,42 +105,48 @@ namespace NET1814_MilkShop.Services.Services
 
             if (!string.IsNullOrEmpty(model.OrderStatus))
             {
-                query = query.Where(o => string.Equals(o.Status!.Name, model.OrderStatus));
+                query = query.Where(o =>
+                    string.Equals(o.Status!.Name, model.OrderStatus));
             }
 
             #endregion
 
             #region(sorting)
 
-            if ("desc".Equals(model.SortOrder?.ToLower()))
-            {
-                query = query.OrderByDescending(GetSortProperty(model));
-            }
-            else
-            {
-                query = query.OrderBy(GetSortProperty(model));
-            }
+            //mặc định sort giảm dần theo created_at và tăng dần theo order status (PENDING)
+            query = "desc".Equals(model.SortOrder?.ToLower())
+                ? query.OrderBy(x => x.StatusId).ThenByDescending(GetSortProperty(model))
+                : query.OrderBy(x => x.StatusId).ThenBy(GetSortProperty(model));
+
+            // tạm thời để pending lên đầu nhưng created_at sort ko chuẩn
+            // var pendingOrders = query.Where(o => o.StatusId == (int)OrderStatusId.PENDING);
+            //
+            // var otherOrders = query.Where(o => o.StatusId != (int)OrderStatusId.PENDING);
+            //
+            // query = pendingOrders.Union(otherOrders);
 
             #endregion
 
             // chuyển về OrderModel
-            var orderModelQuery = query.Select(x => new OrderModel
+            var orderModels = query.Select(order => new OrderModel
             {
-                Id = x.Id,
-                CustomerId = x.Customer!.UserId,
-                TotalAmount = x.TotalAmount,
-                PhoneNumber = x.PhoneNumber,
-                Address = x.Address,
-                PaymentMethod = x.PaymentMethod,
-                OrderStatus = x.Status!.Name,
-                CreatedDate = x.CreatedAt,
-                PaymentDate = x.PaymentDate,
+                Id = order.Id,
+                CustomerId = order.Customer!.UserId,
+                TotalAmount = order.TotalAmount,
+                PhoneNumber = order.PhoneNumber,
+                Email = order.Email,
+                Address = order.Address,
+                PaymentMethod = order.PaymentMethod,
+                OrderStatus = order.Status!.Name,
+                CreatedDate = order.CreatedAt,
+                PaymentDate = order.PaymentDate,
             });
+
 
             #region(paging)
 
             var orders = await PagedList<OrderModel>.CreateAsync(
-                orderModelQuery,
+                orderModels,
                 model.Page,
                 model.PageSize
             );
@@ -156,8 +165,14 @@ namespace NET1814_MilkShop.Services.Services
             );
         }
 
+        private async Task<object?> GetInformation(Order order)
+        {
+            var paymentData = await _paymentService.GetPaymentLinkInformation(order.Id);
+            return paymentData.StatusCode == 200 ? paymentData.Data : null;
+        }
+
         /// <summary>
-        /// lịch sử đặt hàng của khách hàng cụ thể
+        /// customer lấy lịch sử đặt hàng của mình
         /// </summary>
         /// <param name="customerId"></param>
         /// <param name="model"></param>
@@ -215,8 +230,8 @@ namespace NET1814_MilkShop.Services.Services
             #region sort
 
             query = "desc".Equals(model.SortOrder?.ToLower())
-                ? query.OrderByDescending(GetSortProperty(model))
-                : query.OrderBy(GetSortProperty(model));
+                ? query.OrderBy(x => x.StatusId).ThenByDescending(GetSortProperty(model))
+                : query.OrderBy(x => x.StatusId).ThenBy(GetSortProperty(model));
 
             #endregion
 
@@ -226,14 +241,16 @@ namespace NET1814_MilkShop.Services.Services
             {
                 OrderId = o.Id,
                 TotalAmount = o.TotalAmount,
+                PaymentMethod = o.PaymentMethod,
                 OrderStatus = o.Status!.Name,
                 ProductList = o.OrderDetails
                     .Where(u => u.OrderId == o.Id)
                     .Select(h => new
                     {
                         h.Product.Name,
-                        h.Thumbnail
-                    })
+                        h.Thumbnail,
+                    }),
+                CreatedAt = o.CreatedAt
             });
 
             #endregion
@@ -261,6 +278,12 @@ namespace NET1814_MilkShop.Services.Services
             );
         }
 
+        /// <summary>
+        /// customer lấy ra chi tiết của 1 đơn hàng cụ thể
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetOrderHistoryDetailAsync(Guid userId, Guid orderId)
         {
             var order = await _orderRepository.GetByOrderIdAsync(orderId, true);
@@ -276,12 +299,13 @@ namespace NET1814_MilkShop.Services.Services
                 Quantity = x.Quantity,
                 UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
                 ItemPrice = x.ItemPrice,
-                ThumbNail = x.Thumbnail
+                Thumbnail = x.Thumbnail
             }).ToList();
 
             var detail = new OrderDetailModel
             {
                 RecieverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
+                Email = order.Email,
                 PhoneNumber = order.PhoneNumber,
                 Address = order.Address,
                 Note = order.Note,
@@ -290,13 +314,36 @@ namespace NET1814_MilkShop.Services.Services
                 ShippingFee = order.ShippingFee,
                 TotalAmount = order.TotalAmount,
                 PaymentMethod = order.PaymentMethod,
-                OrderStatus = order.Status!.Name
+                OrderStatus = order.Status!.Name,
+                CreatedAt = order.CreatedAt,
+                PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null
             };
+            if (order.StatusId == (int)OrderStatusId.SHIPPING)
+            {
+                var orderDetail = await _shippingService.GetOrderDetailAsync(orderId);
+                if (orderDetail.StatusCode != 200)
+                {
+                    return ResponseModel.Error(ResponseConstants.Get("chi tiết đơn hàng", false));
+                }
+
+                var json = JsonConvert.SerializeObject(orderDetail.Data);
+                var shippingData = JsonConvert.DeserializeObject<ExpectedDeliveryTime>(json);
+                var expectedDeliveryDate = shippingData!.DeliveryTime;
+                detail.ExpectedDeliveryDate = expectedDeliveryDate;
+            }
+
             return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
         }
 
+        /// <summary>
+        /// customer cancel order
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> CancelOrderAsync(Guid userId, Guid orderId)
         {
+            var message = "";
             var order = await _orderRepository.GetByOrderIdAsync(orderId, false);
             if (order == null || order.CustomerId != userId)
             {
@@ -313,6 +360,15 @@ namespace NET1814_MilkShop.Services.Services
                 return ResponseModel.BadRequest("Đơn hàng đang trong quá trình giao nên bạn không thể hủy.");
             }
 
+            if (order.PaymentMethod == "PAYOS")
+            {
+                var cancelResult = await _paymentService.CancelPaymentLink(order.Id);
+                if (cancelResult.StatusCode == 200)
+                {
+                    message = "Hủy link thanh toán thành công và ";
+                }
+            }
+
             order.StatusId = 5;
             foreach (var o in order.OrderDetails)
             {
@@ -324,7 +380,7 @@ namespace NET1814_MilkShop.Services.Services
             var res = await _unitOfWork.SaveChangesAsync();
             if (res > 0)
             {
-                return ResponseModel.Success(ResponseConstants.Cancel("đơn hàng", true), null);
+                return ResponseModel.Success(ResponseConstants.Cancel(message + "đơn hàng", true), null);
             }
 
             return ResponseModel.Error(ResponseConstants.Cancel("đơn hàng", false));
@@ -345,13 +401,13 @@ namespace NET1814_MilkShop.Services.Services
         private static Expression<Func<Order, object>> GetSortProperty<T>(
             T queryModel
         ) where T : QueryModel =>
-            queryModel.SortColumn?.ToLower().Replace(" ", "") switch
+            queryModel.SortColumn?.ToLower() switch
             {
                 "totalamount" => order => order.TotalAmount,
-                "createdat" => order => order.CreatedAt,
                 "paymentdate" => order =>
                     order.PaymentDate, //cái này có thể null, chưa thống nhất (TH paymentmethod là COD thì giao xong mới lưu thông tin vô db hay lưu thông tin vô db lúc đặt hàng thành công luôn)
-                _ => order => order.Id, //chưa biết mặc định sort theo cái gì nên để tạm là id
+                "orderid" => order => order.Id,
+                _ => order => order.CreatedAt, //mặc định là sort theo createdat
             };
 
         public async Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model)
@@ -379,7 +435,8 @@ namespace NET1814_MilkShop.Services.Services
                 {
                     return orderShippingAsync;
                 }
-                return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng",true),
+
+                return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true),
                     orderShippingAsync.Data);
             }
 
@@ -400,10 +457,12 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest(ResponseConstants.InvalidFromDate);
             }
+
             if (queryModel.FromOrderDate > queryModel.ToOrderDate)
             {
                 return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
             }
+
             var query = _orderRepository.GetOrderQueryWithStatus();
             // default is from last 30 days
             var from = queryModel.FromOrderDate ?? DateTime.Now.AddDays(-30);
@@ -412,7 +471,8 @@ namespace NET1814_MilkShop.Services.Services
             query = query.Where(o => o.CreatedAt >= from && o.CreatedAt <= to);
             // only count delivered orders
             var delivered = query.Where(o => o.StatusId == (int)OrderStatusId.DELIVERED);
-            var totalOrdersPerStatus = await query.GroupBy(o => o.Status).ToDictionaryAsync(g => g.Key!.Name.ToUpper(), g => g.Count());
+            var totalOrdersPerStatus = await query.GroupBy(o => o.Status)
+                .ToDictionaryAsync(g => g.Key!.Name.ToUpper(), g => g.Count());
             var stats = new OrderStatsModel
             {
                 TotalOrders = await query.CountAsync(),
@@ -423,8 +483,101 @@ namespace NET1814_MilkShop.Services.Services
             {
                 stats.TotalOrdersPerStatus[status] = totalOrdersPerStatus.GetValueOrDefault(status, 0);
             }
-            return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng", true), stats);
 
+            return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng", true), stats);
+        }
+
+        public async Task<ResponseModel> CancelOrderAdminStaffAsync(Guid id)
+        {
+            var message = "";
+            var order = await _orderRepository.GetByOrderIdAsync(id, false);
+            if (order is null)
+            {
+                return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
+            }
+
+            if (order.PaymentMethod == "PAYOS")
+            {
+                var cancelResult = await _paymentService.CancelPaymentLink(order.Id);
+                if (cancelResult.StatusCode == 200)
+                {
+                    message = "Hủy link thanh toán và ";
+                }
+            }
+
+            order.StatusId = 5;
+
+            foreach (var o in order.OrderDetails)
+            {
+                o.Product.Quantity += o.Quantity;
+                _productRepository.Update(o.Product);
+            }
+
+            _orderRepository.Update(order);
+            var res = await _unitOfWork.SaveChangesAsync();
+            if (res > 0)
+            {
+                return ResponseModel.Success(order.ShippingCode != null
+                    ? "Hủy thành công, đơn hàng có mã vận chuyển. Vui lòng hủy bên đơn vị vận chuyển"
+                    : ResponseConstants.Cancel(message + "đơn hàng", true), null);
+            }
+
+            return ResponseModel.Error(ResponseConstants.Cancel("đơn hàng", false));
+        }
+
+        /// <summary>
+        /// staff, admin lấy chi tiết đơn hàng cụ thể
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        public async Task<ResponseModel> GetOrderHistoryDetailDashBoardAsync(Guid orderId)
+        {
+            var order = await _orderRepository.GetByOrderIdAsync(orderId, true);
+            if (order == null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Đơn hàng"));
+            }
+
+            var pModel = order.OrderDetails.Select(x => new CheckoutOrderDetailModel
+            {
+                ProductId = x.ProductId,
+                ProductName = x.ProductName,
+                Quantity = x.Quantity,
+                UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
+                ItemPrice = x.ItemPrice,
+                Thumbnail = x.Thumbnail
+            }).ToList();
+            var detail = new OrderDetailModel
+            {
+                RecieverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
+                PhoneNumber = order.PhoneNumber,
+                Email = order.Email,
+                Address = order.Address,
+                Note = order.Note,
+                OrderDetail = pModel,
+                TotalPrice = order.TotalPrice,
+                ShippingFee = order.ShippingFee,
+                TotalAmount = order.TotalAmount,
+                PaymentMethod = order.PaymentMethod,
+                OrderStatus = order.Status!.Name,
+                CreatedAt = order.CreatedAt,
+                PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
+            };
+            if (order.StatusId == (int)OrderStatusId.SHIPPING)
+            {
+                var orderDetail = await _shippingService.GetOrderDetailAsync(orderId);
+                if (orderDetail.StatusCode != 200)
+                {
+                    return ResponseModel.Error(ResponseConstants.Get("chi tiết đơn hàng", false));
+                }
+
+                var json = JsonConvert.SerializeObject(orderDetail.Data);
+                var shippingData = JsonConvert.DeserializeObject<ExpectedDeliveryTime>(json);
+                var expectedDeliveryDate = shippingData!.DeliveryTime;
+                detail.ExpectedDeliveryDate = expectedDeliveryDate;
+            }
+
+            return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
         }
     }
 }

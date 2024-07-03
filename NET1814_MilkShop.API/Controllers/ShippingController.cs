@@ -3,21 +3,22 @@ using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models.ShipModels;
 using NET1814_MilkShop.Services.Services;
 using ILogger = Serilog.ILogger;
+
 namespace NET1814_MilkShop.API.Controllers;
 
 [ApiController]
 [Route("api/shipping")]
 public class ShippingController : ControllerBase
 {
-    private readonly IShippingService _shippingService;
     private readonly ILogger _logger;
-    
+    private readonly IShippingService _shippingService;
+
     public ShippingController(IServiceProvider serviceProvider, ILogger logger)
     {
         _shippingService = serviceProvider.GetRequiredService<IShippingService>();
         _logger = logger;
     }
-    
+
     [HttpGet("provinces")]
     public async Task<IActionResult> GetProvince()
     {
@@ -25,7 +26,7 @@ public class ShippingController : ControllerBase
         var response = await _shippingService.GetProvinceAsync();
         return ResponseExtension.Result(response);
     }
-    
+
     [HttpGet("districts/{provinceId}")]
     public async Task<IActionResult> GetDistrict(int provinceId)
     {
@@ -33,7 +34,7 @@ public class ShippingController : ControllerBase
         var response = await _shippingService.GetDistrictAsync(provinceId);
         return ResponseExtension.Result(response);
     }
-    
+
     [HttpGet("wards/{districtId}")]
     public async Task<IActionResult> GetWard(int districtId)
     {
@@ -41,17 +42,23 @@ public class ShippingController : ControllerBase
         var response = await _shippingService.GetWardAsync(districtId);
         return ResponseExtension.Result(response);
     }
-    
+
+
+    /// <summary>
+    ///     Get shipping fee of order
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>
     [HttpGet("fee")]
-    public async Task<IActionResult> GetShippingFee([FromQuery]ShippingFeeRequestModel request)
+    public async Task<IActionResult> GetShippingFee([FromQuery] ShippingFeeRequestModel model)
     {
         _logger.Information("Get shipping fee");
-        var response = await _shippingService.GetShippingFeeAsync(request);
+        var response = await _shippingService.GetShippingFeeAsync(model);
         return ResponseExtension.Result(response);
     }
-    
+
     /// <summary>
-    /// Create order shipping in ghn
+    ///     Create order shipping in ghn
     /// </summary>
     /// <param name="orderId"></param>
     /// <returns></returns>
@@ -62,9 +69,9 @@ public class ShippingController : ControllerBase
         var response = await _shippingService.CreateOrderShippingAsync(orderId);
         return ResponseExtension.Result(response);
     }
-    
+
     /// <summary>
-    /// Preview order shipping in ghn
+    ///     Preview order shipping in ghn
     /// </summary>
     /// <param name="orderId"></param>
     /// <returns></returns>
@@ -75,18 +82,30 @@ public class ShippingController : ControllerBase
         var response = await _shippingService.PreviewOrderShippingAsync(orderId);
         return ResponseExtension.Result(response);
     }
-    
+
     /// <summary>
-    /// Get order detail orderCode này là của ghn
+    ///     Get order detail by our Guid orderId (not ghn shippingCode)
     /// </summary>
-    /// <param name="orderCode"></param>
+    /// <param name="orderId"></param>
     /// <returns></returns>
-    [HttpGet("order/detail/{orderCode}")]
-    public async Task<IActionResult> PreviewOrder(string orderCode)
+    [HttpGet("order/detail/{orderId}")]
+    public async Task<IActionResult> GetOrderDetail(Guid orderId)
     {
         _logger.Information("Get shipping order detail");
-        var response = await _shippingService.GetOrderDetailAsync(orderCode);
+        var response = await _shippingService.GetOrderDetailAsync(orderId);
         return ResponseExtension.Result(response);
     }
-    
+
+    /// <summary>
+    ///     Cancel shipping order by our Guid orderId (not ghn shippingCode)
+    /// </summary>
+    /// <param name="orderId"></param>
+    /// <returns></returns>
+    [HttpGet("order/cancel/{orderId}")]
+    public async Task<IActionResult> CancelOrder(Guid orderId)
+    {
+        _logger.Information("Cancel shipping order");
+        var response = await _shippingService.CancelOrderShippingAsync(orderId);
+        return ResponseExtension.Result(response);
+    }
 }

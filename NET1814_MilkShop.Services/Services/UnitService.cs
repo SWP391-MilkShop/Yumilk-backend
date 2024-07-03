@@ -94,6 +94,7 @@ public class UnitService : IUnitService
         {
             Name = createUnitModel.Name,
             Description = createUnitModel.Description,
+            Gram = createUnitModel.Gram,
             IsActive = true
         };
         _unitRepository.Add(unit);
@@ -127,6 +128,11 @@ public class UnitService : IUnitService
         if (unitModel.IsActive.HasValue)
         {
             isExistUnit.IsActive = unitModel.IsActive!.Value;
+        }
+
+        if (unitModel.Gram == 0)
+        {
+            isExistUnit.Gram = unitModel.Gram;
         }
 
         _unitRepository.Update(isExistUnit);

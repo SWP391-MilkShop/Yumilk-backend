@@ -15,16 +15,15 @@ namespace NET1814_MilkShop.API.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly IProductService _productService;
-        private readonly IUserService _userService;
+        private readonly ICustomerService _customerService;
         private readonly ILogger _logger;
 
-        public DashboardController(IOrderService orderService, IProductService productService, ILogger logger,
-            IUserService userService)
+        public DashboardController(IOrderService orderService, IProductService productService, ILogger logger, ICustomerService customerService)
         {
             _orderService = orderService;
             _productService = productService;
-            _userService = userService;
             _logger = logger;
+            _customerService = customerService;
         }
 
         [HttpGet]
@@ -72,11 +71,7 @@ namespace NET1814_MilkShop.API.Controllers
         }
 
         /// <summary>
-        /// Get product stats
-        /// Total number of products sold
-        /// Total number of products sold per category
-        /// Total number of products sold per brand
-        /// (only count products that have been delivered)
+        /// Get product stats (total sold, revenue per brand, category)
         /// </summary>
         /// <param name="queryModel"></param>
         /// <returns></returns>
@@ -92,7 +87,7 @@ namespace NET1814_MilkShop.API.Controllers
 
         /// <summary>
         /// Get users stats
-        /// Total customers
+        /// Total customers,
         /// Total customers who have bought any product
         /// </summary>
         /// <param name="queryModel"></param>
@@ -103,7 +98,34 @@ namespace NET1814_MilkShop.API.Controllers
         public async Task<IActionResult> GetCustomersStats([FromQuery] CustomersStatsQueryModel queryModel)
         {
             _logger.Information("Get users stats");
-            var res = await _userService.GetCustomersStatsAsync(queryModel);
+            var res = await _customerService.GetCustomersStatsAsync(queryModel);
+            return ResponseExtension.Result(res);
+        }
+
+        /// <summary>
+        /// Admin and Staff have full permission to cancel order (PREORDER, PROCESSING, SHIPPING).
+        /// If an order is already in shipping, preorder status (order has been created in GHN),
+        /// Admin or Staff must manually cancel shipping order in GHN.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPatch]
+        [Route("orders/cancel/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> CancelOrder(Guid id)
+        {
+            _logger.Information("Cancel order");
+            var response = await _orderService.CancelOrderAdminStaffAsync(id);
+            return ResponseExtension.Result(response);
+        }
+
+        [HttpGet]
+        [Route("orders/{id}")]
+        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+        public async Task<IActionResult> GetOrderHistoryDetail(Guid id)
+        {
+            _logger.Information("Get order detail history");
+            var res = await _orderService.GetOrderHistoryDetailDashBoardAsync(id);
             return ResponseExtension.Result(res);
         }
     }

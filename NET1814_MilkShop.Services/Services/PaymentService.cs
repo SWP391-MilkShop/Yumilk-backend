@@ -10,8 +10,8 @@ namespace NET1814_MilkShop.Services.Services;
 public interface IPaymentService
 {
     public Task<ResponseModel> CreatePaymentLink(int orderCode);
-    public Task<ResponseModel> GetPaymentLinkInformation(int orderCode);
-    public Task<ResponseModel> CancelPaymentLink(int orderCode);
+    public Task<ResponseModel> GetPaymentLinkInformation(Guid orderId);
+    public Task<ResponseModel> CancelPaymentLink(Guid orderId);
 }
 
 public class PaymentService : IPaymentService
@@ -50,7 +50,7 @@ public class PaymentService : IPaymentService
                 .OrderDetails.Select(item => new ItemData(
                     item.Product.Name,
                     item.Quantity,
-                    item.ItemPrice.ToInt()
+                    item.ItemPrice
                 ))
                 .ToList();
             if (items.Count <= 0)
@@ -60,15 +60,15 @@ public class PaymentService : IPaymentService
             var customerName = $"{order.Customer?.User.FirstName} {order.Customer?.User.LastName}";
             var customerEmail = order.Customer?.Email;
             var customerPhone = order.Customer?.PhoneNumber;
-            var description = $"{orderCode} Shipfee:{(int)order.ShippingFee}đ";
+            var description = $"{orderCode} Shipfee: {(int)order.ShippingFee}đ";
             var expiredAt = (int)DateTimeOffset.UtcNow.AddMinutes(15).ToUnixTimeSeconds();
             var paymentData = new PaymentData(
                 (long)order.OrderCode,
-                order.TotalAmount.ToInt(),
+                order.TotalAmount,
                 description,
                 items,
-                _configuration["PayOS:CancelUrl"]!,
-                _configuration["PayOS:ReturnUrl"]!,
+                _configuration["PayOS:CancelUrl"]!+order.Id,
+                _configuration["PayOS:ReturnUrl"]!+order.Id,
                 buyerName: customerName,
                 buyerEmail: customerEmail,
                 buyerPhone: customerPhone,
@@ -85,10 +85,21 @@ public class PaymentService : IPaymentService
         }
     }
 
-    public async Task<ResponseModel> GetPaymentLinkInformation(int orderCode)
+    public async Task<ResponseModel> GetPaymentLinkInformation(Guid orderId)
     {
         try
         {
+            var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(orderId);
+            if (existOrder is null)
+            {
+                return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
+            }
+            if(existOrder.OrderCode is null)
+            {
+                return ResponseModel.BadRequest("Không tìm thấy mã đơn hàng thanh toán");
+            }
+
+            var orderCode = existOrder.OrderCode.Value;
             var paymentLinkInformation = await _payOs.getPaymentLinkInformation(orderCode);
             if (paymentLinkInformation.status == "ERROR")
             {
@@ -107,10 +118,20 @@ public class PaymentService : IPaymentService
         }
     }
 
-    public async Task<ResponseModel> CancelPaymentLink(int orderCode)
+    public async Task<ResponseModel> CancelPaymentLink(Guid orderId)
     {
         try
         {
+            var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(orderId);
+            if (existOrder is null)
+            {
+                return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
+            }
+            if(existOrder.OrderCode is null)
+            {
+                return ResponseModel.BadRequest("Không tìm thấy mã đơn hàng thanh toán");
+            }
+            var orderCode = existOrder.OrderCode.Value;
             var cancelPaymentLink = await _payOs.cancelPaymentLink(orderCode);
             return cancelPaymentLink.status == "ERROR"
                 ? ResponseModel.Error("Hủy link thanh toán thất bại")

@@ -72,6 +72,11 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.BadRequest(ResponseConstants.OutOfStock);
             }
+            // Check if product is in pre-order status
+            if (product.StatusId == (int)ProductStatusId.PREORDER)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NoPreorderCart);
+            }
             if (model.Quantity > product.Quantity)
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotEnoughQuantity);
@@ -143,6 +148,14 @@ namespace NET1814_MilkShop.Services.Services
                     isChanged = true;
                     continue;
                 }
+                // Check if product is in pre-order status
+                if (cartDetail.Product.StatusId == (int)ProductStatusId.PREORDER)
+                {
+                    _cartDetailRepository.Remove(cartDetail);
+                    messages.Add($"Sản phẩm {cartDetail.Product.Name} đang trong chế độ đặt trước");
+                    isChanged = true;
+                    continue;
+                }
                 if (cartDetail.Quantity > cartDetail.Product.Quantity)
                 {
                     cartDetail.Quantity = cartDetail.Product.Quantity;
@@ -181,6 +194,7 @@ namespace NET1814_MilkShop.Services.Services
                     CustomerId = customerId,
                     TotalPrice = 0,
                     TotalQuantity = 0,
+                    TotalGram = 0,
                     CartItems = PagedList<CartDetailModel>.Create(
                         new List<CartDetailModel>().AsQueryable(),
                         model.Page,
@@ -192,6 +206,7 @@ namespace NET1814_MilkShop.Services.Services
             var cartDetailQuery = _cartDetailRepository
                 .GetCartDetailQuery()
                 .Include(x => x.Product)
+                .ThenInclude(x=>x.Unit)
                 .Where(x => x.CartId == cart.Id && x.Product.Name.Contains(searchTerm));
             var cartItems = cartDetailQuery.Select(x => new CartDetailModel
             {
@@ -201,7 +216,8 @@ namespace NET1814_MilkShop.Services.Services
                 ProductQuantity = x.Product.Quantity,
                 Thumbnail = x.Product.Thumbnail,
                 OriginalPrice = x.Product.OriginalPrice,
-                SalePrice = x.Product.SalePrice
+                SalePrice = x.Product.SalePrice,
+                Gram = x.Product.Unit.Gram
             });
             if (model.SortOrder == "desc")
             {
@@ -222,6 +238,7 @@ namespace NET1814_MilkShop.Services.Services
                 CustomerId = cart.CustomerId,
                 TotalPrice = pagedList.Items.Sum(x => (x.SalePrice > 0 ? x.SalePrice : x.OriginalPrice) * x.Quantity),
                 TotalQuantity = pagedList.Items.Sum(x => x.Quantity),
+                TotalGram = pagedList.Items.Sum(x => x.Gram * x.Quantity),
                 CartItems = pagedList
             };
             return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", true), cartModel);

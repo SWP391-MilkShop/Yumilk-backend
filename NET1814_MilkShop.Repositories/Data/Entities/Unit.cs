@@ -15,6 +15,9 @@ public partial class Unit : IAuditableEntity
 
     public string? Description { get; set; }
 
+    [Column("gram")]
+    public int Gram { get; set; }
+
     [DefaultValue(false)]
     public bool IsActive { get; set; }
 

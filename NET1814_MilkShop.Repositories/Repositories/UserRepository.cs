@@ -8,15 +8,11 @@ namespace NET1814_MilkShop.Repositories.Repositories
     {
         /*Task<List<User>> GetUsersAsync();*/
         IQueryable<User> GetUsersQuery();
-
-        IQueryable<User> GetUserQueryIncludeCustomer();
-        Task<User?> GetByUsernameAsync(string username);
-        Task<string?> GetVerificationTokenAsync(string username);
+        Task<User?> GetByUsernameAsync(string username, int roleId);
         Task<User?> GetByIdAsync(Guid id);
         Task<bool> IsExistAsync(Guid id);
         void Add(User user);
         void Update(User user);
-        void Remove(User user);
     }
 
     public sealed class UserRepository : Repository<User>, IUserRepository
@@ -32,34 +28,18 @@ namespace NET1814_MilkShop.Repositories.Repositories
             return _query.Include(u => u.Role);
         }
 
-        public IQueryable<User> GetUserQueryIncludeCustomer()
-        {
-            return _query.Include(x => x.Customer).ThenInclude(o => o.Orders);
-        }
-
-        public async Task<User?> GetByUsernameAsync(string username)
+        public async Task<User?> GetByUsernameAsync(string username, int roleId)
         {
             //var user = await _context
             //    .Users.AsNoTracking()
             //    .FirstOrDefaultAsync(x => username.Equals(x.Username));
-            var user = await _query.FirstOrDefaultAsync(x => username.Equals(x.Username));
+            var user = await _query.FirstOrDefaultAsync(x => username.Equals(x.Username) && x.RoleId == roleId);
             if (user != null && username.Equals(user.Username, StringComparison.Ordinal))
             {
                 return user;
             }
 
             return null;
-        }
-
-        public async Task<string?> GetVerificationTokenAsync(string username)
-        {
-            var user = await GetByUsernameAsync(username);
-            if (user == null)
-            {
-                return null;
-            }
-
-            return user.VerificationCode;
         }
 
         public async Task<bool> IsExistAsync(Guid id)

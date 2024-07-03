@@ -12,6 +12,7 @@ namespace NET1814_MilkShop.Services.Services;
 public interface IBrandService
 {
     Task<ResponseModel> GetBrandsAsync(BrandQueryModel queryModel);
+    Task<ResponseModel> GetBrandByIdAsync(int id);
     Task<ResponseModel> CreateBrandAsync(CreateBrandModel model);
     Task<ResponseModel> UpdateBrandAsync(int id, UpdateBrandModel model);
     Task<ResponseModel> DeleteBrandAsync(int id);
@@ -43,7 +44,7 @@ public class BrandService : IBrandService
         {
             query = query.Where(x =>
                 x.Name.Contains(queryModel.SearchTerm)
-                || x.Description.Contains(queryModel.SearchTerm)
+                || (x.Description != null && x.Description.Contains(queryModel.SearchTerm))
             );
         }
 
@@ -66,13 +67,15 @@ public class BrandService : IBrandService
         {
             Id = x.Id,
             Name = x.Name,
-            Description = x.Description
+            Description = x.Description,
+            IsActive = x.IsActive,
+            Logo = x.Logo
         });
 
         #region paging
 
-        var brands = await PagedList<Brand>.CreateAsync(
-            query,
+        var brands = await PagedList<BrandModel>.CreateAsync(
+            model,
             queryModel.Page,
             queryModel.PageSize
         );
@@ -83,6 +86,26 @@ public class BrandService : IBrandService
             ResponseConstants.Get("thương hiệu", brands.TotalCount > 0),
             brands
         );
+    }
+
+    public async Task<ResponseModel> GetBrandByIdAsync(int id)
+    {
+        var brand = await _brandRepository.GetByIdAsync(id);
+        if (brand == null)
+        {
+            return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
+        }
+
+        var model = new BrandModel
+        {
+            Id = brand.Id,
+            Name = brand.Name,
+            Description = brand.Description,
+            IsActive = brand.IsActive,
+            Logo = brand.Logo
+        };
+
+        return ResponseModel.Success(ResponseConstants.Get("thương hiệu", true), model);
     }
 
     public async Task<ResponseModel> CreateBrandAsync(CreateBrandModel model)

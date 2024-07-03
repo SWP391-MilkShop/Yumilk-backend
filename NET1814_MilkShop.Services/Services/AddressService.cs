@@ -34,11 +34,13 @@ public class AddressService : IAddressService
         {
             return ResponseModel.BadRequest("Không được tạo quá 3 địa chỉ");
         }
+
         var existAnyAddress = await _addressRepository.ExistAnyAddress(customerId);
         if (existAnyAddress == false) //Dia chi dau tien gan lam mac dinh
         {
             model.IsDefault = true;
         }
+
         if (model.IsDefault && existAnyAddress != false)
         {
             var getDefaultAddress = await _addressRepository.GetByDefault(customerId);
@@ -48,6 +50,7 @@ public class AddressService : IAddressService
                 _addressRepository.Update(getDefaultAddress);
             }
         }
+
         var address = new CustomerAddress
         {
             ReceiverName = model.ReceiverName,
@@ -68,6 +71,7 @@ public class AddressService : IAddressService
         {
             return ResponseModel.Success(ResponseConstants.Create("địa chỉ", true), null);
         }
+
         return ResponseModel.Error(ResponseConstants.Create("địa chỉ", false));
     }
 
@@ -88,7 +92,7 @@ public class AddressService : IAddressService
                 ProvinceId = customerAddress.ProvinceId,
                 ProvinceName = customerAddress.ProvinceName,
                 IsDefault = customerAddress.IsDefault
-            })
+            }).OrderByDescending(x => x.IsDefault)
             .ToListAsync();
         return ResponseModel.Success(ResponseConstants.Get("địa chỉ", result.Any()), result);
     }
@@ -105,11 +109,13 @@ public class AddressService : IAddressService
         {
             return ResponseModel.Success(ResponseConstants.NotFound("địa chỉ"), null);
         }
+
         var countCustomerAddress = _addressRepository.GetCustomerAddresses(customerId).Count();
         if (countCustomerAddress == 1)
         {
             model.IsDefault = true;
         }
+
         if (model.IsDefault && countCustomerAddress > 1)
         {
             var getDefaultAddress = await _addressRepository.GetByDefault(customerId);
@@ -119,6 +125,7 @@ public class AddressService : IAddressService
                 _addressRepository.Update(getDefaultAddress);
             }
         }
+
         address.ReceiverName = model.ReceiverName;
         address.PhoneNumber = model.ReceiverPhone;
         address.Address = model.Address;
@@ -135,6 +142,7 @@ public class AddressService : IAddressService
         {
             return ResponseModel.Success(ResponseConstants.Update("địa chỉ", true), null);
         }
+
         return ResponseModel.Error(ResponseConstants.Update("địa chỉ", false));
     }
 
@@ -156,8 +164,10 @@ public class AddressService : IAddressService
                 {
                     return ResponseModel.Success(ResponseConstants.Delete("địa chỉ", true), null);
                 }
+
                 break;
         }
+
         return ResponseModel.Error(ResponseConstants.Delete("địa chỉ", false));
     }
 }

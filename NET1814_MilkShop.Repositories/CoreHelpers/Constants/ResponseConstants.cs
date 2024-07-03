@@ -177,10 +177,10 @@
         public const string Banned = "Tài khoản của bạn đã bị khóa";
         public const string AccountActivated = "Tài khoản của bạn đã được kích hoạt";
         public const string WrongCode = "Mã xác thực không đúng";
-        public const string PassSameNewPass = "Mật khẩu cũ và mật khẩu mới không được trùng nhau";
-        public const string WrongPassword = "Mật khẩu cũ không chính xác";
+        public const string SamePassword = "Mật khẩu cũ và mật khẩu mới không được trùng nhau";
+        public const string WrongPassword = "Mật khẩu không chính xác";
         public const string InvalidPhoneNumber = "Số điện thoại không hợp lệ";
-
+        public const string SameUsername = "Tên đăng nhập mới không được trùng với tên đăng nhập hiện tại";
         #endregion
 
         /// <summary>
@@ -197,6 +197,7 @@
         public const string InvalidUrl = "Url không hợp lệ";
         public const string InvalidFilterDate = "Ngày bắt đầu phải trước hoặc trùng với ngày kết thúc";
         public const string InvalidFromDate = "Ngày bắt đầu không thể lớn hơn ngày hiện tại";
+        public const string UserNotActive =  "Tài khoản của bạn chưa được kích hoạt. Vui lòng kích hoạt tài khoản để tiến hành thanh toán";
         #region Review
 
         public const string ReviewConstraint = "Bạn không thể đánh giá sản phẩm khi chưa mua hàng hoặc đơn hàng chưa được giao";
@@ -208,7 +209,10 @@
         public const string OutOfStock = "Sản phẩm đã hết hàng";
         public const string NotEnoughQuantity = "Số lượng sản phẩm không đủ";
         public const string InvalidSalePrice = "Giá khuyến mãi phải nhỏ hơn giá gốc";
-
+        public const string InvalidQuantity = "Số lượng sản phẩm phải lớn hơn 0";
+        public const string NoQuantityPreorder = "Không thể set số lượng tồn cho sản phẩm Pre-order";
+        public const string NotInPreOrder = "Sản phẩm đang không trong quá trình Pre-order";
+        public const string ProductOrdered = "Sản phẩm đang trong quá trình đặt hàng";
         #endregion
         #region Cart
 
@@ -223,6 +227,7 @@
                 ? "Thêm sản phẩm vào giỏ hàng thành công"
                 : "Thêm sản phẩm vào giỏ hàng không thành công";
         }
+        public const string NoPreorderCart = "Không thể thêm sản phẩm Pre-order vào giỏ hàng";
 
         public const string CartIsEmpty = "Giỏ hàng của bạn hiện tại đang rỗng!";
 

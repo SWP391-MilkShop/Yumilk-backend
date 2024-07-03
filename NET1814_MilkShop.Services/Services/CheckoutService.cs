@@ -4,14 +4,17 @@ using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.CheckoutModels;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
+using NET1814_MilkShop.Repositories.Models.PaymentModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
+using Newtonsoft.Json;
 
 namespace NET1814_MilkShop.Services.Services;
 
 public interface ICheckoutService
 {
     Task<ResponseModel> Checkout(Guid userId, CheckoutModel model);
+    Task<ResponseModel> PreOrderCheckout(Guid userId, PreorderCheckoutModel model);
 }
 
 public class CheckoutService : ICheckoutService
@@ -22,6 +25,11 @@ public class CheckoutService : ICheckoutService
     private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPaymentService _paymentService;
+    private readonly IPreorderProductRepository _preorderProductRepository;
+    private readonly IEmailService _emailService;
+    private readonly IUserRepository _userRepository;
+    private readonly ICartDetailRepository _cartDetailRepository;
+
 
     public CheckoutService(
         IUnitOfWork unitOfWork,
@@ -29,7 +37,9 @@ public class CheckoutService : ICheckoutService
         IProductRepository productRepository,
         ICartRepository cartRepository,
         ICustomerRepository customerRepository,
-        IPaymentService paymentService
+        IPaymentService paymentService,
+        IPreorderProductRepository preorderProductRepository, IEmailService emailService,
+        IUserRepository userRepository, ICartDetailRepository cartDetailRepository
     )
     {
         _customerRepository = customerRepository;
@@ -38,11 +48,32 @@ public class CheckoutService : ICheckoutService
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
         _paymentService = paymentService;
+        _preorderProductRepository = preorderProductRepository;
+        _emailService = emailService;
+        _userRepository = userRepository;
+        _cartDetailRepository = cartDetailRepository;
     }
 
+    /// <summary>
+    /// checkout cart
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
     public async Task<ResponseModel> Checkout(Guid userId, CheckoutModel model)
     {
-        var cart = await _cartRepository.GetByCustomerIdAsync(userId, true);
+        var userActive = await _userRepository.GetByIdAsync(userId);
+        if (userActive!.IsBanned)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.Banned);
+        }
+
+        if (!userActive!.IsActive)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
+        }
+
+        var cart = await _cartRepository.GetCartByCustomerId(userId);
         if (cart == null)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Giỏ hàng"));
@@ -54,34 +85,45 @@ public class CheckoutService : ICheckoutService
         }
 
         //check quantity coi còn hàng không
-        List<CartDetail> unavailableItems = new List<CartDetail>();
+        List<CheckoutQuantityResponseModel> unavailableItems = new List<CheckoutQuantityResponseModel>();
         foreach (var c in cart.CartDetails)
         {
             if (c.Quantity > c.Product.Quantity)
             {
-                unavailableItems.Add(c);
+                unavailableItems.Add(new CheckoutQuantityResponseModel
+                {
+                    ProductName = c.Product.Name,
+                    Quantity = c.Quantity,
+                    Message =
+                        $"Số lượng sản phẩm bạn mua ({c.Quantity}) đã vượt quá số lượng sản phẩm còn lại của cửa hàng ({c.Product.Quantity}). Vui lòng kiểm tra lại giỏ hàng của quý khách!"
+                });
+            }
+            else if (c.Product.StatusId == (int)ProductStatusId.OUT_OF_STOCK ||
+                     c.Product.StatusId == (int)ProductStatusId.PREORDER)
+            {
+                unavailableItems.Add(new CheckoutQuantityResponseModel
+                {
+                    ProductName = c.Product.Name,
+                    Quantity = c.Quantity,
+                    Message =
+                        $"Sản phẩm đã hết hàng hoặc đang trong quá trình pre-order. Vui lòng kiểm tra lại giỏ hàng của quý khách!"
+                });
             }
         }
 
         if (unavailableItems.Any())
         {
-            var resp = unavailableItems.Select(x => new CheckoutQuantityResponseModel()
-            {
-                ProductName = x.Product.Name,
-                Quantity = x.Quantity,
-                Message =
-                    $"Số lượng sản phẩm bạn mua ({x.Quantity}) đã vượt quá số lượng sản phẩm còn lại của cửa hàng ({x.Product.Quantity}). Vui lòng kiểm tra lại giỏ hàng của quý khách!"
-            });
-            return ResponseModel.Success(ResponseConstants.OverLimit("số lượng sản phẩm"), resp);
+            return ResponseModel.BadRequest(ResponseConstants.OverLimit("Số lượng sản phẩm"), unavailableItems);
         }
 
         // lấy address theo address id
-        var address = await _customerRepository.GetCustomerAddressById(model.AddressId);
-        if (address == null)
+        var customerAddress = await _customerRepository.GetCustomerAddressById(model.AddressId);
+        if (customerAddress == null || customerAddress.UserId != userId)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Địa chỉ"));
         }
 
+        var customerEmail = await _customerRepository.GetCustomerEmail(userId);
         // thêm vào order
         var orders = new Order
         {
@@ -89,24 +131,27 @@ public class CheckoutService : ICheckoutService
             CustomerId = userId,
             TotalPrice = GetTotalPrice(cart.CartDetails.ToList()),
             ShippingFee = model.ShippingFee,
-            TotalAmount = GetTotalPrice(cart.CartDetails.ToList()) + model.ShippingFee,
-            VoucherId = 1, // de tam 1 voucher
-            ReceiverName = address.ReceiverName ?? "",
+            TotalAmount = model.PaymentMethod == "COD"
+                ? GetTotalPrice(cart.CartDetails.ToList())
+                : GetTotalPrice(cart.CartDetails.ToList()) + model.ShippingFee,
+            ReceiverName = customerAddress.ReceiverName ?? "",
             Address =
-                address.Address
+                customerAddress.Address
                 + ", "
-                + address.WardName
+                + customerAddress.WardName
                 + ", "
-                + address.DistrictName
+                + customerAddress.DistrictName
                 + ", "
-                + address.ProvinceName,
-            WardCode = address.WardCode,
-            DistrictId = address.DistrictId,
-            PhoneNumber = address.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
+                + customerAddress.ProvinceName,
+            WardCode = customerAddress.WardCode,
+            DistrictId = customerAddress.DistrictId,
+            PhoneNumber = customerAddress.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
             Note = model.Note,
             PaymentMethod = model.PaymentMethod,
             StatusId = (int)OrderStatusId.PENDING,
-            OrderCode = await GenerateOrderCode()
+            OrderCode = await GenerateOrderCode(),
+            TotalGram = GetTotalGram(cart.CartDetails.ToList()),
+            Email = customerEmail,
         };
         _orderRepository.Add(orders);
 
@@ -122,18 +167,24 @@ public class CheckoutService : ICheckoutService
                 x.Quantity
                 * (x.Product.SalePrice == 0
                     ? x.Product.OriginalPrice
-                    : x.Product.SalePrice) //check sale price va original price
+                    : x.Product.SalePrice), //check sale price va original price
+            Thumbnail = x.Product.Thumbnail
         });
         var cartTemp = cart.CartDetails.ToList();
         _orderRepository.AddRange(orderDetailsList);
-
         // xóa cart detail
+
         _cartRepository.RemoveRange(cart.CartDetails); ////tạo hàm mẫu ở order repo
 
         // cập nhật quantity trong product
         foreach (var c in cart.CartDetails)
         {
             c.Product.Quantity -= c.Quantity;
+            if (c.Product.Quantity == 0)
+            {
+                c.Product.StatusId = (int)ProductStatusId.OUT_OF_STOCK;
+            }
+
             _productRepository.Update(c.Product);
         }
 
@@ -145,19 +196,176 @@ public class CheckoutService : ICheckoutService
                 OrderId = orders.Id,
                 CustomerId = orders.CustomerId,
                 FullName = orders.ReceiverName,
+                Email = customerEmail,
                 TotalAmount = orders.TotalAmount,
+                TotalGram = orders.TotalGram,
                 ShippingFee = orders.ShippingFee,
                 Address = orders.Address,
                 PhoneNumber = orders.PhoneNumber,
                 Note = orders.Note,
+                PaymentMethod = orders.PaymentMethod,
+                CreatedAt = orders.CreatedAt,
                 OrderDetail = ToOrderDetailModel(cartTemp),
             };
             if (model.PaymentMethod == "PAYOS")
             {
                 var paymentLink = await _paymentService.CreatePaymentLink(orders.OrderCode.Value);
-                return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), paymentLink);
+                if (paymentLink.Status == "ERROR")
+                {
+                    return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
+                }
+
+                var json = JsonConvert.SerializeObject(paymentLink.Data);
+                var paymentData = JsonConvert.DeserializeObject<PaymentDataModel>(json);
+                resp.OrderCode = paymentData!.OrderCode;
+                resp.CheckoutUrl = paymentData.CheckoutUrl;
             }
 
+            await _emailService.SendPurchaseEmailAsync(customerEmail, userActive.FirstName);
+            return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
+        }
+
+        return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
+    }
+
+    /// <summary>
+    /// checkout preorder
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
+    public async Task<ResponseModel> PreOrderCheckout(Guid userId, PreorderCheckoutModel model)
+    {
+        var userActive = await _userRepository.GetByIdAsync(userId);
+        if (userActive!.IsBanned)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.Banned);
+        }
+
+        if (!userActive!.IsActive)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
+        }
+
+        var product = await _preorderProductRepository.GetByProductIdAsync(model.ProductId);
+        if (product == null || product.Product.StatusId != (int)ProductStatusId.PREORDER)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm") +
+                                            " hoặc sản phẩm đang không trong quá trình Pre-order");
+        }
+
+        if (DateTime.Now < product.StartDate ||
+            DateTime.Now > product.EndDate)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotInPreOrder);
+        }
+
+        if (model.Quantity + product.Product.Quantity > product.MaxPreOrderQuantity)
+        {
+            var resp = new CheckoutQuantityResponseModel
+            {
+                ProductName = product.Product.Name,
+                Quantity = model.Quantity,
+                Message =
+                    $"Số lượng sản phẩm bạn mua ({model.Quantity}) đã vượt quá " +
+                    $"số lượng sản phẩm tối đa cho phép ({product.MaxPreOrderQuantity - product.Product.Quantity})."
+            };
+            return ResponseModel.BadRequest(ResponseConstants.OverLimit("Số lượng sản phẩm"), resp);
+        }
+
+        var customerAddress = await _customerRepository.GetCustomerAddressById(model.AddressId);
+        if (customerAddress == null || customerAddress.UserId != userId)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Địa chỉ"));
+        }
+
+        var customerEmail = await _customerRepository.GetCustomerEmail(userId);
+        var preOrder = new Order
+        {
+            Id = Guid.NewGuid(),
+            CustomerId = userId,
+            TotalPrice = product.Product.SalePrice == 0
+                ? (product.Product.OriginalPrice * model.Quantity)
+                : (product.Product.SalePrice * model.Quantity),
+            ShippingFee = model.ShippingFee,
+            TotalAmount = product.Product.SalePrice == 0
+                ? (product.Product.OriginalPrice * model.Quantity)
+                : (product.Product.SalePrice * model.Quantity) + model.ShippingFee,
+            ReceiverName = customerAddress.ReceiverName + "",
+            Address =
+                customerAddress.Address
+                + ", "
+                + customerAddress.WardName
+                + ", "
+                + customerAddress.DistrictName
+                + ", "
+                + customerAddress.ProvinceName,
+            WardCode = customerAddress.WardCode,
+            DistrictId = customerAddress.DistrictId,
+            PhoneNumber = customerAddress.PhoneNumber + "", //cộng thêm này để chắc chắn ko null (ko báo lỗi biên dịch)
+            Note = model.Note,
+            PaymentMethod = "PAYOS",
+            StatusId = (int)OrderStatusId.PENDING,
+            OrderCode = await GenerateOrderCode(),
+            TotalGram = product.Product.Unit!.Gram * model.Quantity,
+            Email = customerEmail,
+        };
+        _orderRepository.Add(preOrder);
+        var preOrderDetail = new OrderDetail
+        {
+            OrderId = preOrder.Id,
+            ProductId = product.ProductId,
+            Quantity = model.Quantity,
+            UnitPrice = product.Product.SalePrice == 0 ? product.Product.OriginalPrice : product.Product.SalePrice,
+            ProductName = product.Product.Name,
+            ItemPrice =
+                model.Quantity
+                * (product.Product.SalePrice == 0
+                    ? product.Product.OriginalPrice
+                    : product.Product.SalePrice), //check sale price va original price
+            Thumbnail = product.Product.Thumbnail
+        };
+        _orderRepository.Add(preOrderDetail);
+        product.Product.Quantity += model.Quantity;
+        _productRepository.Update(product.Product);
+        var res = await _unitOfWork.SaveChangesAsync();
+        if (res > 0)
+        {
+            var resp = new CheckoutResponseModel
+            {
+                OrderId = preOrder.Id,
+                CustomerId = preOrder.CustomerId,
+                FullName = preOrder.ReceiverName,
+                Email = customerEmail,
+                TotalAmount = preOrder.TotalAmount,
+                TotalGram = preOrder.TotalGram,
+                ShippingFee = preOrder.ShippingFee,
+                Address = preOrder.Address,
+                PhoneNumber = preOrder.PhoneNumber,
+                Note = preOrder.Note,
+                PaymentMethod = preOrder.PaymentMethod,
+                CreatedAt = preOrder.CreatedAt,
+                OrderDetail = new CheckoutOrderDetailModel
+                {
+                    ProductId = preOrderDetail.ProductId,
+                    ProductName = preOrderDetail.ProductName,
+                    Quantity = preOrderDetail.Quantity,
+                    UnitPrice = preOrderDetail.UnitPrice,
+                    ItemPrice = preOrderDetail.ItemPrice,
+                    Thumbnail = preOrderDetail.Product.Thumbnail
+                },
+            };
+            var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);
+            if (paymentLink.Status == "ERROR")
+            {
+                return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
+            }
+
+            var json = JsonConvert.SerializeObject(paymentLink.Data);
+            var paymentData = JsonConvert.DeserializeObject<PaymentDataModel>(json);
+            resp.OrderCode = paymentData!.OrderCode;
+            resp.CheckoutUrl = paymentData.CheckoutUrl;
+            await _emailService.SendPurchaseEmailAsync(customerEmail, userActive.FirstName);
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
@@ -176,9 +384,9 @@ public class CheckoutService : ICheckoutService
         return orderCode;
     }
 
-    private decimal GetTotalPrice(List<CartDetail> list)
+    private int GetTotalPrice(List<CartDetail> list)
     {
-        decimal total = 0;
+        int total = 0;
         foreach (var x in list)
         {
             var price = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice;
@@ -186,6 +394,18 @@ public class CheckoutService : ICheckoutService
         }
 
         return total;
+    }
+
+    private int GetTotalGram(List<CartDetail> list)
+    {
+        var totalGram = 0;
+        foreach (var x in list)
+        {
+            var gram = x.Product.Unit!.Gram;
+            totalGram += x.Quantity * gram;
+        }
+
+        return totalGram;
     }
 
     private IEnumerable<CheckoutOrderDetailModel> ToOrderDetailModel(List<CartDetail> list)
@@ -198,7 +418,8 @@ public class CheckoutService : ICheckoutService
             UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
             ItemPrice =
                 x.Quantity
-                * (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice)
+                * (x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice),
+            Thumbnail = x.Product.Thumbnail
         });
         return res;
     }

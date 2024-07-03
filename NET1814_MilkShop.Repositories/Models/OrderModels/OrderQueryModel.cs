@@ -4,14 +4,10 @@ namespace NET1814_MilkShop.Repositories.Models.OrderModels
 {
     public class OrderQueryModel : QueryModel
     {
-        [Range(
-            typeof(decimal),
-            "0",
-            "79228162514264337593543950335",
-            ErrorMessage = "Total amount must be >= 0"
-        )]
-        public decimal TotalAmount { get; set; } = 0;
+        [Range(0, int.MaxValue, ErrorMessage = "Total amount must be greater than or equal to 0")]
+        public int TotalAmount { get; set; } = 0;
 
+        [EmailAddress(ErrorMessage = "Must be email format")]
         public string? Email { get; set; }
 
         /// <summary>
@@ -26,10 +22,10 @@ namespace NET1814_MilkShop.Repositories.Models.OrderModels
 
         public string? PaymentMethod { get; set; }
         public string? OrderStatus { get; set; }
-
+        
         /// <summary>
-        /// Sort by id, total amount, order date, payment date (default is id)
+        /// sort order asc or desc (default is desc by created at)
         /// </summary>
-        public new string? SortColumn { get; set; }
+        public new string? SortOrder { get; set; } = "desc";
     }
 }

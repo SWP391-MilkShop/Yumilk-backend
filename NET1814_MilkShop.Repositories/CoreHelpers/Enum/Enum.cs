@@ -6,7 +6,8 @@
         PROCESSING = 2,
         SHIPPING = 3,
         DELIVERED = 4,
-        CANCELLED = 5
+        CANCELLED = 5,
+        PREORDER = 6,
     }
     public enum RoleId
     {
@@ -17,7 +18,7 @@
     public enum ProductStatusId
     {
         SELLING = 1,
-        PRE_ORDER = 2,
+        PREORDER = 2, //move out of product
         OUT_OF_STOCK = 3
     }
 }

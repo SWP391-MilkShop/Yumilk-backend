@@ -4,13 +4,10 @@ namespace NET1814_MilkShop.Repositories.Models.OrderModels;
 
 public class OrderHistoryQueryModel : QueryModel
 {
-    [Range(
-        typeof(decimal),
-        "0",
-        "79228162514264337593543950335",
-        ErrorMessage = "Total amount must be >= 0"
-    )]
-    public decimal TotalAmount { get; set; } = 0;
+    [Range(0, int.MaxValue,
+        ErrorMessage =
+            "Total amount must be greater than or equal to 0")] // "Total amount must be greater than or equal to 0
+    public int TotalAmount { get; set; } = 0;
 
     public DateTime? FromOrderDate { get; set; }
     public DateTime? ToOrderDate { get; set; }
@@ -25,4 +22,9 @@ public class OrderHistoryQueryModel : QueryModel
     /// search theo tên sản phẩm trong order history
     /// </summary>
     public new string? SearchTerm { get; set; }
+
+    /// <summary>
+    /// sort mặc định theo ngày đặt hàng giảm dần
+    /// </summary>
+    public new string? SortOrder { get; set; } = "desc";
 }
