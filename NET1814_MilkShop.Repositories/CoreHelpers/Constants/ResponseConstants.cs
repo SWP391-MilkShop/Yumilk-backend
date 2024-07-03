@@ -110,6 +110,7 @@
         }
 
         public const string NoChangeIsMade = "Không có thay đổi nào được thực hiện";
+        public const string NotEnoughPermission = "Bạn không có quyền thực hiện thao tác này";
 
         #endregion
 
