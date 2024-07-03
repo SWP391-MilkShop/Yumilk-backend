@@ -10,8 +10,10 @@ namespace NET1814_MilkShop.Services.Services;
 public interface IMessageService
 {
     // Task<ResponseModel> GetMessagesForUser(Guid userId);
-    Task<ResponseModel> GetMessageThread(Guid currentUserId, Guid recipientUserId);
-    Task<ResponseModel> CreateMessage(Guid senderId, CreateMessageModel createMessageModel);
+    Task<ResponseModel> GetMessageThreadAsync(Guid currentUserId, Guid recipientUserId);
+    Task<ResponseModel> CreateMessageAsync(Guid senderId, CreateMessageModel createMessageModel);
+    Task<List<MessageModel>> GetMessageThread(Guid currentUserId, Guid recipientUserId);
+    Task<ResponseModel> DeleteMessageAsync(Guid currentUserId, Guid messageId);
 }
 
 public class MessageService : IMessageService
@@ -32,7 +34,7 @@ public class MessageService : IMessageService
     //     throw new NotImplementedException();
     // }
     //
-    public async Task<ResponseModel> GetMessageThread(Guid currentUserId, Guid recipientUserId)
+    public async Task<ResponseModel> GetMessageThreadAsync(Guid currentUserId, Guid recipientUserId)
     {
         var messages = await _messageRepository.GetMessageThread(currentUserId, recipientUserId);
         if (!messages.Any())
@@ -67,7 +69,7 @@ public class MessageService : IMessageService
         return ResponseModel.Success(ResponseConstants.Get("tin nhắn", true), resp);
     }
 
-    public async Task<ResponseModel> CreateMessage(Guid senderId, CreateMessageModel createMessageModel)
+    public async Task<ResponseModel> CreateMessageAsync(Guid senderId, CreateMessageModel createMessageModel)
     {
         var senderExist = await _userRepository.GetByIdAsync(senderId);
         if (senderExist == null)
@@ -118,5 +120,68 @@ public class MessageService : IMessageService
         }
 
         return ResponseModel.Error(ResponseConstants.Create("tin nhắn", false));
+    }
+
+    public async Task<List<MessageModel>> GetMessageThread(Guid currentUserId, Guid recipientUserId)
+    {
+        var messages = await _messageRepository.GetMessageThread(currentUserId, recipientUserId);
+        var unreadMessages = messages.Where(x => x.RecipientId == currentUserId && x.DateRead == null)
+            .ToList();
+        if (unreadMessages.Any())
+        {
+            foreach (var message in unreadMessages)
+            {
+                message.DateRead = DateTime.Now;
+                _messageRepository.Update(message);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        var resp = messages.Select(x => new MessageModel
+        {
+            Id = x.Id,
+            SenderId = x.SenderId,
+            SenderName = x.SenderName,
+            RecipientId = x.RecipientId,
+            RecipientName = x.RecipientName,
+            Content = x.Content,
+            DateRead = x.DateRead,
+            CreatedAt = x.CreatedAt
+        }).ToList();
+        return resp;
+    }
+
+    public async Task<ResponseModel> DeleteMessageAsync(Guid currentUserId, Guid messageId)
+    {
+        var message = await _messageRepository.GetMessageById(messageId);
+        if (message == null)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Tin nhắn"));
+        }
+
+        if (message.SenderId != currentUserId && message.RecipientId != currentUserId)
+        {
+            return ResponseModel.BadRequest("Bạn không thể xóa tin nhắn này");
+        }
+
+        if (message.SenderId == currentUserId)
+        {
+            message.SenderDeleted = true;
+        }
+
+        if (message.RecipientId == currentUserId)
+        {
+            message.RecipientDeleted = true;
+        }
+
+        _messageRepository.Delete(message);
+        var res = await _unitOfWork.SaveChangesAsync();
+        if (res > 0)
+        {
+            return ResponseModel.Success(ResponseConstants.Delete("tin nhắn", true), null);
+        }
+
+        return ResponseModel.Error(ResponseConstants.Delete("tin nhắn", false));
     }
 }
