@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+﻿using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
@@ -46,8 +45,8 @@ namespace NET1814_MilkShop.Services.Services
                 Title = model.Title,
                 Content = model.Content,
                 AuthorId = authorId,
-                MetaTitle = model.MetaTitle,
-                MetaDescription = model.MetaDescription,
+                MetaTitle = model.MetaTitle ?? model.Title,
+                MetaDescription = model.MetaDescription ?? model.Content,
                 IsActive = false // default is unpublished
             };
             _postRepository.Add(post);
@@ -80,7 +79,7 @@ namespace NET1814_MilkShop.Services.Services
             var query = _postRepository.GetPostQuery(includeAuthor: true);
             var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
             var authorId = queryModel.AuthorId;
-            query = query.Where(p => (queryModel.IsActive.HasValue ? p.IsActive == queryModel.IsActive.Value : true)
+            query = query.Where(p => (!queryModel.IsActive.HasValue || p.IsActive == queryModel.IsActive.Value)
             && (string.IsNullOrEmpty(searchTerm)
                 || p.Title.Contains(searchTerm)
                 || p.Content.Contains(searchTerm)
