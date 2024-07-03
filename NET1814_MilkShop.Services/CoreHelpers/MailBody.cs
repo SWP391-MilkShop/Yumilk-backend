@@ -2,8 +2,8 @@ namespace NET1814_MilkShop.Services.CoreHelpers;
 
 public static class MailBody
 {
-    public static readonly string verifyLink = "https://yumilk.vercel.app/verify?token=";
-    public static readonly string resetLink = "https://yumilk.vercel.app/reset-password?token=";
+    public static readonly string verifyLink = "https://yumilk.shop/verify?token=";
+    public static readonly string resetLink = "https://yumilk.shop/reset-password?token=";
 
     public static string ResetPassword(string customerName, string token)
     {
