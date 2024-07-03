@@ -12,8 +12,8 @@ namespace NET1814_MilkShop.Repositories.Data.Entities
         [ForeignKey("Product")]
         public Guid ProductId { get; set; }
 
-        [Column("max_preorder_quantity")]
-        public int MaxPreOrderQuantity { get; set; } //khi add thi cong vao, khi ship thi tru di
+        [Column("max_preorder_quantity")] 
+        public int MaxPreOrderQuantity { get; set; } = 1000; //default 1000
 
         [Column("start_date", TypeName ="datetime2")]
         public DateTime StartDate { get; set; } //ngay bat dau preorder

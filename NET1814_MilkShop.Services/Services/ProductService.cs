@@ -209,6 +209,7 @@ public class ProductService : IProductService
                 ProductId = product.Id
             };
             _preorderProductRepository.Add(preorderProduct);
+            product.Quantity = 0; // set quantity to 0 if status is preorder
         }
 
         _productRepository.Add(product);
@@ -221,7 +222,13 @@ public class ProductService : IProductService
 
         return ResponseModel.Error(ResponseConstants.Create("sản phẩm", false));
     }
-
+    /// <summary>
+    /// If status is changed, check if product is ordered
+    /// If status is preorder, add preorder product if not exists, set quantity to 0, set default max preorder quantity to 1000
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
     public async Task<ResponseModel> UpdateProductAsync(Guid id, UpdateProductModel model)
     {
         var product = await _productRepository.GetByIdNoIncludeAsync(id);
@@ -236,18 +243,6 @@ public class ProductService : IProductService
             }
         }
         //add preorder product if status is preorder and no preorder product exists
-        if (model.StatusId == (int)ProductStatusId.PREORDER)
-        {
-            var existing = await _preorderProductRepository.GetByIdAsync(id);
-            if (existing == null)
-            {
-                var preorderProduct = new PreorderProduct
-                {
-                    ProductId = product.Id
-                };
-                _preorderProductRepository.Add(preorderProduct);
-            }
-        }
 
         if (!string.IsNullOrEmpty(model.Name))
         {
@@ -272,10 +267,23 @@ public class ProductService : IProductService
         product.Quantity = model.Quantity ?? product.Quantity;
         product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
         product.SalePrice = model.SalePrice ?? product.SalePrice;
+        if (model.StatusId == (int)ProductStatusId.PREORDER)
+        {
+            var existing = await _preorderProductRepository.GetByIdAsync(id);
+            if (existing == null)
+            {
+                var preorderProduct = new PreorderProduct
+                {
+                    ProductId = product.Id
+                };
+                product.Quantity = 0; // set quantity to 0 if status is preorder
+                _preorderProductRepository.Add(preorderProduct);
+            }
+        }
         var validateCommonResponse = ValidateCommon(product.SalePrice, product.OriginalPrice, product.Quantity,
             product.StatusId, model.Thumbnail);
         if (validateCommonResponse != null) return validateCommonResponse;
-
+        
         product.Thumbnail = string.IsNullOrEmpty(model.Thumbnail) ? product.Thumbnail : model.Thumbnail;
         product.IsActive = model.IsActive;
         _productRepository.Update(product);
