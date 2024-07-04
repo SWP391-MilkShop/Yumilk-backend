@@ -149,7 +149,7 @@ public class CheckoutService : ICheckoutService
             Note = model.Note,
             PaymentMethod = model.PaymentMethod,
             StatusId = (int)OrderStatusId.PENDING,
-            OrderCode = await GenerateOrderCode(),
+            OrderCode = model.PaymentMethod == "COD" ? null : await GenerateOrderCode(),
             TotalGram = GetTotalGram(cart.CartDetails.ToList()),
             Email = customerEmail,
         };
