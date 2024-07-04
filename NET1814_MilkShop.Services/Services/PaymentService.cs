@@ -3,7 +3,6 @@ using Net.payOS;
 using Net.payOS.Types;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Repositories;
-using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 
 namespace NET1814_MilkShop.Services.Services;
 
@@ -60,7 +59,7 @@ public class PaymentService : IPaymentService
             var customerName = $"{order.Customer?.User.FirstName} {order.Customer?.User.LastName}";
             var customerEmail = order.Customer?.Email;
             var customerPhone = order.Customer?.PhoneNumber;
-            var description = $"{orderCode} Shipfee: {(int)order.ShippingFee}đ";
+            var description = $"{orderCode} Shipfee: {order.ShippingFee}đ";
             var expiredAt = (int)DateTimeOffset.UtcNow.AddMinutes(15).ToUnixTimeSeconds();
             var paymentData = new PaymentData(
                 (long)order.OrderCode,

@@ -68,7 +68,7 @@ public class CheckoutService : ICheckoutService
             return ResponseModel.BadRequest(ResponseConstants.Banned);
         }
 
-        if (!userActive!.IsActive)
+        if (!userActive.IsActive)
         {
             return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
         }
@@ -85,7 +85,7 @@ public class CheckoutService : ICheckoutService
         }
 
         //check quantity coi còn hàng không
-        List<CheckoutQuantityResponseModel> unavailableItems = new List<CheckoutQuantityResponseModel>();
+        List<CheckoutQuantityResponseModel> unavailableItems = [];
         foreach (var c in cart.CartDetails)
         {
             if (c.Quantity > c.Product.Quantity)
@@ -98,8 +98,7 @@ public class CheckoutService : ICheckoutService
                         $"Số lượng sản phẩm bạn mua ({c.Quantity}) đã vượt quá số lượng sản phẩm còn lại của cửa hàng ({c.Product.Quantity}). Vui lòng kiểm tra lại giỏ hàng của quý khách!"
                 });
             }
-            else if (c.Product.StatusId == (int)ProductStatusId.OUT_OF_STOCK ||
-                     c.Product.StatusId == (int)ProductStatusId.PREORDER)
+            else if (c.Product.StatusId is (int)ProductStatusId.OUT_OF_STOCK or (int)ProductStatusId.PREORDER)
             {
                 unavailableItems.Add(new CheckoutQuantityResponseModel
                 {
@@ -111,7 +110,7 @@ public class CheckoutService : ICheckoutService
             }
         }
 
-        if (unavailableItems.Any())
+        if (unavailableItems.Count != 0)
         {
             return ResponseModel.BadRequest(ResponseConstants.OverLimit("Số lượng sản phẩm"), unavailableItems);
         }
@@ -174,7 +173,7 @@ public class CheckoutService : ICheckoutService
         _orderRepository.AddRange(orderDetailsList);
         // xóa cart detail
 
-        _cartRepository.RemoveRange(cart.CartDetails); ////tạo hàm mẫu ở order repo
+        _cartDetailRepository.RemoveRange(cart.CartDetails); ////tạo hàm mẫu ở order repo
 
         // cập nhật quantity trong product
         foreach (var c in cart.CartDetails)
@@ -242,7 +241,7 @@ public class CheckoutService : ICheckoutService
             return ResponseModel.BadRequest(ResponseConstants.Banned);
         }
 
-        if (!userActive!.IsActive)
+        if (!userActive.IsActive)
         {
             return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
         }

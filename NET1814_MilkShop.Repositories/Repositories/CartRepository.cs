@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Entities;
 
@@ -26,7 +25,6 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         void Add(Cart cart);
         void Remove(Cart cart);
-        void RemoveRange(IEnumerable<CartDetail> cart);
         Task<List<CartDetail>> GetCartDetails(int cartId);
         Task<Cart?> GetCartByCustomerId(Guid customerId);
     }
@@ -55,7 +53,6 @@ namespace NET1814_MilkShop.Repositories.Repositories
                 return await _query
                     .Include(x => x.CartDetails)
                     .ThenInclude(x => x.Product)
-                    .ThenInclude(x => x.Unit)
                     .FirstOrDefaultAsync(x => x.CustomerId == customerId);
             }
 
@@ -69,11 +66,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
             return await _context.Carts.Include(x => x.CartDetails).ThenInclude(x => x.Product)
                 .ThenInclude(x => x.Unit).FirstOrDefaultAsync(x => x.CustomerId == customerId);
         }
-
-        public void RemoveRange(IEnumerable<CartDetail> cartDetails)
-        {
-            _context.RemoveRange(cartDetails);
-        }
+        
 
         public async Task<List<CartDetail>> GetCartDetails(int cartId)
         {

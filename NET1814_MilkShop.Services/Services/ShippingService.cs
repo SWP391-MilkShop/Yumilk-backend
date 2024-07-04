@@ -7,7 +7,6 @@ using NET1814_MilkShop.Repositories.Models.ShipModels;
 using NET1814_MilkShop.Repositories.Models.ShippingModels;
 using NET1814_MilkShop.Repositories.Repositories;
 using NET1814_MilkShop.Repositories.UnitOfWork;
-using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using Newtonsoft.Json;
 
 namespace NET1814_MilkShop.Services.Services;
@@ -26,10 +25,9 @@ public interface IShippingService
 
 public class ShippingService : IShippingService
 {
-    private readonly IConfiguration _configuration;
     private readonly HttpClient _client;
-    private readonly string Token;
-    private readonly string ShopId;
+    private readonly string _token;
+    private readonly string _shopId;
     private readonly IOrderRepository _orderRepository;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -38,11 +36,10 @@ public class ShippingService : IShippingService
         IOrderRepository orderRepository,
         IUnitOfWork unitOfWork)
     {
-        _configuration = configuration;
-        Token = _configuration["GHN:Token"];
-        ShopId = _configuration["GHN:ShopId"];
+        _token = configuration["GHN:Token"];
+        _shopId = configuration["GHN:ShopId"];
         _client = client;
-        _client.DefaultRequestHeaders.Add("Token", Token);
+        _client.DefaultRequestHeaders.Add("Token", _token);
         _orderRepository = orderRepository;
         _unitOfWork = unitOfWork;
     }
@@ -126,7 +123,7 @@ public class ShippingService : IShippingService
 
     public async Task<ResponseModel> GetShippingFeeAsync(ShippingFeeRequestModel request)
     {
-        _client.DefaultRequestHeaders.Add("ShopId", ShopId);
+        _client.DefaultRequestHeaders.Add("ShopId", _shopId);
         var url = $"https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?" +
                   $"to_ward_code={request.FromWardCode}&to_district_id={request.FromDistrictId}&weight={request.TotalWeight}" +
                   $"&service_id=0&service_type_id=2";

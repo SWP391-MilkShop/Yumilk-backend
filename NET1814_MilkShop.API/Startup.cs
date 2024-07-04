@@ -36,8 +36,8 @@ namespace NET1814_MilkShop.API
                     new OpenApiInfo { Title = "NET1814_MilkShop.API", Version = "v1" }
                 );
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var APIXmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                o.IncludeXmlComments(APIXmlPath);
+                var apiXmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                o.IncludeXmlComments(apiXmlPath);
                 var repoXmlFile = "NET1814_MilkShop.Repositories.xml";
                 var repoXmlPath = Path.Combine(AppContext.BaseDirectory, repoXmlFile);
                 o.IncludeXmlComments(repoXmlPath);
@@ -106,7 +106,7 @@ namespace NET1814_MilkShop.API
             services.AddExceptionHandler<ExceptionLoggingHandler>();
             services.AddExceptionHandler<GlobalExceptionHandler>();
             //Add Cors
-            services.AddCors(services =>
+            services.AddCors(options =>
             {
                 /*services.AddPolicy(
                     "DefaultPolicy",
@@ -119,7 +119,7 @@ namespace NET1814_MilkShop.API
                             .AllowAnyHeader();
                     }
                 );*/
-                services.AddPolicy(
+                options.AddPolicy(
                     "AllowAll",
                     builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }
                 );
@@ -132,7 +132,7 @@ namespace NET1814_MilkShop.API
                     o =>
                     {
                         o.TokenValidationParameters =
-                            new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                            new TokenValidationParameters
                             {
                                 ValidateIssuer = true,
                                 ValidateAudience = false,
@@ -151,7 +151,7 @@ namespace NET1814_MilkShop.API
                     o =>
                     {
                         o.TokenValidationParameters =
-                            new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                            new TokenValidationParameters
                             {
                                 ValidateIssuer = true,
                                 ValidateAudience = false,
@@ -175,7 +175,7 @@ namespace NET1814_MilkShop.API
 
             app.UseDeveloperExceptionPage();
 
-            var isUserSwagger = _configuration.GetValue<bool>("UseSwagger", false);
+            var isUserSwagger = _configuration.GetValue("UseSwagger", false);
             if (isUserSwagger)
             {
                 app.UseSwagger();
@@ -189,7 +189,7 @@ namespace NET1814_MilkShop.API
             app.UseRouting();
             app.UseCors("AllowAll"); //luon dat truoc app.UseAuthorization()
             app.UseAuthorization();
-            app.UseExceptionHandler(options => { });
+            app.UseExceptionHandler(_ => { });
             // ko biet sao cai nay no keu violate ASP0014, keu map route truc tiep trong api luon
             app.UseEndpoints(endpoint =>
             {

@@ -217,7 +217,7 @@ namespace NET1814_MilkShop.Services.Services
                 Thumbnail = x.Product.Thumbnail,
                 OriginalPrice = x.Product.OriginalPrice,
                 SalePrice = x.Product.SalePrice,
-                Gram = x.Product.Unit.Gram
+                Gram = x.Product.Unit!.Gram
             });
             if (model.SortOrder == "desc")
             {
@@ -304,6 +304,7 @@ namespace NET1814_MilkShop.Services.Services
             }
             cartItem.Quantity = model.Quantity;
             _cartDetailRepository.Update(cartItem);
+            // _unitOfWork.Detach(cartItem.Product); // Detach product to prevent update product
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
@@ -317,7 +318,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> ClearCartAsync(Guid customerId)
         {
-            var cart = await _cartRepository.GetByCustomerIdAsync(customerId, true);
+            var cart = await _cartRepository.GetByCustomerIdAsync(customerId, false);
             if (cart == null)
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Giỏ hàng"));
