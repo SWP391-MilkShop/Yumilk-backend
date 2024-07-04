@@ -23,7 +23,9 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         public virtual void Update(TEntity entity)
         {
-            _context.Set<TEntity>().Update(entity);
+            // _context.Set<TEntity>().Update(entity);
+            _context.Set<TEntity>().Attach(entity);
+            _context.Entry(entity).State = EntityState.Modified;
         }
 
         /// <summary>
@@ -42,7 +44,9 @@ namespace NET1814_MilkShop.Repositories.Repositories
         public virtual void Delete(TEntity entity)
         {
             entity.DeletedAt = DateTime.Now;
-            _context.Set<TEntity>().Update(entity);
+            // _context.Set<TEntity>().Update(entity);
+            _context.Set<TEntity>().Attach(entity);
+            _context.Entry(entity).State = EntityState.Modified;
         }
 
         public virtual async Task<TEntity?> GetByIdAsync(Guid id)
