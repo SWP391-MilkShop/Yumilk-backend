@@ -12,10 +12,12 @@ namespace NET1814_MilkShop.Repositories.Repositories
 
         /// <summary>
         /// This method is used to get all child category ids of a parent category (include parent category id)
+        /// Must pass in a list of categories to avoid multiple queries to the database
         /// </summary>
         /// <param name="parentId"></param>
+        /// <param name="categories"></param>
         /// <returns></returns>
-        Task<HashSet<int>> GetChildCategoryIds(int parentId);
+        HashSet<int> GetChildCategoryIds(int parentId, List<Category> categories);
 
         void Add(Category category);
         void Update(Category category);
@@ -68,15 +70,12 @@ namespace NET1814_MilkShop.Repositories.Repositories
         //
         //     return childCategoryIds;
         // }
-        public async Task<HashSet<int>> GetChildCategoryIds(int parentId)
+        public HashSet<int> GetChildCategoryIds(int parentId, List<Category> categories)
         {
             if (parentId == 0) return new HashSet<int>();
 
-            // Load all categories once
-            var allCategories = await _query.ToListAsync();
-
             // Convert to a lookup table for efficient child category lookup
-            var categoriesLookup = allCategories.ToLookup(c => c.ParentId);
+            var categoriesLookup = categories.ToLookup(c => c.ParentId);
 
             // Initialize the result set with the parent ID
             var categoryIds = new HashSet<int> { parentId };

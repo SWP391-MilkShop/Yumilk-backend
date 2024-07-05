@@ -4,15 +4,14 @@
     {
         public int TotalSold { get; set; }
         public int TotalRevenue { get; set; }
-        public IDictionary<string, CategoryBrandStats> StatsPerCategory { get; set; } = 
-            new Dictionary<string, CategoryBrandStats>();
+        public List<CategoryBrandStats> StatsPerCategory { get; set; } = [];
 
-        public IDictionary<string, CategoryBrandStats> StatsPerBrand { get; set; } =
-            new Dictionary<string, CategoryBrandStats>();
+        public List<CategoryBrandStats> StatsPerBrand { get; set; } = [];
     }
 
     public class CategoryBrandStats
     {
+        public string Name { get; set; } = null!;
         public int TotalSold { get; set; }
         public int TotalRevenue { get; set; }
     }

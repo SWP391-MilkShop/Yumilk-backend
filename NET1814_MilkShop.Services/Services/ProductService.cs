@@ -72,12 +72,14 @@ public class ProductService : IProductService
         //normalize search term, brand, category, unit, status
         var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
         HashSet<int> categoryIds = [];
+        var categories = await _categoryRepository.GetCategoriesQuery()
+            .Where(c => c.ParentId != null)
+            .ToListAsync();
         foreach (var categoryId in queryModel.CategoryIds)
         {
-            var childCategoryIds = await _categoryRepository.GetChildCategoryIds(categoryId);
+            var childCategoryIds = _categoryRepository.GetChildCategoryIds(categoryId, categories);
             categoryIds.UnionWith(childCategoryIds);
         }
-
         var minPrice = queryModel.MinPrice;
         var maxPrice = queryModel.MaxPrice;
         var query = _productRepository.GetProductsQuery(true, true);
@@ -222,6 +224,7 @@ public class ProductService : IProductService
 
         return ResponseModel.Error(ResponseConstants.Create("sản phẩm", false));
     }
+
     /// <summary>
     /// If status is changed, check if product is ordered
     /// If status is preorder, add preorder product if not exists, set quantity to 0, set default max preorder quantity to 1000
@@ -280,10 +283,11 @@ public class ProductService : IProductService
                 _preorderProductRepository.Add(preorderProduct);
             }
         }
+
         var validateCommonResponse = ValidateCommon(product.SalePrice, product.OriginalPrice, product.Quantity,
             product.StatusId, model.Thumbnail);
         if (validateCommonResponse != null) return validateCommonResponse;
-        
+
         product.Thumbnail = string.IsNullOrEmpty(model.Thumbnail) ? product.Thumbnail : model.Thumbnail;
         product.IsActive = model.IsActive;
         _productRepository.Update(product);
@@ -302,6 +306,7 @@ public class ProductService : IProductService
         {
             return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
         }
+
         var preorderProduct = await _preorderProductRepository.GetByIdAsync(id);
         //delete preorder product if exists
         if (preorderProduct != null) _preorderProductRepository.Delete(preorderProduct);
@@ -327,10 +332,8 @@ public class ProductService : IProductService
         var brands = _brandRepository.GetBrandsQuery();
         var statsPerBrand = await GetBrandStats(brands, orderDetails);
         //get total products sold per category
-        var categories = _categoryRepository.GetCategoriesQuery()
-            .Include(c => c.Parent)
-            .Where(c => c.ParentId == parentId);
-        var statsPerCategory = await GetCategoryStats(categories, orderDetails);
+        var categories = _categoryRepository.GetCategoriesQuery();
+        var statsPerCategory = await GetCategoryStats(categories, orderDetails, parentId);
         var stats = new ProductStatsModel
         {
             TotalSold = await orderDetails.SumAsync(o => o.Quantity),
@@ -576,50 +579,57 @@ public class ProductService : IProductService
 
     #endregion
 
-    private async Task<IDictionary<string, CategoryBrandStats>> GetCategoryStats(IQueryable<Category> categories,
-        IQueryable<OrderDetail> orderDetails)
+    private async Task<List<CategoryBrandStats>> GetCategoryStats(IQueryable<Category> categories,
+        IQueryable<OrderDetail> orderDetails, int? parentId)
     {
-        var categoriesList = await categories
-            .Select(c => new { c.Id, Name = c.Name + (c.ParentId == null ? "" : $" ({c.Parent!.Name})") })
-            .ToListAsync();
-        var categoryDict = categoriesList.ToDictionary(c => c.Name, _ => new CategoryBrandStats());
-        foreach (var category in categoriesList)
-        {
-            var childCategoryIds = await _categoryRepository.GetChildCategoryIds(category.Id);
-            var categoryOrderDetails = orderDetails
-                .Where(od => childCategoryIds.Contains(od.Product.CategoryId))
-                .Select(od => new { od.Quantity, od.ItemPrice });
-            var totalQuantity = await categoryOrderDetails.SumAsync(x => x.Quantity);
-            var totalRevenue = await categoryOrderDetails.SumAsync(x => x.ItemPrice);
-
-            categoryDict[category.Name] = new CategoryBrandStats
+        var allCategories = await categories.Include(c => c.Parent).ToListAsync();
+        var categoriesList = allCategories.Where(c => c.ParentId == parentId)
+            .Select(c => new
             {
-                TotalSold = totalQuantity,
-                TotalRevenue = totalRevenue
+                c.Id,
+                Name = c.Name + (c.ParentId == null ? "" : $" ({c.Parent!.Name})"),
+                childCategoryIds = _categoryRepository.GetChildCategoryIds(c.Id, allCategories)
+            }).ToList();
+        var allChildCategoryIds = categoriesList.SelectMany(c => c.childCategoryIds).ToList();
+        var query = from c in categories
+            // join ... into ... from ... in ... DefaultIfEmpty() to perform left join
+            // include all categories even if there is no order detail
+            join od in orderDetails on c.Id equals od.Product.CategoryId into categoryOrderDetails
+            from cod in categoryOrderDetails.DefaultIfEmpty()
+            where allChildCategoryIds.Contains(c.Id)
+            group new { cod.Quantity, cod.ItemPrice } by c.Id into g
+            select new
+            {
+                Id = g.Key,
+                TotalSold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.ItemPrice)
             };
-        }
-
-        return categoryDict;
+        var dataList = await query.ToListAsync();
+        var categoryStatsList = categoriesList.Select(c => new CategoryBrandStats()
+        {
+            Name = c.Name,
+            TotalSold = dataList.Where(d => c.childCategoryIds.Contains(d.Id)).Sum(d => d.TotalSold),
+            TotalRevenue = dataList.Where(d => c.childCategoryIds.Contains(d.Id)).Sum(d => d.TotalRevenue)
+        }).ToList();
+        return categoryStatsList;
     }
 
-    private async Task<IDictionary<string, CategoryBrandStats>> GetBrandStats(IQueryable<Brand> brands,
+    private async Task<List<CategoryBrandStats>> GetBrandStats(IQueryable<Brand> brands,
         IQueryable<OrderDetail> orderDetails)
     {
-        var brandsList = await brands.ToListAsync();
-        var brandDict = brandsList.ToDictionary(b => b.Name, _ => new CategoryBrandStats());
-        foreach (var brand in brandsList)
-        {
-            var brandsOrderDetails = orderDetails.Where(od => brand.Id == od.Product.BrandId)
-                .Select(od => new { od.Quantity, od.ItemPrice });
-            var totalQuantity = await brandsOrderDetails.SumAsync(x => x.Quantity);
-            var totalRevenue = await brandsOrderDetails.SumAsync(x => x.ItemPrice);
-            brandDict[brand.Name] = new CategoryBrandStats
+        var query = from b in brands
+            // join ... into ... from ... in ... DefaultIfEmpty() to perform left join
+            // include all brands even if there is no order detail
+            join od in orderDetails on b.Id equals od.Product.BrandId into brandOrderDetails
+            from bod in brandOrderDetails.DefaultIfEmpty()
+            group new { bod.Quantity , bod.ItemPrice } by b.Name into g
+            select new CategoryBrandStats
             {
-                TotalSold = totalQuantity,
-                TotalRevenue = totalRevenue
+                Name = g.Key,
+                TotalSold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.Quantity * x.ItemPrice)
             };
-        }
-
-        return brandDict;
+        List<CategoryBrandStats> brandStatsList = await query.ToListAsync();
+        return brandStatsList;
     }
 }
