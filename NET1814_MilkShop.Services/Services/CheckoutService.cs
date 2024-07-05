@@ -326,6 +326,7 @@ public class CheckoutService : ICheckoutService
             Thumbnail = product.Product.Thumbnail
         };
         _orderRepository.Add(preOrderDetail);
+        // cập nhật quantity trong product (+ thêm quantity vào product)
         product.Product.Quantity += model.Quantity;
         _productRepository.Update(product.Product);
         var res = await _unitOfWork.SaveChangesAsync();

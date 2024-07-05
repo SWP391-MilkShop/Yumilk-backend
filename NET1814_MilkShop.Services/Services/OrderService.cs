@@ -412,7 +412,7 @@ namespace NET1814_MilkShop.Services.Services
 
         public async Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model)
         {
-            var order = await _orderRepository.GetByIdAsync(id, includeDetails: false);
+            var order = await _orderRepository.GetByOrderIdAsync(id, include: true);
             if (order == null)
             {
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("đơn hàng"));
@@ -422,27 +422,54 @@ namespace NET1814_MilkShop.Services.Services
             {
                 return ResponseModel.Success(ResponseConstants.NoChangeIsMade, null);
             }
-
-            if (order.StatusId > model.StatusId)
+            if(order.StatusId == (int)OrderStatusId.CANCELLED)
+            {
+                return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
+            }
+            // đơn hàng không thể quay lại trạng thái trước đó
+            if (order.StatusId != (int)OrderStatusId.PREORDER && order.StatusId > model.StatusId)
             {
                 return ResponseModel.BadRequest(ResponseConstants.Update("trạng thái đơn hàng", false));
             }
-
+            if(order.StatusId == (int)OrderStatusId.PREORDER && model.StatusId != (int)OrderStatusId.SHIPPING)
+            {
+                return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
+            }
+            int result;
             if (model.StatusId == (int)OrderStatusId.SHIPPING)
             {
+                if(order.StatusId == (int) OrderStatusId.PREORDER)
+                {
+                    // trừ số lượng sản phẩm trong kho
+                    foreach (var o in order.OrderDetails)
+                    {
+                        o.Product.Quantity -= o.Quantity;
+                        if (o.Product.Quantity < 0)
+                        {
+                            return ResponseModel.Error("Có lỗi xảy ra khi cập nhật số lượng sản phẩm trong kho");
+                        }
+                        _productRepository.Update(o.Product);
+                    }
+                }
                 var orderShippingAsync = await _shippingService.CreateOrderShippingAsync(id);
                 if (orderShippingAsync.StatusCode != 200)
                 {
                     return orderShippingAsync;
                 }
-
-                return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true),
-                    orderShippingAsync.Data);
+                order.StatusId = model.StatusId;
+                
+                _orderRepository.Update(order);
+                result = await _unitOfWork.SaveChangesAsync();
+                if (result > 0)
+                {
+                    return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), orderShippingAsync.Data);
+                }
+                return ResponseModel.Error(ResponseConstants.Update("trạng thái đơn hàng", false));
             }
 
             order.StatusId = model.StatusId;
             _orderRepository.Update(order);
-            var result = await _unitOfWork.SaveChangesAsync();
+            result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
             {
                 return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), null);
