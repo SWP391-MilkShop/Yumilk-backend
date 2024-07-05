@@ -55,7 +55,7 @@ public class CheckPaymentStatusJob : IJob
                     continue;
                 }
 
-                switch (order.StatusId)
+                /*switch (order.StatusId)
                 {
                     case (int) OrderStatusId.CANCELLED:
                         _logger.LogInformation(
@@ -77,19 +77,21 @@ public class CheckPaymentStatusJob : IJob
                             "OrderId {OrderId} code {OrderCode} is in {preorder} status",
                             order.Id, order.OrderCode.Value, OrderStatusId.PREORDER.ToString());
                         continue;
-                }
+                }*/
 
                 //Gọi API lấy payment status của PayOS
                 await Task.Delay(300); //Tranh request qua nhieu trong thoi gian ngan tranh bi block
                 var paymentStatus = await _paymentService.GetPaymentLinkInformation(order.Id);
                 _logger.LogInformation($"OrderId:{order.Id} code:{order.OrderCode.Value} --> " + paymentStatus.Message);
+                
+                //Neu bi loi thi tam thoi skip qua order do
                 if (paymentStatus.StatusCode == 500)
                 {
                     continue;
                 }
 
-                _logger.LogInformation("Type of paymentStatus.Data: {Type}", paymentStatus.Data?.GetType());
-                _logger.LogInformation("paymentStatus.Data: {Data}", paymentStatus.Data);
+                /*_logger.LogInformation("Type of paymentStatus.Data: {Type}", paymentStatus.Data?.GetType());*/
+                /*_logger.LogInformation("paymentStatus.Data: {Data}", paymentStatus.Data);*/
 
                 var paymentData = paymentStatus.Data as PaymentLinkInformation;
 

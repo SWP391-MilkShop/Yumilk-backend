@@ -90,7 +90,7 @@ namespace NET1814_MilkShop.Repositories.Repositories
         {
             return await _query
                 .Include(o => o.OrderDetails)
-                .Where(x => x.OrderCode != null)
+                .Where(x => x.OrderCode != null && (x.StatusId == (int)OrderStatusId.PENDING))
                 .ToListAsync();
         }
 
