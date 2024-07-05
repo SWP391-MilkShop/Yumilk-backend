@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Interfaces;
 
@@ -26,23 +25,21 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
 
         public async Task<int> SaveChangesAsync()
         {
-            int result = -1;
+            int result;
 
             // Wrap the entire save process in a transaction
-            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            await using var dbContextTransaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                try
-                {
-                    UpdateAuditableEntities();
-                    result = await _context.SaveChangesAsync();
-                    dbContextTransaction.Commit();
-                }
-                catch (Exception)
-                {
-                    //Log Exception Handling message
-                    result = -1;
-                    dbContextTransaction.Rollback();
-                }
+                UpdateAuditableEntities();
+                result = await _context.SaveChangesAsync();
+                await dbContextTransaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                //Log Exception Handling message
+                result = -1;
+                await dbContextTransaction.RollbackAsync();
             }
 
             return result;
@@ -59,10 +56,10 @@ namespace NET1814_MilkShop.Repositories.UnitOfWork
 
         private void UpdateAuditableEntities()
         {
-            IEnumerable<EntityEntry<IAuditableEntity>> entries =
+            var entries =
                 _context.ChangeTracker.Entries<IAuditableEntity>();
 
-            foreach (EntityEntry<IAuditableEntity> entityEntry in entries)
+            foreach (var entityEntry in entries)
             {
                 if (entityEntry.State == EntityState.Added)
                 {
