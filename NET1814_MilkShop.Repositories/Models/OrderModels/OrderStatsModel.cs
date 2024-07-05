@@ -11,14 +11,14 @@ namespace NET1814_MilkShop.Repositories.Models.OrderModels
         /// <summary>
         /// Total number of orders per status
         /// </summary>
-        public IDictionary<string, int> TotalOrdersPerStatus { get; set; } = new Dictionary<string, int>()
-        {
-            { OrderStatusId.PENDING.ToString(), 0},
-            { OrderStatusId.PROCESSING.ToString(), 0},
-            { OrderStatusId.SHIPPING.ToString(), 0},
-            { OrderStatusId.DELIVERED.ToString(), 0},
-            { OrderStatusId.CANCELLED.ToString(), 0}
-        };
+        public List<OrderStatusCount> TotalOrdersPerStatus { get; set; } =
+        [
+            new OrderStatusCount { Status = OrderStatusId.PENDING.ToString(), Count = 0 },
+            new OrderStatusCount { Status = OrderStatusId.PROCESSING.ToString(), Count = 0 },
+            new OrderStatusCount { Status = OrderStatusId.SHIPPING.ToString(), Count = 0 },
+            new OrderStatusCount { Status = OrderStatusId.DELIVERED.ToString(), Count = 0 },
+            new OrderStatusCount { Status = OrderStatusId.CANCELLED.ToString(), Count = 0 }
+        ];
         /// <summary>
         /// Only count orders that have been delivered
         /// </summary>
@@ -27,5 +27,10 @@ namespace NET1814_MilkShop.Repositories.Models.OrderModels
         /// Only count orders that have been delivered
         /// </summary>
         public int TotalShippingFee { get; set; }
+    }
+    public class OrderStatusCount
+    {
+        public string Status { get; set; } = null!;
+        public int Count { get; set; }
     }
 }

@@ -471,17 +471,24 @@ namespace NET1814_MilkShop.Services.Services
             query = query.Where(o => o.CreatedAt >= from && o.CreatedAt <= to);
             // only count delivered orders
             var delivered = query.Where(o => o.StatusId == (int)OrderStatusId.DELIVERED);
-            var totalOrdersPerStatus = await query.GroupBy(o => o.Status)
-                .ToDictionaryAsync(g => g.Key!.Name.ToUpper(), g => g.Count());
+            var totalOrdersPerStatus = await query
+                .GroupBy(o => o.Status)
+                .Select(g => new OrderStatusCount
+                {
+                    Status = g.Key!.Name.ToUpper(),
+                    Count = g.Count()
+                })
+                .ToListAsync();
             var stats = new OrderStatsModel
             {
                 TotalOrders = await query.CountAsync(),
                 TotalRevenue = await delivered.SumAsync(o => o.TotalPrice),
                 TotalShippingFee = await delivered.SumAsync(o => o.ShippingFee),
             };
-            foreach (var status in Enum.GetNames(typeof(OrderStatusId)))
+            foreach (var item in totalOrdersPerStatus)
             {
-                stats.TotalOrdersPerStatus[status] = totalOrdersPerStatus.GetValueOrDefault(status, 0);
+                var count = stats.TotalOrdersPerStatus.FirstOrDefault(x => x.Status == item.Status);
+                if (count != null) count.Count = item.Count;
             }
 
             return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng", true), stats);
