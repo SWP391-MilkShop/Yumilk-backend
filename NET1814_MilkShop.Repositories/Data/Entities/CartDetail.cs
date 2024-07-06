@@ -1,10 +1,10 @@
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 using System.ComponentModel.DataAnnotations.Schema;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("cart_details")]
-public partial class CartDetail : IAuditableEntity
+public class CartDetail : IAuditableEntity
 {
     public int CartId { get; set; }
     public Guid ProductId { get; set; }

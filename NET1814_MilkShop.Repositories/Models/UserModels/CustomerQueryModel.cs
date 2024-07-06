@@ -4,6 +4,7 @@ public class CustomerQueryModel : QueryModel
 {
     public bool? IsActive { get; set; }
     public bool? IsBanned { get; set; }
+
     /// <summary>
     /// Sort by point, email, isactive, first name, last name, created at (default is id)
     /// </summary>

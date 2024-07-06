@@ -5,7 +5,6 @@ namespace NET1814_MilkShop.API.Infrastructure;
 
 public class QuartzExtenstionHosting
 {
-
     public static void AddQuartzBackgroundJobs(IServiceCollection services)
     {
         services.AddQuartz(options =>

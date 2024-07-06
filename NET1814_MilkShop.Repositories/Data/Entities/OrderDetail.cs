@@ -1,10 +1,10 @@
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 using System.ComponentModel.DataAnnotations.Schema;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("order_details")]
-public partial class OrderDetail : IAuditableEntity
+public class OrderDetail : IAuditableEntity
 {
     public Guid OrderId { get; set; }
 

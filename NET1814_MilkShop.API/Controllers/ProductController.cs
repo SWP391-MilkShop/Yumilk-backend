@@ -9,7 +9,7 @@ using NET1814_MilkShop.Repositories.Models.ProductAttributeValueModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Models.ProductReviewModels;
 using NET1814_MilkShop.Repositories.Models.UnitModels;
-using NET1814_MilkShop.Services.Services;
+using NET1814_MilkShop.Services.Services.Interfaces;
 using ILogger = Serilog.ILogger;
 
 namespace NET1814_MilkShop.API.Controllers;
@@ -63,6 +63,7 @@ public class ProductController : Controller
     #endregion
 
     #region Product
+
     [HttpGet("search")]
     public async Task<IActionResult> GetSearchResults([FromQuery] ProductSearchModel queryModel)
     {
@@ -70,6 +71,7 @@ public class ProductController : Controller
         var response = await _productService.GetSearchResultsAsync(queryModel);
         return ResponseExtension.Result(response);
     }
+
     /// <summary>
     ///     Filter products by category, brand, unit, status, min price, max price
     ///     <para> Default status is selling</para>
@@ -83,7 +85,7 @@ public class ProductController : Controller
         var response = await _productService.GetProductsAsync(queryModel);
         return ResponseExtension.Result(response);
     }
-    
+
     /// <summary>
     /// Return additional information if the product is preordered
     /// </summary>
@@ -112,6 +114,7 @@ public class ProductController : Controller
         var response = await _productService.CreateProductAsync(model);
         return ResponseExtension.Result(response);
     }
+
     /// <summary>
     /// Cant change product status if in active order (not DELIVERED OR CANCELLED)
     /// <para>Leave the Ids as 0 for no update</para>
@@ -304,7 +307,7 @@ public class ProductController : Controller
     )
     {
         _logger.Information("Get Product Attributes");
-        var res = await _productAttributeService.GetProductAttributesAsync(queryModel); 
+        var res = await _productAttributeService.GetProductAttributesAsync(queryModel);
         return ResponseExtension.Result(res);
     }
 
@@ -365,7 +368,7 @@ public class ProductController : Controller
             attributeId,
             model
         );
-        
+
         return ResponseExtension.Result(res);
     }
 
@@ -382,7 +385,7 @@ public class ProductController : Controller
             attributeId,
             model
         );
-        
+
         return ResponseExtension.Result(res);
     }
 
@@ -394,7 +397,7 @@ public class ProductController : Controller
             id,
             attributeId
         );
-        
+
         return ResponseExtension.Result(res);
     }
 
@@ -427,6 +430,7 @@ public class ProductController : Controller
         var response = await _productImageService.CreateProductImageAsync(id, images);
         return ResponseExtension.Result(response);
     }
+
     [HttpPatch("images/{id}")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> UpdateProductImage(int id, [FromBody] bool isActive)
@@ -435,6 +439,7 @@ public class ProductController : Controller
         var response = await _productImageService.UpdateProductImageAsync(id, isActive);
         return ResponseExtension.Result(response);
     }
+
     /// <summary>
     ///     Delete by image id (Hard delete)
     /// </summary>
