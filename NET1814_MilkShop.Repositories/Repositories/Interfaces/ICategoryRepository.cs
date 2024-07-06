@@ -10,10 +10,12 @@ public interface ICategoryRepository
 
     /// <summary>
     /// This method is used to get all child category ids of a parent category (include parent category id)
+    /// Must pass in a list of categories to avoid multiple queries to the database
     /// </summary>
     /// <param name="parentId"></param>
+    /// <param name="categories"></param>
     /// <returns></returns>
-    Task<HashSet<int>> GetChildCategoryIds(int parentId);
+    HashSet<int> GetChildCategoryIds(int parentId, List<Category> categories);
 
     void Add(Category category);
     void Update(Category category);

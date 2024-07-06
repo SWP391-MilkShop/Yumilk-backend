@@ -55,7 +55,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
     {
         return await _query
             .Include(o => o.OrderDetails)
-            .Where(x => x.OrderCode != null)
+            .Where(x => x.OrderCode != null && (x.StatusId == (int)OrderStatusId.Pending))
             .ToListAsync();
     }
 

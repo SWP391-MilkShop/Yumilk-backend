@@ -401,7 +401,7 @@ public class OrderService : IOrderService
 
     public async Task<ResponseModel> UpdateOrderStatusAsync(Guid id, OrderStatusModel model)
     {
-        var order = await _orderRepository.GetByIdAsync(id, includeDetails: false);
+        var order = await _orderRepository.GetByOrderIdAsync(id, include: false);
         if (order == null)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("đơn hàng"));
@@ -411,27 +411,54 @@ public class OrderService : IOrderService
         {
             return ResponseModel.Success(ResponseConstants.NoChangeIsMade, null);
         }
-
-        if (order.StatusId > model.StatusId)
+        if(order.StatusId == (int)OrderStatusId.Cancelled)
+        {
+            return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
+        }
+        // đơn hàng không thể quay lại trạng thái trước đó
+        if (order.StatusId != (int)OrderStatusId.Preorder && order.StatusId > model.StatusId)
         {
             return ResponseModel.BadRequest(ResponseConstants.Update("trạng thái đơn hàng", false));
         }
-
+        if(order.StatusId == (int)OrderStatusId.Preorder && model.StatusId != (int)OrderStatusId.Shipping)
+        {
+            return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
+        }
+        int result;
         if (model.StatusId == (int)OrderStatusId.Shipping)
         {
+            if(order.StatusId == (int) OrderStatusId.Preorder)
+            {
+                // trừ số lượng sản phẩm trong kho
+                foreach (var o in order.OrderDetails)
+                {
+                    o.Product.Quantity -= o.Quantity;
+                    if (o.Product.Quantity < 0)
+                    {
+                        return ResponseModel.Error("Có lỗi xảy ra khi cập nhật số lượng sản phẩm trong kho");
+                    }
+                    _productRepository.Update(o.Product);
+                }
+            }
             var orderShippingAsync = await _shippingService.CreateOrderShippingAsync(id);
             if (orderShippingAsync.StatusCode != 200)
             {
                 return orderShippingAsync;
             }
-
-            return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true),
-                orderShippingAsync.Data);
+            order.StatusId = model.StatusId;
+                
+            _orderRepository.Update(order);
+            result = await _unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), orderShippingAsync.Data);
+            }
+            return ResponseModel.Error(ResponseConstants.Update("trạng thái đơn hàng", false));
         }
 
         order.StatusId = model.StatusId;
         _orderRepository.Update(order);
-        var result = await _unitOfWork.SaveChangesAsync();
+        result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
         {
             return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), null);
@@ -460,17 +487,24 @@ public class OrderService : IOrderService
         query = query.Where(o => o.CreatedAt >= from && o.CreatedAt <= to);
         // only count delivered orders
         var delivered = query.Where(o => o.StatusId == (int)OrderStatusId.Delivered);
-        var totalOrdersPerStatus = await query.GroupBy(o => o.Status)
-            .ToDictionaryAsync(g => g.Key!.Name.ToUpper(), g => g.Count());
+        var totalOrdersPerStatus = await query
+            .GroupBy(o => o.Status)
+            .Select(g => new OrderStatusCount
+            {
+                Status = g.Key!.Name.ToUpper(),
+                Count = g.Count()
+            })
+            .ToListAsync();
         var stats = new OrderStatsModel
         {
             TotalOrders = await query.CountAsync(),
             TotalRevenue = await delivered.SumAsync(o => o.TotalPrice),
             TotalShippingFee = await delivered.SumAsync(o => o.ShippingFee),
         };
-        foreach (var status in Enum.GetNames(typeof(OrderStatusId)))
+        foreach (var item in totalOrdersPerStatus)
         {
-            stats.TotalOrdersPerStatus[status] = totalOrdersPerStatus.GetValueOrDefault(status, 0);
+            var count = stats.TotalOrdersPerStatus.FirstOrDefault(x => x.Status == item.Status);
+            if (count != null) count.Count = item.Count;
         }
 
         return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng", true), stats);

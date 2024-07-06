@@ -52,15 +52,12 @@ public class CategoryRepository : Repository<Category>, ICategoryRepository
     //
     //     return childCategoryIds;
     // }
-    public async Task<HashSet<int>> GetChildCategoryIds(int parentId)
+    public HashSet<int> GetChildCategoryIds(int parentId, List<Category> categories)
     {
         if (parentId == 0) return new HashSet<int>();
 
-        // Load all categories once
-        var allCategories = await _query.ToListAsync();
-
         // Convert to a lookup table for efficient child category lookup
-        var categoriesLookup = allCategories.ToLookup(c => c.ParentId);
+        var categoriesLookup = categories.ToLookup(c => c.ParentId);
 
         // Initialize the result set with the parent ID
         var categoryIds = new HashSet<int> { parentId };
