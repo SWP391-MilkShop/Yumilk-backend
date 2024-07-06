@@ -457,12 +457,19 @@ public class ProductController : Controller
     #endregion
 
     #region ProductReview
-
-    [HttpGet("{productId}/reviews")]
-    public async Task<IActionResult> GetProductReviews(Guid productId, [FromQuery] ReviewQueryModel queryModel)
+    [HttpGet("reviews")]
+    public async Task<IActionResult> GetProductReviews([FromQuery] ReviewQueryModel queryModel)
     {
         _logger.Information("Get Product Reviews");
-        var response = await _productReviewService.GetProductReviewsAsync(productId, queryModel);
+        var response = await _productReviewService.GetProductReviewsAsync(queryModel);
+        return ResponseExtension.Result(response);
+    }
+    
+    [HttpGet("{productId}/reviews")]
+    public async Task<IActionResult> GetProductReviews(Guid productId, [FromQuery] ProductReviewQueryModel queryModel)
+    {
+        _logger.Information("Get Product Reviews by Product Id {productId}", productId);
+        var response = await _productReviewService.GetProductReviewsByProductIdAsync(productId, queryModel);
         return ResponseExtension.Result(response);
     }
 

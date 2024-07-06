@@ -64,7 +64,29 @@ public class ProductReviewService : IProductReviewService
         return ResponseModel.Error(ResponseConstants.Delete("đánh giá sản phẩm", false));
     }
 
-    public async Task<ResponseModel> GetProductReviewsAsync(Guid productId, ReviewQueryModel queryModel)
+    public async Task<ResponseModel> GetProductReviewsAsync(ReviewQueryModel queryModel)
+    {
+        // var isProductExist = await _productRepository.IsExistAsync(productId);
+        // if (!isProductExist) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
+
+        var query = _productReviewRepository.GetProductReviewQuery(true);
+        query = query.Where(x => (queryModel.CustomerId == Guid.Empty || x.CustomerId == queryModel.CustomerId)
+                                 && (queryModel.ProductId == Guid.Empty || x.ProductId == queryModel.ProductId)
+                                 && (queryModel.OrderId == Guid.Empty || x.OrderId == queryModel.OrderId)
+                                 && (queryModel.Rating == 0 || x.Rating == queryModel.Rating)
+                                 && ((queryModel.IsActive == null) || x.IsActive == queryModel.IsActive));
+        if (queryModel.SortOrder == "desc")
+            query = query.OrderByDescending(GetSortProperty(queryModel));
+        else
+            query = query.OrderBy(GetSortProperty(queryModel));
+        var reviewModelQuery = query.Select(x => ToReviewModel(x));
+        var productReviews =
+            await PagedList<ReviewModel>.CreateAsync(reviewModelQuery, queryModel.Page, queryModel.PageSize);
+        return ResponseModel.Success(
+            ResponseConstants.Get("danh sách đánh giá sản phẩm", productReviews.TotalCount > 0), productReviews);
+    }
+
+    public async Task<ResponseModel> GetProductReviewsByProductIdAsync(Guid productId, ProductReviewQueryModel queryModel)
     {
         var isProductExist = await _productRepository.IsExistAsync(productId);
         if (!isProductExist) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
@@ -82,7 +104,7 @@ public class ProductReviewService : IProductReviewService
         var productReviews =
             await PagedList<ReviewModel>.CreateAsync(reviewModelQuery, queryModel.Page, queryModel.PageSize);
         return ResponseModel.Success(
-            ResponseConstants.Get("Danh sách đánh giá sản phẩm", productReviews.TotalCount > 0), productReviews);
+            ResponseConstants.Get("danh sách đánh giá sản phẩm", productReviews.TotalCount > 0), productReviews);
     }
 
     public async Task<ResponseModel> UpdateProductReviewAsync(int id, UpdateReviewModel model)
@@ -104,7 +126,7 @@ public class ProductReviewService : IProductReviewService
     /// <param name="queryModel"></param>
     /// <returns></returns>
     private static Expression<Func<ProductReview, object>> GetSortProperty(
-        ReviewQueryModel queryModel
+        ProductReviewQueryModel queryModel
     )
     {
         return queryModel.SortColumn?.ToLower().Replace(" ", "") switch
