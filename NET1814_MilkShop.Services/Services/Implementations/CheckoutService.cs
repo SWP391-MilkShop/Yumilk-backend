@@ -350,7 +350,7 @@ public class CheckoutService : ICheckoutService
                 },
             };
             var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);
-            if (paymentLink.Status == "ERROR")
+            if (paymentLink.Status == "Error")
             {
                 return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
             }
