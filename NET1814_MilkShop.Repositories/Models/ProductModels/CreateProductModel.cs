@@ -15,10 +15,10 @@ public class CreateProductModel
     public int Quantity { get; set; }
 
     [Required(ErrorMessage = "Original Price is required")]
-    [Range(0, double.MaxValue, ErrorMessage = "Original Price must be greater than or equal to 0")]
+    [Range(0.1, double.MaxValue, ErrorMessage = "Original Price must be greater than or equal to 0.1")]
     public int OriginalPrice { get; set; }
 
-    [Range(0, double.MaxValue, ErrorMessage = "Sale Price must be greater than or equal to 0")]
+    [Range(0.1, double.MaxValue, ErrorMessage = "Sale Price must be greater than or equal to 0.1")]
     public int SalePrice { get; set; }
 
     public string? Thumbnail { get; set; }
