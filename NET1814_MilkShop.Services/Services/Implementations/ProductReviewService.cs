@@ -144,6 +144,7 @@ public class ProductReviewService : IProductReviewService
             Id = productReview.Id,
             CustomerId = productReview.CustomerId,
             ProductId = productReview.ProductId,
+            ProductName = productReview.Product!.Name,
             FirstName = customer?.User.FirstName,
             LastName = customer?.User.LastName,
             ProfilePicture = customer?.ProfilePictureUrl,

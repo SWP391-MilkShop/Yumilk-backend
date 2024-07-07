@@ -16,12 +16,12 @@ public class ProductReviewRepository : Repository<ProductReview>, IProductReview
         return _query.FirstOrDefaultAsync(x => x.OrderId == orderId && x.ProductId == productId);
     }
 
-    public IQueryable<ProductReview> GetProductReviewQuery(bool includeCustomer)
+    public IQueryable<ProductReview> GetProductReviewQuery(bool isInclude)
     {
-        return includeCustomer
+        return isInclude
             ? _query
                 .Include(pr => pr.Customer)
-                .ThenInclude(c => c!.User)
+                .ThenInclude(c => c!.User).Include(p => p.Product)
             : _query;
     }
 }
