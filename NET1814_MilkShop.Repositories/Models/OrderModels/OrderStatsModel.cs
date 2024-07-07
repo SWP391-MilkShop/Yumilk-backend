@@ -16,7 +16,7 @@ public class OrderStatsModel
         new OrderStatusCount { Status = OrderStatusId.Pending.ToString(), Count = 0 },
         new OrderStatusCount { Status = OrderStatusId.Processing.ToString(), Count = 0 },
         new OrderStatusCount { Status = OrderStatusId.Preorder.ToString(), Count = 0 },
-        new OrderStatusCount { Status = OrderStatusId.Shipping.ToString(), Count = 0 },
+        new OrderStatusCount { Status = OrderStatusId.Shipped.ToString(), Count = 0 },
         new OrderStatusCount { Status = OrderStatusId.Delivered.ToString(), Count = 0 },
         new OrderStatusCount { Status = OrderStatusId.Cancelled.ToString(), Count = 0 }
     ];

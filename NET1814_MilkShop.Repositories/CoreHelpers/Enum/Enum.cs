@@ -4,7 +4,7 @@ public enum OrderStatusId
 {
     Pending = 1,
     Processing = 2,
-    Shipping = 3,
+    Shipped = 3,
     Delivered = 4,
     Cancelled = 5,
     Preorder = 6,

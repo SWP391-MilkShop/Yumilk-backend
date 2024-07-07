@@ -307,7 +307,7 @@ public class OrderService : IOrderService
             CreatedAt = order.CreatedAt,
             PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null
         };
-        if (order.StatusId == (int)OrderStatusId.Shipping)
+        if (order.StatusId == (int)OrderStatusId.Shipped)
         {
             var orderDetail = await _shippingService.GetOrderDetailAsync(orderId);
             if (orderDetail.StatusCode != 200)
@@ -420,12 +420,12 @@ public class OrderService : IOrderService
         {
             return ResponseModel.BadRequest(ResponseConstants.Update("trạng thái đơn hàng", false));
         }
-        if(order.StatusId == (int)OrderStatusId.Preorder && model.StatusId != (int)OrderStatusId.Shipping)
+        if(order.StatusId == (int)OrderStatusId.Preorder && model.StatusId != (int)OrderStatusId.Shipped)
         {
             return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
         }
         int result;
-        if (model.StatusId == (int)OrderStatusId.Shipping)
+        if (model.StatusId == (int)OrderStatusId.Shipped)
         {
             // Check if the order is a preorder and needs stock updates
             if (order.StatusId == (int)OrderStatusId.Preorder)
@@ -585,7 +585,7 @@ public class OrderService : IOrderService
             CreatedAt = order.CreatedAt,
             PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
         };
-        if (order.StatusId == (int)OrderStatusId.Shipping)
+        if (order.StatusId == (int)OrderStatusId.Shipped)
         {
             var orderDetail = await _shippingService.GetOrderDetailAsync(orderId);
             if (orderDetail.StatusCode != 200)
