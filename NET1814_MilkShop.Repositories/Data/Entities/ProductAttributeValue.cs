@@ -1,10 +1,10 @@
-﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("product_attribute_values")]
-public partial class ProductAttributeValue : IAuditableEntity
+public class ProductAttributeValue : IAuditableEntity
 {
     public Guid ProductId { get; set; }
 

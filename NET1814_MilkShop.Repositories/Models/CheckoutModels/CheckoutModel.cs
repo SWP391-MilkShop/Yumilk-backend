@@ -8,11 +8,9 @@ public class CheckoutModel
     [Range(0, Int32.MaxValue, ErrorMessage = "Phí ship tối thiểu 0 VND")]
     public int ShippingFee { get; set; }
 
-    [Required]
-    public int AddressId { get; set; }
+    [Required] public int AddressId { get; set; }
 
     public string? Note { get; set; }
 
-    [Required]
-    public string? PaymentMethod { get; set; }
+    [Required] public string? PaymentMethod { get; set; }
 }

@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Net.payOS.Types;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
-using NET1814_MilkShop.Repositories.Repositories;
-using NET1814_MilkShop.Repositories.UnitOfWork;
-using NET1814_MilkShop.Services.Services;
+using NET1814_MilkShop.Repositories.Repositories.Interfaces;
+using NET1814_MilkShop.Repositories.UnitOfWork.Interfaces;
+using NET1814_MilkShop.Services.Services.Interfaces;
 using Quartz;
 
 namespace NET1814_MilkShop.Services.BackgroundJobs;
@@ -57,25 +57,25 @@ public class CheckPaymentStatusJob : IJob
 
                 /*switch (order.StatusId)
                 {
-                    case (int) OrderStatusId.CANCELLED:
+                    case (int)OrderStatusId.Cancelled:
                         _logger.LogInformation(
                             "OrderId {OrderId} code {OrderCode} is already cancelled and updated to {cancelled}",
-                            order.Id, order.OrderCode.Value, OrderStatusId.CANCELLED.ToString());
+                            order.Id, order.OrderCode.Value, OrderStatusId.Cancelled.ToString());
                         continue;
-                    case (int) OrderStatusId.PROCESSING:
+                    case (int)OrderStatusId.Processing:
                         _logger.LogInformation(
                             "OrderId {OrderId} code {OrderCode} is already paid and updated to {processing}",
-                            order.Id, order.OrderCode.Value, OrderStatusId.PROCESSING.ToString());
+                            order.Id, order.OrderCode.Value, OrderStatusId.Processing.ToString());
                         continue;
-                    case (int) OrderStatusId.SHIPPING:
+                    case (int)OrderStatusId.Shipping:
                         _logger.LogInformation(
                             "OrderId {OrderId} code {OrderCode} is in {shipping} status",
-                            order.Id, order.OrderCode.Value, OrderStatusId.SHIPPING.ToString());
+                            order.Id, order.OrderCode.Value, OrderStatusId.Shipping.ToString());
                         continue;
-                    case (int) OrderStatusId.PREORDER:
+                    case (int)OrderStatusId.Preorder:
                         _logger.LogInformation(
                             "OrderId {OrderId} code {OrderCode} is in {preorder} status",
-                            order.Id, order.OrderCode.Value, OrderStatusId.PREORDER.ToString());
+                            order.Id, order.OrderCode.Value, OrderStatusId.Preorder.ToString());
                         continue;
                 }*/
 
@@ -105,11 +105,11 @@ public class CheckPaymentStatusJob : IJob
                     if (existPreorder)
                     {
                         _logger.LogInformation("Order {OrderId} has preorder product", order.Id);
-                        existOrder.StatusId = (int)OrderStatusId.PREORDER; //Preorder
+                        existOrder.StatusId = (int)OrderStatusId.Preorder; //Preorder
                     }
                     else
                     {
-                        existOrder!.StatusId = (int)OrderStatusId.PROCESSING; //Processing
+                        existOrder!.StatusId = (int)OrderStatusId.Processing; //Processing
                     }
 
                     existOrder.PaymentDate = DateTime.UtcNow;
@@ -130,7 +130,7 @@ public class CheckPaymentStatusJob : IJob
                 foreach (var orderDetail in order.OrderDetails)
                 {
                     var product = await _productRepository.GetByIdNoIncludeAsync(orderDetail.ProductId);
-                    if (product!.OrderDetails.Any(x => x.Product.StatusId == (int)OrderStatusId.PREORDER))
+                    if (product!.OrderDetails.Any(x => x.Product.StatusId == (int)OrderStatusId.Preorder))
                     {
                         product.Quantity -= orderDetail.Quantity;
                     }
@@ -143,7 +143,7 @@ public class CheckPaymentStatusJob : IJob
                 }
 
 
-                order.StatusId = (int) OrderStatusId.CANCELLED;
+                order.StatusId = (int)OrderStatusId.Cancelled;
                 _orderRepository.Update(order);
                 var result = await _unitOfWork.SaveChangesAsync();
                 foreach (var orderDetail in order.OrderDetails)

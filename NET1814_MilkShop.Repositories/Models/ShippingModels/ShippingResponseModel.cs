@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using NET1814_MilkShop.Repositories.Models.ShipModels;
 using Newtonsoft.Json;
 
 namespace NET1814_MilkShop.Repositories.Models.ShippingModels;

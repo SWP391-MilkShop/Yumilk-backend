@@ -4,7 +4,7 @@ public class OrderHistoryModel
 {
     public Guid OrderId { get; set; }
     public int TotalAmount { get; set; }
-    
+
     public string? PaymentMethod { get; set; }
     public string? OrderStatus { get; set; }
     public DateTime CreatedAt { get; set; }

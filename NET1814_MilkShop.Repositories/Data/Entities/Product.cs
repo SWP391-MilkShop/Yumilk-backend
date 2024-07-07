@@ -1,15 +1,14 @@
-﻿using NET1814_MilkShop.Repositories.Data.Interfaces;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("products")]
-public partial class Product : IAuditableEntity
+public class Product : IAuditableEntity
 {
-    [Key]
-    public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; }
 
     [Column("name", TypeName = "nvarchar(255)")]
     public string Name { get; set; } = null!;
@@ -17,26 +16,20 @@ public partial class Product : IAuditableEntity
     [Column("description", TypeName = "nvarchar(max)")]
     public string? Description { get; set; }
 
-    [Column("quantity")]
-    public int Quantity { get; set; }
+    [Column("quantity")] public int Quantity { get; set; }
 
-    [Column("original_price")]
-    public int OriginalPrice { get; set; }
+    [Column("original_price")] public int OriginalPrice { get; set; }
 
-    [Column("sale_price")]
-    public int SalePrice { get; set; }
+    [Column("sale_price")] public int SalePrice { get; set; }
 
     [Column("thumbnail", TypeName = "nvarchar(255)")]
     public string? Thumbnail { get; set; }
 
-    [Column("category_id")]
-    public int CategoryId { get; set; }
+    [Column("category_id")] public int CategoryId { get; set; }
 
-    [Column("brand_id")]
-    public int BrandId { get; set; }
+    [Column("brand_id")] public int BrandId { get; set; }
 
-    [Column("unit_id")]
-    public int UnitId { get; set; }
+    [Column("unit_id")] public int UnitId { get; set; }
 
     [Column("status_id")]
     [ForeignKey("ProductStatus")]
@@ -75,5 +68,4 @@ public partial class Product : IAuditableEntity
     public virtual ICollection<ProductImage> ProductImages { get; set; } = [];
 
     public virtual ICollection<ProductReview> ProductReviews { get; set; } = [];
-
 }

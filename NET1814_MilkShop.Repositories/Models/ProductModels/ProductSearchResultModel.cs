@@ -7,12 +7,12 @@ public class ProductSearchResultModel
     public string Brand { get; set; } = null!;
     public int OriginalPrice { get; set; }
     public int SalePrice { get; set; }
-    
+
     public bool IsPreOrder { get; set; }
-    
+
     public double AverageRating { get; set; }
-    
+
     public int RatingCount { get; set; }
-    
+
     public string? Thumbnail { get; set; }
 }
