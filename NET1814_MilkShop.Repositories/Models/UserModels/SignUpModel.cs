@@ -34,4 +34,13 @@ public class SignUpModel
     [DataType(DataType.Password)]
     [Compare("Password", ErrorMessage = "Password and confirmation does not match!")]
     public string ConfirmPassword { get; set; } = null!;
+
+    /// <summary>
+    /// 1. Male
+    /// 2. Female
+    /// 3. Other
+    /// </summary>
+    [Required(ErrorMessage = "Gender is required")]
+    [Range(1, 3, ErrorMessage = "Gender must be 1,2 or 3")]
+    public int Gender { get; set; }
 }

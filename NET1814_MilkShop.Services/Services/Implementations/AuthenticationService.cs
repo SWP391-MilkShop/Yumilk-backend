@@ -77,7 +77,8 @@ public sealed class AuthenticationService : IAuthenticationService
             };
         }*/
 
-        string token = _jwtTokenExtension.CreateVerifyCode();
+        var token = _jwtTokenExtension.CreateVerifyCode();
+        var parsedGender = Enum.Parse(typeof(Gender), model.Gender.ToString()).ToString();
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -88,6 +89,7 @@ public sealed class AuthenticationService : IAuthenticationService
             RoleId = (int)RoleId.Customer,
             VerificationCode = token,
             IsActive = false,
+            Gender = parsedGender
         };
         var customer = new Customer
         {
@@ -98,14 +100,10 @@ public sealed class AuthenticationService : IAuthenticationService
         _userRepository.Add(user);
         _customerRepository.Add(customer); // Khong nen add vao customer khi chua verify
         var result = await _unitOfWork.SaveChangesAsync();
-        var jwtVeriryToken = _jwtTokenExtension.CreateJwtToken(user, TokenType.Authentication);
-        if (result > 0)
-        {
-            await _emailService.SendVerificationEmailAsync(model.Email, jwtVeriryToken, model.FirstName);
-            return ResponseModel.Success(ResponseConstants.Register(true), null);
-        }
-
-        return ResponseModel.Error(ResponseConstants.Register(false));
+        var jwtVerifyToken = _jwtTokenExtension.CreateJwtToken(user, TokenType.Authentication);
+        if (result <= 0) return ResponseModel.Error(ResponseConstants.Register(false));
+        await _emailService.SendVerificationEmailAsync(model.Email, jwtVerifyToken, model.FirstName);
+        return ResponseModel.Success(ResponseConstants.Register(true), null);
     }
 
     public async Task<ResponseModel> LoginAsync(RequestLoginModel model)
@@ -115,45 +113,41 @@ public sealed class AuthenticationService : IAuthenticationService
             model.Password,
             isCustomer: true
         );
-        if (existingUser != null && existingUser.RoleId == (int)RoleId.Customer)
-            //Only customer can login, others will say wrong username or password
+        if (existingUser == null || existingUser.RoleId != (int)RoleId.Customer)
+            return ResponseModel.BadRequest(ResponseConstants.Login(false));
+        //Only customer can login, others will say wrong username or password
+        //check if user is banned
+        if (existingUser.IsBanned)
         {
-            //check if user is banned
-            if (existingUser.IsBanned)
-            {
-                return ResponseModel.BadRequest(ResponseConstants.Banned);
-            }
-
-            var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
-            var refreshToken = _jwtTokenExtension.CreateJwtToken(
-                existingUser,
-                TokenType.Refresh
-            );
-            var responseLogin = new ResponseLoginModel
-            {
-                UserID = existingUser.Id.ToString(),
-                Username = existingUser.Username,
-                FirstName = existingUser.FirstName,
-                LastName = existingUser.LastName,
-                Role = existingUser.Role!.Name,
-                AccessToken = token,
-                RefreshToken = refreshToken,
-                IsActive = existingUser.IsActive,
-                IsBanned = existingUser.IsBanned
-            };
-            var customer = await _customerRepository.GetByIdAsync(existingUser.Id);
-            if (customer != null)
-            {
-                responseLogin.Email = customer.Email;
-                responseLogin.PhoneNumber = customer.PhoneNumber;
-                responseLogin.ProfilePictureUrl = customer.ProfilePictureUrl;
-                responseLogin.GoogleId = customer.GoogleId;
-            }
-
-            return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
+            return ResponseModel.BadRequest(ResponseConstants.Banned);
         }
 
-        return ResponseModel.BadRequest(ResponseConstants.Login(false));
+        var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
+        var refreshToken = _jwtTokenExtension.CreateJwtToken(
+            existingUser,
+            TokenType.Refresh
+        );
+        var responseLogin = new ResponseLoginModel
+        {
+            UserID = existingUser.Id.ToString(),
+            Username = existingUser.Username,
+            FirstName = existingUser.FirstName,
+            LastName = existingUser.LastName,
+            Role = existingUser.Role!.Name,
+            AccessToken = token,
+            RefreshToken = refreshToken,
+            IsActive = existingUser.IsActive,
+            IsBanned = existingUser.IsBanned,
+            Gender = existingUser.Gender
+        };
+        var customer = await _customerRepository.GetByIdAsync(existingUser.Id);
+        if (customer == null) return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
+        responseLogin.Email = customer.Email;
+        responseLogin.PhoneNumber = customer.PhoneNumber;
+        responseLogin.ProfilePictureUrl = customer.ProfilePictureUrl;
+        responseLogin.GoogleId = customer.GoogleId;
+
+        return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
     }
 
     public async Task<ResponseModel> VerifyAccountAsync(string token)
@@ -176,21 +170,18 @@ public sealed class AuthenticationService : IAuthenticationService
             return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
         }
 
-        if (verifyToken.Equals(isExist.VerificationCode))
+        if (!verifyToken.Equals(isExist.VerificationCode)) return ResponseModel.BadRequest(ResponseConstants.WrongCode);
+        isExist.IsActive = true;
+        isExist.VerificationCode = null;
+        _userRepository.Update(isExist);
+        var result = await _unitOfWork.SaveChangesAsync();
+        if (result > 0)
         {
-            isExist.IsActive = true;
-            isExist.VerificationCode = null;
-            _userRepository.Update(isExist);
-            var result = await _unitOfWork.SaveChangesAsync();
-            if (result > 0)
-            {
-                return ResponseModel.Success(ResponseConstants.Verify(true), null);
-            }
-
-            return ResponseModel.Error(ResponseConstants.Verify(false));
+            return ResponseModel.Success(ResponseConstants.Verify(true), null);
         }
 
-        return ResponseModel.BadRequest(ResponseConstants.WrongCode);
+        return ResponseModel.Error(ResponseConstants.Verify(false));
+
     }
 
     public async Task<ResponseModel> ForgotPasswordAsync(
@@ -198,25 +189,19 @@ public sealed class AuthenticationService : IAuthenticationService
     )
     {
         var customer = await _customerRepository.GetByEmailAsync(request.Email);
-        if (customer != null)
-        {
-            string token = _jwtTokenExtension.CreateVerifyCode();
-            customer.User.ResetPasswordCode = token;
-            _userRepository.Update(customer.User);
-            var result = await _unitOfWork.SaveChangesAsync();
-            if (result > 0)
-            {
-                var verifyToken = _jwtTokenExtension.CreateJwtToken(
-                    customer.User,
-                    TokenType.Reset
-                );
-                await _emailService.SendPasswordResetEmailAsync(customer.Email, verifyToken,
-                    customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
-                return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
-            }
-        }
-
-        return ResponseModel.BadRequest(ResponseConstants.NotFound("Email"));
+        if (customer == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Email"));
+        var token = _jwtTokenExtension.CreateVerifyCode();
+        customer.User.ResetPasswordCode = token;
+        _userRepository.Update(customer.User);
+        var result = await _unitOfWork.SaveChangesAsync();
+        if (result <= 0) return ResponseModel.BadRequest(ResponseConstants.NotFound("Email"));
+        var verifyToken = _jwtTokenExtension.CreateJwtToken(
+            customer.User,
+            TokenType.Reset
+        );
+        await _emailService.SendPasswordResetEmailAsync(customer.Email, verifyToken,
+            customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+        return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
     }
 
     public async Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request)
@@ -232,21 +217,18 @@ public sealed class AuthenticationService : IAuthenticationService
             return ResponseModel.Success(ResponseConstants.NotFound("Người dùng"), null);
         }
 
-        if (verifyToken.Equals(isExist.ResetPasswordCode))
+        if (!verifyToken.Equals(isExist.ResetPasswordCode))
+            return ResponseModel.BadRequest(ResponseConstants.WrongCode);
+        isExist.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
+        isExist.ResetPasswordCode = null;
+        _userRepository.Update(isExist);
+        var result = await _unitOfWork.SaveChangesAsync();
+        if (result > 0)
         {
-            isExist.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            isExist.ResetPasswordCode = null;
-            _userRepository.Update(isExist);
-            var result = await _unitOfWork.SaveChangesAsync();
-            if (result > 0)
-            {
-                return ResponseModel.Success(ResponseConstants.ChangePassword(true), null);
-            }
-
-            return ResponseModel.Error(ResponseConstants.ChangePassword(false));
+            return ResponseModel.Success(ResponseConstants.ChangePassword(true), null);
         }
 
-        return ResponseModel.BadRequest(ResponseConstants.WrongCode);
+        return ResponseModel.Error(ResponseConstants.ChangePassword(false));
     }
 
     public async Task<ResponseModel> RefreshTokenAsync(string token)
@@ -286,25 +268,19 @@ public sealed class AuthenticationService : IAuthenticationService
             return ResponseModel.Success(ResponseConstants.NotFound("Email"), null);
         }
 
-        if (!customer.User.IsActive)
-        {
-            string token = _jwtTokenExtension.CreateVerifyCode();
-            customer.User.VerificationCode = token;
-            _userRepository.Update(customer.User);
-            var result = await _unitOfWork.SaveChangesAsync();
-            if (result > 0)
-            {
-                var verifyToken = _jwtTokenExtension.CreateJwtToken(
-                    customer.User,
-                    TokenType.Authentication
-                );
-                await _emailService.SendVerificationEmailAsync(customer.Email, verifyToken,
-                    customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
-                return ResponseModel.Success(ResponseConstants.ActivateAccountLink, null);
-            }
-        }
-
-        return ResponseModel.BadRequest(ResponseConstants.AccountActivated);
+        if (customer.User.IsActive) return ResponseModel.BadRequest(ResponseConstants.AccountActivated);
+        var token = _jwtTokenExtension.CreateVerifyCode();
+        customer.User.VerificationCode = token;
+        _userRepository.Update(customer.User);
+        var result = await _unitOfWork.SaveChangesAsync();
+        if (result <= 0) return ResponseModel.BadRequest(ResponseConstants.AccountActivated);
+        var verifyToken = _jwtTokenExtension.CreateJwtToken(
+            customer.User,
+            TokenType.Authentication
+        );
+        await _emailService.SendVerificationEmailAsync(customer.Email, verifyToken,
+            customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+        return ResponseModel.Success(ResponseConstants.ActivateAccountLink, null);
     }
 
     public async Task<ResponseModel> DashBoardLoginAsync(RequestLoginModel model)
@@ -314,36 +290,34 @@ public sealed class AuthenticationService : IAuthenticationService
             model.Password,
             isCustomer: false
         );
-        if (existingUser != null && existingUser.RoleId != (int)RoleId.Customer)
-            //Only admin,staff can login others will response wrong username or password
+        if (existingUser == null || existingUser.RoleId == (int)RoleId.Customer)
+            return ResponseModel.BadRequest(ResponseConstants.Login(false));
+        //Only admin,staff can login others will response wrong username or password
+        //check if user is banned
+        if (existingUser.IsBanned)
         {
-            //check if user is banned
-            if (existingUser.IsBanned)
-            {
-                return ResponseModel.BadRequest(ResponseConstants.Banned);
-            }
-
-            var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
-            var refreshToken = _jwtTokenExtension.CreateJwtToken(
-                existingUser,
-                TokenType.Refresh
-            );
-            var responseLogin = new ResponseLoginModel
-            {
-                UserID = existingUser.Id.ToString(),
-                Username = existingUser.Username,
-                FirstName = existingUser.FirstName,
-                LastName = existingUser.LastName,
-                Role = existingUser.Role!.Name,
-                AccessToken = token,
-                RefreshToken = refreshToken,
-                IsBanned = existingUser.IsBanned,
-                IsActive = existingUser.IsActive
-            };
-            return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
+            return ResponseModel.BadRequest(ResponseConstants.Banned);
         }
 
-        return ResponseModel.BadRequest(ResponseConstants.Login(false));
+        var token = _jwtTokenExtension.CreateJwtToken(existingUser, TokenType.Access);
+        var refreshToken = _jwtTokenExtension.CreateJwtToken(
+            existingUser,
+            TokenType.Refresh
+        );
+        var responseLogin = new ResponseLoginModel
+        {
+            UserID = existingUser.Id.ToString(),
+            Username = existingUser.Username,
+            FirstName = existingUser.FirstName,
+            LastName = existingUser.LastName,
+            Role = existingUser.Role!.Name,
+            AccessToken = token,
+            RefreshToken = refreshToken,
+            IsBanned = existingUser.IsBanned,
+            IsActive = existingUser.IsActive,
+            Gender = existingUser.Gender
+        };
+        return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
     }
 
     public async Task<ResponseModel> GoogleLoginAsync(string token)
@@ -392,7 +366,8 @@ public sealed class AuthenticationService : IAuthenticationService
                 FirstName = userFirstName,
                 LastName = userLastName,
                 RoleId = (int)RoleId.Customer,
-                IsActive = true
+                IsActive = true,
+                Gender = null
             };
 
             var pictureUrl = decodedToken.Claims["picture"].ToString(); // lấy ảnh đại diện từ google
@@ -454,16 +429,16 @@ public sealed class AuthenticationService : IAuthenticationService
             AccessToken = jwtToken,
             RefreshToken = refreshToken,
             IsActive = tempUser.IsActive,
-            IsBanned = tempUser.IsBanned
+            IsBanned = tempUser.IsBanned,
+            Gender = tempUser.Gender
+            
         };
         var customer = await _customerRepository.GetByIdAsync(tempUser.Id);
-        if (customer != null)
-        {
-            responseLogin.Email = customer.Email;
-            responseLogin.PhoneNumber = customer.PhoneNumber;
-            responseLogin.ProfilePictureUrl = customer.ProfilePictureUrl;
-            responseLogin.GoogleId = customer.GoogleId;
-        }
+        if (customer == null) return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
+        responseLogin.Email = customer.Email;
+        responseLogin.PhoneNumber = customer.PhoneNumber;
+        responseLogin.ProfilePictureUrl = customer.ProfilePictureUrl;
+        responseLogin.GoogleId = customer.GoogleId;
 
         return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
     }

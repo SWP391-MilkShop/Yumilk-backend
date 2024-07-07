@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
+using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
@@ -96,7 +97,7 @@ public sealed class UserService : IUserService
         {
             return ResponseModel.BadRequest(ResponseConstants.Exist("Tên đăng nhập"));
         }
-
+        var parsedGender = Enum.Parse(typeof(Gender), model.Gender.ToString()).ToString();
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -106,7 +107,8 @@ public sealed class UserService : IUserService
             Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
             RoleId = model.RoleId,
             IsActive = true, //no activation required
-            IsBanned = false
+            IsBanned = false,
+            Gender = parsedGender
         };
         _userRepository.Add(user);
         var result = await _unitOfWork.SaveChangesAsync();
@@ -189,7 +191,8 @@ public sealed class UserService : IUserService
             LastName = user.LastName,
             Role = user.Role!.Name,
             IsActive = user.IsActive,
-            IsBanned = user.IsBanned
+            IsBanned = user.IsBanned,
+            Gender = user.Gender
         };
     }
 

@@ -17,12 +17,14 @@ namespace NET1814_MilkShop.Services.Services.Implementations;
 public sealed class CustomerService : ICustomerService
 {
     private readonly ICustomerRepository _customerRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CustomerService(ICustomerRepository customerRepository, IUnitOfWork unitOfWork)
+    public CustomerService(ICustomerRepository customerRepository, IUnitOfWork unitOfWork, IUserRepository userRepository)
     {
         _customerRepository = customerRepository;
         _unitOfWork = unitOfWork;
+        _userRepository = userRepository;
     }
 
     private static CustomerModel ToCustomerModel(Customer customer, User user)
@@ -39,7 +41,8 @@ public sealed class CustomerService : ICustomerService
             Role = user.Role!.Name,
             ProfilePictureUrl = customer.ProfilePictureUrl,
             IsActive = user.IsActive,
-            IsBanned = user.IsBanned
+            IsBanned = user.IsBanned,
+            Gender = user.Gender
         };
     }
 
@@ -211,7 +214,16 @@ public sealed class CustomerService : ICustomerService
             customer.User.LastName = changeUserInfoModel.LastName;
         }
 
+        if (Enum.TryParse<Gender>(changeUserInfoModel.Gender.ToString(), out var genderEnum) && Enum.IsDefined(typeof(Gender), genderEnum))
+        {
+            // The gender value is valid and defined in the Gender enum
+
+            customer.User.Gender = genderEnum.ToString();
+        }
+        
+
         _customerRepository.Update(customer);
+        _userRepository.Update(customer.User);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
         {

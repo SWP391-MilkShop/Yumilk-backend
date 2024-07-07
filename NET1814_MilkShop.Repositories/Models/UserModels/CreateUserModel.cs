@@ -36,4 +36,13 @@ public class CreateUserModel
     [Display(Name = "Role")]
     [Range(1, 2, ErrorMessage = "Choose role in range 1-2")]
     public int RoleId { get; set; }
+    
+    /// <summary>
+    /// 1. Male
+    /// 2. Female
+    /// 3. Other
+    /// </summary>
+    [Required(ErrorMessage = "Gender is required")]
+    [Range(1, 3, ErrorMessage = "Gender must be 1,2 or 3")]
+    public int Gender { get; set; }
 }

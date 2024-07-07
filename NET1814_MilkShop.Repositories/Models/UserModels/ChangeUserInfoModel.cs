@@ -1,4 +1,6 @@
-﻿namespace NET1814_MilkShop.Repositories.Models.UserModels;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace NET1814_MilkShop.Repositories.Models.UserModels;
 
 public class ChangeUserInfoModel
 {
@@ -11,4 +13,6 @@ public class ChangeUserInfoModel
 
     //[Url(ErrorMessage = "Invalid URL!")]
     public string? ProfilePictureUrl { get; set; }
+    
+    public int Gender { get; set; } = 0;
 }

@@ -10,13 +10,15 @@ public class User : IAuditableEntity
 {
     [Key] public Guid Id { get; set; }
 
-    public string Username { get; set; } = null!;
+    [Column(TypeName = "nvarchar(50)")] public string Username { get; set; } = null!;
 
     [Column(TypeName = "nvarchar(255)")] public string Password { get; set; } = null!;
 
-    public string? FirstName { get; set; }
+    [Column(TypeName = "nvarchar(50)")] public string? FirstName { get; set; }
 
-    public string? LastName { get; set; }
+    [Column(TypeName = "nvarchar(50)")] public string? LastName { get; set; }
+    
+    [Column(TypeName = "nvarchar(50)")] public string? Gender { get; set; }
 
     [Column("verification_code", TypeName = "nvarchar(6)")]
     public string? VerificationCode { get; set; }

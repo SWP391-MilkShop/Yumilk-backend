@@ -151,7 +151,8 @@ public class ProductReviewService : IProductReviewService
             Review = productReview.Review,
             Rating = productReview.Rating,
             CreatedAt = productReview.CreatedAt,
-            UpdatedAt = productReview.ModifiedAt
+            UpdatedAt = productReview.ModifiedAt,
+            Gender = customer?.User.Gender
         };
         return model;
     }

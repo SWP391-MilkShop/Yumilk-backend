@@ -23,3 +23,10 @@ public enum ProductStatusId
     Preorder = 2, //move out of product
     OutOfStock = 3
 }
+
+public enum Gender
+{
+    Male = 1,
+    Female = 2,
+    Other = 3
+}
