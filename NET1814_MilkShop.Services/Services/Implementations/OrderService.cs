@@ -286,7 +286,7 @@ public class OrderService : IOrderService
             ProductId = x.ProductId,
             ProductName = x.ProductName,
             Quantity = x.Quantity,
-            UnitPrice = x.Product.SalePrice == 0 ? x.Product.OriginalPrice : x.Product.SalePrice,
+            UnitPrice = x.UnitPrice,
             ItemPrice = x.ItemPrice,
             Thumbnail = x.Thumbnail
         }).ToList();
@@ -427,9 +427,9 @@ public class OrderService : IOrderService
         int result;
         if (model.StatusId == (int)OrderStatusId.Shipping)
         {
-            if(order.StatusId == (int) OrderStatusId.Preorder)
+            // Check if the order is a preorder and needs stock updates
+            if (order.StatusId == (int)OrderStatusId.Preorder)
             {
-                // trừ số lượng sản phẩm trong kho
                 foreach (var o in order.OrderDetails)
                 {
                     o.Product.Quantity -= o.Quantity;
@@ -439,21 +439,20 @@ public class OrderService : IOrderService
                     }
                     _productRepository.Update(o.Product);
                 }
+                // Save changes if stock was updated
+                var stockUpdateResult = await _unitOfWork.SaveChangesAsync();
+                if (stockUpdateResult <= 0)
+                {
+                    return ResponseModel.Error("Không thể cập nhật số lượng sản phẩm trong kho");
+                }
             }
-            var orderShippingAsync = await _shippingService.CreateOrderShippingAsync(id);
-            if (orderShippingAsync.StatusCode != 200)
+            // order code and shipping status is already updated in the shipping service
+            var orderShipping = await _shippingService.CreateOrderShippingAsync(id);
+            if (orderShipping.StatusCode != 200)
             {
-                return orderShippingAsync;
+                return orderShipping;
             }
-            order.StatusId = model.StatusId;
-                
-            _orderRepository.Update(order);
-            result = await _unitOfWork.SaveChangesAsync();
-            if (result > 0)
-            {
-                return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), orderShippingAsync.Data);
-            }
-            return ResponseModel.Error(ResponseConstants.Update("trạng thái đơn hàng", false));
+            return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), orderShipping.Data);
         }
 
         order.StatusId = model.StatusId;
