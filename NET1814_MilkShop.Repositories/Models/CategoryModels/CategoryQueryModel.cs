@@ -7,7 +7,7 @@ public class CategoryQueryModel : QueryModel
     /// </summary>
     public int ParentId { get; set; } = 0;
 
-    public bool IsActive { get; set; } = true;
+    public bool? IsActive { get; set; }
 
     /// <summary>
     /// Sort by id or name (default is id)

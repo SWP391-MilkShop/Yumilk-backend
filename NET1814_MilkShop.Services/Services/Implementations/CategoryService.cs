@@ -95,7 +95,7 @@ public class CategoryService : ICategoryService
             .Include(x => x.Parent).AsQueryable();
         var searchTerm = StringExtension.Normalize(queryModel.SearchTerm);
         query = query.Where(p =>
-            p.IsActive == queryModel.IsActive
+            (!queryModel.IsActive.HasValue || p.IsActive == queryModel.IsActive)
             && (queryModel.ParentId == 0 || p.ParentId == queryModel.ParentId)
             && (string.IsNullOrEmpty(searchTerm) || p.Name.ToLower().Contains(searchTerm))
         );
