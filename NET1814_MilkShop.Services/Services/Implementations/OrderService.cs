@@ -121,7 +121,7 @@ public class OrderService : IOrderService
         {
             Id = order.Id,
             CustomerId = order.Customer!.UserId,
-            TotalAmount = order.PaymentMethod == "COD" ? order.TotalPrice + order.ShippingFee : order.TotalAmount,
+            TotalAmount = order.TotalAmount,
             PhoneNumber = order.PhoneNumber,
             Email = order.Email,
             Address = order.Address,
@@ -229,7 +229,7 @@ public class OrderService : IOrderService
         var orderHistoryQuery = query.Select(o => new OrderHistoryModel
         {
             OrderId = o.Id,
-            TotalAmount = o.PaymentMethod == "COD" ? o.TotalPrice + o.ShippingFee : o.TotalAmount,
+            TotalAmount = o.TotalAmount,
             PaymentMethod = o.PaymentMethod,
             OrderStatus = o.Status!.Name,
             ProductList = o.OrderDetails
@@ -301,7 +301,7 @@ public class OrderService : IOrderService
             OrderDetail = pModel,
             TotalPrice = order.TotalPrice,
             ShippingFee = order.ShippingFee,
-            TotalAmount = order.PaymentMethod == "PAYOS" ? order.TotalPrice + order.ShippingFee : order.TotalAmount,
+            TotalAmount = order.TotalAmount,
             PaymentMethod = order.PaymentMethod,
             OrderStatus = order.Status!.Name,
             CreatedAt = order.CreatedAt,
@@ -579,7 +579,7 @@ public class OrderService : IOrderService
             OrderDetail = pModel,
             TotalPrice = order.TotalPrice,
             ShippingFee = order.ShippingFee,
-            TotalAmount = order.PaymentMethod == "COD" ? order.TotalPrice + order.ShippingFee : order.TotalAmount,
+            TotalAmount = order.TotalAmount,
             PaymentMethod = order.PaymentMethod,
             OrderStatus = order.Status!.Name,
             CreatedAt = order.CreatedAt,

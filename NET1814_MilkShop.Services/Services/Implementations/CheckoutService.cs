@@ -125,9 +125,7 @@ public class CheckoutService : ICheckoutService
             CustomerId = userId,
             TotalPrice = GetTotalPrice(cart.CartDetails.ToList()),
             ShippingFee = model.ShippingFee,
-            TotalAmount = model.PaymentMethod == "COD"
-                ? GetTotalPrice(cart.CartDetails.ToList())
-                : GetTotalPrice(cart.CartDetails.ToList()) + model.ShippingFee,
+            TotalAmount = GetTotalPrice(cart.CartDetails.ToList()) + model.ShippingFee,
             ReceiverName = customerAddress.ReceiverName ?? "",
             Address =
                 customerAddress.Address
