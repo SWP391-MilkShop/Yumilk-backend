@@ -411,19 +411,23 @@ public class OrderService : IOrderService
         {
             return ResponseModel.Success(ResponseConstants.NoChangeIsMade, null);
         }
-        if(order.StatusId == (int)OrderStatusId.Cancelled)
+
+        if (order.StatusId == (int)OrderStatusId.Cancelled)
         {
             return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
         }
+
         // đơn hàng không thể quay lại trạng thái trước đó
         if (order.StatusId != (int)OrderStatusId.Preorder && order.StatusId > model.StatusId)
         {
             return ResponseModel.BadRequest(ResponseConstants.Update("trạng thái đơn hàng", false));
         }
-        if(order.StatusId == (int)OrderStatusId.Preorder && model.StatusId != (int)OrderStatusId.Shipped)
+
+        if (order.StatusId == (int)OrderStatusId.Preorder && model.StatusId != (int)OrderStatusId.Shipped)
         {
             return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
         }
+
         int result;
         if (model.StatusId == (int)OrderStatusId.Shipped)
         {
@@ -437,8 +441,10 @@ public class OrderService : IOrderService
                     {
                         return ResponseModel.Error("Có lỗi xảy ra khi cập nhật số lượng sản phẩm trong kho");
                     }
+
                     _productRepository.Update(o.Product);
                 }
+
                 // Save changes if stock was updated
                 var stockUpdateResult = await _unitOfWork.SaveChangesAsync();
                 if (stockUpdateResult <= 0)
@@ -446,12 +452,14 @@ public class OrderService : IOrderService
                     return ResponseModel.Error("Không thể cập nhật số lượng sản phẩm trong kho");
                 }
             }
+
             // order code and shipping status is already updated in the shipping service
             var orderShipping = await _shippingService.CreateOrderShippingAsync(id);
             if (orderShipping.StatusCode != 200)
             {
                 return orderShipping;
             }
+
             return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), orderShipping.Data);
         }
 
@@ -601,5 +609,24 @@ public class OrderService : IOrderService
         }
 
         return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
+    }
+
+    public async Task<ResponseModel> GetPaymentMethodStats()
+    {
+        var orders = await _orderRepository.GetOrderQuery().Where(x => x.StatusId == (int)OrderStatusId.Delivered)
+            .ToListAsync();
+        if (orders.Count == 0)
+        {
+            return ResponseModel.BadRequest("Không có đơn hàng nào trong hệ thống");
+        }
+
+        var totalCod = orders.Count(x => x.PaymentMethod == "COD");
+        var totalPayOs = orders.Count(x => x.PaymentMethod == "PayOS");
+        var percentCod = totalCod * 100 * 1.0 / orders.Count;
+        var percentPayOs = 100 - percentCod;
+        return ResponseModel.Success(ResponseConstants.Get("thống kê phương thức thanh toán", true), new
+        {
+            totalCod, totalPayOs, percentCod, percentPayOs
+        });
     }
 }
