@@ -61,10 +61,11 @@ public class ProductService : IProductService
             var childCategoryIds = _categoryRepository.GetChildCategoryIds(categoryId, categories);
             categoryIds.UnionWith(childCategoryIds);
         }
+
         var minPrice = queryModel.MinPrice;
         var maxPrice = queryModel.MaxPrice;
         var query = _productRepository.GetProductsQuery(true, true);
-        if (queryModel.StatusId == (int)ProductStatusId.Preorder)
+        if (queryModel.StatusIds.Contains((int)ProductStatusId.Preorder))
         {
             query = query.Include(p => p.PreorderProduct);
         }
@@ -83,11 +84,11 @@ public class ProductService : IProductService
                 || p.Unit!.Name.Contains(searchTerm)
                 || p.Category!.Name.Contains(searchTerm)
             )
-            && p.StatusId == queryModel.StatusId //filter theo status (default is selling)
             //filter theo brand, category, unit, status, minPrice, maxPrice
             && (categoryIds.IsNullOrEmpty() || categoryIds.Contains(p.CategoryId))
             && (queryModel.BrandIds.IsNullOrEmpty() || queryModel.BrandIds.Contains(p.BrandId))
             && (queryModel.UnitIds.IsNullOrEmpty() || queryModel.UnitIds.Contains(p.UnitId))
+            && (queryModel.StatusIds.IsNullOrEmpty() || queryModel.StatusIds.Contains(p.StatusId))
             && (minPrice == 0 || (p.SalePrice == 0 ? p.OriginalPrice >= minPrice : p.SalePrice >= minPrice))
             && (maxPrice == 0 || (p.SalePrice == 0 ? p.OriginalPrice <= maxPrice : p.SalePrice <= maxPrice))
             // filter product on sale
@@ -109,27 +110,13 @@ public class ProductService : IProductService
 
         #region Pagination
 
-        if (queryModel.StatusId == (int)ProductStatusId.Preorder)
-        {
-            var productModelQuery = query.Select(p => ToPreorderProductModel(p));
-            var products = await PagedList<PreorderProductModel>.CreateAsync(
-                productModelQuery,
-                queryModel.Page,
-                queryModel.PageSize
-            );
-            return ResponseModel.Success(ResponseConstants.Get("sản phẩm đặt trước", products.TotalCount > 0),
-                products);
-        }
-        else
-        {
-            var productModelQuery = query.Select(p => ToProductModel(p));
-            var products = await PagedList<ProductModel>.CreateAsync(
-                productModelQuery,
-                queryModel.Page,
-                queryModel.PageSize
-            );
-            return ResponseModel.Success(ResponseConstants.Get("sản phẩm", products.TotalCount > 0), products);
-        }
+        var productModelQuery = query.Select(p => ToProductModel(p));
+        var products = await PagedList<ProductModel>.CreateAsync(
+            productModelQuery,
+            queryModel.Page,
+            queryModel.PageSize
+        );
+        return ResponseModel.Success(ResponseConstants.Get("sản phẩm", products.TotalCount > 0), products);
 
         #endregion
     }
@@ -144,16 +131,16 @@ public class ProductService : IProductService
     {
         var product = await _productRepository.GetByIdAsync(id, true, true);
         if (product == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
-        if (product.StatusId != (int)ProductStatusId.Preorder)
-            return ResponseModel.Success(
-                ResponseConstants.Get("sản phẩm", true),
-                ToProductModel(product)
-            );
+        // if (product.StatusId != (int)ProductStatusId.Preorder)
+        //     return ResponseModel.Success(
+        //         ResponseConstants.Get("sản phẩm", true),
+        //         ToProductModel(product)
+        //     );
         var preorderProduct = await _preorderProductRepository.GetByIdAsync(id);
         product.PreorderProduct = preorderProduct;
         return ResponseModel.Success(
             ResponseConstants.Get("sản phẩm đặt trước", true),
-            ToPreorderProductModel(product)
+            ToProductModel(product)
         );
     }
 
@@ -396,7 +383,8 @@ public class ProductService : IProductService
                 ? 0
                 : p.ProductReviews.Average(pr => (double)pr.Rating),
             RatingCount = p.ProductReviews.Count,
-            Thumbnail = p.Thumbnail
+            Thumbnail = p.Thumbnail,
+            Status = p.ProductStatus!.Name
         });
 
         #region Pagination
@@ -417,7 +405,7 @@ public class ProductService : IProductService
 
     private static ProductModel ToProductModel(Product product)
     {
-        return new ProductModel
+        var model = new ProductModel()
         {
             Id = product.Id.ToString(),
             Name = product.Name,
@@ -442,40 +430,12 @@ public class ProductService : IProductService
             IsActive = product.IsActive,
             CreatedAt = product.CreatedAt
         };
-    }
+        if (product.PreorderProduct == null) return model;
+        model.MaxPreOrderQuantity = product.PreorderProduct.MaxPreOrderQuantity;
+        model.StartDate = product.PreorderProduct.StartDate;
+        model.EndDate = product.PreorderProduct.EndDate;
+        model.ExpectedPreOrderDays = product.PreorderProduct.ExpectedPreOrderDays;
 
-    private static PreorderProductModel ToPreorderProductModel(Product product)
-    {
-        var preorderProduct = product.PreorderProduct!;
-        var model = new PreorderProductModel
-        {
-            Id = product.Id.ToString(),
-            Name = product.Name,
-            Description = product.Description,
-            Quantity = product.Quantity,
-            BrandId = product.BrandId,
-            Brand = product.Brand!.Name,
-            CategoryId = product.CategoryId,
-            Category = product.Category!.Name,
-            UnitId = product.UnitId,
-            Unit = product.Unit!.Name,
-            OriginalPrice = product.OriginalPrice,
-            SalePrice = product.SalePrice,
-            StatusId = product.StatusId,
-            Status = product.ProductStatus!.Name,
-            Thumbnail = product.Thumbnail,
-            AverageRating = product.ProductReviews.IsNullOrEmpty()
-                ? 0
-                : product.ProductReviews.Average(pr => (double)pr.Rating),
-            RatingCount = product.ProductReviews.Count,
-            OrderCount = product.OrderDetails.IsNullOrEmpty() ? 0 : product.OrderDetails.Sum(od => od.Quantity),
-            MaxPreOrderQuantity = preorderProduct.MaxPreOrderQuantity,
-            StartDate = preorderProduct.StartDate,
-            EndDate = preorderProduct.EndDate,
-            ExpectedPreOrderDays = preorderProduct.ExpectedPreOrderDays,
-            IsActive = product.IsActive,
-            CreatedAt = product.CreatedAt
-        };
         return model;
     }
 
@@ -578,7 +538,8 @@ public class ProductService : IProductService
             join od in orderDetails on c.Id equals od.Product.CategoryId into categoryOrderDetails
             from cod in categoryOrderDetails.DefaultIfEmpty()
             where allChildCategoryIds.Contains(c.Id)
-            group new { cod.Quantity, cod.ItemPrice } by c.Id into g
+            group new { cod.Quantity, cod.ItemPrice } by c.Id
+            into g
             select new
             {
                 Id = g.Key,
@@ -603,7 +564,8 @@ public class ProductService : IProductService
             // include all brands even if there is no order detail
             join od in orderDetails on b.Id equals od.Product.BrandId into brandOrderDetails
             from bod in brandOrderDetails.DefaultIfEmpty()
-            group new { bod.Quantity , bod.ItemPrice } by b.Name into g
+            group new { bod.Quantity, bod.ItemPrice } by b.Name
+            into g
             select new CategoryBrandStats
             {
                 Name = g.Key,

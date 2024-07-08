@@ -14,7 +14,7 @@ public class ProductQueryModel : QueryModel
     /// 3 => OUT OF STOCK
     /// <para>Default is SELLING</para>
     /// </summary>
-    public int StatusId { get; set; } = 1;
+    public int[] StatusIds { get; set; } = [];
 
     [Range(0, double.MaxValue, ErrorMessage = "Min price must be greater than or equal to 0")]
     public int MinPrice { get; set; }

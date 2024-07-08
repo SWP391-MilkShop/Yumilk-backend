@@ -41,4 +41,12 @@ public class ProductModel
     public bool IsActive { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public int MaxPreOrderQuantity { get; set; }
+
+    public DateTime StartDate { get; set; }
+
+    public DateTime EndDate { get; set; }
+
+    public int ExpectedPreOrderDays { get; set; }
 }

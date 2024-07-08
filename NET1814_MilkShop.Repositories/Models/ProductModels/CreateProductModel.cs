@@ -15,10 +15,10 @@ public class CreateProductModel
     public int Quantity { get; set; }
 
     [Required(ErrorMessage = "Original Price is required")]
-    [Range(0.1, double.MaxValue, ErrorMessage = "Original Price must be greater than or equal to 0.1")]
+    [Range(0, int.MaxValue, ErrorMessage = "Original Price must be greater than or equal to 0")]
     public int OriginalPrice { get; set; }
 
-    [Range(0.1, double.MaxValue, ErrorMessage = "Sale Price must be greater than or equal to 0.1")]
+    [Range(0, int.MaxValue, ErrorMessage = "Sale Price must be greater than or equal to 0")]
     public int SalePrice { get; set; }
 
     public string? Thumbnail { get; set; }
@@ -38,8 +38,8 @@ public class CreateProductModel
     /// <summary>
     /// 1. SELLING  2.PRE_ORDER
     /// Neu set selling thi quantity phai lon hon 0
-    /// Neu set PRE_ORDER thi quantity = 0
+    /// Neu set PRE_ORDER HOAC OUT_OF_STOCK thi quantity = 0
     /// </summary>
-    [Range(1, 2, ErrorMessage = "Status must be in range 1-2")]
+    [Range(1, 3, ErrorMessage = "Status must be in range 1-3")]
     public int StatusId { get; set; }
 }

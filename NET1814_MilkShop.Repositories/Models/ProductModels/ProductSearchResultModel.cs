@@ -15,4 +15,6 @@ public class ProductSearchResultModel
     public int RatingCount { get; set; }
 
     public string? Thumbnail { get; set; }
+    
+    public string Status { get; set; }
 }
