@@ -171,11 +171,12 @@ public class ProductService : IProductService
             IsActive = false, // default is unpublished
             Thumbnail = model.Thumbnail
         };
-        if(model.StatusId is (int)ProductStatusId.Preorder or (int) ProductStatusId.OutOfStock)
+        if (model.StatusId is (int)ProductStatusId.Preorder or (int)ProductStatusId.OutOfStock)
         {
             // set quantity to 0 if status is preorder or out of stock
-            product.Quantity = 0; 
+            product.Quantity = 0;
         }
+
         //add preorder product if status is preordered
         if (model.StatusId == (int)ProductStatusId.Preorder)
         {
@@ -242,11 +243,12 @@ public class ProductService : IProductService
         product.Quantity = model.Quantity ?? product.Quantity;
         product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
         product.SalePrice = model.SalePrice ?? product.SalePrice;
-        if(model.StatusId is (int)ProductStatusId.Preorder or (int) ProductStatusId.OutOfStock)
+        if (model.StatusId is (int)ProductStatusId.Preorder or (int)ProductStatusId.OutOfStock)
         {
             // set quantity to 0 if status is preorder or out of stock
-            product.Quantity = 0; 
+            product.Quantity = 0;
         }
+
         if (model.StatusId == (int)ProductStatusId.Preorder)
         {
             var existing = await _preorderProductRepository.GetByIdAsync(id);
@@ -310,14 +312,33 @@ public class ProductService : IProductService
         //get total products sold per category
         var categories = _categoryRepository.GetCategoriesQuery();
         var statsPerCategory = await GetCategoryStats(categories, orderDetails, parentId);
+        var bestSeller = await GetBestSellerProductAsync(orderDetails);
         var stats = new ProductStatsModel
         {
             TotalSold = await orderDetails.SumAsync(o => o.Quantity),
             TotalRevenue = await orderDetails.SumAsync(o => o.ItemPrice),
             StatsPerBrand = statsPerBrand,
-            StatsPerCategory = statsPerCategory
+            StatsPerCategory = statsPerCategory,
+            BestSellers = bestSeller
         };
         return ResponseModel.Success(ResponseConstants.Get("thống kê sản phẩm", true), stats);
+    }
+
+    private async Task<List<BestSellerModel>> GetBestSellerProductAsync(IQueryable<OrderDetail> orderDetails)
+    {
+        var query = from order in orderDetails
+            group order by new { order.Product.Id, order.Product.Name }
+            into g
+            select new BestSellerModel
+            {
+                Id = g.Key.Id,
+                Name = g.Key.Name,
+                TotalSold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.ItemPrice)
+            };
+        var bestSeller = await query.OrderByDescending(x => x.TotalSold).ThenByDescending(x => x.TotalRevenue).Take(5)
+            .ToListAsync();
+        return bestSeller;
     }
 
     public async Task<ResponseModel> UpdatePreorderProductAsync(Guid productId, UpdatePreorderProductModel model)
