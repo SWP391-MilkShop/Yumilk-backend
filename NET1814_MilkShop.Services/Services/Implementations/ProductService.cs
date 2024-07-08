@@ -171,11 +171,12 @@ public class ProductService : IProductService
             IsActive = false, // default is unpublished
             Thumbnail = model.Thumbnail
         };
-        if(model.StatusId is (int)ProductStatusId.Preorder or (int) ProductStatusId.OutOfStock)
+        if (model.StatusId is (int)ProductStatusId.Preorder or (int)ProductStatusId.OutOfStock)
         {
             // set quantity to 0 if status is preorder or out of stock
-            product.Quantity = 0; 
+            product.Quantity = 0;
         }
+
         //add preorder product if status is preordered
         if (model.StatusId == (int)ProductStatusId.Preorder)
         {
@@ -242,11 +243,12 @@ public class ProductService : IProductService
         product.Quantity = model.Quantity ?? product.Quantity;
         product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
         product.SalePrice = model.SalePrice ?? product.SalePrice;
-        if(model.StatusId is (int)ProductStatusId.Preorder or (int) ProductStatusId.OutOfStock)
+        if (model.StatusId is (int)ProductStatusId.Preorder or (int)ProductStatusId.OutOfStock)
         {
             // set quantity to 0 if status is preorder or out of stock
-            product.Quantity = 0; 
+            product.Quantity = 0;
         }
+
         if (model.StatusId == (int)ProductStatusId.Preorder)
         {
             var existing = await _preorderProductRepository.GetByIdAsync(id);
@@ -413,6 +415,9 @@ public class ProductService : IProductService
 
     private static ProductModel ToProductModel(Product product)
     {
+        var orderDetails = product.OrderDetails.IsNullOrEmpty()
+            ? []
+            : product.OrderDetails.Where(od => od.Order.StatusId == (int)OrderStatusId.Delivered).ToList();
         var model = new ProductModel()
         {
             Id = product.Id.ToString(),
@@ -434,7 +439,7 @@ public class ProductService : IProductService
                 ? 0
                 : product.ProductReviews.Average(pr => (double)pr.Rating),
             RatingCount = product.ProductReviews.Count,
-            OrderCount = product.OrderDetails.IsNullOrEmpty() ? 0 : product.OrderDetails.Sum(od => od.Quantity),
+            OrderCount = orderDetails.IsNullOrEmpty() ? 0 : orderDetails.Sum(od => od.Quantity),
             IsActive = product.IsActive,
             CreatedAt = product.CreatedAt
         };
