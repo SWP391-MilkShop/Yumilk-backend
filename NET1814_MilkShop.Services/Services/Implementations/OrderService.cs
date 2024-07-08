@@ -502,7 +502,8 @@ public class OrderService : IOrderService
         };
         foreach (var item in totalOrdersPerStatus)
         {
-            var count = stats.TotalOrdersPerStatus.FirstOrDefault(x => x.Status == item.Status);
+            // uppercase để đồng bộ case
+            var count = stats.TotalOrdersPerStatus.FirstOrDefault(x => x.Status.ToUpper() == item.Status);
             if (count != null) count.Count = item.Count;
         }
 
