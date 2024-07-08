@@ -178,7 +178,7 @@ public class ShippingService : IShippingService
             ToAddress = order.Address,
             ToDistrictId = order.DistrictId,
             Weight = order.TotalGram,
-            CodAmount = order.PaymentMethod == "COD" ? order.TotalAmount : 0,
+            CodAmount = order.PaymentMethod == "COD" ? order.TotalPrice : 0,
             ToWardCode = order.WardCode,
             Items = order.OrderDetails.Select(x => new Item
             {
