@@ -139,4 +139,14 @@ public class DashboardController : Controller
         var res = await _orderService.GetPaymentMethodStats();
         return ResponseExtension.Result(res);
     }
+
+    [HttpGet]
+    [Route("orders/stats/{date}")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> GetOrdersStatsByDate(int date)
+    {
+        _logger.Information("Get orders stats by date");
+        var res = await _orderService.GetOrdersStatsByDateAsync(date);
+        return ResponseExtension.Result(res);
+    }
 }

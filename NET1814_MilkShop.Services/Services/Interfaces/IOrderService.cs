@@ -14,4 +14,6 @@ public interface IOrderService
     Task<ResponseModel> CancelOrderAdminStaffAsync(Guid id);
     Task<ResponseModel> GetOrderHistoryDetailDashBoardAsync(Guid orderId);
     Task<ResponseModel> GetPaymentMethodStats();
+
+    Task<ResponseModel> GetOrdersStatsByDateAsync(int date);
 }

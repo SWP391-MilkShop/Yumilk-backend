@@ -629,4 +629,21 @@ public class OrderService : IOrderService
             totalCod, totalPayOs, percentCod, percentPayOs
         });
     }
+
+    public async Task<ResponseModel> GetOrdersStatsByDateAsync(int date)
+    {
+        var orders = await _orderRepository.GetOrderQuery().ToListAsync();
+        if (!orders.Any())
+        {
+            return ResponseModel.BadRequest("Không có đơn hàng nào trong hệ thống");
+        }
+
+        var result = orders.Where(x => x.StatusId == (int)OrderStatusId.Delivered)
+            .Select(x => x.CreatedAt).GroupBy(o => o.DayOfWeek).Select(x => new
+            {
+                DayOfWeek = x.Key.ToString(),
+                Count = x.Count()
+            }).ToList();
+        return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng theo ngày", true), result);
+    }
 }
