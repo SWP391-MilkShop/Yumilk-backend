@@ -46,7 +46,7 @@ public class CartService : ICartService
 
         var product = await _productRepository.GetByIdNoIncludeAsync(model.ProductId);
         // Check if product is not exist or not active
-        if (product == null || !product.IsActive)
+        if (product is not { IsActive: true })
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
         }
