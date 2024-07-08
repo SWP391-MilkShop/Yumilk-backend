@@ -171,6 +171,11 @@ public class ProductService : IProductService
             IsActive = false, // default is unpublished
             Thumbnail = model.Thumbnail
         };
+        if(model.StatusId is (int)ProductStatusId.Preorder or (int) ProductStatusId.OutOfStock)
+        {
+            // set quantity to 0 if status is preorder or out of stock
+            product.Quantity = 0; 
+        }
         //add preorder product if status is preordered
         if (model.StatusId == (int)ProductStatusId.Preorder)
         {
@@ -179,7 +184,6 @@ public class ProductService : IProductService
                 ProductId = product.Id
             };
             _preorderProductRepository.Add(preorderProduct);
-            product.Quantity = 0; // set quantity to 0 if status is preorder
         }
 
         _productRepository.Add(product);
@@ -238,6 +242,11 @@ public class ProductService : IProductService
         product.Quantity = model.Quantity ?? product.Quantity;
         product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
         product.SalePrice = model.SalePrice ?? product.SalePrice;
+        if(model.StatusId is (int)ProductStatusId.Preorder or (int) ProductStatusId.OutOfStock)
+        {
+            // set quantity to 0 if status is preorder or out of stock
+            product.Quantity = 0; 
+        }
         if (model.StatusId == (int)ProductStatusId.Preorder)
         {
             var existing = await _preorderProductRepository.GetByIdAsync(id);
@@ -247,7 +256,6 @@ public class ProductService : IProductService
                 {
                     ProductId = product.Id
                 };
-                product.Quantity = 0; // set quantity to 0 if status is preorder
                 _preorderProductRepository.Add(preorderProduct);
             }
         }
