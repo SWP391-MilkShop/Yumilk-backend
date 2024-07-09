@@ -311,10 +311,16 @@ public class ProductController : Controller
         return ResponseExtension.Result(res);
     }
 
+    [HttpGet("attributes/{id}")]
+    public async Task<IActionResult> GetProductAttributesById(int id)
+    {
+        _logger.Information("Get Product Attributes By Id");
+        var res = await _productAttributeService.GetProductAttributesByIdAsync(id);
+        return ResponseExtension.Result(res);
+    }
+
     [HttpPost("attributes")]
-    public async Task<IActionResult> AddProductAttribute(
-        [FromBody] CreateProductAttributeModel model
-    )
+    public async Task<IActionResult> AddProductAttribute([FromBody] CreateProductAttributeModel model)
     {
         _logger.Information("Add Product Attribute");
         var res = await _productAttributeService.AddProductAttributeAsync(model);
@@ -457,6 +463,7 @@ public class ProductController : Controller
     #endregion
 
     #region ProductReview
+
     [HttpGet("reviews")]
     public async Task<IActionResult> GetProductReviews([FromQuery] ReviewQueryModel queryModel)
     {
@@ -464,7 +471,7 @@ public class ProductController : Controller
         var response = await _productReviewService.GetProductReviewsAsync(queryModel);
         return ResponseExtension.Result(response);
     }
-    
+
     [HttpGet("{productId}/reviews")]
     public async Task<IActionResult> GetProductReviews(Guid productId, [FromQuery] ProductReviewQueryModel queryModel)
     {

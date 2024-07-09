@@ -24,6 +24,23 @@ public class ProductAttributeService : IProductAttributeService
         _unitOfWork = unitOfWork;
     }
 
+    public async Task<ResponseModel> GetProductAttributesByIdAsync(int id)
+    {
+        var isExist = await _productAttribute.GetProductAttributeById(id);
+        if (isExist == null)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Thuộc tính sản phẩm"));
+        }
+
+        var model = new ProductAttributeModel
+        {
+            Id = isExist.Id,
+            Name = isExist.Name,
+            Description = isExist.Description
+        };
+        return ResponseModel.Success(ResponseConstants.Get("thuộc tính sản phẩm", true), model);
+    }
+
     public async Task<ResponseModel> GetProductAttributesAsync(
         ProductAttributeQueryModel queryModel
     )
