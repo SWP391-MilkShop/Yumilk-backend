@@ -142,7 +142,7 @@ public class CategoryService : ICategoryService
         var query = _categoryRepository.GetCategoriesQuery()
             .Include(x => x.Parent).AsQueryable();
         var category = await query.FirstOrDefaultAsync(x => x.Id == id);
-        if (category is not { IsActive: true })
+        if (category is null)
         {
             return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
         }
