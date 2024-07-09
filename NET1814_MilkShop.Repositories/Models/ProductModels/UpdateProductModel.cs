@@ -10,7 +10,7 @@ public class UpdateProductModel
     [Range(0, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
     public int? Quantity { get; set; }
 
-    [Range(0, double.MaxValue, ErrorMessage = "Original Price must be greater than 0")]
+    [Range(1, double.MaxValue, ErrorMessage = "Original Price must be greater than 0")]
     public int? OriginalPrice { get; set; }
 
     [Range(0, double.MaxValue, ErrorMessage = "Sale Price must be greater than 0")]
