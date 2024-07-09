@@ -36,7 +36,8 @@ public class ProductAttributeService : IProductAttributeService
         {
             Id = isExist.Id,
             Name = isExist.Name,
-            Description = isExist.Description
+            Description = isExist.Description,
+            IsActive = isExist.IsActive
         };
         return ResponseModel.Success(ResponseConstants.Get("thuộc tính sản phẩm", true), model);
     }
@@ -76,7 +77,8 @@ public class ProductAttributeService : IProductAttributeService
         {
             Id = x.Id,
             Name = x.Name,
-            Description = x.Description
+            Description = x.Description,
+            IsActive = x.IsActive
         });
 
         #region paging
