@@ -218,7 +218,6 @@ public class ProductService : IProductService
                 return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
             }
         }
-        //add preorder product if status is preorder and no preorder product exists
 
         if (!string.IsNullOrEmpty(model.Name))
         {
@@ -243,12 +242,18 @@ public class ProductService : IProductService
         product.Quantity = model.Quantity ?? product.Quantity;
         product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
         product.SalePrice = model.SalePrice ?? product.SalePrice;
-        if (model.StatusId is (int)ProductStatusId.Preorder or (int)ProductStatusId.OutOfStock)
+        // set quantity to 0 if status is preorder or out of stock
+        if (product.StatusId is (int)ProductStatusId.Preorder or (int)ProductStatusId.OutOfStock)
         {
-            // set quantity to 0 if status is preorder or out of stock
             product.Quantity = 0;
         }
 
+        if (product.StatusId is (int)ProductStatusId.Selling && product.Quantity == 0)
+        {
+            product.StatusId = (int)ProductStatusId.OutOfStock;
+        }
+
+        //add preorder product if status is preorder and no preorder product exists
         if (model.StatusId == (int)ProductStatusId.Preorder)
         {
             var existing = await _preorderProductRepository.GetByIdAsync(id);
@@ -514,16 +519,13 @@ public class ProductService : IProductService
     /// <param name="statusId"></param>
     /// <param name="thumbnail"></param>
     /// <returns></returns>
-    private ResponseModel? ValidateCommon(int salePrice, int originalPrice, int quantity, int statusId,
+    private static ResponseModel? ValidateCommon(int salePrice, int originalPrice, int quantity, int statusId,
         string? thumbnail)
     {
         if (!string.IsNullOrEmpty(thumbnail) && !Uri.IsWellFormedUriString(thumbnail, UriKind.Absolute))
             return ResponseModel.BadRequest(ResponseConstants.WrongFormat("URL"));
 
         if (salePrice > originalPrice) return ResponseModel.BadRequest(ResponseConstants.InvalidSalePrice);
-
-        if (statusId == (int)ProductStatusId.Selling && quantity == 0)
-            return ResponseModel.BadRequest(ResponseConstants.InvalidQuantity);
 
         if (statusId == (int)ProductStatusId.Preorder && quantity != 0)
             return ResponseModel.BadRequest(ResponseConstants.NoQuantityPreorder);
