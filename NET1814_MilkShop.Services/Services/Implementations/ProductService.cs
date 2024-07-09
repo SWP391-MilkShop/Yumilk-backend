@@ -209,55 +209,11 @@ public class ProductService : IProductService
     {
         var product = await _productRepository.GetByIdNoIncludeAsync(id);
         if (product == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
-        //check if product is ordered and status is changed
-        if (model.StatusId != 0 && product.StatusId != model.StatusId)
-        {
-            var isOrdered = await _orderDetailRepository.CheckActiveOrderProduct(id);
-            if (isOrdered)
-            {
-                return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
-            }
-        }
 
-        if (!string.IsNullOrEmpty(model.Name))
-        {
-            var productByName = await _productRepository.GetByNameAsync(model.Name);
-            // check if product with the same name exists and not the current product
-            if (productByName != null && productByName.Id != id)
-                return ResponseModel.BadRequest(ResponseConstants.Exist("Tên sản phẩm"));
-
-            product.Name = model.Name;
-        }
-
-        var validateResponse = await ValidateId(model.BrandId, model.CategoryId, model.UnitId);
-        if (validateResponse != null) return validateResponse;
-
-        product.BrandId = model.BrandId == 0 ? product.BrandId : model.BrandId;
-        product.CategoryId = model.CategoryId == 0 ? product.CategoryId : model.CategoryId;
-        product.UnitId = model.UnitId == 0 ? product.UnitId : model.UnitId;
-        product.StatusId = model.StatusId == 0 ? product.StatusId : model.StatusId;
-        product.Description = string.IsNullOrEmpty(model.Description)
-            ? product.Description
-            : model.Description;
-        product.Quantity = model.Quantity ?? product.Quantity;
-        product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
-        product.SalePrice = model.SalePrice ?? product.SalePrice;
-        // set quantity to 0 if status is preorder or out of stock
-        if (product.StatusId is (int)ProductStatusId.Preorder or (int)ProductStatusId.OutOfStock)
-        {
-            product.Quantity = 0;
-        }
-
-        if (product.StatusId is (int)ProductStatusId.Selling && product.Quantity == 0)
-        {
-            product.StatusId = (int)ProductStatusId.OutOfStock;
-        }
-
-        //add preorder product if status is preorder and no preorder product exists
+        var existingPreorder = await _preorderProductRepository.GetByIdAsync(id);
         if (model.StatusId == (int)ProductStatusId.Preorder)
         {
-            var existing = await _preorderProductRepository.GetByIdAsync(id);
-            if (existing == null)
+            if (existingPreorder == null)
             {
                 var preorderProduct = new PreorderProduct
                 {
@@ -267,12 +223,59 @@ public class ProductService : IProductService
             }
         }
 
-        var validateCommonResponse = ValidateCommon(product.SalePrice, product.OriginalPrice, product.Quantity,
-            product.StatusId, model.Thumbnail);
-        if (validateCommonResponse != null) return validateCommonResponse;
+        if (!string.IsNullOrEmpty(model.Name))
+        {
+            var productByName = await _productRepository.GetByNameAsync(model.Name);
+            // check if product with the same name exists and not the current product
+            if (productByName != null && productByName.Id != id)
+                return ResponseModel.BadRequest(ResponseConstants.Exist("Tên sản phẩm"));
+            product.Name = model.Name;
+        }
+
+        var validateResponse = await ValidateId(model.BrandId, model.CategoryId, model.UnitId);
+        if (validateResponse != null) return validateResponse;
+
+        product.BrandId = model.BrandId == 0 ? product.BrandId : model.BrandId;
+        product.CategoryId = model.CategoryId == 0 ? product.CategoryId : model.CategoryId;
+        product.UnitId = model.UnitId == 0 ? product.UnitId : model.UnitId;
+
+        product.Description = string.IsNullOrEmpty(model.Description)
+            ? product.Description
+            : model.Description;
+        product.Quantity = model.Quantity ?? product.Quantity;
+        product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
+        product.SalePrice = model.SalePrice ?? product.SalePrice;
+        product.IsActive = model.IsActive;
+        // check if product is ordered
+        if (product.StatusId != (int)ProductStatusId.OutOfStock && product.IsActive)
+        {
+            if (model.StatusId != 0 && product.StatusId != model.StatusId)
+            {
+                var isOrdered = await _orderDetailRepository.CheckActiveOrderProduct(id);
+                if (isOrdered)
+                {
+                    return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
+                }
+            }
+        }
+
+        product.StatusId = model.StatusId == 0 ? product.StatusId : model.StatusId;
+
+        // validate common fields and logic if product is active
+        if (product.IsActive)
+        {
+            var validateCommonResponse = ValidateCommon(product.SalePrice, product.OriginalPrice, product.Quantity,
+                product.StatusId, model.Thumbnail);
+            if (validateCommonResponse != null) return validateCommonResponse;
+            if (product.StatusId == (int)ProductStatusId.Preorder)
+            {
+                var validatePreorderProduct = ValidatePreorderProduct(existingPreorder!);
+                if (validatePreorderProduct != null) return validatePreorderProduct;
+            }
+        }
 
         product.Thumbnail = string.IsNullOrEmpty(model.Thumbnail) ? product.Thumbnail : model.Thumbnail;
-        product.IsActive = model.IsActive;
+
         _productRepository.Update(product);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0) return ResponseModel.Success(ResponseConstants.Update("sản phẩm", true), null);
@@ -526,10 +529,23 @@ public class ProductService : IProductService
             return ResponseModel.BadRequest(ResponseConstants.WrongFormat("URL"));
 
         if (salePrice > originalPrice) return ResponseModel.BadRequest(ResponseConstants.InvalidSalePrice);
+        if (statusId == (int)ProductStatusId.Selling && quantity == 0)
+            return ResponseModel.BadRequest(ResponseConstants.InvalidQuantity);
 
         if (statusId == (int)ProductStatusId.Preorder && quantity != 0)
             return ResponseModel.BadRequest(ResponseConstants.NoQuantityPreorder);
 
+        return null;
+    }
+
+    private static ResponseModel? ValidatePreorderProduct(PreorderProduct preorderProduct)
+    {
+        if(preorderProduct.StartDate < DateTime.Now)
+            return ResponseModel.BadRequest("Ngày bắt đầu không thể nhỏ hơn ngày hiện tại");
+        if (preorderProduct.StartDate > preorderProduct.EndDate)
+            return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+        if (preorderProduct.MaxPreOrderQuantity <= 0)
+            return ResponseModel.BadRequest(ResponseConstants.InvalidMaxPreOrderQuantity);
         return null;
     }
 

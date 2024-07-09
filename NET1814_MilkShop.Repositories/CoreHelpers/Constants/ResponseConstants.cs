@@ -220,6 +220,7 @@ public static class ResponseConstants
     public const string NoQuantityPreorder = "Không thể set số lượng tồn cho sản phẩm Pre-order";
     public const string NotInPreOrder = "Sản phẩm đang không trong quá trình Pre-order";
     public const string ProductOrdered = "Sản phẩm đang trong quá trình đặt hàng";
+    public const string InvalidMaxPreOrderQuantity = "Số lượng đặt hàng tối đa phải lớn hơn 0";
 
     #endregion
 
