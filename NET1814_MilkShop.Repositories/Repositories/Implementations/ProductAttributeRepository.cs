@@ -19,6 +19,11 @@ public class ProductAttributeRepository
         return _query;
     }
 
+    public async Task<ProductAttribute?> GetProductAttributeByName(string name, int id)
+    {
+        return await _query.FirstOrDefaultAsync(x => x.Name.Equals(name) && x.Id != id);
+    }
+
     public async Task<ProductAttribute?> GetProductAttributeByName(string name)
     {
         return await _query.FirstOrDefaultAsync(x => x.Name.Equals(name));

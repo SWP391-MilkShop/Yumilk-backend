@@ -155,7 +155,7 @@ public class ProductAttributeService : IProductAttributeService
 
         if (!string.IsNullOrEmpty(model.Name))
         {
-            var isExistName = await _productAttribute.GetProductAttributeByName(model.Name);
+            var isExistName = await _productAttribute.GetProductAttributeByName(model.Name, isExistId.Id);
             if (isExistName != null)
             {
                 /*return new ResponseModel
@@ -183,7 +183,7 @@ public class ProductAttributeService : IProductAttributeService
                 Status = "Success",
             };*/
             return ResponseModel.Success(
-                ResponseConstants.Update("Thuộc tính sản phẩm", true),
+                ResponseConstants.Update("thuộc tính sản phẩm", true),
                 null
             );
         }
