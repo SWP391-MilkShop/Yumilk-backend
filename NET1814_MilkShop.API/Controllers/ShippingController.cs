@@ -101,7 +101,7 @@ public class ShippingController : ControllerBase
     /// </summary>
     /// <param name="orderId"></param>
     /// <returns></returns>
-    [HttpGet("order/cancel/{orderId}")]
+    [HttpPost("order/cancel/{orderId}")]
     public async Task<IActionResult> CancelOrder(Guid orderId)
     {
         _logger.Information("Cancel shipping order");
