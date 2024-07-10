@@ -18,11 +18,14 @@ public sealed class CustomerService : ICustomerService
 {
     private readonly ICustomerRepository _customerRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrderRepository _orderRepository;
 
-    public CustomerService(ICustomerRepository customerRepository, IUnitOfWork unitOfWork)
+    public CustomerService(ICustomerRepository customerRepository, IUnitOfWork unitOfWork,
+        IOrderRepository orderRepository)
     {
         _customerRepository = customerRepository;
         _unitOfWork = unitOfWork;
+        _orderRepository = orderRepository;
     }
 
     private static CustomerModel ToCustomerModel(Customer customer, User user)
@@ -244,6 +247,32 @@ public sealed class CustomerService : ICustomerService
     public async Task<bool> IsExistEmailAsync(string email)
     {
         return await _customerRepository.IsExistEmailAsync(email);
+    }
+
+    public async Task<ResponseModel> GetReturnCustomerStatsAsync(int year)
+    {
+        // get all orders that have been delivered in year
+        var orders = _orderRepository.GetOrderQuery()
+            .Where(x => x.CreatedAt.Year == year && x.StatusId == (int)OrderStatusId.Delivered);
+        var query = from firstorder in orders
+            join secondorder in orders on firstorder.CustomerId equals secondorder.CustomerId
+            where firstorder.CreatedAt.Date != secondorder.CreatedAt.Date
+            // Tính toán quý dựa trên tháng của CreatedAt
+            group new { firstorder.CreatedAt, firstorder.CustomerId } by new
+                { Quarter = (firstorder.CreatedAt.Month - 1) / 3 + 1 }
+            into g
+            select new
+            {
+                g.Key.Quarter, // Quý 3 tháng (4 quý)
+                DistinctCustomerCount =
+                    g.Select(x => x.CustomerId).Distinct()
+                        .Count() // Số lượng khách hàng quay trở lại mua hàng trong mỗi quý
+            };
+        var result = await query.ToListAsync();
+        return ResponseModel.Success(
+            ResponseConstants.Get("khách hàng trở lại", result.Count > 0),
+            result
+        );
     }
 
     /*public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)

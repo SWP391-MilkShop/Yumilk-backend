@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.API.CoreHelpers.Extensions;
+using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Models.UserModels;
@@ -147,6 +148,16 @@ public class DashboardController : Controller
     {
         _logger.Information("Get orders stats by date");
         var res = await _orderService.GetOrdersStatsByDateAsync(model);
+        return ResponseExtension.Result(res);
+    }
+
+    [HttpGet]
+    [Route("customers/stats/{year}")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> GetReturnCustomersStats(int year)
+    {
+        _logger.Information("Get customers return stats by year");
+        var res = await _customerService.GetReturnCustomerStatsAsync(year);
         return ResponseExtension.Result(res);
     }
 }
