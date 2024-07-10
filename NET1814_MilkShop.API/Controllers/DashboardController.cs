@@ -141,12 +141,12 @@ public class DashboardController : Controller
     }
 
     [HttpGet]
-    [Route("orders/stats/{date}")]
+    [Route("orders/stats/date")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-    public async Task<IActionResult> GetOrdersStatsByDate(int date)
+    public async Task<IActionResult> GetOrdersStatsByDate([FromQuery] OrderStatsQueryModel model)
     {
         _logger.Information("Get orders stats by date");
-        var res = await _orderService.GetOrdersStatsByDateAsync(date);
+        var res = await _orderService.GetOrdersStatsByDateAsync(model);
         return ResponseExtension.Result(res);
     }
 }

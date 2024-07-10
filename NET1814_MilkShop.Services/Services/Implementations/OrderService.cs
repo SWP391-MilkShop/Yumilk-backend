@@ -630,20 +630,58 @@ public class OrderService : IOrderService
         });
     }
 
-    public async Task<ResponseModel> GetOrdersStatsByDateAsync(int date)
+    public async Task<ResponseModel> GetOrdersStatsByDateAsync(OrderStatsQueryModel queryModel)
     {
-        var orders = await _orderRepository.GetOrderQuery().ToListAsync();
-        if (!orders.Any())
+        if (queryModel.FromOrderDate > DateTime.Now)
         {
-            return ResponseModel.BadRequest("Không có đơn hàng nào trong hệ thống");
+            return ResponseModel.BadRequest(ResponseConstants.InvalidFromDate);
         }
 
-        var result = orders.Where(x => x.StatusId == (int)OrderStatusId.Delivered)
-            .Select(x => x.CreatedAt).GroupBy(o => o.DayOfWeek).Select(x => new
+        if (queryModel.FromOrderDate > queryModel.ToOrderDate)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+        }
+        // default is from last 30 days
+        var from = queryModel.FromOrderDate ?? DateTime.Now.AddDays(-30);
+        // default is now
+        var to = queryModel.ToOrderDate ?? DateTime.Now;
+
+        var orders = await _orderRepository.GetOrderQuery()
+            .Where(o => o.CreatedAt >= from && o.CreatedAt <= to && o.StatusId != (int)OrderStatusId.Cancelled)
+            .ToListAsync();
+        
+        // order per day of week (theo thứ)
+        var orderPerDayOfWeek = orders
+            .GroupBy(o => o.CreatedAt.DayOfWeek)
+            .Select(x => new OrderStatsPerDate
             {
-                DayOfWeek = x.Key.ToString(),
+                DateTime = x.Key.ToString(),
                 Count = x.Count()
             }).ToList();
-        return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng theo ngày", true), result);
+
+        // order per date (theo ngày)
+        var orderPerDay = orders
+            .GroupBy(x => x.CreatedAt.Date)
+            .Select(x => new OrderStatsPerDate
+            {
+                DateTime = x.Key.ToString("yyyy-MM-dd"),
+                Count = x.Count()
+            }).OrderBy(x => x.DateTime).ToList();
+
+        // order per month (theo tháng)
+        var orderPerMonth = orders
+            .GroupBy(x => x.CreatedAt.Month)
+            .Select(x => new OrderStatsPerDate
+            {
+                DateTime = x.Key.ToString(),
+                Count = x.Count()
+            }).OrderBy(x => x.DateTime).ToList();
+
+        return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng theo ngày", true), new
+        {
+            orderPerDayOfWeek,
+            orderPerDay,
+            orderPerMonth
+        });
     }
 }
