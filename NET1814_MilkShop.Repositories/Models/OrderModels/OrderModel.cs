@@ -12,4 +12,5 @@ public class OrderModel
     public string? OrderStatus { get; set; }
     public DateTime? CreatedDate { get; set; }
     public DateTime? PaymentDate { get; set; }
+    public bool IsPreorder { get; set; }
 }

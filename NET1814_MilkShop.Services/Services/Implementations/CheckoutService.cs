@@ -144,6 +144,7 @@ public class CheckoutService : ICheckoutService
             OrderCode = model.PaymentMethod == "COD" ? null : await GenerateOrderCode(),
             TotalGram = GetTotalGram(cart.CartDetails.ToList()),
             Email = customerEmail,
+            IsPreorder = false // set is preorder = false cho order thông thường
         };
         _orderRepository.Add(orders);
 
@@ -198,6 +199,7 @@ public class CheckoutService : ICheckoutService
                 PaymentMethod = orders.PaymentMethod,
                 CreatedAt = orders.CreatedAt,
                 OrderDetail = ToOrderDetailModel(cartTemp),
+                IsPreorder = orders.IsPreorder
             };
             if (model.PaymentMethod == "PAYOS")
             {
@@ -301,6 +303,7 @@ public class CheckoutService : ICheckoutService
             OrderCode = await GenerateOrderCode(),
             TotalGram = product.Product.Unit!.Gram * model.Quantity,
             Email = customerEmail,
+            IsPreorder = true // set is preorder = true
         };
         _orderRepository.Add(preOrder);
         var preOrderDetail = new OrderDetail
@@ -346,6 +349,7 @@ public class CheckoutService : ICheckoutService
                     ItemPrice = preOrderDetail.ItemPrice,
                     Thumbnail = preOrderDetail.Product.Thumbnail
                 },
+                IsPreorder = preOrder.IsPreorder
             };
             var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);
             if (paymentLink.Status == "Error")
