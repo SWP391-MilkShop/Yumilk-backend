@@ -66,4 +66,6 @@ public class Order : IAuditableEntity
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
 
     public virtual OrderStatus? Status { get; set; }
+
+    public virtual ICollection<OrderLog> OrderLogs { get; set; } = [];
 }

@@ -61,6 +61,12 @@ public class DashboardController : Controller
         return ResponseExtension.Result(response);
     }
 
+    /// <summary>
+    /// Chuyen trang thai sang PROCESSING, SHIPPED
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
     [HttpPatch]
     [Route("orders/{id}/status")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
@@ -68,6 +74,21 @@ public class DashboardController : Controller
     {
         _logger.Information("Update order status");
         var response = await _orderService.UpdateOrderStatusAsync(id, model);
+        return ResponseExtension.Result(response);
+    }
+
+    /// <summary>
+    /// Chuyen trang thai don hang sang da giao
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [HttpPatch]
+    [Route("orders/{id}/status/delivered")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> UpdateOrderStatusDelivered(Guid id)
+    {
+        _logger.Information("Update order status to delivered");
+        var response = await _orderService.UpdateOrderStatusDeliveredAsync(id);
         return ResponseExtension.Result(response);
     }
 
@@ -102,6 +123,15 @@ public class DashboardController : Controller
         var res = await _customerService.GetCustomersStatsAsync(queryModel);
         return ResponseExtension.Result(res);
     }
+    // [HttpGet]
+    // [Route("customers/{id}/stats")]
+    // [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    // public async Task<IActionResult> GetCustomerStats(Guid id)
+    // {
+    //     _logger.Information("Get user stats");
+    //     var res = await _customerService.GetCustomersStatsByIdAsync(id);
+    //     return ResponseExtension.Result(res);
+    // }
 
     /// <summary>
     /// Admin and Staff have full permission to cancel order (PREORDER, PROCESSING, SHIPPING).

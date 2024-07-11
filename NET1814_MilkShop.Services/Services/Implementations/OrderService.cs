@@ -602,4 +602,30 @@ public class OrderService : IOrderService
 
         return ResponseModel.Success(ResponseConstants.Get("chi tiết đơn hàng", true), detail);
     }
+
+    public async Task<ResponseModel> UpdateOrderStatusDeliveredAsync(Guid id)
+    {
+        var order = await _orderRepository.GetByOrderIdAsync(id, include: false);
+        if (order == null)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("đơn hàng"));
+        }
+
+        if (order.StatusId != (int)OrderStatusId.Shipped)
+        {
+            return ResponseModel.BadRequest("Đơn hàng chưa được giao");
+        }
+        
+        // Handle point for customer
+        // Handle order logs
+        // ...
+        order.StatusId = (int) OrderStatusId.Delivered;
+        _orderRepository.Update(order);
+        var result = await _unitOfWork.SaveChangesAsync();
+        if (result > 0)
+        {
+            return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), null);
+        }
+        return ResponseModel.Error(ResponseConstants.Update("trạng thái đơn hàng", false));
+    }
 }

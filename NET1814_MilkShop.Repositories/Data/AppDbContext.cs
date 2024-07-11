@@ -39,6 +39,8 @@ public class AppDbContext : DbContext
     public virtual DbSet<ProductImage> ProductImages { get; set; }
     public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
     public virtual DbSet<Post> Posts { get; set; }
+    public virtual DbSet<OrderLog> OrderLogs { get; set; }
+    public virtual DbSet<Voucher> Vouchers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -229,7 +231,7 @@ public class AppDbContext : DbContext
             b.Property<string>("PhoneNumber")
                 .HasColumnType("nvarchar(20)")
                 .HasColumnName("phone_number");
-                
+
 
             b.Property<string>("ProfilePictureUrl")
                 .HasColumnType("nvarchar(255)")
@@ -936,7 +938,7 @@ public class AppDbContext : DbContext
 
             b.ToTable("users", null as string);
         });
-            
+
         modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Cart", b =>
         {
             b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Customer", "Customer")
@@ -998,7 +1000,7 @@ public class AppDbContext : DbContext
                 .HasForeignKey("StatusId")
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
-                
+
             b.Navigation("Customer");
 
             b.Navigation("Status");
@@ -1134,22 +1136,13 @@ public class AppDbContext : DbContext
 
             b.Navigation("Role");
         });
-            
 
-        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Brand", b =>
-        {
-            b.Navigation("Products");
-        });
 
-        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Cart", b =>
-        {
-            b.Navigation("CartDetails");
-        });
+        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Brand", b => { b.Navigation("Products"); });
 
-        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Category", b =>
-        {
-            b.Navigation("Products");
-        });
+        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Cart", b => { b.Navigation("CartDetails"); });
+
+        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Category", b => { b.Navigation("Products"); });
 
         modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Customer", b =>
         {
@@ -1160,15 +1153,11 @@ public class AppDbContext : DbContext
             b.Navigation("Orders");
         });
 
-        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Order", b =>
-        {
-            b.Navigation("OrderDetails");
-        });
+        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Order",
+            b => { b.Navigation("OrderDetails"); });
 
-        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.OrderStatus", b =>
-        {
-            b.Navigation("Orders");
-        });
+        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.OrderStatus",
+            b => { b.Navigation("Orders"); });
 
         modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Product", b =>
         {
@@ -1185,24 +1174,13 @@ public class AppDbContext : DbContext
             b.Navigation("ProductReviews");
         });
 
-        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.ProductAttribute", b =>
-        {
-            b.Navigation("ProductAttributeValues");
-        });
+        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.ProductAttribute",
+            b => { b.Navigation("ProductAttributeValues"); });
 
-        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Role", b =>
-        {
-            b.Navigation("Users");
-        });
+        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Role", b => { b.Navigation("Users"); });
 
-        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Unit", b =>
-        {
-            b.Navigation("Products");
-        });
+        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Unit", b => { b.Navigation("Products"); });
 
-        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.User", b =>
-        {
-            b.Navigation("Customer");
-        });
+        modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.User", b => { b.Navigation("Customer"); });
     }
 }
