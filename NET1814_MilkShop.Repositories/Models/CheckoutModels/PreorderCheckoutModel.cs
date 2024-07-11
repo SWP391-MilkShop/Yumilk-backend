@@ -17,4 +17,5 @@ public class PreorderCheckoutModel
     [Required] public int AddressId { get; set; }
 
     public string? Note { get; set; }
+    public bool IsUsingPoint { get; set; } = true;
 }

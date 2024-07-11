@@ -21,15 +21,18 @@ public class OrderService : IOrderService
     private readonly IProductRepository _productRepository;
     private readonly IShippingService _shippingService;
     private readonly IPaymentService _paymentService;
+    private readonly ICustomerRepository _customerRepository;
 
     public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork,
-        IProductRepository productRepository, IShippingService shippingService, IPaymentService paymentService)
+        IProductRepository productRepository, IShippingService shippingService, IPaymentService paymentService,
+        ICustomerRepository customerRepository)
     {
         _orderRepository = orderRepository;
         _unitOfWork = unitOfWork;
         _productRepository = productRepository;
         _shippingService = shippingService;
         _paymentService = paymentService;
+        _customerRepository = customerRepository;
     }
 
     /// <summary>
@@ -411,19 +414,23 @@ public class OrderService : IOrderService
         {
             return ResponseModel.Success(ResponseConstants.NoChangeIsMade, null);
         }
-        if(order.StatusId == (int)OrderStatusId.Cancelled)
+
+        if (order.StatusId == (int)OrderStatusId.Cancelled)
         {
             return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
         }
+
         // đơn hàng không thể quay lại trạng thái trước đó
         if (order.StatusId != (int)OrderStatusId.Preorder && order.StatusId > model.StatusId)
         {
             return ResponseModel.BadRequest(ResponseConstants.Update("trạng thái đơn hàng", false));
         }
-        if(order.StatusId == (int)OrderStatusId.Preorder && model.StatusId != (int)OrderStatusId.Shipped)
+
+        if (order.StatusId == (int)OrderStatusId.Preorder && model.StatusId != (int)OrderStatusId.Shipped)
         {
             return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
         }
+
         int result;
         if (model.StatusId == (int)OrderStatusId.Shipped)
         {
@@ -437,8 +444,10 @@ public class OrderService : IOrderService
                     {
                         return ResponseModel.Error("Có lỗi xảy ra khi cập nhật số lượng sản phẩm trong kho");
                     }
+
                     _productRepository.Update(o.Product);
                 }
+
                 // Save changes if stock was updated
                 var stockUpdateResult = await _unitOfWork.SaveChangesAsync();
                 if (stockUpdateResult <= 0)
@@ -446,12 +455,14 @@ public class OrderService : IOrderService
                     return ResponseModel.Error("Không thể cập nhật số lượng sản phẩm trong kho");
                 }
             }
+
             // order code and shipping status is already updated in the shipping service
             var orderShipping = await _shippingService.CreateOrderShippingAsync(id);
             if (orderShipping.StatusCode != 200)
             {
                 return orderShipping;
             }
+
             return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), orderShipping.Data);
         }
 
@@ -605,7 +616,7 @@ public class OrderService : IOrderService
 
     public async Task<ResponseModel> UpdateOrderStatusDeliveredAsync(Guid id)
     {
-        var order = await _orderRepository.GetByOrderIdAsync(id, include: false);
+        var order = await _orderRepository.GetByIdIncludeCustomerAsync(id);
         if (order == null)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("đơn hàng"));
@@ -615,17 +626,22 @@ public class OrderService : IOrderService
         {
             return ResponseModel.BadRequest("Đơn hàng chưa được giao");
         }
-        
+
         // Handle point for customer
+        // 100 VND = 1 point
+        var point = (int)Math.Round(order.TotalAmount * 0.01);
+        order.Customer!.Point += point;
+        _customerRepository.Update(order.Customer);
         // Handle order logs
         // ...
-        order.StatusId = (int) OrderStatusId.Delivered;
+        order.StatusId = (int)OrderStatusId.Delivered;
         _orderRepository.Update(order);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
         {
             return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), null);
         }
+
         return ResponseModel.Error(ResponseConstants.Update("trạng thái đơn hàng", false));
     }
 }

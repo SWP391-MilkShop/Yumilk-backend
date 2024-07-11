@@ -88,6 +88,11 @@ public class OrderRepository : Repository<Order>, IOrderRepository
         return order!.OrderDetails.Any(o => o.Product.StatusId == (int)ProductStatusId.Preorder);
     }
 
+    public async Task<Order?> GetByIdIncludeCustomerAsync(Guid id)
+    {
+        return await _query.Include(o => o.Customer).FirstOrDefaultAsync(o => o.Id == id);
+    }
+
     public Task<Order?> GetByIdAsync(Guid id, bool includeDetails)
     {
         var query = includeDetails ? _query.Include(o => o.OrderDetails) : _query;

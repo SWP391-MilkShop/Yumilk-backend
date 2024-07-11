@@ -198,10 +198,12 @@ public class CheckoutService : ICheckoutService
                 PaymentMethod = orders.PaymentMethod,
                 CreatedAt = orders.CreatedAt,
                 OrderDetail = ToOrderDetailModel(cartTemp),
+                Message = "Bạn sẽ nhận được " + Math.Round(orders.TotalAmount * 0.01) +
+                          " điểm tích lũy cho đơn hàng này!"
             };
             if (model.PaymentMethod == "PAYOS")
             {
-                var paymentLink = await _paymentService.CreatePaymentLink(orders.OrderCode.Value);
+                var paymentLink = await _paymentService.CreatePaymentLink(orders.OrderCode!.Value);
                 if (paymentLink.Status == "Error")
                 {
                     return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
@@ -213,7 +215,7 @@ public class CheckoutService : ICheckoutService
                 resp.CheckoutUrl = paymentData.CheckoutUrl;
             }
 
-            await _emailService.SendPurchaseEmailAsync(customerEmail, userActive.FirstName);
+            await _emailService.SendPurchaseEmailAsync(customerEmail!, userActive.FirstName!);
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
@@ -346,6 +348,8 @@ public class CheckoutService : ICheckoutService
                     ItemPrice = preOrderDetail.ItemPrice,
                     Thumbnail = preOrderDetail.Product.Thumbnail
                 },
+                Message = "Bạn sẽ nhận được " + Math.Round(preOrder.TotalAmount * 0.01) +
+                          " điểm tích lũy cho đơn hàng này!"
             };
             var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);
             if (paymentLink.Status == "Error")
@@ -357,7 +361,7 @@ public class CheckoutService : ICheckoutService
             var paymentData = JsonConvert.DeserializeObject<PaymentDataModel>(json);
             resp.OrderCode = paymentData!.OrderCode;
             resp.CheckoutUrl = paymentData.CheckoutUrl;
-            await _emailService.SendPurchaseEmailAsync(customerEmail, userActive.FirstName);
+            await _emailService.SendPurchaseEmailAsync(customerEmail!, userActive.FirstName!);
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
