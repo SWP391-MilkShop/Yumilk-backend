@@ -29,7 +29,7 @@ public class Voucher : IAuditableEntity
     [Column("is_active")]
     public bool IsActive { get; set; }
     
-    // Số lượng voucher tối đa mà 1 user có thể sử dụng
+    // Giá trị giảm giá tối đa, nếu bằng 0 thì không giới hạn
     [Column("max_discount")]
     public int MaxDiscount { get; set; }
 

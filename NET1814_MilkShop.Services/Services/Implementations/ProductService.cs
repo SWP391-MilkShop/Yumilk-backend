@@ -540,7 +540,7 @@ public class ProductService : IProductService
 
     private static ResponseModel? ValidatePreorderProduct(PreorderProduct preorderProduct)
     {
-        if(preorderProduct.StartDate < DateTime.Now)
+        if(preorderProduct.StartDate < DateTime.UtcNow)
             return ResponseModel.BadRequest("Ngày bắt đầu không thể nhỏ hơn ngày hiện tại");
         if (preorderProduct.StartDate > preorderProduct.EndDate)
             return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
