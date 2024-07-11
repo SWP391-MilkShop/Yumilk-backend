@@ -30,4 +30,6 @@ public class VoucherModel
     public int MaxDiscount { get; set; }
     
     public DateTime CreatedAt { get; set; }
+    
+    public int MinPriceCondition { get; set; }
 }

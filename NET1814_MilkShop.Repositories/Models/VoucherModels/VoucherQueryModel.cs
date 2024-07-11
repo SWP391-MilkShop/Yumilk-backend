@@ -5,13 +5,17 @@ public class VoucherQueryModel : QueryModel
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public bool? IsActive { get; set; }
-
+    /// <summary>
+    /// Filter voucher satisfy min_price_condition
+    /// </summary>
+    public int MinPriceCondition { get; set; } = 0;
     /// <summary>
     /// Search by voucher code and description
     /// </summary>
     public new string? SearchTerm { get; set; }
     /// <summary>
-    /// Sort by created_at, start_date, end_date, quantity, percent, max_discount
+    /// Sort by created at, start date, end date, quantity, percent, max discount, min price condition
+    /// (Default is percent)
     /// </summary>
     public new string? SortColumn { get; set; }
 

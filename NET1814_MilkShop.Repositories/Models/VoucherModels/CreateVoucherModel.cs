@@ -21,4 +21,5 @@ public class CreateVoucherModel
     
     [Range(0, int.MaxValue, ErrorMessage = "Max Discount must be greater than or equal to 0")]
     public int MaxDiscount { get; set; }
+    public int MinPriceCondition { get; set; }
 }

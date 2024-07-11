@@ -33,6 +33,7 @@ public class VoucherService : IVoucherService
         var query = _voucherRepository.GetVouchersQuery();
         // Filter
         query = query.Where(v => (!model.IsActive.HasValue || v.IsActive == model.IsActive)
+                                 && v.MinPriceCondition <= model.MinPriceCondition // Filter by min price condition
                                  && (!model.StartDate.HasValue || v.StartDate >= model.StartDate)
                                  && (!model.EndDate.HasValue || v.EndDate <= model.EndDate)
                                  && (string.IsNullOrEmpty(searchTerm) || v.Code.Contains(searchTerm) ||
@@ -66,10 +67,10 @@ public class VoucherService : IVoucherService
         {
             "startdate" => v => v.StartDate,
             "enddate" => v => v.EndDate,
-            "percent" => v => v.Percent,
+            "minpricecondition" => v => v.Percent,
             "quantity" => v => v.Quantity,
             "maxdiscount" => v => v.MaxDiscount,
-            _ => v => v.CreatedAt // Default sort by created_at
+            _ => v => v.Percent // Default sort by created_at
         };
     }
 
@@ -94,7 +95,8 @@ public class VoucherService : IVoucherService
             Quantity = model.Quantity,
             Percent = model.Percent,
             IsActive = false, // Default is unpublished
-            MaxDiscount = model.MaxDiscount
+            MaxDiscount = model.MaxDiscount,
+            MinPriceCondition = model.MinPriceCondition
         };
         _voucherRepository.Add(voucher);
         var result = await _unitOfWork.SaveChangesAsync();
@@ -121,6 +123,7 @@ public class VoucherService : IVoucherService
         voucher.Percent = model.Percent ?? voucher.Percent;
         voucher.IsActive = model.IsActive;
         voucher.MaxDiscount = model.MaxDiscount ?? voucher.MaxDiscount;
+        voucher.MinPriceCondition = model.MinPriceCondition ?? voucher.MinPriceCondition;
         if (voucher.IsActive)
         {
             if (voucher.StartDate <= DateTime.UtcNow)
@@ -146,6 +149,10 @@ public class VoucherService : IVoucherService
             if (voucher.Quantity <= 0)
             {
                 return ResponseModel.BadRequest("Số lượng voucher phải lớn hơn 0");
+            }
+            if(voucher.MinPriceCondition < 0)
+            {
+                return ResponseModel.BadRequest("Giá trị đơn hàng tối thiểu phải lớn hơn 0");
             }
         }
 
@@ -202,7 +209,8 @@ public class VoucherService : IVoucherService
             Percent = voucher.Percent,
             IsActive = voucher.IsActive,
             MaxDiscount = voucher.MaxDiscount,
-            CreatedAt = voucher.CreatedAt
+            CreatedAt = voucher.CreatedAt,
+            MinPriceCondition = voucher.MinPriceCondition
         };
     }
 }

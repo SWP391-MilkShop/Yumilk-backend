@@ -22,16 +22,17 @@ public class Voucher : IAuditableEntity
 
     // Số lượng voucher còn lại
     public int Quantity { get; set; }
-    
+
     // Phần trăm giảm giá
     public int Percent { get; set; }
+
+    [Column("is_active")] public bool IsActive { get; set; }
     
-    [Column("is_active")]
-    public bool IsActive { get; set; }
-    
+    // Giá trị đơn hàng tối thiểu để sử dụng voucher
+    [Column("min_price_condition")] public int MinPriceCondition { get; set; }
+
     // Giá trị giảm giá tối đa, nếu bằng 0 thì không giới hạn
-    [Column("max_discount")]
-    public int MaxDiscount { get; set; }
+    [Column("max_discount")] public int MaxDiscount { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
