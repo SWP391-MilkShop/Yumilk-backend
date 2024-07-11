@@ -6,5 +6,7 @@ public class UpdateUnitModel
 
     public string Description { get; set; } = string.Empty;
 
+    public int Gram { get; set; }
+
     public bool? IsActive { get; set; }
 }

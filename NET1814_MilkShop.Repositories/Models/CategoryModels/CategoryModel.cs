@@ -1,13 +1,16 @@
-﻿namespace NET1814_MilkShop.Repositories.Models.CategoryModels
+﻿namespace NET1814_MilkShop.Repositories.Models.CategoryModels;
+
+public class CategoryModel
 {
-    public class CategoryModel
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public string Name { get; set; } = null!;
+    public string Name { get; set; } = null!;
 
-        public string? Description { get; set; }
+    public string? Description { get; set; }
 
-        public bool IsActive { get; set; } = true;
-    }
+    public int? ParentId { get; set; }
+
+    public string? ParentName { get; set; }
+
+    public bool IsActive { get; set; } = true;
 }

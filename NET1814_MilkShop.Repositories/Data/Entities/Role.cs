@@ -1,14 +1,13 @@
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("roles")]
-public partial class Role : IAuditableEntity
+public class Role : IAuditableEntity
 {
-    [Key]
-    public int Id { get; set; }
+    [Key] public int Id { get; set; }
 
     public string Name { get; set; } = null!;
 

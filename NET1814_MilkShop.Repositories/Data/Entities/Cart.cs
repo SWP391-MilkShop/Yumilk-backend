@@ -1,16 +1,14 @@
-using NET1814_MilkShop.Repositories.Data.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
 [Table("Carts")]
-public partial class Cart : IAuditableEntity
+public class Cart : IAuditableEntity
 {
-    [Key]
-    public int Id { get; set; }
-    [Required]
-    public Guid CustomerId { get; set; }
+    [Key] public int Id { get; set; }
+    [Required] public Guid CustomerId { get; set; }
 
 
     [Column("created_at", TypeName = "datetime2")]

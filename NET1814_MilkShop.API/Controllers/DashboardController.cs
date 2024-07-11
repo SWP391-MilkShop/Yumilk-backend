@@ -4,107 +4,129 @@ using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Models.ProductModels;
 using NET1814_MilkShop.Repositories.Models.UserModels;
-using NET1814_MilkShop.Services.Services;
+using NET1814_MilkShop.Services.Services.Interfaces;
 using ILogger = Serilog.ILogger;
 
-namespace NET1814_MilkShop.API.Controllers
+namespace NET1814_MilkShop.API.Controllers;
+
+[ApiController]
+[Route("api/dashboard")]
+public class DashboardController : Controller
 {
-    [ApiController]
-    [Route("api/dashboard")]
-    public class DashboardController : Controller
+    private readonly IOrderService _orderService;
+    private readonly IProductService _productService;
+    private readonly ICustomerService _customerService;
+    private readonly ILogger _logger;
+
+    public DashboardController(IOrderService orderService, IProductService productService, ILogger logger,
+        ICustomerService customerService)
     {
-        private readonly IOrderService _orderService;
-        private readonly IProductService _productService;
-        private readonly IUserService _userService;
-        private readonly ILogger _logger;
+        _orderService = orderService;
+        _productService = productService;
+        _logger = logger;
+        _customerService = customerService;
+    }
 
-        public DashboardController(IOrderService orderService, IProductService productService, ILogger logger,
-            IUserService userService)
+    [HttpGet]
+    [Route("/api/dashboard/orders")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> GetOrders([FromQuery] OrderQueryModel queryModel)
+    {
+        _logger.Information("Get all orders");
+        var response = await _orderService.GetOrderAsync(queryModel);
+        /*if (response.Status == "Error")
         {
-            _orderService = orderService;
-            _productService = productService;
-            _userService = userService;
-            _logger = logger;
+            return BadRequest(response);
         }
+        return Ok(response);*/
+        return ResponseExtension.Result(response);
+    }
 
-        [HttpGet]
-        [Route("/api/dashboard/orders")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> GetOrders([FromQuery] OrderQueryModel queryModel)
-        {
-            _logger.Information("Get all orders");
-            var response = await _orderService.GetOrderAsync(queryModel);
-            /*if (response.Status == "Error")
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);*/
-            return ResponseExtension.Result(response);
-        }
+    /// <summary>
+    /// Get order stats
+    /// Total number of orders
+    /// Total number of orders per status
+    /// Total revenue (only count orders that have been delivered)
+    /// Total shipping fee (only count orders that have been delivered)
+    /// </summary>
+    /// <param name="queryModel"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("orders/stats")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> GetOrderStats([FromQuery] OrderStatsQueryModel queryModel)
+    {
+        _logger.Information("Get order stats");
+        var response = await _orderService.GetOrderStatsAsync(queryModel);
+        return ResponseExtension.Result(response);
+    }
 
-        /// <summary>
-        /// Get order stats
-        /// Total number of orders
-        /// Total number of orders per status
-        /// Total revenue (only count orders that have been delivered)
-        /// Total shipping fee (only count orders that have been delivered)
-        /// </summary>
-        /// <param name="queryModel"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("orders/stats")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> GetOrderStats([FromQuery] OrderStatsQueryModel queryModel)
-        {
-            _logger.Information("Get order stats");
-            var response = await _orderService.GetOrderStatsAsync(queryModel);
-            return ResponseExtension.Result(response);
-        }
+    [HttpPatch]
+    [Route("orders/{id}/status")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> UpdateOrderStatus(Guid id, [FromBody] OrderStatusModel model)
+    {
+        _logger.Information("Update order status");
+        var response = await _orderService.UpdateOrderStatusAsync(id, model);
+        return ResponseExtension.Result(response);
+    }
 
-        [HttpPatch]
-        [Route("orders/{id}/status")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> UpdateOrderStatus(Guid id, [FromBody] OrderStatusModel model)
-        {
-            _logger.Information("Update order status");
-            var response = await _orderService.UpdateOrderStatusAsync(id, model);
-            return ResponseExtension.Result(response);
-        }
+    /// <summary>
+    /// Get product stats (total sold, revenue per brand, category)
+    /// </summary>
+    /// <param name="queryModel"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("products/stats")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> GetProductStats([FromQuery] ProductStatsQueryModel queryModel)
+    {
+        _logger.Information("Get product stats");
+        var response = await _productService.GetProductStatsAsync(queryModel);
+        return ResponseExtension.Result(response);
+    }
 
-        /// <summary>
-        /// Get product stats
-        /// Total number of products sold
-        /// Total number of products sold per category
-        /// Total number of products sold per brand
-        /// (only count products that have been delivered)
-        /// </summary>
-        /// <param name="queryModel"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("products/stats")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> GetProductStats([FromQuery] ProductStatsQueryModel queryModel)
-        {
-            _logger.Information("Get product stats");
-            var response = await _productService.GetProductStatsAsync(queryModel);
-            return ResponseExtension.Result(response);
-        }
+    /// <summary>
+    /// Get users stats
+    /// Total customers,
+    /// Total customers who have bought any product
+    /// </summary>
+    /// <param name="queryModel"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("customers/stats")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> GetCustomersStats([FromQuery] CustomersStatsQueryModel queryModel)
+    {
+        _logger.Information("Get users stats");
+        var res = await _customerService.GetCustomersStatsAsync(queryModel);
+        return ResponseExtension.Result(res);
+    }
 
-        /// <summary>
-        /// Get users stats
-        /// Total customers
-        /// Total customers who have bought any product
-        /// </summary>
-        /// <param name="queryModel"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("customers/stats")]
-        [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
-        public async Task<IActionResult> GetCustomersStats([FromQuery] CustomersStatsQueryModel queryModel)
-        {
-            _logger.Information("Get users stats");
-            var res = await _userService.GetCustomersStatsAsync(queryModel);
-            return ResponseExtension.Result(res);
-        }
+    /// <summary>
+    /// Admin and Staff have full permission to cancel order (PREORDER, PROCESSING, SHIPPING).
+    /// If an order is already in shipping, preorder status (order has been created in GHN),
+    /// Admin or Staff must manually cancel shipping order in GHN.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [HttpPatch]
+    [Route("orders/cancel/{id}")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> CancelOrder(Guid id)
+    {
+        _logger.Information("Cancel order");
+        var response = await _orderService.CancelOrderAdminStaffAsync(id);
+        return ResponseExtension.Result(response);
+    }
+
+    [HttpGet]
+    [Route("orders/{id}")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> GetOrderHistoryDetail(Guid id)
+    {
+        _logger.Information("Get order detail history");
+        var res = await _orderService.GetOrderHistoryDetailDashBoardAsync(id);
+        return ResponseExtension.Result(res);
     }
 }

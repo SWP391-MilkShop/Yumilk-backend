@@ -4,7 +4,6 @@ namespace NET1814_MilkShop.Repositories.Models.AddressModels;
 
 public class UpdateAddressModel
 {
-
     [Required(ErrorMessage = "Receiver name is required")]
     public string? ReceiverName { get; set; }
 
@@ -24,7 +23,7 @@ public class UpdateAddressModel
     public string? DistrictName { get; set; }
 
     [Required(ErrorMessage = "WardId is required")]
-    public int WardId { get; set; }
+    public string WardCode { get; set; }
 
     [Required(ErrorMessage = "WardName is required")]
     public string? WardName { get; set; }

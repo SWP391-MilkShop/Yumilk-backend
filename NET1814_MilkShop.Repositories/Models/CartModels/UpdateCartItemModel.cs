@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NET1814_MilkShop.Repositories.Models.CartModels
+namespace NET1814_MilkShop.Repositories.Models.CartModels;
+
+public class UpdateCartItemModel
 {
-    public class UpdateCartItemModel
-    {
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
-        public int Quantity { get; set; }
-    }
+    [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
+    public int Quantity { get; set; }
 }

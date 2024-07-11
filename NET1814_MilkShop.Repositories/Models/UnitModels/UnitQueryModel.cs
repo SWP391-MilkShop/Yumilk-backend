@@ -4,6 +4,7 @@ public class UnitQueryModel : QueryModel
 {
     //SearchTerm se search theo Name, Description
     public bool? IsActive { get; set; }
+
     /// <summary>
     /// Sort by id, name, description (default is id)
     /// </summary>
