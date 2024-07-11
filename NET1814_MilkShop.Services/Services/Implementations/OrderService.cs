@@ -21,15 +21,20 @@ public class OrderService : IOrderService
     private readonly IProductRepository _productRepository;
     private readonly IShippingService _shippingService;
     private readonly IPaymentService _paymentService;
+    private readonly IOrderLogRepository _orderLogRepository;
 
     public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork,
-        IProductRepository productRepository, IShippingService shippingService, IPaymentService paymentService)
+        IProductRepository productRepository, 
+        IShippingService shippingService,
+        IPaymentService paymentService,
+        IOrderLogRepository orderLogRepository)
     {
         _orderRepository = orderRepository;
         _unitOfWork = unitOfWork;
         _productRepository = productRepository;
         _shippingService = shippingService;
         _paymentService = paymentService;
+        _orderLogRepository = orderLogRepository;
     }
 
     /// <summary>
@@ -158,6 +163,58 @@ public class OrderService : IOrderService
     {
         var paymentData = await _paymentService.GetPaymentLinkInformation(order.Id);
         return paymentData.StatusCode == 200 ? paymentData.Data : null;
+    }
+
+    private void AddOrderStatusLog(Guid orderId, int statusId)
+    {
+        switch (statusId)
+        {
+            case 2:
+                var processingLog = new OrderLog
+                {
+                    OrderId = orderId,
+                    NewStatusId = (int)OrderStatusId.Processing,
+                    StatusName = OrderStatusId.Processing.ToString(),
+                };
+                _orderLogRepository.Add(processingLog);
+                break;
+            case 3:
+                var shippedLog = new OrderLog
+                {
+                    OrderId = orderId,
+                    NewStatusId = (int)OrderStatusId.Shipped,
+                    StatusName = OrderStatusId.Shipped.ToString(),
+                };
+                _orderLogRepository.Add(shippedLog);
+                break;
+            case 4:
+                var deliveredLog = new OrderLog
+                {
+                    OrderId = orderId,
+                    NewStatusId = (int)OrderStatusId.Delivered,
+                    StatusName = OrderStatusId.Delivered.ToString(),
+                };
+                _orderLogRepository.Add(deliveredLog);
+                break;
+            case 5:
+                var cancelLog = new OrderLog
+                {
+                    OrderId = orderId,
+                    NewStatusId = (int)OrderStatusId.Cancelled,
+                    StatusName = OrderStatusId.Cancelled.ToString(),
+                };
+                _orderLogRepository.Add(cancelLog);
+                break;
+            case 6:
+                var preorderLog = new OrderLog
+                {
+                    OrderId = orderId,
+                    NewStatusId = (int)OrderStatusId.Preorder,
+                    StatusName = OrderStatusId.Preorder.ToString(),
+                };
+                _orderLogRepository.Add(preorderLog);
+                break;
+        }    
     }
 
     /// <summary>
@@ -290,7 +347,12 @@ public class OrderService : IOrderService
             ItemPrice = x.ItemPrice,
             Thumbnail = x.Thumbnail
         }).ToList();
-
+        var orderLog = await _orderLogRepository.GetOrderLogQuery(orderId).ToListAsync();
+        var orderStatusLogs = orderLog.Select(x => new OrderLogsModel()
+        {
+            Status = x.StatusName,
+            CreatedAt = x.CreatedAt
+        }).ToList();
         var detail = new OrderDetailModel
         {
             RecieverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
@@ -305,7 +367,8 @@ public class OrderService : IOrderService
             PaymentMethod = order.PaymentMethod,
             OrderStatus = order.Status!.Name,
             CreatedAt = order.CreatedAt,
-            PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null
+            PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
+            Logs = orderStatusLogs
         };
         if (order.StatusId == (int)OrderStatusId.Shipped)
         {
@@ -339,12 +402,12 @@ public class OrderService : IOrderService
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Đơn hàng"));
         }
 
-        if (order.StatusId == 5)
+        if (order.StatusId == (int)OrderStatusId.Cancelled)
         {
             return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
         }
 
-        if (order.StatusId != 1 && order.StatusId != 2)
+        if (order.StatusId != (int)OrderStatusId.Pending && order.StatusId != (int)OrderStatusId.Processing)
         {
             return ResponseModel.BadRequest("Đơn hàng đang trong quá trình giao nên bạn không thể hủy.");
         }
@@ -358,7 +421,8 @@ public class OrderService : IOrderService
             }
         }
 
-        order.StatusId = 5;
+        order.StatusId = (int)OrderStatusId.Cancelled;
+        AddOrderStatusLog(order.Id, (int)OrderStatusId.Cancelled);
         foreach (var o in order.OrderDetails)
         {
             o.Product.Quantity += o.Quantity;
@@ -374,7 +438,7 @@ public class OrderService : IOrderService
 
         return ResponseModel.Error(ResponseConstants.Cancel("đơn hàng", false));
     }
-
+    
     private async Task<List<Product>> GetProductByOrderIdAsync(Guid id)
     {
         List<Product> list = new();
@@ -456,6 +520,8 @@ public class OrderService : IOrderService
         }
 
         order.StatusId = model.StatusId;
+        //Add order log status
+        AddOrderStatusLog(order.Id, model.StatusId);
         _orderRepository.Update(order);
         result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
@@ -528,14 +594,13 @@ public class OrderService : IOrderService
             }
         }
 
-        order.StatusId = 5;
-
+        order.StatusId = (int)OrderStatusId.Cancelled;
+        AddOrderStatusLog(order.Id,(int)OrderStatusId.Cancelled);
         foreach (var o in order.OrderDetails)
         {
             o.Product.Quantity += o.Quantity;
             _productRepository.Update(o.Product);
         }
-
         _orderRepository.Update(order);
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
@@ -544,7 +609,6 @@ public class OrderService : IOrderService
                 ? "Hủy thành công, đơn hàng có mã vận chuyển. Vui lòng hủy bên đơn vị vận chuyển"
                 : ResponseConstants.Cancel(message + "đơn hàng", true), null);
         }
-
         return ResponseModel.Error(ResponseConstants.Cancel("đơn hàng", false));
     }
 
@@ -570,6 +634,13 @@ public class OrderService : IOrderService
             ItemPrice = x.ItemPrice,
             Thumbnail = x.Thumbnail
         }).ToList();
+        
+        var orderLog = await _orderLogRepository.GetOrderLogQuery(orderId).ToListAsync();
+        var orderStatusLogs = orderLog.Select(x => new OrderLogsModel()
+        {
+            Status = x.StatusName,
+            CreatedAt = x.CreatedAt
+        }).ToList();
         var detail = new OrderDetailModel
         {
             RecieverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
@@ -585,6 +656,7 @@ public class OrderService : IOrderService
             OrderStatus = order.Status!.Name,
             CreatedAt = order.CreatedAt,
             PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
+            Logs = orderStatusLogs
         };
         if (order.StatusId == (int)OrderStatusId.Shipped)
         {
@@ -616,10 +688,11 @@ public class OrderService : IOrderService
             return ResponseModel.BadRequest("Đơn hàng chưa được giao");
         }
         
+
+        order.StatusId = (int) OrderStatusId.Delivered;
         // Handle point for customer
         // Handle order logs
-        // ...
-        order.StatusId = (int) OrderStatusId.Delivered;
+        AddOrderStatusLog(order.Id, (int)OrderStatusId.Delivered);
         _orderRepository.Update(order);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
