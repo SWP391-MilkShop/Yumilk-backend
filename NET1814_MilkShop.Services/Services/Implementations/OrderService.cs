@@ -9,6 +9,7 @@ using NET1814_MilkShop.Repositories.Models.ShippingModels;
 using NET1814_MilkShop.Repositories.Repositories.Interfaces;
 using NET1814_MilkShop.Repositories.UnitOfWork.Interfaces;
 using NET1814_MilkShop.Services.CoreHelpers;
+using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using NET1814_MilkShop.Services.Services.Interfaces;
 using Newtonsoft.Json;
 
@@ -414,23 +415,33 @@ public class OrderService : IOrderService
         {
             return ResponseModel.Success(ResponseConstants.NoChangeIsMade, null);
         }
-
-        if (order.StatusId == (int)OrderStatusId.Cancelled)
+        switch (order.StatusId)
         {
-            return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
+            case (int)OrderStatusId.Pending:
+                if (model.StatusId != (int)OrderStatusId.Processing)
+                {
+                    return ResponseModel.BadRequest("Đơn hàng ở trạng thái chờ xử lý chỉ có thể chuyển sang trạng thái đang xử lý");
+                }
+                break;
+            case (int)OrderStatusId.Processing:
+                if (model.StatusId != (int)OrderStatusId.Shipped)
+                {
+                    return ResponseModel.BadRequest("Đơn hàng đang xử lý chỉ có thể chuyển sang trạng thái đang giao");
+                }
+                break;
+            case (int)OrderStatusId.Preorder:
+                if (model.StatusId != (int)OrderStatusId.Shipped)
+                {
+                    return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
+                }
+                break;
+            case (int)OrderStatusId.Cancelled:
+                return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
+            case (int)OrderStatusId.Delivered:
+                return ResponseModel.BadRequest("Đơn hàng đã được giao");
+            case (int)OrderStatusId.Shipped:
+                return ResponseModel.BadRequest("Đơn hàng đang trên đường giao");
         }
-
-        // đơn hàng không thể quay lại trạng thái trước đó
-        if (order.StatusId != (int)OrderStatusId.Preorder && order.StatusId > model.StatusId)
-        {
-            return ResponseModel.BadRequest(ResponseConstants.Update("trạng thái đơn hàng", false));
-        }
-
-        if (order.StatusId == (int)OrderStatusId.Preorder && model.StatusId != (int)OrderStatusId.Shipped)
-        {
-            return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
-        }
-
         int result;
         if (model.StatusId == (int)OrderStatusId.Shipped)
         {
@@ -629,8 +640,7 @@ public class OrderService : IOrderService
 
         // Handle point for customer
         // 100 VND = 1 point
-        var point = (int)Math.Round(order.TotalAmount * 0.01);
-        order.Customer!.Point += point;
+        order.Customer!.Point += order.TotalPrice.ApplyPercentage(1);
         _customerRepository.Update(order.Customer);
         // Handle order logs
         // ...
