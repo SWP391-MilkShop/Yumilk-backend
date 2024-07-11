@@ -1,4 +1,6 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
@@ -38,6 +40,8 @@ public class PostService : IPostService
             return ResponseModel.BadRequest(ResponseConstants.NotEnoughPermission);
         }
 
+        if (!string.IsNullOrEmpty(model.Thumbnail) && !Uri.IsWellFormedUriString(model.Thumbnail, UriKind.Absolute))
+            return ResponseModel.BadRequest(ResponseConstants.WrongFormat("URL"));
         var post = new Post
         {
             Title = model.Title,
@@ -45,7 +49,8 @@ public class PostService : IPostService
             AuthorId = authorId,
             MetaTitle = model.MetaTitle ?? model.Title,
             MetaDescription = model.MetaDescription ?? model.Content,
-            IsActive = false // default is unpublished
+            IsActive = false, // default is unpublished
+            Thumbnail = model.Thumbnail
         };
         _postRepository.Add(post);
         var result = await _unitOfWork.SaveChangesAsync();
@@ -73,6 +78,31 @@ public class PostService : IPostService
         }
 
         return ResponseModel.Error(ResponseConstants.Delete("bài viết", false));
+    }
+
+    public async Task<ResponseModel> GetPostByIdAsync(Guid postId)
+    {
+        var post = await  _postRepository.GetPostQuery(includeAuthor: true).FirstOrDefaultAsync(p => p.Id == postId);
+        if (post == null)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("bài viết"));
+        }
+
+        var model = new PostModel()
+        {
+            Id = post.Id,
+            Title = post.Title,
+            Content = post.Content,
+            AuthorId = post.AuthorId,
+            AuthorName = post.Author.FirstName + " " + post.Author.LastName,
+            MetaTitle = post.MetaTitle,
+            MetaDescription = post.MetaDescription,
+            IsActive = post.IsActive,
+            CreatedAt = post.CreatedAt,
+            UpdatedAt = post.ModifiedAt ?? null,
+            Thumbnail = post.Thumbnail
+        };
+        return ResponseModel.Success(ResponseConstants.Get("bài viết", true), model);
     }
 
     public async Task<ResponseModel> GetPostsAsync(PostQueryModel queryModel)
@@ -107,7 +137,8 @@ public class PostService : IPostService
             MetaDescription = p.MetaDescription,
             IsActive = p.IsActive,
             CreatedAt = p.CreatedAt,
-            UpdatedAt = p.ModifiedAt ?? null
+            UpdatedAt = p.ModifiedAt ?? null,
+            Thumbnail = p.Thumbnail
         });
         var posts = await PagedList<PostModel>.CreateAsync(
             postModelQuery,
@@ -144,6 +175,9 @@ public class PostService : IPostService
             return ResponseModel.BadRequest(ResponseConstants.NotEnoughPermission);
         }
 
+        if (!string.IsNullOrEmpty(model.Thumbnail) && !Uri.IsWellFormedUriString(model.Thumbnail, UriKind.Absolute))
+            return ResponseModel.BadRequest(ResponseConstants.WrongFormat("URL"));
+        post.Thumbnail = model.Thumbnail.IsNullOrEmpty() ? post.Thumbnail : model.Thumbnail;
         post.Title = string.IsNullOrEmpty(model.Title) ? post.Title : model.Title;
         post.Content = string.IsNullOrEmpty(model.Content) ? post.Content : model.Content;
         post.MetaTitle = string.IsNullOrEmpty(model.MetaTitle) ? post.MetaTitle : model.MetaTitle;

@@ -9,4 +9,5 @@ public interface IPostService
     Task<ResponseModel> CreatePostAsync(Guid authorId, CreatePostModel model);
     Task<ResponseModel> UpdatePostAsync(Guid userId, Guid postId, UpdatePostModel model);
     Task<ResponseModel> DeletePostAsync(Guid postId);
+    Task<ResponseModel> GetPostByIdAsync(Guid postId);
 }

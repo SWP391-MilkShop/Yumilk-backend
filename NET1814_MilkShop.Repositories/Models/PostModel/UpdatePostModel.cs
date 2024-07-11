@@ -7,4 +7,6 @@ public class UpdatePostModel
     public string? MetaTitle { get; set; }
     public string? MetaDescription { get; set; }
     public bool IsActive { get; set; } = true;
+    
+    public string? Thumbnail { get; set; }
 }
