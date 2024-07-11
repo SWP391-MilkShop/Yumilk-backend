@@ -275,6 +275,22 @@ public sealed class CustomerService : ICustomerService
         );
     }
 
+    public async Task<ResponseModel> GetTotalPurchaseAsync()
+    {
+
+        var orders = _orderRepository.GetOrderQuery();
+        var query = await orders.Where(x=> x.StatusId == (int)OrderStatusId.Delivered)
+            .GroupBy(x => x.CustomerId)
+            .Select(x => new
+            {
+                CustomerId = x.Key,
+                TotalPurchase = x.Count(),
+                TotalRevenue = (long)x.Sum(x => x.TotalPrice)
+            }).OrderByDescending(x=>x.TotalRevenue).ToListAsync();
+        return ResponseModel.Success(ResponseConstants.Get("doanh thu cao nhất của khách hàng đã đặt hàng", true), query);
+    }
+
+
     /*public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
     {
         return await _customerRepository.IsCustomerExistAsync(email, phoneNumber);
