@@ -41,6 +41,8 @@ public class AppDbContext : DbContext
     public virtual DbSet<Post> Posts { get; set; }
     public virtual DbSet<OrderLog> OrderLogs { get; set; }
     public virtual DbSet<Voucher> Vouchers { get; set; }
+    public virtual DbSet<Report> Reports { get; set; }
+    public virtual DbSet<ReportType> ReportTypes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

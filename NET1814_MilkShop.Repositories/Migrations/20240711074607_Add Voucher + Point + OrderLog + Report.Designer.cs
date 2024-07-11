@@ -12,8 +12,8 @@ using NET1814_MilkShop.Repositories.Data;
 namespace NET1814_MilkShop.Repositories.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240711064810_Add OrderLog Point Voucher")]
-    partial class AddOrderLogPointVoucher
+    [Migration("20240711074607_Add Voucher + Point + OrderLog + Report")]
+    partial class AddVoucherPointOrderLogReport
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -901,6 +901,90 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.ToTable("product_statuses", (string)null);
                 });
 
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Report", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("customer_id");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("modified_at");
+
+                    b.Property<int>("ReportTypeId")
+                        .HasColumnType("int")
+                        .HasColumnName("report_type_id");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<Guid>("ResolvedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("resolved_by");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("ReportTypeId");
+
+                    b.ToTable("reports");
+                });
+
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.ReportType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("modified_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("report_types");
+                });
+
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -1048,7 +1132,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(10");
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
@@ -1060,11 +1144,19 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(2000");
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("end_date");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<int>("MaxDiscount")
+                        .HasColumnType("int")
+                        .HasColumnName("max_discount");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2")
@@ -1303,6 +1395,25 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Report", b =>
+                {
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.ReportType", "ReportType")
+                        .WithMany("Reports")
+                        .HasForeignKey("ReportTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("ReportType");
+                });
+
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.User", b =>
                 {
                     b.HasOne("NET1814_MilkShop.Repositories.Data.Entities.Role", "Role")
@@ -1370,6 +1481,11 @@ namespace NET1814_MilkShop.Repositories.Migrations
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.ProductAttribute", b =>
                 {
                     b.Navigation("ProductAttributeValues");
+                });
+
+            modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.ReportType", b =>
+                {
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Role", b =>
