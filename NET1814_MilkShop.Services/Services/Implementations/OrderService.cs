@@ -684,4 +684,18 @@ public class OrderService : IOrderService
             orderPerMonth
         });
     }
+
+    public async Task<ResponseModel> GetRevenueByMonthAsync(int year)
+    {
+        var orders = _orderRepository.GetOrderQuery();
+        var revenueByMonth = await orders
+            .Where(x => x.CreatedAt.Year == year && x.StatusId == (int)OrderStatusId.Delivered)
+            .GroupBy(x => x.CreatedAt.Month)
+            .Select(x => new
+            {
+                Month = x.Key,
+                Revenue = x.Sum(x => x.TotalPrice)
+            }).ToListAsync();
+        return ResponseModel.Success(ResponseConstants.Get("thống kê doanh thu theo tháng", true), revenueByMonth);
+    }
 }

@@ -15,4 +15,5 @@ public interface IOrderService
     Task<ResponseModel> GetOrderHistoryDetailDashBoardAsync(Guid orderId);
     Task<ResponseModel> GetPaymentMethodStats();
     Task<ResponseModel> GetOrdersStatsByDateAsync(OrderStatsQueryModel model);
+    Task<ResponseModel> GetRevenueByMonthAsync(int year);
 }
