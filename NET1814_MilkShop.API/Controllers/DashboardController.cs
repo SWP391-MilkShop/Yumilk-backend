@@ -141,8 +141,13 @@ public class DashboardController : Controller
         return ResponseExtension.Result(res);
     }
 
+    /// <summary>
+    /// tổng đơn hàng đặt trong thứ ngày tháng
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>
     [HttpGet]
-    [Route("orders/stats/date")]
+    [Route("orders/stats/orders-by-date")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetOrdersStatsByDate([FromQuery] OrderStatsQueryModel model)
     {
@@ -151,8 +156,13 @@ public class DashboardController : Controller
         return ResponseExtension.Result(res);
     }
 
+    /// <summary>
+    /// khách hàng quay trở lại mua hàng theo quý trong năm
+    /// </summary>
+    /// <param name="year"></param>
+    /// <returns></returns>
     [HttpGet]
-    [Route("customers/stats/{year}")]
+    [Route("customers/returning/stats/{year}")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetReturnCustomersStats(int year)
     {
