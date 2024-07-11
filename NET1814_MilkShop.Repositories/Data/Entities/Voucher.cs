@@ -7,7 +7,7 @@ namespace NET1814_MilkShop.Repositories.Data.Entities;
 [Table("vouchers")]
 public class Voucher : IAuditableEntity
 {
-    [Key] public int Id { get; set; }
+    [Key] public Guid Id { get; set; }
 
     // Mã voucher tối đa 10 ký tự
     [Column(TypeName = "nvarchar(10)")] public string Code { get; set; } = null!;

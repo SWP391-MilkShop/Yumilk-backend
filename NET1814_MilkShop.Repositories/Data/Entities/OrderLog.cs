@@ -13,12 +13,10 @@ public class OrderLog : IAuditableEntity
     [ForeignKey("Order")]
     public Guid OrderId { get; set; }
 
-    [Column("old_status_id")] public int OldStatusId { get; set; }
-    
     [Column("new_status_id")] public int NewStatusId { get; set; }
 
-    [Column(TypeName = "nvarchar(2000)")] public string Description { get; set; } = "";
-
+    [Column("status_name", TypeName = "nvarchar(50)")]
+    public string StatusName { get; set; } = null!;
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
@@ -28,6 +26,6 @@ public class OrderLog : IAuditableEntity
 
     [Column("deleted_at", TypeName = "datetime2")]
     public DateTime? DeletedAt { get; set; }
-    
+
     public virtual Order Order { get; set; } = null!;
 }

@@ -25,9 +25,8 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     order_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    old_status_id = table.Column<int>(type: "int", nullable: false),
                     new_status_id = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(2000)", nullable: false),
+                    status_name = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
                     modified_at = table.Column<DateTime>(type: "datetime2", nullable: true),
                     deleted_at = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -43,6 +42,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            
             migrationBuilder.CreateTable(
                 name: "report_types",
                 columns: table => new
@@ -64,8 +64,7 @@ namespace NET1814_MilkShop.Repositories.Migrations
                 name: "vouchers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Code = table.Column<string>(type: "nvarchar(10)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(2000)", nullable: false),
                     start_date = table.Column<DateTime>(type: "datetime2", nullable: false),

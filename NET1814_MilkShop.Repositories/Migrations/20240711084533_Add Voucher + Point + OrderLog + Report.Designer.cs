@@ -12,7 +12,7 @@ using NET1814_MilkShop.Repositories.Data;
 namespace NET1814_MilkShop.Repositories.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240711074607_Add Voucher + Point + OrderLog + Report")]
+    [Migration("20240711084533_Add Voucher + Point + OrderLog + Report")]
     partial class AddVoucherPointOrderLogReport
     {
         /// <inheritdoc />
@@ -472,10 +472,6 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(2000)");
-
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("modified_at");
@@ -484,13 +480,14 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("int")
                         .HasColumnName("new_status_id");
 
-                    b.Property<int>("OldStatusId")
-                        .HasColumnType("int")
-                        .HasColumnName("old_status_id");
-
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("order_id");
+
+                    b.Property<string>("StatusName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("status_name");
 
                     b.HasKey("Id");
 
@@ -1124,11 +1121,9 @@ namespace NET1814_MilkShop.Repositories.Migrations
 
             modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Voucher", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Code")
                         .IsRequired()
