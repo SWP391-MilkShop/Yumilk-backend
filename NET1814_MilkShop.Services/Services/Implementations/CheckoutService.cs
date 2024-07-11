@@ -24,7 +24,7 @@ public class CheckoutService : ICheckoutService
     private readonly IEmailService _emailService;
     private readonly IUserRepository _userRepository;
     private readonly ICartDetailRepository _cartDetailRepository;
-
+    private readonly IOrderLogRepository _orderLogRepository;
 
     public CheckoutService(
         IUnitOfWork unitOfWork,
@@ -33,8 +33,11 @@ public class CheckoutService : ICheckoutService
         ICartRepository cartRepository,
         ICustomerRepository customerRepository,
         IPaymentService paymentService,
-        IPreorderProductRepository preorderProductRepository, IEmailService emailService,
-        IUserRepository userRepository, ICartDetailRepository cartDetailRepository
+        IPreorderProductRepository preorderProductRepository, 
+        IEmailService emailService,
+        IUserRepository userRepository,
+        ICartDetailRepository cartDetailRepository,
+        IOrderLogRepository orderLogRepository
     )
     {
         _customerRepository = customerRepository;
@@ -47,6 +50,7 @@ public class CheckoutService : ICheckoutService
         _emailService = emailService;
         _userRepository = userRepository;
         _cartDetailRepository = cartDetailRepository;
+        _orderLogRepository = orderLogRepository;
     }
 
     /// <summary>
@@ -145,8 +149,14 @@ public class CheckoutService : ICheckoutService
             TotalGram = GetTotalGram(cart.CartDetails.ToList()),
             Email = customerEmail,
         };
+        var orderLog = new OrderLog()
+        {
+            OrderId = orders.Id,
+            NewStatusId = (int)OrderStatusId.Pending,
+            StatusName = OrderStatusId.Pending.ToString(),
+        };
         _orderRepository.Add(orders);
-
+        _orderLogRepository.Add(orderLog);
         //thêm vào order detail
         var orderDetailsList = cart.CartDetails.Select(x => new OrderDetail
         {
@@ -302,7 +312,14 @@ public class CheckoutService : ICheckoutService
             TotalGram = product.Product.Unit!.Gram * model.Quantity,
             Email = customerEmail,
         };
+        var orderLog = new OrderLog()
+        {
+            OrderId = preOrder.Id,
+            NewStatusId = (int)OrderStatusId.Pending,
+            StatusName = OrderStatusId.Pending.ToString(),
+        };
         _orderRepository.Add(preOrder);
+        _orderLogRepository.Add(orderLog);
         var preOrderDetail = new OrderDetail
         {
             OrderId = preOrder.Id,
