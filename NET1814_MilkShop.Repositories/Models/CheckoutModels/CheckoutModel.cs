@@ -13,4 +13,5 @@ public class CheckoutModel
     public string? Note { get; set; }
 
     [Required] public string? PaymentMethod { get; set; }
+    public bool IsUsingPoint { get; set; } = true;
 }
