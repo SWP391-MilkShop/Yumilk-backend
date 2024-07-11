@@ -10,7 +10,7 @@ public class UpdateProductModel
     [Range(0, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
     public int? Quantity { get; set; }
 
-    [Range(0, double.MaxValue, ErrorMessage = "Original Price must be greater than 0")]
+    [Range(1, double.MaxValue, ErrorMessage = "Original Price must be greater than 0")]
     public int? OriginalPrice { get; set; }
 
     [Range(0, double.MaxValue, ErrorMessage = "Sale Price must be greater than 0")]
@@ -30,5 +30,5 @@ public class UpdateProductModel
     [Range(0, 3, ErrorMessage = "Status must be in range 1-3")]
     public int StatusId { get; set; } = 0;
 
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; set; } = false;
 }

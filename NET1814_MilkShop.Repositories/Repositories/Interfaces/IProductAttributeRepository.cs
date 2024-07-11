@@ -8,6 +8,8 @@ public interface IProductAttributeRepository
     void Add(ProductAttribute p);
     void Update(ProductAttribute p);
     void Remove(ProductAttribute p);
+    Task<ProductAttribute?> GetProductAttributeByName(string name, int id);
     Task<ProductAttribute?> GetProductAttributeByName(string name);
+
     Task<ProductAttribute?> GetProductAttributeById(int id);
 }

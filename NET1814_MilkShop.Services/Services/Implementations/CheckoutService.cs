@@ -246,8 +246,8 @@ public class CheckoutService : ICheckoutService
                                             " hoặc sản phẩm đang không trong quá trình Pre-order");
         }
 
-        if (DateTime.Now < product.StartDate ||
-            DateTime.Now > product.EndDate)
+        if (DateTime.UtcNow < product.StartDate ||
+            DateTime.UtcNow > product.EndDate)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotInPreOrder);
         }

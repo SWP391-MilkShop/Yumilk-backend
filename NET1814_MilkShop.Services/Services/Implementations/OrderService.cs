@@ -228,7 +228,7 @@ public class OrderService : IOrderService
 
         var orderHistoryQuery = query.Select(o => new OrderHistoryModel
         {
-            OrderId = o.Id,
+            Id = o.Id,
             TotalAmount = o.TotalAmount,
             PaymentMethod = o.PaymentMethod,
             OrderStatus = o.Status!.Name,

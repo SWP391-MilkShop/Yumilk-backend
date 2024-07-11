@@ -15,7 +15,7 @@ public sealed class ProductRepository : Repository<Product>, IProductRepository
     public IQueryable<Product> GetProductsQuery(bool includeRating, bool includeOrderCount)
     {
         var query = includeRating ? _query.Include(p => p.ProductReviews) : _query;
-        query = includeOrderCount ? query.Include(p => p.OrderDetails) : query;
+        query = includeOrderCount ? query.Include(p => p.OrderDetails).ThenInclude(od => od.Order) : query;
         query = query.Include(p => p.Brand)
             .Include(p => p.Category)
             .Include(p => p.Unit)
@@ -25,12 +25,7 @@ public sealed class ProductRepository : Repository<Product>, IProductRepository
 
     public Task<Product?> GetByIdAsync(Guid id, bool includeRating, bool includeOrderCount)
     {
-        var query = includeRating ? _query.Include(p => p.ProductReviews) : _query;
-        query = includeOrderCount ? query.Include(p => p.OrderDetails) : query;
-        query = query.Include(p => p.Brand)
-            .Include(p => p.Category)
-            .Include(p => p.Unit)
-            .Include(p => p.ProductStatus).AsSplitQuery();
+        var query = GetProductsQuery(includeRating, includeOrderCount);
         return query.FirstOrDefaultAsync(p => p.Id == id);
     }
 

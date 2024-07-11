@@ -59,12 +59,6 @@ public class UserController : ControllerBase
     {
         _logger.Information("Get all users");
         var response = await _userService.GetUsersAsync(request);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-        return Ok(response);*/
-
         return ResponseExtension.Result(response);
     }
 
@@ -99,11 +93,6 @@ public class UserController : ControllerBase
     {
         _logger.Information("Get all customers");
         var response = await _customerService.GetCustomersAsync(request);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -120,11 +109,6 @@ public class UserController : ControllerBase
     {
         _logger.Information("Get customer by id");
         var response = await _customerService.GetByIdAsync(id);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -146,11 +130,6 @@ public class UserController : ControllerBase
         _logger.Information("Get current user");
         var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
         var response = await _customerService.GetByIdAsync(userId);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -187,11 +166,6 @@ public class UserController : ControllerBase
         _logger.Information("Change user password");
         var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
         var response = await _userService.ChangePasswordAsync(userId, model);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -212,24 +186,26 @@ public class UserController : ControllerBase
         return ResponseExtension.Result(response);
     }
 
-    /// <summary>
-    /// Feature only available for Customer role
-    /// </summary>
-    /// <returns></returns>
+    // [HttpGet]
+    // [Route("user/account/addresses")]
+    // [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+    // [ServiceFilter(typeof(UserExistsFilter))]
+    // public async Task<IActionResult> GetCustomerAddresses()
+    // {
+    //     _logger.Information("Get customer addresses");
+    //     var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
+    //     var response = await _addressService.GetAddressesByCustomerId(userId);
+    //     return ResponseExtension.Result(response);
+    // }
+    
     [HttpGet]
-    [Route("user/account/addresses")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+    [Route("users/{userId}/addresses")]
+    [Authorize(AuthenticationSchemes = "Access")]
     [ServiceFilter(typeof(UserExistsFilter))]
-    public async Task<IActionResult> GetCustomerAddresses()
+    public async Task<IActionResult> GetCustomerAddresses(Guid userId)
     {
         _logger.Information("Get customer addresses");
-        var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
         var response = await _addressService.GetAddressesByCustomerId(userId);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -250,11 +226,6 @@ public class UserController : ControllerBase
         _logger.Information("Create customer address");
         var customerId = (HttpContext.Items["UserId"] as Guid?)!.Value;
         var response = await _addressService.CreateAddressAsync(customerId, request);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -275,11 +246,6 @@ public class UserController : ControllerBase
         _logger.Information("Update Customer Address");
         var customerId = (HttpContext.Items["UserId"] as Guid?)!.Value;
         var response = await _addressService.UpdateAddressAsync(customerId, id, request);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -298,11 +264,6 @@ public class UserController : ControllerBase
         _logger.Information("Delete Customer Address");
         var customerId = (HttpContext.Items["UserId"] as Guid?)!.Value;
         var response = await _addressService.DeleteAddressAsync(customerId, id);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -313,16 +274,28 @@ public class UserController : ControllerBase
     /// <summary>
     /// customer get all order history
     /// </summary>
+    /// <param name="userId"></param>
     /// <param name="model"></param>
     /// <returns></returns>
+
+    // [HttpGet]
+    // [Route("/api/customer/orders")]
+    // [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+    // [ServiceFilter(typeof(UserExistsFilter))]
+    // public async Task<IActionResult> GetOrderHistory([FromQuery] OrderHistoryQueryModel model)
+    // {
+    //     _logger.Information("Get order history");
+    //     var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
+    //     var res = await _orderService.GetOrderHistoryAsync(userId, model);
+    //     return ResponseExtension.Result(res);
+    // }
     [HttpGet]
-    [Route("/api/customer/orders")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+    [Route("users/{userId}/orders")]
+    [Authorize(AuthenticationSchemes = "Access")]
     [ServiceFilter(typeof(UserExistsFilter))]
-    public async Task<IActionResult> GetOrderHistory([FromQuery] OrderHistoryQueryModel model)
+    public async Task<IActionResult> GetOrderHistory(Guid userId, [FromQuery] OrderHistoryQueryModel model)
     {
         _logger.Information("Get order history");
-        var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
         var res = await _orderService.GetOrderHistoryAsync(userId, model);
         return ResponseExtension.Result(res);
     }
@@ -330,25 +303,37 @@ public class UserController : ControllerBase
     /// <summary>
     /// get order detail history
     /// </summary>
+    /// <param name="userId"></param>
     /// <param name="id"></param>
     /// <returns></returns>
-    [HttpGet("/api/customer/orders/{id}")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+
+    // [HttpGet("/api/customer/orders/{id}")]
+    // [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
+    // [ServiceFilter(typeof(UserExistsFilter))]
+    // public async Task<IActionResult> GetOrderHistoryDetail(Guid id)
+    // {
+    //     _logger.Information("Get order detail history");
+    //     var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
+    //     var res = await _orderService.GetOrderHistoryDetailAsync(userId, id);
+    //     return ResponseExtension.Result(res);
+    // }
+
+    [HttpGet("users/{userId}/orders/{id}")]
+    [Authorize(AuthenticationSchemes = "Access")]
     [ServiceFilter(typeof(UserExistsFilter))]
-    public async Task<IActionResult> GetOrderHistoryDetail(Guid id)
+    public async Task<IActionResult> GetOrderHistoryDetail(Guid userId, Guid id)
     {
         _logger.Information("Get order detail history");
-        var userId = (HttpContext.Items["UserId"] as Guid?)!.Value;
         var res = await _orderService.GetOrderHistoryDetailAsync(userId, id);
         return ResponseExtension.Result(res);
     }
-
+    
     /// <summary>
     /// cancel order
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    [HttpPatch("/api/customer/orders/{id}/cancel")]
+    [HttpPatch("user/orders/{id}/cancel")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
     [ServiceFilter(typeof(UserExistsFilter))]
     public async Task<IActionResult> CancelOrder(Guid id)

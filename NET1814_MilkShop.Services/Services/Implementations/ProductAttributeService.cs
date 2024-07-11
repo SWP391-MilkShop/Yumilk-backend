@@ -24,6 +24,24 @@ public class ProductAttributeService : IProductAttributeService
         _unitOfWork = unitOfWork;
     }
 
+    public async Task<ResponseModel> GetProductAttributesByIdAsync(int id)
+    {
+        var isExist = await _productAttribute.GetProductAttributeById(id);
+        if (isExist == null)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Thuộc tính sản phẩm"));
+        }
+
+        var model = new ProductAttributeModel
+        {
+            Id = isExist.Id,
+            Name = isExist.Name,
+            Description = isExist.Description,
+            IsActive = isExist.IsActive
+        };
+        return ResponseModel.Success(ResponseConstants.Get("thuộc tính sản phẩm", true), model);
+    }
+
     public async Task<ResponseModel> GetProductAttributesAsync(
         ProductAttributeQueryModel queryModel
     )
@@ -59,7 +77,8 @@ public class ProductAttributeService : IProductAttributeService
         {
             Id = x.Id,
             Name = x.Name,
-            Description = x.Description
+            Description = x.Description,
+            IsActive = x.IsActive
         });
 
         #region paging
@@ -138,7 +157,7 @@ public class ProductAttributeService : IProductAttributeService
 
         if (!string.IsNullOrEmpty(model.Name))
         {
-            var isExistName = await _productAttribute.GetProductAttributeByName(model.Name);
+            var isExistName = await _productAttribute.GetProductAttributeByName(model.Name, isExistId.Id);
             if (isExistName != null)
             {
                 /*return new ResponseModel
@@ -166,7 +185,7 @@ public class ProductAttributeService : IProductAttributeService
                 Status = "Success",
             };*/
             return ResponseModel.Success(
-                ResponseConstants.Update("Thuộc tính sản phẩm", true),
+                ResponseConstants.Update("thuộc tính sản phẩm", true),
                 null
             );
         }
