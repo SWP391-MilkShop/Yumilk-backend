@@ -320,14 +320,33 @@ public class ProductService : IProductService
         //get total products sold per category
         var categories = _categoryRepository.GetCategoriesQuery();
         var statsPerCategory = await GetCategoryStats(categories, orderDetails, parentId);
+        var bestSeller = await GetBestSellerProductAsync(orderDetails);
         var stats = new ProductStatsModel
         {
             TotalSold = await orderDetails.SumAsync(o => o.Quantity),
             TotalRevenue = await orderDetails.SumAsync(o => o.ItemPrice),
             StatsPerBrand = statsPerBrand,
-            StatsPerCategory = statsPerCategory
+            StatsPerCategory = statsPerCategory,
+            BestSellers = bestSeller
         };
         return ResponseModel.Success(ResponseConstants.Get("thống kê sản phẩm", true), stats);
+    }
+
+    private async Task<List<BestSellerModel>> GetBestSellerProductAsync(IQueryable<OrderDetail> orderDetails)
+    {
+        var query = from order in orderDetails
+            group order by new { order.Product.Id, order.Product.Name }
+            into g
+            select new BestSellerModel
+            {
+                Id = g.Key.Id,
+                Name = g.Key.Name,
+                TotalSold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.ItemPrice)
+            };
+        var bestSeller = await query.OrderByDescending(x => x.TotalSold).ThenByDescending(x => x.TotalRevenue).Take(5)
+            .ToListAsync();
+        return bestSeller;
     }
 
     public async Task<ResponseModel> UpdatePreorderProductAsync(Guid productId, UpdatePreorderProductModel model)
