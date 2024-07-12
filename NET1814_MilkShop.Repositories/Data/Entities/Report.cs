@@ -30,7 +30,6 @@ public class Report : IAuditableEntity
 
     public virtual ReportType ReportType { get; set; } = null!;
 
-    // Assuming a Customer class exists
     public virtual Customer Customer { get; set; } = null!;
 
     [Column("created_at", TypeName = "datetime2")]

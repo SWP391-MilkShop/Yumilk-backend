@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
@@ -7,6 +8,7 @@ using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Models.PaymentModels;
 using NET1814_MilkShop.Repositories.Repositories.Interfaces;
 using NET1814_MilkShop.Repositories.UnitOfWork.Interfaces;
+using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using NET1814_MilkShop.Services.Services.Interfaces;
 using Newtonsoft.Json;
 
@@ -25,6 +27,8 @@ public class CheckoutService : ICheckoutService
     private readonly IUserRepository _userRepository;
     private readonly ICartDetailRepository _cartDetailRepository;
     private readonly IOrderLogRepository _orderLogRepository;
+    private readonly IVoucherRepository _voucherRepository;
+
 
     public CheckoutService(
         IUnitOfWork unitOfWork,
@@ -37,8 +41,8 @@ public class CheckoutService : ICheckoutService
         IEmailService emailService,
         IUserRepository userRepository,
         ICartDetailRepository cartDetailRepository,
-        IOrderLogRepository orderLogRepository
-    )
+        IOrderLogRepository orderLogRepository,
+        IVoucherRepository voucherRepository)
     {
         _customerRepository = customerRepository;
         _cartRepository = cartRepository;
@@ -51,6 +55,7 @@ public class CheckoutService : ICheckoutService
         _userRepository = userRepository;
         _cartDetailRepository = cartDetailRepository;
         _orderLogRepository = orderLogRepository;
+        _voucherRepository = voucherRepository;
     }
 
     /// <summary>
@@ -61,13 +66,15 @@ public class CheckoutService : ICheckoutService
     /// <returns></returns>
     public async Task<ResponseModel> Checkout(Guid userId, CheckoutModel model)
     {
-        var userActive = await _userRepository.GetByIdAsync(userId);
-        if (userActive!.IsBanned)
+        // var userActive = await _userRepository.GetByIdAsync(userId);
+        var userActive = await _customerRepository.GetCustomersQuery()
+            .Include(c => c.User).FirstOrDefaultAsync(c => c.UserId == userId);
+        if (userActive!.User.IsBanned)
         {
             return ResponseModel.BadRequest(ResponseConstants.Banned);
         }
 
-        if (!userActive.IsActive)
+        if (!userActive.User.IsActive)
         {
             return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
         }
@@ -121,15 +128,35 @@ public class CheckoutService : ICheckoutService
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Địa chỉ"));
         }
 
-        var customerEmail = await _customerRepository.GetCustomerEmail(userId);
+        var voucherDiscount = 0;
+        // handle voucher
+        var totalPrice = GetTotalPrice(cart.CartDetails.ToList());
+        if (model.VoucherId != Guid.Empty)
+        {
+            var handleVoucher = await ApplyVoucher(model.VoucherId, totalPrice);
+            if (handleVoucher.StatusCode != 200) return handleVoucher;
+            voucherDiscount += (int)handleVoucher.Data!;
+            totalPrice -= (int)handleVoucher.Data!;
+        }
+
+        // handle point
+        var pointDiscount = 0;
+        if (model.IsUsingPoint)
+        {
+            var handlePoint = ApplyPoint(userActive, totalPrice);
+            if (handlePoint.StatusCode != 200) return handlePoint;
+            pointDiscount += (int)handlePoint.Data!;
+            totalPrice -= (int)handlePoint.Data!;
+        }
+
         // thêm vào order
         var orders = new Order
         {
             Id = Guid.NewGuid(),
             CustomerId = userId,
-            TotalPrice = GetTotalPrice(cart.CartDetails.ToList()),
+            TotalPrice = totalPrice,
             ShippingFee = model.ShippingFee,
-            TotalAmount = GetTotalPrice(cart.CartDetails.ToList()) + model.ShippingFee,
+            TotalAmount = totalPrice + model.ShippingFee,
             ReceiverName = customerAddress.ReceiverName ?? "",
             Address =
                 customerAddress.Address
@@ -147,7 +174,9 @@ public class CheckoutService : ICheckoutService
             StatusId = (int)OrderStatusId.Pending,
             OrderCode = model.PaymentMethod == "COD" ? null : await GenerateOrderCode(),
             TotalGram = GetTotalGram(cart.CartDetails.ToList()),
-            Email = customerEmail,
+            Email = userActive.Email,
+            VoucherAmount = voucherDiscount,
+            PointAmount = pointDiscount
         };
         var orderLog = new OrderLog()
         {
@@ -198,8 +227,9 @@ public class CheckoutService : ICheckoutService
                 OrderId = orders.Id,
                 CustomerId = orders.CustomerId,
                 FullName = orders.ReceiverName,
-                Email = customerEmail,
-                TotalAmount = orders.TotalAmount,
+                Email = userActive.Email,
+                TotalPrice = orders.TotalPrice, // Tổng tiền sau khi giảm giá 
+                TotalAmount = orders.TotalAmount, // Tổng tiền + ship
                 TotalGram = orders.TotalGram,
                 ShippingFee = orders.ShippingFee,
                 Address = orders.Address,
@@ -208,10 +238,16 @@ public class CheckoutService : ICheckoutService
                 PaymentMethod = orders.PaymentMethod,
                 CreatedAt = orders.CreatedAt,
                 OrderDetail = ToOrderDetailModel(cartTemp),
+                Message = "Bạn sẽ nhận được " + orders.TotalPrice.ApplyPercentage(1) +
+                          " điểm tích lũy cho đơn hàng này khi đơn hàng được giao thành công!",
+                VoucherId = model.VoucherId,
+                IsUsingPoint = model.IsUsingPoint,
+                VoucherDiscount = voucherDiscount,
+                PointDiscount = pointDiscount
             };
             if (model.PaymentMethod == "PAYOS")
             {
-                var paymentLink = await _paymentService.CreatePaymentLink(orders.OrderCode.Value);
+                var paymentLink = await _paymentService.CreatePaymentLink(orders.OrderCode!.Value);
                 if (paymentLink.Status == "Error")
                 {
                     return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
@@ -223,12 +259,81 @@ public class CheckoutService : ICheckoutService
                 resp.CheckoutUrl = paymentData.CheckoutUrl;
             }
 
-            await _emailService.SendPurchaseEmailAsync(customerEmail, userActive.FirstName);
+            await _emailService.SendPurchaseEmailAsync(userActive.Email!, userActive.User.FirstName!);
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
         return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
     }
+
+    #region Discount
+
+    /// <summary>
+    /// Số point sử dụng = discount price
+    /// </summary>
+    /// <param name="customer"></param>
+    /// <param name="totalPrice"></param>
+    /// <returns></returns>
+    private ResponseModel ApplyPoint(Customer customer, int totalPrice)
+    {
+        if (customer.Point < 100)
+        {
+            return ResponseModel.BadRequest("Số điểm tích lũy không đủ để sử dụng. Tối thiểu 100 điểm để sử dụng");
+        }
+
+        var discountPrice = customer.Point;
+        var halfPrice = totalPrice.ApplyPercentage(50);
+        if (customer.Point > halfPrice)
+        {
+            discountPrice = halfPrice;
+        }
+
+        customer.Point -= discountPrice; // trừ điểm
+        _customerRepository.Update(customer);
+        return ResponseModel.Success("Áp dụng điểm tích lũy thành công", discountPrice);
+    }
+
+    private async Task<ResponseModel> ApplyVoucher(Guid voucherId, int totalPrice)
+    {
+        var voucher = await _voucherRepository.GetByIdAsync(voucherId);
+        if (voucher == null)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Voucher"));
+        }
+
+        if (voucher.StartDate > DateTime.UtcNow || !voucher.IsActive)
+        {
+            return ResponseModel.BadRequest("Voucher chưa được kích hoạt");
+        }
+
+        if (voucher.EndDate < DateTime.UtcNow)
+        {
+            return ResponseModel.BadRequest("Voucher đã hết hạn");
+        }
+
+        if (voucher.Quantity == 0)
+        {
+            return ResponseModel.BadRequest("Voucher đã hết lượt sử dụng");
+        }
+
+        if (totalPrice < voucher.MinPriceCondition)
+        {
+            return ResponseModel.BadRequest("Đơn hàng không đủ điều kiện sử dụng voucher");
+        }
+
+        var discountPrice = totalPrice.ApplyPercentage(voucher.Percent);
+        if (discountPrice > voucher.MaxDiscount && voucher.MaxDiscount != 0)
+        {
+            discountPrice = voucher.MaxDiscount;
+        }
+
+        // update voucher quantity
+        voucher.Quantity--;
+        _voucherRepository.Update(voucher);
+        return ResponseModel.Success("Áp dụng voucher thành công", discountPrice);
+    }
+
+    #endregion
 
     /// <summary>
     /// checkout preorder
@@ -363,6 +468,8 @@ public class CheckoutService : ICheckoutService
                     ItemPrice = preOrderDetail.ItemPrice,
                     Thumbnail = preOrderDetail.Product.Thumbnail
                 },
+                Message = "Bạn sẽ nhận được " + Math.Round(preOrder.TotalAmount * 0.01) +
+                          " điểm tích lũy cho đơn hàng này!"
             };
             var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);
             if (paymentLink.Status == "Error")
@@ -374,7 +481,7 @@ public class CheckoutService : ICheckoutService
             var paymentData = JsonConvert.DeserializeObject<PaymentDataModel>(json);
             resp.OrderCode = paymentData!.OrderCode;
             resp.CheckoutUrl = paymentData.CheckoutUrl;
-            await _emailService.SendPurchaseEmailAsync(customerEmail, userActive.FirstName);
+            await _emailService.SendPurchaseEmailAsync(customerEmail!, userActive.FirstName!);
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 

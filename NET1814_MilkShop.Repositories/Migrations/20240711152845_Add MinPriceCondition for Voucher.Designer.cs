@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NET1814_MilkShop.Repositories.Data;
 
@@ -11,9 +12,11 @@ using NET1814_MilkShop.Repositories.Data;
 namespace NET1814_MilkShop.Repositories.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240711152845_Add MinPriceCondition for Voucher")]
+    partial class AddMinPriceConditionforVoucher
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -359,10 +362,6 @@ namespace NET1814_MilkShop.Repositories.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("phone_number");
 
-                    b.Property<int>("PointAmount")
-                        .HasColumnType("int")
-                        .HasColumnName("point_amount");
-
                     b.Property<string>("ReceiverName")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")
@@ -392,10 +391,6 @@ namespace NET1814_MilkShop.Repositories.Migrations
                     b.Property<int>("TotalPrice")
                         .HasColumnType("int")
                         .HasColumnName("total_price");
-
-                    b.Property<int>("VoucherAmount")
-                        .HasColumnType("int")
-                        .HasColumnName("voucher_amount");
 
                     b.Property<string>("WardCode")
                         .IsRequired()

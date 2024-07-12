@@ -9,6 +9,7 @@ using NET1814_MilkShop.Repositories.Models.ShippingModels;
 using NET1814_MilkShop.Repositories.Repositories.Interfaces;
 using NET1814_MilkShop.Repositories.UnitOfWork.Interfaces;
 using NET1814_MilkShop.Services.CoreHelpers;
+using NET1814_MilkShop.Services.CoreHelpers.Extensions;
 using NET1814_MilkShop.Services.Services.Interfaces;
 using Newtonsoft.Json;
 
@@ -21,13 +22,15 @@ public class OrderService : IOrderService
     private readonly IProductRepository _productRepository;
     private readonly IShippingService _shippingService;
     private readonly IPaymentService _paymentService;
+    private readonly ICustomerRepository _customerRepository;
     private readonly IOrderLogRepository _orderLogRepository;
 
     public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork,
         IProductRepository productRepository, 
         IShippingService shippingService,
         IPaymentService paymentService,
-        IOrderLogRepository orderLogRepository)
+        IOrderLogRepository orderLogRepository,
+        ICustomerRepository customerRepository)
     {
         _orderRepository = orderRepository;
         _unitOfWork = unitOfWork;
@@ -35,6 +38,7 @@ public class OrderService : IOrderService
         _shippingService = shippingService;
         _paymentService = paymentService;
         _orderLogRepository = orderLogRepository;
+        _customerRepository = customerRepository;
     }
 
     /// <summary>
@@ -169,7 +173,7 @@ public class OrderService : IOrderService
     {
         switch (statusId)
         {
-            case 2:
+            case (int)OrderStatusId.Processing:
                 var processingLog = new OrderLog
                 {
                     OrderId = orderId,
@@ -178,7 +182,7 @@ public class OrderService : IOrderService
                 };
                 _orderLogRepository.Add(processingLog);
                 break;
-            case 3:
+            case (int)OrderStatusId.Shipped:
                 var shippedLog = new OrderLog
                 {
                     OrderId = orderId,
@@ -187,7 +191,7 @@ public class OrderService : IOrderService
                 };
                 _orderLogRepository.Add(shippedLog);
                 break;
-            case 4:
+            case (int)OrderStatusId.Delivered:
                 var deliveredLog = new OrderLog
                 {
                     OrderId = orderId,
@@ -196,7 +200,7 @@ public class OrderService : IOrderService
                 };
                 _orderLogRepository.Add(deliveredLog);
                 break;
-            case 5:
+            case (int)OrderStatusId.Cancelled:
                 var cancelLog = new OrderLog
                 {
                     OrderId = orderId,
@@ -205,7 +209,7 @@ public class OrderService : IOrderService
                 };
                 _orderLogRepository.Add(cancelLog);
                 break;
-            case 6:
+            case (int)OrderStatusId.Preorder:
                 var preorderLog = new OrderLog
                 {
                     OrderId = orderId,
@@ -361,6 +365,8 @@ public class OrderService : IOrderService
             Address = order.Address,
             Note = order.Note,
             OrderDetail = pModel,
+            VoucherDisCount = order.VoucherAmount,
+            PointDiscount = order.PointAmount,
             TotalPrice = order.TotalPrice,
             ShippingFee = order.ShippingFee,
             TotalAmount = order.TotalAmount,
@@ -475,19 +481,39 @@ public class OrderService : IOrderService
         {
             return ResponseModel.Success(ResponseConstants.NoChangeIsMade, null);
         }
-        if(order.StatusId == (int)OrderStatusId.Cancelled)
+
+        switch (order.StatusId)
         {
-            return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
+            case (int)OrderStatusId.Pending:
+                if (model.StatusId != (int)OrderStatusId.Processing)
+                {
+                    return ResponseModel.BadRequest(
+                        "Đơn hàng ở trạng thái chờ xử lý chỉ có thể chuyển sang trạng thái đang xử lý");
+                }
+
+                break;
+            case (int)OrderStatusId.Processing:
+                if (model.StatusId != (int)OrderStatusId.Shipped)
+                {
+                    return ResponseModel.BadRequest("Đơn hàng đang xử lý chỉ có thể chuyển sang trạng thái đang giao");
+                }
+
+                break;
+            case (int)OrderStatusId.Preorder:
+                if (model.StatusId != (int)OrderStatusId.Shipped)
+                {
+                    return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
+                }
+
+                break;
+            case (int)OrderStatusId.Cancelled:
+                return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
+            case (int)OrderStatusId.Delivered:
+                return ResponseModel.BadRequest("Đơn hàng đã được giao");
+            case (int)OrderStatusId.Shipped:
+                return ResponseModel.BadRequest("Đơn hàng đang trên đường giao");
         }
-        // đơn hàng không thể quay lại trạng thái trước đó
-        if (order.StatusId != (int)OrderStatusId.Preorder && order.StatusId > model.StatusId)
-        {
-            return ResponseModel.BadRequest(ResponseConstants.Update("trạng thái đơn hàng", false));
-        }
-        if(order.StatusId == (int)OrderStatusId.Preorder && model.StatusId != (int)OrderStatusId.Shipped)
-        {
-            return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
-        }
+
         int result;
         if (model.StatusId == (int)OrderStatusId.Shipped)
         {
@@ -501,8 +527,10 @@ public class OrderService : IOrderService
                     {
                         return ResponseModel.Error("Có lỗi xảy ra khi cập nhật số lượng sản phẩm trong kho");
                     }
+
                     _productRepository.Update(o.Product);
                 }
+
                 // Save changes if stock was updated
                 var stockUpdateResult = await _unitOfWork.SaveChangesAsync();
                 if (stockUpdateResult <= 0)
@@ -510,12 +538,14 @@ public class OrderService : IOrderService
                     return ResponseModel.Error("Không thể cập nhật số lượng sản phẩm trong kho");
                 }
             }
+
             // order code and shipping status is already updated in the shipping service
             var orderShipping = await _shippingService.CreateOrderShippingAsync(id);
             if (orderShipping.StatusCode != 200)
             {
                 return orderShipping;
             }
+
             return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), orderShipping.Data);
         }
 
@@ -649,6 +679,8 @@ public class OrderService : IOrderService
             Address = order.Address,
             Note = order.Note,
             OrderDetail = pModel,
+            VoucherDisCount = order.VoucherAmount,
+            PointDiscount = order.PointAmount,
             TotalPrice = order.TotalPrice,
             ShippingFee = order.ShippingFee,
             TotalAmount = order.TotalAmount,
@@ -677,7 +709,7 @@ public class OrderService : IOrderService
 
     public async Task<ResponseModel> UpdateOrderStatusDeliveredAsync(Guid id)
     {
-        var order = await _orderRepository.GetByOrderIdAsync(id, include: false);
+        var order = await _orderRepository.GetByIdIncludeCustomerAsync(id);
         if (order == null)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("đơn hàng"));
@@ -687,11 +719,13 @@ public class OrderService : IOrderService
         {
             return ResponseModel.BadRequest("Đơn hàng chưa được giao");
         }
-        
 
-        order.StatusId = (int) OrderStatusId.Delivered;
         // Handle point for customer
+        // 100 VND = 1 point
+        order.Customer!.Point += order.TotalPrice.ApplyPercentage(1);
+        _customerRepository.Update(order.Customer);
         // Handle order logs
+        order.StatusId = (int)OrderStatusId.Delivered;
         AddOrderStatusLog(order.Id, (int)OrderStatusId.Delivered);
         _orderRepository.Update(order);
         var result = await _unitOfWork.SaveChangesAsync();
@@ -699,6 +733,7 @@ public class OrderService : IOrderService
         {
             return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), null);
         }
+
         return ResponseModel.Error(ResponseConstants.Update("trạng thái đơn hàng", false));
     }
 }

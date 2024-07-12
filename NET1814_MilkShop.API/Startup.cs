@@ -259,6 +259,9 @@ public class Startup
 
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<IPostService, PostService>();
+        
+        services.AddScoped<IVoucherRepository, VoucherRepository>();
+        services.AddScoped<IVoucherService, VoucherService>();
 
         services.AddScoped<IOrderLogRepository, OrderLogRepository>();
 
