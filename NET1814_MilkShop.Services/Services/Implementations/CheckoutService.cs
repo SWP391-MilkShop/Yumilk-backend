@@ -244,7 +244,7 @@ public class CheckoutService : ICheckoutService
                 VoucherId = model.VoucherId,
                 IsUsingPoint = model.IsUsingPoint,
                 VoucherDiscount = voucherDiscount,
-                PointDiscount = pointDiscount
+                PointDiscount = pointDiscount,
                 IsPreorder = orders.IsPreorder
             };
             if (model.PaymentMethod == "PAYOS")
@@ -472,7 +472,7 @@ public class CheckoutService : ICheckoutService
                     Thumbnail = preOrderDetail.Product.Thumbnail
                 },
                 Message = "Bạn sẽ nhận được " + Math.Round(preOrder.TotalAmount * 0.01) +
-                          " điểm tích lũy cho đơn hàng này!"
+                          " điểm tích lũy cho đơn hàng này!",
                 IsPreorder = preOrder.IsPreorder
             };
             var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);

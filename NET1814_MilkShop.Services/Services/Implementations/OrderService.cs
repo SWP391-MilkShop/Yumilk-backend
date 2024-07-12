@@ -387,7 +387,7 @@ public class OrderService : IOrderService
             OrderStatus = order.Status!.Name,
             CreatedAt = order.CreatedAt,
             PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
-            Logs = orderStatusLogs
+            Logs = orderStatusLogs,
             IsPreorder = order.IsPreorder
         };
         if (order.StatusId == (int)OrderStatusId.Shipped)
@@ -703,7 +703,7 @@ public class OrderService : IOrderService
             OrderStatus = order.Status!.Name,
             CreatedAt = order.CreatedAt,
             PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
-            Logs = orderStatusLogs
+            Logs = orderStatusLogs,
             IsPreorder = order.IsPreorder
         };
         if (order.StatusId == (int)OrderStatusId.Shipped)
