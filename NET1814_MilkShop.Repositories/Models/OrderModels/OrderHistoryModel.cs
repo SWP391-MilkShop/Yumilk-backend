@@ -9,4 +9,6 @@ public class OrderHistoryModel
     public string? OrderStatus { get; set; }
     public DateTime CreatedAt { get; set; }
     public object? ProductList { get; set; }
+    
+    public bool IsPreorder { get; set; }
 }

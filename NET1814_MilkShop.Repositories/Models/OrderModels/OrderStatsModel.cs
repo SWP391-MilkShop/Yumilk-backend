@@ -8,6 +8,7 @@ public class OrderStatsModel
     /// Total number of orders
     /// </summary>
     public int TotalOrders { get; set; }
+
     /// <summary>
     /// Total number of orders per status
     /// </summary>
@@ -20,17 +21,26 @@ public class OrderStatsModel
         new OrderStatusCount { Status = OrderStatusId.Delivered.ToString(), Count = 0 },
         new OrderStatusCount { Status = OrderStatusId.Cancelled.ToString(), Count = 0 }
     ];
+
     /// <summary>
     /// Only count orders that have been delivered
     /// </summary>
     public int TotalRevenue { get; set; }
+
     /// <summary>
     /// Only count orders that have been delivered
     /// </summary>
     public int TotalShippingFee { get; set; }
 }
+
 public class OrderStatusCount
 {
     public string Status { get; set; } = null!;
+    public int Count { get; set; }
+}
+
+public class OrderStatsPerDate
+{
+    public string? DateTime { get; set; }
     public int Count { get; set; }
 }
