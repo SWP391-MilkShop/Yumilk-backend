@@ -18,4 +18,6 @@ public class OrderDetailModel
     public DateTime CreatedAt { get; set; }
     public DateTime? ExpectedDeliveryDate { get; set; } = null;
     public object? PaymentData { get; set; }
+    
+    public List<OrderLogsModel?> Logs { get; set; }
 }

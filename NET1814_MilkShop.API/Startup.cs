@@ -263,6 +263,8 @@ public class Startup
         services.AddScoped<IVoucherRepository, VoucherRepository>();
         services.AddScoped<IVoucherService, VoucherService>();
 
+        services.AddScoped<IOrderLogRepository, OrderLogRepository>();
+
         services.AddScoped<ICheckoutService, CheckoutService>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
