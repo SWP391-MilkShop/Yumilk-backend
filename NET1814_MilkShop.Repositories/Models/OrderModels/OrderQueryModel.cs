@@ -10,6 +10,7 @@ public class OrderQueryModel : QueryModel
     [EmailAddress(ErrorMessage = "Must be email format")]
     public string? Email { get; set; }
 
+    public bool? IsPreorder { get; set; }
     /// <summary>
     /// Format is mm-dd-yyyy or yyyy-mm-dd
     /// </summary>

@@ -19,4 +19,5 @@ public class CheckoutResponseModel
     public DateTime CreatedAt { get; set; }
     public string? CheckoutUrl { get; set; }
     public object? OrderDetail { get; set; }
+    public bool IsPreorder { get; set; }
 }

@@ -98,11 +98,14 @@ public class CheckPaymentStatusJob : IJob
                 if ("PAID".Equals(paymentData!.status))
                 {
                     _logger.LogInformation("Payment for order {OrderId} is paid", order.Id);
-                    var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(order.Id);
+                    var existOrder = await _orderRepository.GetByIdNoIncludeAsync(order.Id);
+                    if(existOrder == null)
+                    {
+                        _logger.LogInformation("Order {OrderId} not found", order.Id);
+                        continue;
+                    }
                     //Check if order has preorder product
-                    var existPreorder =
-                        await _orderRepository.IsExistPreorderProductAsync(order.Id);
-                    if (existPreorder)
+                    if (existOrder.IsPreorder)
                     {
                         _logger.LogInformation("Order {OrderId} has preorder product", order.Id);
                         existOrder.StatusId = (int)OrderStatusId.Preorder; //Preorder
@@ -151,15 +154,10 @@ public class CheckPaymentStatusJob : IJob
                     _unitOfWork.Detach(orderDetail.Product);
                 }
 
-                if (result < 0)
-                {
-                    _logger.LogInformation("Update order status for order {OrderId} failed", order.Id);
-                }
-
                 _logger.LogInformation(
-                    result > 0
-                        ? "Update order status for order {OrderId} successfully"
-                        : "Update order status for order {OrderId} failed", order.Id);
+                    result < 0
+                        ? "Update order status for order {OrderId} failed"
+                        : "Update order status for order {OrderId} successfully", order.Id);
             }
             catch (Exception e)
             {
