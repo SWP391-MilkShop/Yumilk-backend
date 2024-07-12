@@ -123,23 +123,24 @@ public class CheckoutService : ICheckoutService
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Địa chỉ"));
         }
 
-        var discountPrice = 0;
+        var voucherDiscount = 0;
         // handle voucher
         var totalPrice = GetTotalPrice(cart.CartDetails.ToList());
         if (model.VoucherId != Guid.Empty)
         {
             var handleVoucher = await ApplyVoucher(model.VoucherId, totalPrice);
             if (handleVoucher.StatusCode != 200) return handleVoucher;
-            discountPrice += (int)handleVoucher.Data!;
+            voucherDiscount += (int)handleVoucher.Data!;
             totalPrice -= (int)handleVoucher.Data!;
         }
 
         // handle point
+        var pointDiscount = 0;
         if (model.IsUsingPoint)
         {
             var handlePoint = ApplyPoint(userActive, totalPrice);
             if (handlePoint.StatusCode != 200) return handlePoint;
-            discountPrice += (int)handlePoint.Data!;
+            pointDiscount += (int)handlePoint.Data!;
             totalPrice -= (int)handlePoint.Data!;
         }
 
@@ -169,6 +170,8 @@ public class CheckoutService : ICheckoutService
             OrderCode = model.PaymentMethod == "COD" ? null : await GenerateOrderCode(),
             TotalGram = GetTotalGram(cart.CartDetails.ToList()),
             Email = userActive.Email,
+            VoucherAmount = voucherDiscount,
+            PointAmount = pointDiscount
         };
         _orderRepository.Add(orders);
 
@@ -228,7 +231,8 @@ public class CheckoutService : ICheckoutService
                           " điểm tích lũy cho đơn hàng này khi đơn hàng được giao thành công!",
                 VoucherId = model.VoucherId,
                 IsUsingPoint = model.IsUsingPoint,
-                DiscountPrice = discountPrice
+                VoucherDiscount = voucherDiscount,
+                PointDiscount = pointDiscount
             };
             if (model.PaymentMethod == "PAYOS")
             {

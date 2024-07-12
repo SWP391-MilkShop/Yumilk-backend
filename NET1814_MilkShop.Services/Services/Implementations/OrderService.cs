@@ -303,6 +303,8 @@ public class OrderService : IOrderService
             Address = order.Address,
             Note = order.Note,
             OrderDetail = pModel,
+            VoucherDisCount = order.VoucherAmount,
+            PointDiscount = order.PointAmount,
             TotalPrice = order.TotalPrice,
             ShippingFee = order.ShippingFee,
             TotalAmount = order.TotalAmount,
@@ -415,25 +417,30 @@ public class OrderService : IOrderService
         {
             return ResponseModel.Success(ResponseConstants.NoChangeIsMade, null);
         }
+
         switch (order.StatusId)
         {
             case (int)OrderStatusId.Pending:
                 if (model.StatusId != (int)OrderStatusId.Processing)
                 {
-                    return ResponseModel.BadRequest("Đơn hàng ở trạng thái chờ xử lý chỉ có thể chuyển sang trạng thái đang xử lý");
+                    return ResponseModel.BadRequest(
+                        "Đơn hàng ở trạng thái chờ xử lý chỉ có thể chuyển sang trạng thái đang xử lý");
                 }
+
                 break;
             case (int)OrderStatusId.Processing:
                 if (model.StatusId != (int)OrderStatusId.Shipped)
                 {
                     return ResponseModel.BadRequest("Đơn hàng đang xử lý chỉ có thể chuyển sang trạng thái đang giao");
                 }
+
                 break;
             case (int)OrderStatusId.Preorder:
                 if (model.StatusId != (int)OrderStatusId.Shipped)
                 {
                     return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
                 }
+
                 break;
             case (int)OrderStatusId.Cancelled:
                 return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
@@ -442,6 +449,7 @@ public class OrderService : IOrderService
             case (int)OrderStatusId.Shipped:
                 return ResponseModel.BadRequest("Đơn hàng đang trên đường giao");
         }
+
         int result;
         if (model.StatusId == (int)OrderStatusId.Shipped)
         {
@@ -600,6 +608,8 @@ public class OrderService : IOrderService
             Address = order.Address,
             Note = order.Note,
             OrderDetail = pModel,
+            VoucherDisCount = order.VoucherAmount,
+            PointDiscount = order.PointAmount,
             TotalPrice = order.TotalPrice,
             ShippingFee = order.ShippingFee,
             TotalAmount = order.TotalAmount,
