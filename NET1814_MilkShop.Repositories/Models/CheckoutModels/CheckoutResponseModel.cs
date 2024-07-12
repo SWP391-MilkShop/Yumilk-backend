@@ -8,7 +8,7 @@ public class CheckoutResponseModel
     public string? FullName { get; set; }
 
     public string? Email { get; set; }
-    
+
     public int TotalPrice { get; set; }
     public int TotalAmount { get; set; }
 
@@ -22,10 +22,11 @@ public class CheckoutResponseModel
     public string? CheckoutUrl { get; set; }
     public object? OrderDetail { get; set; }
     public string? Message { get; set; }
-    
+
     public Guid VoucherId { get; set; }
-    
+
     public bool IsUsingPoint { get; set; }
-    
-    public int DiscountPrice { get; set; }
+
+    public int VoucherDiscount { get; set; }
+    public int PointDiscount { get; set; }
 }
