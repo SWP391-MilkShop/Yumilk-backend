@@ -132,7 +132,7 @@ public class DashboardController : Controller
     }
 
     [HttpGet]
-    [Route("payment/stats")]
+    [Route("payment/stats/payment-methods")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetPaymentMethodStats()
     {
@@ -162,7 +162,7 @@ public class DashboardController : Controller
     /// <param name="year"></param>
     /// <returns></returns>
     [HttpGet]
-    [Route("customers/returning/stats/{year}")]
+    [Route("customers/stats/{year}/returning-customers")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetReturnCustomersStats(int year)
     {
@@ -170,6 +170,7 @@ public class DashboardController : Controller
         var res = await _customerService.GetReturnCustomerStatsAsync(year);
         return ResponseExtension.Result(res);
     }
+
     /// <summary>
     ///  Get revenue by each month, enter a year to get revenue by month
     /// </summary>
@@ -177,13 +178,14 @@ public class DashboardController : Controller
     /// <returns></returns>
     [HttpGet]
     [Route("orders/stats/{year}/revenue-by-month")]
-    [Authorize(AuthenticationSchemes = "Access",Roles="1,2")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetRevenueByMonth(int year)
     {
         _logger.Information("Get revenue by month");
         var res = await _orderService.GetRevenueByMonthAsync(year);
         return ResponseExtension.Result(res);
     }
+
     [HttpGet]
     [Route("customers/stats/total-purchase")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
@@ -191,6 +193,16 @@ public class DashboardController : Controller
     {
         _logger.Information("Get total purchase");
         var res = await _customerService.GetTotalPurchaseAsync();
+        return ResponseExtension.Result(res);
+    }
+
+    [HttpGet]
+    [Route("customers/{id}/stats/{year}/total-purchase/")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> GetTotalPurchaseByCustomer(Guid id, int year)
+    {
+        _logger.Information("Get total purchase by customer");
+        var res = await _customerService.GetTotalPurchaseByCustomerAsync(id, year);
         return ResponseExtension.Result(res);
     }
 }

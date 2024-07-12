@@ -277,17 +277,38 @@ public sealed class CustomerService : ICustomerService
 
     public async Task<ResponseModel> GetTotalPurchaseAsync()
     {
-
         var orders = _orderRepository.GetOrderQuery();
-        var query = await orders.Where(x=> x.StatusId == (int)OrderStatusId.Delivered)
+        var query = await orders.Where(x => x.StatusId == (int)OrderStatusId.Delivered)
             .GroupBy(x => x.CustomerId)
             .Select(x => new
             {
                 CustomerId = x.Key,
                 TotalPurchase = x.Count(),
                 TotalRevenue = (long)x.Sum(x => x.TotalPrice)
-            }).OrderByDescending(x=>x.TotalRevenue).ToListAsync();
-        return ResponseModel.Success(ResponseConstants.Get("doanh thu cao nhất của khách hàng đã đặt hàng", true), query);
+            }).OrderByDescending(x => x.TotalRevenue).ToListAsync();
+        return ResponseModel.Success(ResponseConstants.Get("doanh thu cao nhất của khách hàng đã đặt hàng", true),
+            query);
+    }
+
+    public async Task<ResponseModel> GetTotalPurchaseByCustomerAsync(Guid id, int year)
+    {
+        var isExistCustomer = await _customerRepository.IsExistAsync(id);
+        if (!isExistCustomer)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Khách hàng"));
+        }
+
+        var orders = _orderRepository.GetOrderQuery();
+        var query = await orders.Where(x =>
+                x.CustomerId == id && x.StatusId == (int)OrderStatusId.Delivered && x.CreatedAt.Year == year)
+            .GroupBy(x => x.CustomerId)
+            .Select(x => new
+            {
+                CustomerId = x.Key,
+                TotalPurchase = x.Count(),
+                TotalRevenue = x.Sum(o => o.TotalPrice)
+            }).ToListAsync();
+        return ResponseModel.Success(ResponseConstants.Get("doanh thu của khách hàng", true), query);
     }
 
 
