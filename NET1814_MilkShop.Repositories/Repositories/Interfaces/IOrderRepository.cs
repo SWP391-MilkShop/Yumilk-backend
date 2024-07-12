@@ -36,4 +36,5 @@ public interface IOrderRepository
     Task<bool> IsExistOrderCode(int id);
     void Add(OrderDetail orderDetail);
     Task<bool> IsExistPreorderProductAsync(Guid orderId);
+    Task<Order?> GetByIdIncludeCustomerAsync(Guid id);
 }

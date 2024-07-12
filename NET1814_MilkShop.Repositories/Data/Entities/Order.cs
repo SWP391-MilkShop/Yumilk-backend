@@ -13,6 +13,12 @@ public class Order : IAuditableEntity
 
     public int TotalPrice { get; set; }
 
+    [Column("voucher_amount", TypeName = "int")]
+    public int VoucherAmount { get; set; }
+
+    [Column("point_amount", TypeName = "int")]
+    public int PointAmount { get; set; }
+
     public int ShippingFee { get; set; }
 
     public int TotalAmount { get; set; } // TotalPrice + ShippingFee
@@ -69,4 +75,6 @@ public class Order : IAuditableEntity
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
 
     public virtual OrderStatus? Status { get; set; }
+
+    public virtual ICollection<OrderLog> OrderLogs { get; set; } = [];
 }

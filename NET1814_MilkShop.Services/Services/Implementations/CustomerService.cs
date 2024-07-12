@@ -42,7 +42,8 @@ public sealed class CustomerService : ICustomerService
             Role = user.Role!.Name,
             ProfilePictureUrl = customer.ProfilePictureUrl,
             IsActive = user.IsActive,
-            IsBanned = user.IsBanned
+            IsBanned = user.IsBanned,
+            Point = customer.Point
         };
     }
 
