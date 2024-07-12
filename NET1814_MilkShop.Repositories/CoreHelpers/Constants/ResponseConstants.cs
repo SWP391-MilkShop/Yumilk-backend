@@ -198,7 +198,7 @@ public static class ResponseConstants
     public const string InvalidUrl = "Url không hợp lệ";
     public const string InvalidFilterDate = "Ngày bắt đầu phải trước hoặc trùng với ngày kết thúc";
     public const string InvalidFromDate = "Ngày bắt đầu không thể lớn hơn ngày hiện tại";
-
+    public const string InvalidExpectedPreOrderDays = "Số ngày dự kiến phải lớn hơn 0";
     public const string UserNotActive =
         "Tài khoản của bạn chưa được kích hoạt. Vui lòng kích hoạt tài khoản để tiến hành thanh toán";
 
