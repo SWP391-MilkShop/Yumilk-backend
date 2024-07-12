@@ -26,7 +26,7 @@ public class OrderService : IOrderService
     private readonly IOrderLogRepository _orderLogRepository;
 
     public OrderService(IOrderRepository orderRepository, IUnitOfWork unitOfWork,
-        IProductRepository productRepository, 
+        IProductRepository productRepository,
         IShippingService shippingService,
         IPaymentService paymentService,
         IOrderLogRepository orderLogRepository,
@@ -224,7 +224,7 @@ public class OrderService : IOrderService
                 };
                 _orderLogRepository.Add(preorderLog);
                 break;
-        }    
+        }
     }
 
     /// <summary>
@@ -458,7 +458,7 @@ public class OrderService : IOrderService
 
         return ResponseModel.Error(ResponseConstants.Cancel("đơn hàng", false));
     }
-    
+
     private async Task<List<Product>> GetProductByOrderIdAsync(Guid id)
     {
         List<Product> list = new();
@@ -639,12 +639,13 @@ public class OrderService : IOrderService
         }
 
         order.StatusId = (int)OrderStatusId.Cancelled;
-        AddOrderStatusLog(order.Id,(int)OrderStatusId.Cancelled);
+        AddOrderStatusLog(order.Id, (int)OrderStatusId.Cancelled);
         foreach (var o in order.OrderDetails)
         {
             o.Product.Quantity += o.Quantity;
             _productRepository.Update(o.Product);
         }
+
         _orderRepository.Update(order);
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
@@ -653,6 +654,7 @@ public class OrderService : IOrderService
                 ? "Hủy thành công, đơn hàng có mã vận chuyển. Vui lòng hủy bên đơn vị vận chuyển"
                 : ResponseConstants.Cancel(message + "đơn hàng", true), null);
         }
+
         return ResponseModel.Error(ResponseConstants.Cancel("đơn hàng", false));
     }
 
@@ -678,7 +680,7 @@ public class OrderService : IOrderService
             ItemPrice = x.ItemPrice,
             Thumbnail = x.Thumbnail
         }).ToList();
-        
+
         var orderLog = await _orderLogRepository.GetOrderLogQuery(orderId).ToListAsync();
         var orderStatusLogs = orderLog.Select(x => new OrderLogsModel()
         {
@@ -798,9 +800,19 @@ public class OrderService : IOrderService
             .GroupBy(o => o.CreatedAt.DayOfWeek)
             .Select(x => new OrderStatsPerDate
             {
-                DateTime = x.Key.ToString(),
+                DateTime = x.Key.ToString() switch
+                {
+                    "Monday" => "Thứ 2",
+                    "Tuesday" => "Thứ 3",
+                    "Wednesday" => "Thứ 4",
+                    "Thursday" => "Thứ 5",
+                    "Friday" => "Thứ 6",
+                    "Saturday" => "Thứ 7",
+                    "Sunday" => "Chủ nhật",
+                    _ => ""
+                },
                 Count = x.Count()
-            }).ToList();
+            }).OrderBy(x => x.DateTime).ToList();
 
         // order per date (theo ngày)
         var orderPerDay = orders
