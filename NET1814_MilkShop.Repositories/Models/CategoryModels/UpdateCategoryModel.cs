@@ -9,4 +9,6 @@ public class UpdateCategoryModel
     /// Default is true
     /// </summary>
     public bool IsActive { get; set; } = true;
+
+    public int ParentId { get; set; } = 0;
 }

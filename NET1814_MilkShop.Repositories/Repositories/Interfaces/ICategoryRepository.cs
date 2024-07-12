@@ -16,7 +16,14 @@ public interface ICategoryRepository
     /// <param name="categories"></param>
     /// <returns></returns>
     HashSet<int> GetChildCategoryIds(int parentId, List<Category> categories);
-
+    /// <summary>
+    /// This method is used to check if a category is an ancestor of another category
+    /// </summary>
+    /// <param name="childId"></param>
+    /// <param name="ancestorId"></param>
+    /// <param name="categories"></param>
+    /// <returns></returns>
+    bool IsAncestorOf(int childId, int ancestorId, List<Category> categories);
     void Add(Category category);
     void Update(Category category);
 }
