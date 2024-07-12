@@ -224,6 +224,7 @@ public class OrderService : IOrderService
         {
             query = query.Where(o => o.IsPreorder == model.IsPreorder);
         }
+
         #endregion
 
         #region sort
@@ -304,6 +305,7 @@ public class OrderService : IOrderService
 
         var detail = new OrderDetailModel
         {
+            Id = order.Id,
             ReceiverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
             Email = order.Email,
             PhoneNumber = order.PhoneNumber,
@@ -592,6 +594,7 @@ public class OrderService : IOrderService
         }).ToList();
         var detail = new OrderDetailModel
         {
+            Id = order.Id,
             ReceiverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
             PhoneNumber = order.PhoneNumber,
             Email = order.Email,
@@ -654,6 +657,7 @@ public class OrderService : IOrderService
         {
             return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
         }
+
         // default is from last 30 days
         var from = queryModel.FromOrderDate ?? DateTime.Now.AddDays(-30);
         // default is now
@@ -662,7 +666,7 @@ public class OrderService : IOrderService
         var orders = await _orderRepository.GetOrderQuery()
             .Where(o => o.CreatedAt >= from && o.CreatedAt <= to && o.StatusId != (int)OrderStatusId.Cancelled)
             .ToListAsync();
-        
+
         // order per day of week (theo thứ)
         var orderPerDayOfWeek = orders
             .GroupBy(o => o.CreatedAt.DayOfWeek)
