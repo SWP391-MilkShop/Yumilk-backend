@@ -10,7 +10,9 @@ public class ReportModel
     
     public Guid CustomerId { get; set; }
     
-    public string Title { get; set; } = null!;
+    public Guid ProductId { get; set; }
+
+    public string ProductName { get; set; } = null!;
     
     public DateTime? ResolvedAt { get; set; }
     

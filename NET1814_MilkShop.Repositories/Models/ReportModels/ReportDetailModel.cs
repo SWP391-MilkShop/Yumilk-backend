@@ -13,8 +13,6 @@ public class ReportDetailModel
     public string? ReportTypeDescription { get; set; }
     public Guid CustomerId { get; set; }
     
-    public string Title { get; set; } = null!;
-    
     public DateTime? ResolvedAt { get; set; }
     
     public Guid ResolvedBy { get; set; }
@@ -25,5 +23,7 @@ public class ReportDetailModel
     
     public DateTime? ModifiedAt { get; set; }
     
-    public string? Description { get; set; }
+    public Guid ProductId { get; set; }
+    
+    public string ProductName { get; set; } = null!;
 }

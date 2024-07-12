@@ -7,8 +7,7 @@ public class CreateReportModel
     [Required(ErrorMessage = "Report Type Id is required")]
     public int ReportTypeId { get; set; }
     
-    [Required(ErrorMessage = "Title is required")]
-    public string Title { get; set; } = null!;
-
-    public string? Description { get; set; } = "";
+    [Required(ErrorMessage = "Product Id is required")]
+    public Guid ProductId { get; set; }
+    
 }
