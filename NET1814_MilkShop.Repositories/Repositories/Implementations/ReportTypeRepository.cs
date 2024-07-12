@@ -9,4 +9,9 @@ public class ReportTypeRepository : Repository<ReportType>, IReportTypeRepositor
     public ReportTypeRepository(AppDbContext context) : base(context)
     {
     }
+
+    public IQueryable<ReportType> GetReportTypeQuery()
+    {
+        return _query;
+    }
 }

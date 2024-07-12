@@ -16,12 +16,10 @@ public class Report : IAuditableEntity
     [Column("customer_id")]
     [ForeignKey("Customer")]
     public Guid CustomerId { get; set; }
-
-    [Column("title", TypeName = "nvarchar(255)")]
-    public string Title { get; set; } = null!;
-
-    [Column("description", TypeName = "nvarchar(2000)")]
-    public string? Description { get; set; }
+    
+    [Column("product_id")]
+    [ForeignKey("Product")]
+    public Guid ProductId { get; set; }
 
     [Column("resolved_at", TypeName = "datetime2")]
     public DateTime? ResolvedAt { get; set; }
@@ -31,6 +29,8 @@ public class Report : IAuditableEntity
     public virtual ReportType ReportType { get; set; } = null!;
 
     public virtual Customer Customer { get; set; } = null!;
+    
+    public virtual Product Product { get; set; } = null!;
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
