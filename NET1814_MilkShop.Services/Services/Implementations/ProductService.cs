@@ -247,7 +247,7 @@ public class ProductService : IProductService
         product.SalePrice = model.SalePrice ?? product.SalePrice;
         product.IsActive = model.IsActive;
         // check if product is ordered
-        if (product.StatusId != (int)ProductStatusId.OutOfStock && product.IsActive)
+        if (product.StatusId != (int)ProductStatusId.OutOfStock)
         {
             if (model.StatusId != 0 && product.StatusId != model.StatusId)
             {
@@ -269,7 +269,7 @@ public class ProductService : IProductService
             if (validateCommonResponse != null) return validateCommonResponse;
             if (product.StatusId == (int)ProductStatusId.Preorder)
             {
-                var validatePreorderProduct = ValidatePreorderProduct(existingPreorder!);
+                var validatePreorderProduct = ValidatePreorderProduct(existingPreorder!, product);
                 if (validatePreorderProduct != null) return validatePreorderProduct;
             }
         }
@@ -445,7 +445,7 @@ public class ProductService : IProductService
         var orderDetails = product.OrderDetails.IsNullOrEmpty()
             ? []
             : product.OrderDetails.Where(od => od.Order.StatusId == (int)OrderStatusId.Delivered).ToList();
-        var model = new ProductModel()
+        var model = new ProductModel
         {
             Id = product.Id.ToString(),
             Name = product.Name,
@@ -550,21 +550,24 @@ public class ProductService : IProductService
         if (salePrice > originalPrice) return ResponseModel.BadRequest(ResponseConstants.InvalidSalePrice);
         if (statusId == (int)ProductStatusId.Selling && quantity == 0)
             return ResponseModel.BadRequest(ResponseConstants.InvalidQuantity);
-
-        if (statusId == (int)ProductStatusId.Preorder && quantity != 0)
-            return ResponseModel.BadRequest(ResponseConstants.NoQuantityPreorder);
-
+        if (quantity < 0) return ResponseModel.BadRequest(ResponseConstants.InvalidQuantity);
+        // if (statusId == (int)ProductStatusId.Preorder && quantity != 0)
+        //     return ResponseModel.BadRequest(ResponseConstants.NoQuantityPreorder);
         return null;
     }
 
-    private static ResponseModel? ValidatePreorderProduct(PreorderProduct preorderProduct)
+    private static ResponseModel? ValidatePreorderProduct(PreorderProduct preorderProduct, Product product)
     {
-        if(preorderProduct.StartDate < DateTime.Now)
+        if(preorderProduct.StartDate < DateTime.UtcNow)
             return ResponseModel.BadRequest("Ngày bắt đầu không thể nhỏ hơn ngày hiện tại");
         if (preorderProduct.StartDate > preorderProduct.EndDate)
             return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
         if (preorderProduct.MaxPreOrderQuantity <= 0)
             return ResponseModel.BadRequest(ResponseConstants.InvalidMaxPreOrderQuantity);
+        if(preorderProduct.ExpectedPreOrderDays <= 0)
+            return ResponseModel.BadRequest(ResponseConstants.InvalidExpectedPreOrderDays);
+        if (product.Quantity >= preorderProduct.MaxPreOrderQuantity)
+            return ResponseModel.BadRequest("Số lượng đặt trước tối đa phải lớn hơn số lượng hiện có");
         return null;
     }
 

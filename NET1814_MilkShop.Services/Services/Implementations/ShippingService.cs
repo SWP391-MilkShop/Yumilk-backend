@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
+using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ShippingModels;
 using NET1814_MilkShop.Repositories.Repositories.Interfaces;
@@ -17,11 +18,13 @@ public class ShippingService : IShippingService
     private readonly string _token;
     private readonly string _shopId;
     private readonly IOrderRepository _orderRepository;
+    private readonly IOrderLogRepository _orderLogRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public ShippingService(IConfiguration configuration,
         HttpClient client,
         IOrderRepository orderRepository,
+        IOrderLogRepository orderLogRepository,
         IUnitOfWork unitOfWork)
     {
         _token = configuration["GHN:Token"];
@@ -29,6 +32,7 @@ public class ShippingService : IShippingService
         _client = client;
         _client.DefaultRequestHeaders.Add("Token", _token);
         _orderRepository = orderRepository;
+        _orderLogRepository = orderLogRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -200,6 +204,13 @@ public class ShippingService : IShippingService
             case HttpStatusCode.OK:
                 order.ShippingCode = responseModel.Data.OrderCode;
                 order.StatusId = (int)OrderStatusId.Shipped;
+                var orderLog = new OrderLog()
+                {
+                    OrderId = order.Id,
+                    NewStatusId = (int)OrderStatusId.Shipped,
+                    StatusName = OrderStatusId.Shipped.ToString()
+                };
+                _orderLogRepository.Add(orderLog);
                 _orderRepository.Update(order);
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result < 0)

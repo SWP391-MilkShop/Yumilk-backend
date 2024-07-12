@@ -13,6 +13,7 @@ public interface IOrderService
     Task<ResponseModel> GetOrderStatsAsync(OrderStatsQueryModel queryModel);
     Task<ResponseModel> CancelOrderAdminStaffAsync(Guid id);
     Task<ResponseModel> GetOrderHistoryDetailDashBoardAsync(Guid orderId);
+    Task<ResponseModel> UpdateOrderStatusDeliveredAsync(Guid id);
     Task<ResponseModel> GetPaymentMethodStats();
     Task<ResponseModel> GetOrdersStatsByDateAsync(OrderStatsQueryModel model);
     Task<ResponseModel> GetRevenueByMonthAsync(int year);

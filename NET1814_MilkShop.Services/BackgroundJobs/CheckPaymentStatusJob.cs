@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Net.payOS.Types;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
+using NET1814_MilkShop.Repositories.Data.Entities;
+using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories.Interfaces;
 using NET1814_MilkShop.Repositories.UnitOfWork.Interfaces;
 using NET1814_MilkShop.Services.Services.Interfaces;
@@ -16,20 +18,20 @@ public class CheckPaymentStatusJob : IJob
     private readonly IPaymentService _paymentService;
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
-    private readonly IShippingService _shippingService;
+    private readonly IOrderLogRepository _orderLogRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CheckPaymentStatusJob(ILogger<CheckPaymentStatusJob> logger,
         IPaymentService paymentService,
-        IShippingService shippingService,
+        IOrderLogRepository orderLogRepository,
         IProductRepository productRepository,
         IOrderRepository orderRepository,
         IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _paymentService = paymentService;
-        _shippingService = shippingService;
         _orderRepository = orderRepository;
+        _orderLogRepository = orderLogRepository;
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
     }
@@ -109,10 +111,24 @@ public class CheckPaymentStatusJob : IJob
                     {
                         _logger.LogInformation("Order {OrderId} has preorder product", order.Id);
                         existOrder.StatusId = (int)OrderStatusId.Preorder; //Preorder
+                        var orderLog = new OrderLog()
+                        {
+                            OrderId = existOrder.Id,
+                            NewStatusId = (int)OrderStatusId.Preorder,
+                            StatusName = OrderStatusId.Preorder.ToString(),
+                        };
+                        _orderLogRepository.Add(orderLog);
                     }
                     else
                     {
                         existOrder!.StatusId = (int)OrderStatusId.Processing; //Processing
+                        var orderLog = new OrderLog()
+                        {
+                            OrderId = existOrder.Id,
+                            NewStatusId = (int)OrderStatusId.Processing,
+                            StatusName = OrderStatusId.Processing.ToString(),
+                        };
+                        _orderLogRepository.Add(orderLog);
                     }
 
                     existOrder.PaymentDate = DateTime.UtcNow;
@@ -145,8 +161,14 @@ public class CheckPaymentStatusJob : IJob
                     _productRepository.Update(product);
                 }
 
-
                 order.StatusId = (int)OrderStatusId.Cancelled;
+                var cancelLog = new OrderLog()
+                {
+                    OrderId = order.Id,
+                    NewStatusId = (int)OrderStatusId.Cancelled,
+                    StatusName = OrderStatusId.Cancelled.ToString(),
+                };
+                _orderLogRepository.Add(cancelLog);
                 _orderRepository.Update(order);
                 var result = await _unitOfWork.SaveChangesAsync();
                 foreach (var orderDetail in order.OrderDetails)
