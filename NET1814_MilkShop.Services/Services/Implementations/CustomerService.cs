@@ -283,8 +283,10 @@ public sealed class CustomerService : ICustomerService
             .Select(x => new
             {
                 CustomerId = x.Key,
+                CustomerName = x.Select(o => o.Customer!.User.FirstName + " " + o.Customer.User.LastName)
+                    .FirstOrDefault(),
                 TotalPurchase = x.Count(),
-                TotalRevenue = (long)x.Sum(x => x.TotalPrice)
+                TotalRevenue = (long)x.Sum(o => o.TotalPrice)
             }).OrderByDescending(x => x.TotalRevenue).ToListAsync();
         return ResponseModel.Success(ResponseConstants.Get("doanh thu cao nhất của khách hàng đã đặt hàng", true),
             query);
