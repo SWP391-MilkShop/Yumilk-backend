@@ -18,11 +18,14 @@ public sealed class CustomerService : ICustomerService
 {
     private readonly ICustomerRepository _customerRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrderRepository _orderRepository;
 
-    public CustomerService(ICustomerRepository customerRepository, IUnitOfWork unitOfWork)
+    public CustomerService(ICustomerRepository customerRepository, IUnitOfWork unitOfWork,
+        IOrderRepository orderRepository)
     {
         _customerRepository = customerRepository;
         _unitOfWork = unitOfWork;
+        _orderRepository = orderRepository;
     }
 
     private static CustomerModel ToCustomerModel(Customer customer, User user)
@@ -246,6 +249,69 @@ public sealed class CustomerService : ICustomerService
     {
         return await _customerRepository.IsExistEmailAsync(email);
     }
+
+    public async Task<ResponseModel> GetReturnCustomerStatsAsync(int year)
+    {
+        // get all orders that have been delivered in year
+        var orders = _orderRepository.GetOrderQuery()
+            .Where(x => x.CreatedAt.Year == year && x.StatusId == (int)OrderStatusId.Delivered);
+        var query = from firstorder in orders
+            join secondorder in orders on firstorder.CustomerId equals secondorder.CustomerId
+            where firstorder.CreatedAt.Date != secondorder.CreatedAt.Date
+            // Tính toán quý dựa trên tháng của CreatedAt
+            group new { firstorder.CreatedAt, firstorder.CustomerId } by new
+                { Quarter = (firstorder.CreatedAt.Month - 1) / 3 + 1 }
+            into g
+            select new
+            {
+                g.Key.Quarter, // Quý 3 tháng (4 quý)
+                DistinctCustomerCount =
+                    g.Select(x => x.CustomerId).Distinct()
+                        .Count() // Số lượng khách hàng quay trở lại mua hàng trong mỗi quý
+            };
+        var result = await query.ToListAsync();
+        return ResponseModel.Success(
+            ResponseConstants.Get("khách hàng trở lại", result.Count > 0),
+            result
+        );
+    }
+
+    public async Task<ResponseModel> GetTotalPurchaseAsync()
+    {
+        var orders = _orderRepository.GetOrderQuery();
+        var query = await orders.Where(x => x.StatusId == (int)OrderStatusId.Delivered)
+            .GroupBy(x => x.CustomerId)
+            .Select(x => new
+            {
+                CustomerId = x.Key,
+                TotalPurchase = x.Count(),
+                TotalRevenue = (long)x.Sum(x => x.TotalPrice)
+            }).OrderByDescending(x => x.TotalRevenue).ToListAsync();
+        return ResponseModel.Success(ResponseConstants.Get("doanh thu cao nhất của khách hàng đã đặt hàng", true),
+            query);
+    }
+
+    public async Task<ResponseModel> GetTotalPurchaseByCustomerAsync(Guid id, int year)
+    {
+        var isExistCustomer = await _customerRepository.IsExistAsync(id);
+        if (!isExistCustomer)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Khách hàng"));
+        }
+
+        var orders = _orderRepository.GetOrderQuery();
+        var query = await orders.Where(x =>
+                x.CustomerId == id && x.StatusId == (int)OrderStatusId.Delivered && x.CreatedAt.Year == year)
+            .GroupBy(x => x.CustomerId)
+            .Select(x => new
+            {
+                CustomerId = x.Key,
+                TotalPurchase = x.Count(),
+                TotalRevenue = x.Sum(o => o.TotalPrice)
+            }).ToListAsync();
+        return ResponseModel.Success(ResponseConstants.Get("doanh thu của khách hàng", true), query);
+    }
+
 
     /*public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
     {

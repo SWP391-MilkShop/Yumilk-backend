@@ -15,4 +15,6 @@ public class CreatePostModel
     public string? MetaTitle { get; set; }
 
     public string? MetaDescription { get; set; }
+    
+    public string? Thumbnail { get; set; }
 }

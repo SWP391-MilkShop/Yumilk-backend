@@ -29,4 +29,5 @@ public class CheckoutResponseModel
 
     public int VoucherDiscount { get; set; }
     public int PointDiscount { get; set; }
+    public bool IsPreorder { get; set; }
 }

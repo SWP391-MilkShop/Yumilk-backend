@@ -176,7 +176,8 @@ public class CheckoutService : ICheckoutService
             TotalGram = GetTotalGram(cart.CartDetails.ToList()),
             Email = userActive.Email,
             VoucherAmount = voucherDiscount,
-            PointAmount = pointDiscount
+            PointAmount = pointDiscount,
+            IsPreorder = false // set is preorder = false cho order thông thường
         };
         var orderLog = new OrderLog()
         {
@@ -244,6 +245,7 @@ public class CheckoutService : ICheckoutService
                 IsUsingPoint = model.IsUsingPoint,
                 VoucherDiscount = voucherDiscount,
                 PointDiscount = pointDiscount
+                IsPreorder = orders.IsPreorder
             };
             if (model.PaymentMethod == "PAYOS")
             {
@@ -416,6 +418,7 @@ public class CheckoutService : ICheckoutService
             OrderCode = await GenerateOrderCode(),
             TotalGram = product.Product.Unit!.Gram * model.Quantity,
             Email = customerEmail,
+            IsPreorder = true // set is preorder = true
         };
         var orderLog = new OrderLog()
         {
@@ -470,6 +473,7 @@ public class CheckoutService : ICheckoutService
                 },
                 Message = "Bạn sẽ nhận được " + Math.Round(preOrder.TotalAmount * 0.01) +
                           " điểm tích lũy cho đơn hàng này!"
+                IsPreorder = preOrder.IsPreorder
             };
             var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);
             if (paymentLink.Status == "Error")

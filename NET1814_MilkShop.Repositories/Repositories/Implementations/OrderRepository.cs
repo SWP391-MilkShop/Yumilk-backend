@@ -44,7 +44,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
             .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
     }
 
-    public async Task<Order?> GetByIdNoInlcudeAsync(Guid id)
+    public async Task<Order?> GetByIdNoIncludeAsync(Guid id)
     {
         return await _query
             .FirstOrDefaultAsync(x => x.Id == id);

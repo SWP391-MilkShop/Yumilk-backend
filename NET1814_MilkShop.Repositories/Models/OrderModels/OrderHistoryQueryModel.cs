@@ -8,6 +8,8 @@ public class OrderHistoryQueryModel : QueryModel
         ErrorMessage =
             "Total amount must be greater than or equal to 0")] // "Total amount must be greater than or equal to 0
     public int TotalAmount { get; set; } = 0;
+    
+    public bool? IsPreorder { get; set; }
 
     public DateTime? FromOrderDate { get; set; }
     public DateTime? ToOrderDate { get; set; }

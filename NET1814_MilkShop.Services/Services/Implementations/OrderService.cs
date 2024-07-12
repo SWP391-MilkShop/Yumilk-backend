@@ -107,6 +107,11 @@ public class OrderService : IOrderService
                 string.Equals(o.Status!.Name, model.OrderStatus));
         }
 
+        if (model.IsPreorder != null)
+        {
+            query = query.Where(o => o.IsPreorder == model.IsPreorder);
+        }
+
         #endregion
 
         #region(sorting)
@@ -138,6 +143,7 @@ public class OrderService : IOrderService
             OrderStatus = order.Status!.Name,
             CreatedDate = order.CreatedAt,
             PaymentDate = order.PaymentDate,
+            IsPreorder = order.IsPreorder
         });
 
 
@@ -275,6 +281,11 @@ public class OrderService : IOrderService
             query = query.Where(o => o.StatusId == model.OrderStatus);
         }
 
+        if (model.IsPreorder != null)
+        {
+            query = query.Where(o => o.IsPreorder == model.IsPreorder);
+        }
+
         #endregion
 
         #region sort
@@ -300,7 +311,8 @@ public class OrderService : IOrderService
                     h.Product.Name,
                     h.Thumbnail,
                 }),
-            CreatedAt = o.CreatedAt
+            CreatedAt = o.CreatedAt,
+            IsPreorder = o.IsPreorder
         });
 
         #endregion
@@ -359,7 +371,8 @@ public class OrderService : IOrderService
         }).ToList();
         var detail = new OrderDetailModel
         {
-            RecieverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
+            Id = order.Id,
+            ReceiverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
             Email = order.Email,
             PhoneNumber = order.PhoneNumber,
             Address = order.Address,
@@ -375,6 +388,7 @@ public class OrderService : IOrderService
             CreatedAt = order.CreatedAt,
             PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
             Logs = orderStatusLogs
+            IsPreorder = order.IsPreorder
         };
         if (order.StatusId == (int)OrderStatusId.Shipped)
         {
@@ -673,7 +687,8 @@ public class OrderService : IOrderService
         }).ToList();
         var detail = new OrderDetailModel
         {
-            RecieverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
+            Id = order.Id,
+            ReceiverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
             PhoneNumber = order.PhoneNumber,
             Email = order.Email,
             Address = order.Address,
@@ -689,6 +704,7 @@ public class OrderService : IOrderService
             CreatedAt = order.CreatedAt,
             PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
             Logs = orderStatusLogs
+            IsPreorder = order.IsPreorder
         };
         if (order.StatusId == (int)OrderStatusId.Shipped)
         {
@@ -735,5 +751,94 @@ public class OrderService : IOrderService
         }
 
         return ResponseModel.Error(ResponseConstants.Update("trạng thái đơn hàng", false));
+    }
+
+    public async Task<ResponseModel> GetPaymentMethodStats()
+    {
+        var orders = await _orderRepository.GetOrderQuery().Where(x => x.StatusId == (int)OrderStatusId.Delivered)
+            .ToListAsync();
+        if (orders.Count == 0)
+        {
+            return ResponseModel.BadRequest("Không có đơn hàng nào trong hệ thống");
+        }
+
+        var totalCod = orders.Count(x => x.PaymentMethod == "COD");
+        var totalPayOs = orders.Count(x => x.PaymentMethod == "PayOS");
+        var percentCod = totalCod * 100 * 1.0 / orders.Count;
+        var percentPayOs = 100 - percentCod;
+        return ResponseModel.Success(ResponseConstants.Get("thống kê phương thức thanh toán", true), new
+        {
+            totalCod, totalPayOs, percentCod, percentPayOs
+        });
+    }
+
+    public async Task<ResponseModel> GetOrdersStatsByDateAsync(OrderStatsQueryModel queryModel)
+    {
+        if (queryModel.FromOrderDate > DateTime.Now)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.InvalidFromDate);
+        }
+
+        if (queryModel.FromOrderDate > queryModel.ToOrderDate)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
+        }
+
+        // default is from last 30 days
+        var from = queryModel.FromOrderDate ?? DateTime.Now.AddDays(-30);
+        // default is now
+        var to = queryModel.ToOrderDate ?? DateTime.Now;
+
+        var orders = await _orderRepository.GetOrderQuery()
+            .Where(o => o.CreatedAt >= from && o.CreatedAt <= to && o.StatusId != (int)OrderStatusId.Cancelled)
+            .ToListAsync();
+
+        // order per day of week (theo thứ)
+        var orderPerDayOfWeek = orders
+            .GroupBy(o => o.CreatedAt.DayOfWeek)
+            .Select(x => new OrderStatsPerDate
+            {
+                DateTime = x.Key.ToString(),
+                Count = x.Count()
+            }).ToList();
+
+        // order per date (theo ngày)
+        var orderPerDay = orders
+            .GroupBy(x => x.CreatedAt.Date)
+            .Select(x => new OrderStatsPerDate
+            {
+                DateTime = x.Key.ToString("yyyy-MM-dd"),
+                Count = x.Count()
+            }).OrderBy(x => x.DateTime).ToList();
+
+        // order per month (theo tháng)
+        var orderPerMonth = orders
+            .GroupBy(x => x.CreatedAt.Month)
+            .Select(x => new OrderStatsPerDate
+            {
+                DateTime = x.Key.ToString(),
+                Count = x.Count()
+            }).OrderBy(x => x.DateTime).ToList();
+
+        return ResponseModel.Success(ResponseConstants.Get("thống kê đơn hàng theo ngày", true), new
+        {
+            orderPerDayOfWeek,
+            orderPerDay,
+            orderPerMonth
+        });
+    }
+
+    public async Task<ResponseModel> GetRevenueByMonthAsync(int year)
+    {
+        var orders = _orderRepository.GetOrderQuery();
+        var revenueByMonth = await orders
+            .Where(x => x.CreatedAt.Year == year && x.StatusId == (int)OrderStatusId.Delivered)
+            .GroupBy(x => x.CreatedAt.Month)
+            .Select(x => new
+            {
+                Month = x.Key,
+                Revenue = x.Sum(x => x.TotalPrice)
+            }).ToListAsync();
+        return ResponseModel.Success(ResponseConstants.Get("thống kê doanh thu theo tháng", true), revenueByMonth);
     }
 }

@@ -57,6 +57,9 @@ public class Order : IAuditableEntity
 
     [Column("email", TypeName = "nvarchar(255)")]
     public string? Email { get; set; }
+    
+    [Column("is_preorder")]
+    public bool IsPreorder { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }

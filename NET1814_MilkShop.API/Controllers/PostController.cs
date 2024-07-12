@@ -28,7 +28,13 @@ public class PostController : Controller
         var response = await _postService.GetPostsAsync(queryModel);
         return ResponseExtension.Result(response);
     }
-
+    [HttpGet("{postId}")]
+    public async Task<IActionResult> GetPost(Guid postId)
+    {
+        _logger.Information("Get post {postId}", postId);
+        var response = await _postService.GetPostByIdAsync(postId);
+        return ResponseExtension.Result(response);
+    }
     [HttpPost]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     [ServiceFilter(typeof(UserExistsFilter))]

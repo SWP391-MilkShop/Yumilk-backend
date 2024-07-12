@@ -85,7 +85,7 @@ public class PaymentService : IPaymentService
     {
         try
         {
-            var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(orderId);
+            var existOrder = await _orderRepository.GetByIdNoIncludeAsync(orderId);
             if (existOrder is null)
             {
                 return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
@@ -120,7 +120,7 @@ public class PaymentService : IPaymentService
     {
         try
         {
-            var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(orderId);
+            var existOrder = await _orderRepository.GetByIdNoIncludeAsync(orderId);
             if (existOrder is null)
             {
                 return ResponseModel.BadRequest("Không tìm thấy đơn hàng");

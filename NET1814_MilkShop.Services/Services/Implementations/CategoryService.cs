@@ -166,7 +166,19 @@ public class CategoryService : ICategoryService
         {
             return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
         }
-
+        if (model.ParentId != 0)
+        {
+            var categories = await _categoryRepository.GetCategoriesQuery().ToListAsync();
+            if (categories.All(c => c.Id != model.ParentId))
+            {
+                return ResponseModel.BadRequest("Danh mục cha không tồn tại");
+            }
+            if (_categoryRepository.IsAncestorOf(model.ParentId, id, categories))
+            {
+                return ResponseModel.BadRequest("Danh mục cha này là danh mục con của danh mục hiện tại");
+            }
+            existingCategory.ParentId = model.ParentId;
+        }
         if (!string.IsNullOrEmpty(model.Name))
         {
             // Check if category name is changed

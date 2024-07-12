@@ -16,4 +16,7 @@ public interface ICustomerService
     /*Task<bool> IsCustomerExistAsync(string email, string phoneNumber);*/
     Task<bool> IsExistPhoneNumberAsync(string phoneNumber);
     Task<bool> IsExistEmailAsync(string email);
+    Task<ResponseModel> GetReturnCustomerStatsAsync(int year);
+    Task<ResponseModel> GetTotalPurchaseAsync();
+    Task<ResponseModel> GetTotalPurchaseByCustomerAsync(Guid id, int year);
 }

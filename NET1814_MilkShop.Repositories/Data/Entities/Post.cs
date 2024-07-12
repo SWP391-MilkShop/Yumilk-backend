@@ -24,6 +24,9 @@ public class Post : IAuditableEntity
 
     [Column("meta_description", TypeName = "nvarchar(max)")]
     public string MetaDescription { get; set; } = "";
+    
+    [Column("thumbnail", TypeName = "nvarchar(255)")]
+    public string? Thumbnail { get; set; }
 
     [Column("is_active")] public bool IsActive { get; set; }
 

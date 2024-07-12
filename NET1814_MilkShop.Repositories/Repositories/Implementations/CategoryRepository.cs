@@ -27,31 +27,7 @@ public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
         return _query.AnyAsync(x => x.Name.Equals(name) && x.ParentId == parentId);
     }
-
-    // public async Task<HashSet<int>> GetChildCategoryIds(int parentId)
-    // {
-    //     if(parentId == 0) return new HashSet<int>();
-    //     var categoryIds = new HashSet<int> { parentId };
-    //     var categories = await _query.ToListAsync();
-    //     var childCategoryIds = GetChildCategoryIdsRecursive(categories, parentId);
-    //     categoryIds.UnionWith(childCategoryIds);
-    //     return categoryIds;
-    // }
-    //
-    // private HashSet<int> GetChildCategoryIdsRecursive(List<Category> categories, int parentId)
-    // {
-    //     var childCategories = categories.Where(c => c.ParentId == parentId).ToList();
-    //     var childCategoryIds = new HashSet<int>();
-    //
-    //     foreach (var childCategory in childCategories)
-    //     {
-    //         childCategoryIds.Add(childCategory.Id);
-    //         var grandChildCategoryIds = GetChildCategoryIdsRecursive(categories, childCategory.Id);
-    //         childCategoryIds.UnionWith(grandChildCategoryIds);
-    //     }
-    //
-    //     return childCategoryIds;
-    // }
+    
     public HashSet<int> GetChildCategoryIds(int parentId, List<Category> categories)
     {
         if (parentId == 0) return new HashSet<int>();
@@ -85,5 +61,18 @@ public class CategoryRepository : Repository<Category>, ICategoryRepository
         }
 
         return childCategoryIds;
+    }
+    public bool IsAncestorOf(int childId, int ancestorId, List<Category> categories)
+    {
+        var currentParentId = categories.FirstOrDefault(c => c.Id == childId)?.ParentId;
+        while (currentParentId.HasValue)
+        {
+            if (currentParentId.Value == ancestorId)
+            {
+                return true;
+            }
+            currentParentId = categories.FirstOrDefault(c => c.Id == currentParentId.Value)?.ParentId;
+        }
+        return false;
     }
 }
