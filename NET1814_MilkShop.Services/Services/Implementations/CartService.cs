@@ -211,7 +211,7 @@ public class CartService : ICartService
             };
             return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", true), newCart);
         }
-
+        
         var searchTerm = StringExtension.Normalize(model.SearchTerm) ?? "";
         var cartDetailQuery = _cartDetailRepository
             .GetCartDetailQuery()
@@ -244,7 +244,9 @@ public class CartService : ICartService
             model.PageSize
         );
         var totalPrice = pagedList.Items.Sum(x => (x.SalePrice > 0 ? x.SalePrice : x.OriginalPrice) * x.Quantity);
+        var totalPriceAfterDiscount = totalPrice;
         var voucherDiscount = 0;
+        var voucherMessage = "";
         if (model.VoucherId != Guid.Empty)
         {
             var voucher = await _voucherRepository.GetByIdAsync(model.VoucherId);
@@ -253,31 +255,37 @@ public class CartService : ICartService
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Voucher"));
             }
 
-            var handleVoucher = DiscountExtension.ApplyVoucher(voucher, totalPrice);
-            if (handleVoucher.StatusCode != 200) return handleVoucher;
+            var handleVoucher = DiscountExtension.ApplyVoucher(voucher, totalPriceAfterDiscount);
+            // if (handleVoucher.StatusCode != 200) return handleVoucher;
             voucherDiscount = (int)(handleVoucher.Data ?? 0);
-            totalPrice -= voucherDiscount;
+            voucherMessage = handleVoucher.Message;
+            totalPriceAfterDiscount -= voucherDiscount;
         }
         var pointDiscount = 0;
+        var pointMessage = "";
         if (model.IsUsingPoint)
         {
-            var handlePoint = DiscountExtension.ApplyPoint(customer, totalPrice);
-            if (handlePoint.StatusCode != 200) return handlePoint;
+            var handlePoint = DiscountExtension.ApplyPoint(customer, totalPriceAfterDiscount);
+            // if (handlePoint.StatusCode != 200) return handlePoint;
             pointDiscount = (int)(handlePoint.Data ?? 0);
-            totalPrice -= pointDiscount;
+            pointMessage = handlePoint.Message;
+            totalPriceAfterDiscount -= pointDiscount;
         }
         var cartModel = new CartModel
         {
             Id = cart.Id,
             CustomerId = cart.CustomerId,
-            TotalPrice = totalPrice, // tổng tiền sau khi giảm giá
+            TotalPrice = totalPrice, // tổng tiền trước khi giảm giá
+            TotalPriceAfterDiscount = totalPriceAfterDiscount, // tổng tiền sau khi giảm giá
             TotalQuantity = pagedList.Items.Sum(x => x.Quantity),
             TotalGram = pagedList.Items.Sum(x => x.Gram * x.Quantity),
             CartItems = pagedList,
             VoucherId = model.VoucherId,
             IsUsingPoint = model.IsUsingPoint,
             VoucherDiscount = voucherDiscount,
-            PointDiscount = pointDiscount
+            PointDiscount = pointDiscount,
+            VoucherMessage = voucherMessage,
+            PointMessage = pointMessage
         };
         return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", true), cartModel);
     }
