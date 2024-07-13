@@ -380,7 +380,7 @@ public class OrderService : IOrderService
             OrderDetail = pModel,
             TotalPriceBeforeDiscount =
                 order.VoucherAmount + order.PointAmount + order.TotalPrice, //tổng tiền trước khi giảm giá
-            VoucherDisCount = order.VoucherAmount,
+            VoucherDiscount = order.VoucherAmount,
             PointDiscount = order.PointAmount,
             TotalPriceAfterDiscount = order.TotalPrice, // tổng tiền sau khi giảm giá
             ShippingFee = order.ShippingFee,
@@ -700,7 +700,7 @@ public class OrderService : IOrderService
             OrderDetail = pModel,
             TotalPriceBeforeDiscount =
                 order.VoucherAmount + order.PointAmount + order.TotalPrice, //tổng tiền trước khi giảm giá
-            VoucherDisCount = order.VoucherAmount,
+            VoucherDiscount = order.VoucherAmount,
             PointDiscount = order.PointAmount,
             TotalPriceAfterDiscount = order.TotalPrice, // tổng tiền sau khi giảm giá
             ShippingFee = order.ShippingFee,
