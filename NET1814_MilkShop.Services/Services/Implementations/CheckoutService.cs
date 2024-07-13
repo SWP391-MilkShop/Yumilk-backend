@@ -192,7 +192,7 @@ public class CheckoutService : ICheckoutService
             PointAmount = pointDiscount,
             IsPreorder = false // set is preorder = false cho order thông thường
         };
-        var orderLog = new OrderLog()
+        var orderLog = new OrderLog
         {
             OrderId = orders.Id,
             NewStatusId = (int)OrderStatusId.Pending,

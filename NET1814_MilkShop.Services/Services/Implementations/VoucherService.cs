@@ -33,7 +33,8 @@ public class VoucherService : IVoucherService
         var query = _voucherRepository.GetVouchersQuery();
         // Filter
         query = query.Where(v => (!model.IsActive.HasValue || v.IsActive == model.IsActive)
-                                 && (!model.MinPriceCondition.HasValue || v.MinPriceCondition <= model.MinPriceCondition) // Filter by min price condition
+                                 && (!model.MinPriceCondition.HasValue ||
+                                     v.MinPriceCondition <= model.MinPriceCondition) // Filter by min price condition
                                  && (!model.StartDate.HasValue || v.StartDate >= model.StartDate)
                                  && (!model.EndDate.HasValue || v.EndDate <= model.EndDate)
                                  && (string.IsNullOrEmpty(searchTerm) || v.Code.Contains(searchTerm) ||
@@ -80,12 +81,14 @@ public class VoucherService : IVoucherService
         {
             return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
         }
+
         // Generate random code
         var code = CodeExtension.GenerateRandomString(10);
         while (await _voucherRepository.IsCodeExistAsync(code))
         {
             code = CodeExtension.GenerateRandomString(10);
         }
+
         var voucher = new Voucher
         {
             Code = code,
@@ -150,7 +153,8 @@ public class VoucherService : IVoucherService
             {
                 return ResponseModel.BadRequest("Số lượng voucher phải lớn hơn 0");
             }
-            if(voucher.MinPriceCondition < 0)
+
+            if (voucher.MinPriceCondition < 0)
             {
                 return ResponseModel.BadRequest("Giá trị đơn hàng tối thiểu phải lớn hơn 0");
             }
@@ -208,9 +212,23 @@ public class VoucherService : IVoucherService
             Quantity = voucher.Quantity,
             Percent = voucher.Percent,
             IsActive = voucher.IsActive,
+            IsAvailable = IsVoucherValid(voucher),
             MaxDiscount = voucher.MaxDiscount,
             CreatedAt = voucher.CreatedAt,
             MinPriceCondition = voucher.MinPriceCondition
         };
+    }
+
+    /// <summary>
+    /// Check if voucher is active, not expired and still have quantity
+    /// </summary>
+    /// <param name="voucher"></param>
+    /// <returns></returns>
+    private static bool IsVoucherValid(Voucher voucher)
+    {
+        return voucher.IsActive
+               && voucher.StartDate <= DateTime.UtcNow
+               && voucher.EndDate >= DateTime.UtcNow
+               && voucher.Quantity > 0;
     }
 }

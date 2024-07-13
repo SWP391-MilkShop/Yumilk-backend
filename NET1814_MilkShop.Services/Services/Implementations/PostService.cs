@@ -88,7 +88,7 @@ public class PostService : IPostService
             return ResponseModel.BadRequest(ResponseConstants.NotFound("bài viết"));
         }
 
-        var model = new PostModel()
+        var model = new PostModel
         {
             Id = post.Id,
             Title = post.Title,

@@ -204,7 +204,7 @@ public class ShippingService : IShippingService
             case HttpStatusCode.OK:
                 order.ShippingCode = responseModel.Data.OrderCode;
                 order.StatusId = (int)OrderStatusId.Shipped;
-                var orderLog = new OrderLog()
+                var orderLog = new OrderLog
                 {
                     OrderId = order.Id,
                     NewStatusId = (int)OrderStatusId.Shipped,

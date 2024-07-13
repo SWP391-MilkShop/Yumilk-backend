@@ -364,7 +364,7 @@ public class OrderService : IOrderService
             Thumbnail = x.Thumbnail
         }).ToList();
         var orderLog = await _orderLogRepository.GetOrderLogQuery(orderId).ToListAsync();
-        var orderStatusLogs = orderLog.Select(x => new OrderLogsModel()
+        var orderStatusLogs = orderLog.Select(x => new OrderLogsModel
         {
             Status = x.StatusName,
             CreatedAt = x.CreatedAt
@@ -684,7 +684,7 @@ public class OrderService : IOrderService
         }).ToList();
 
         var orderLog = await _orderLogRepository.GetOrderLogQuery(orderId).ToListAsync();
-        var orderStatusLogs = orderLog.Select(x => new OrderLogsModel()
+        var orderStatusLogs = orderLog.Select(x => new OrderLogsModel
         {
             Status = x.StatusName,
             CreatedAt = x.CreatedAt

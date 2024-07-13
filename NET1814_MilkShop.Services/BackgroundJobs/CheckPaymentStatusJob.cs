@@ -2,7 +2,6 @@ using Microsoft.Extensions.Logging;
 using Net.payOS.Types;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
 using NET1814_MilkShop.Repositories.Data.Entities;
-using NET1814_MilkShop.Repositories.Models.OrderModels;
 using NET1814_MilkShop.Repositories.Repositories.Interfaces;
 using NET1814_MilkShop.Repositories.UnitOfWork.Interfaces;
 using NET1814_MilkShop.Services.Services.Interfaces;
@@ -111,7 +110,7 @@ public class CheckPaymentStatusJob : IJob
                     {
                         _logger.LogInformation("Order {OrderId} has preorder product", order.Id);
                         existOrder.StatusId = (int)OrderStatusId.Preorder; //Preorder
-                        var orderLog = new OrderLog()
+                        var orderLog = new OrderLog
                         {
                             OrderId = existOrder.Id,
                             NewStatusId = (int)OrderStatusId.Preorder,
@@ -122,7 +121,7 @@ public class CheckPaymentStatusJob : IJob
                     else
                     {
                         existOrder!.StatusId = (int)OrderStatusId.Processing; //Processing
-                        var orderLog = new OrderLog()
+                        var orderLog = new OrderLog
                         {
                             OrderId = existOrder.Id,
                             NewStatusId = (int)OrderStatusId.Processing,
@@ -162,7 +161,7 @@ public class CheckPaymentStatusJob : IJob
                 }
 
                 order.StatusId = (int)OrderStatusId.Cancelled;
-                var cancelLog = new OrderLog()
+                var cancelLog = new OrderLog
                 {
                     OrderId = order.Id,
                     NewStatusId = (int)OrderStatusId.Cancelled,
