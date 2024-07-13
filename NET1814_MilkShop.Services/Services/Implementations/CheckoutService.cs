@@ -37,7 +37,7 @@ public class CheckoutService : ICheckoutService
         ICartRepository cartRepository,
         ICustomerRepository customerRepository,
         IPaymentService paymentService,
-        IPreorderProductRepository preorderProductRepository, 
+        IPreorderProductRepository preorderProductRepository,
         IEmailService emailService,
         IUserRepository userRepository,
         ICartDetailRepository cartDetailRepository,
@@ -67,14 +67,14 @@ public class CheckoutService : ICheckoutService
     public async Task<ResponseModel> Checkout(Guid userId, CheckoutModel model)
     {
         // var userActive = await _userRepository.GetByIdAsync(userId);
-        var userActive = await _customerRepository.GetCustomersQuery()
+        var customer = await _customerRepository.GetCustomersQuery()
             .Include(c => c.User).FirstOrDefaultAsync(c => c.UserId == userId);
-        if (userActive!.User.IsBanned)
+        if (customer!.User.IsBanned)
         {
             return ResponseModel.BadRequest(ResponseConstants.Banned);
         }
 
-        if (!userActive.User.IsActive)
+        if (!customer.User.IsActive)
         {
             return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
         }
@@ -133,20 +133,32 @@ public class CheckoutService : ICheckoutService
         var totalPrice = GetTotalPrice(cart.CartDetails.ToList());
         if (model.VoucherId != Guid.Empty)
         {
-            var handleVoucher = await ApplyVoucher(model.VoucherId, totalPrice);
+            var voucher = await _voucherRepository.GetByIdAsync(model.VoucherId);
+            if (voucher == null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Voucher"));
+            }
+
+            var handleVoucher = DiscountExtension.ApplyVoucher(voucher, totalPrice);
             if (handleVoucher.StatusCode != 200) return handleVoucher;
-            voucherDiscount += (int)handleVoucher.Data!;
-            totalPrice -= (int)handleVoucher.Data!;
+            voucherDiscount = (int)handleVoucher.Data!;
+            totalPrice -= voucherDiscount;
+            // update voucher quantity
+            voucher.Quantity--;
+            _voucherRepository.Update(voucher);
         }
 
         // handle point
         var pointDiscount = 0;
         if (model.IsUsingPoint)
         {
-            var handlePoint = ApplyPoint(userActive, totalPrice);
+            var handlePoint = DiscountExtension.ApplyPoint(customer, totalPrice);
             if (handlePoint.StatusCode != 200) return handlePoint;
-            pointDiscount += (int)handlePoint.Data!;
-            totalPrice -= (int)handlePoint.Data!;
+            pointDiscount = (int)handlePoint.Data!;
+            totalPrice -= pointDiscount;
+            // trừ điểm
+            customer.Point -= pointDiscount; 
+            _customerRepository.Update(customer);
         }
 
         // thêm vào order
@@ -174,7 +186,7 @@ public class CheckoutService : ICheckoutService
             StatusId = (int)OrderStatusId.Pending,
             OrderCode = model.PaymentMethod == "COD" ? null : await GenerateOrderCode(),
             TotalGram = GetTotalGram(cart.CartDetails.ToList()),
-            Email = userActive.Email,
+            Email = customer.Email,
             VoucherAmount = voucherDiscount,
             PointAmount = pointDiscount,
             IsPreorder = false // set is preorder = false cho order thông thường
@@ -228,7 +240,7 @@ public class CheckoutService : ICheckoutService
                 OrderId = orders.Id,
                 CustomerId = orders.CustomerId,
                 FullName = orders.ReceiverName,
-                Email = userActive.Email,
+                Email = customer.Email,
                 TotalPrice = orders.TotalPrice, // Tổng tiền sau khi giảm giá 
                 TotalAmount = orders.TotalAmount, // Tổng tiền + ship
                 TotalGram = orders.TotalGram,
@@ -261,81 +273,12 @@ public class CheckoutService : ICheckoutService
                 resp.CheckoutUrl = paymentData.CheckoutUrl;
             }
 
-            await _emailService.SendPurchaseEmailAsync(userActive.Email!, userActive.User.FirstName!);
+            await _emailService.SendPurchaseEmailAsync(customer.Email!, customer.User.FirstName!);
             return ResponseModel.Success(ResponseConstants.Create("đơn hàng", true), resp);
         }
 
         return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
     }
-
-    #region Discount
-
-    /// <summary>
-    /// Số point sử dụng = discount price
-    /// </summary>
-    /// <param name="customer"></param>
-    /// <param name="totalPrice"></param>
-    /// <returns></returns>
-    private ResponseModel ApplyPoint(Customer customer, int totalPrice)
-    {
-        if (customer.Point < 100)
-        {
-            return ResponseModel.BadRequest("Số điểm tích lũy không đủ để sử dụng. Tối thiểu 100 điểm để sử dụng");
-        }
-
-        var discountPrice = customer.Point;
-        var halfPrice = totalPrice.ApplyPercentage(50);
-        if (customer.Point > halfPrice)
-        {
-            discountPrice = halfPrice;
-        }
-
-        customer.Point -= discountPrice; // trừ điểm
-        _customerRepository.Update(customer);
-        return ResponseModel.Success("Áp dụng điểm tích lũy thành công", discountPrice);
-    }
-
-    private async Task<ResponseModel> ApplyVoucher(Guid voucherId, int totalPrice)
-    {
-        var voucher = await _voucherRepository.GetByIdAsync(voucherId);
-        if (voucher == null)
-        {
-            return ResponseModel.BadRequest(ResponseConstants.NotFound("Voucher"));
-        }
-
-        if (voucher.StartDate > DateTime.UtcNow || !voucher.IsActive)
-        {
-            return ResponseModel.BadRequest("Voucher chưa được kích hoạt");
-        }
-
-        if (voucher.EndDate < DateTime.UtcNow)
-        {
-            return ResponseModel.BadRequest("Voucher đã hết hạn");
-        }
-
-        if (voucher.Quantity == 0)
-        {
-            return ResponseModel.BadRequest("Voucher đã hết lượt sử dụng");
-        }
-
-        if (totalPrice < voucher.MinPriceCondition)
-        {
-            return ResponseModel.BadRequest("Đơn hàng không đủ điều kiện sử dụng voucher");
-        }
-
-        var discountPrice = totalPrice.ApplyPercentage(voucher.Percent);
-        if (discountPrice > voucher.MaxDiscount && voucher.MaxDiscount != 0)
-        {
-            discountPrice = voucher.MaxDiscount;
-        }
-
-        // update voucher quantity
-        voucher.Quantity--;
-        _voucherRepository.Update(voucher);
-        return ResponseModel.Success("Áp dụng voucher thành công", discountPrice);
-    }
-
-    #endregion
 
     /// <summary>
     /// checkout preorder

@@ -8,7 +8,7 @@ public class VoucherQueryModel : QueryModel
     /// <summary>
     /// Filter voucher satisfy min_price_condition
     /// </summary>
-    public int MinPriceCondition { get; set; } = 0;
+    public int? MinPriceCondition { get; set; }
     /// <summary>
     /// Search by voucher code and description
     /// </summary>

@@ -33,7 +33,7 @@ public class VoucherService : IVoucherService
         var query = _voucherRepository.GetVouchersQuery();
         // Filter
         query = query.Where(v => (!model.IsActive.HasValue || v.IsActive == model.IsActive)
-                                 && v.MinPriceCondition <= model.MinPriceCondition // Filter by min price condition
+                                 && (!model.MinPriceCondition.HasValue || v.MinPriceCondition <= model.MinPriceCondition) // Filter by min price condition
                                  && (!model.StartDate.HasValue || v.StartDate >= model.StartDate)
                                  && (!model.EndDate.HasValue || v.EndDate <= model.EndDate)
                                  && (string.IsNullOrEmpty(searchTerm) || v.Code.Contains(searchTerm) ||
@@ -126,10 +126,10 @@ public class VoucherService : IVoucherService
         voucher.MinPriceCondition = model.MinPriceCondition ?? voucher.MinPriceCondition;
         if (voucher.IsActive)
         {
-            if (voucher.StartDate <= DateTime.UtcNow)
-            {
-                return ResponseModel.BadRequest("Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại");
-            }
+            // if (voucher.StartDate <= DateTime.UtcNow)
+            // {
+            //     return ResponseModel.BadRequest("Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại");
+            // }
 
             if (voucher.StartDate > voucher.EndDate)
             {

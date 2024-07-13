@@ -10,6 +10,7 @@ public class CheckoutResponseModel
     public string? Email { get; set; }
 
     public int TotalPrice { get; set; }
+    
     public int TotalAmount { get; set; }
 
     public int TotalGram { get; set; }
