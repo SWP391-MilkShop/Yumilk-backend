@@ -123,6 +123,10 @@ public class VoucherService : IVoucherService
         voucher.StartDate = model.StartDate ?? voucher.StartDate;
         voucher.EndDate = model.EndDate ?? voucher.EndDate;
         voucher.Quantity = model.Quantity ?? voucher.Quantity;
+        if(model.Percent is > 50 or < 5)
+        {
+            return ResponseModel.BadRequest("Phần trăm giảm giá phải từ 5% đến 50%");
+        }
         voucher.Percent = model.Percent ?? voucher.Percent;
         voucher.IsActive = model.IsActive;
         voucher.MaxDiscount = model.MaxDiscount ?? voucher.MaxDiscount;
@@ -139,9 +143,9 @@ public class VoucherService : IVoucherService
                 return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
             }
 
-            if (voucher.Percent is >= 100 or <= 0)
+            if (voucher.Percent is > 50 or < 5)
             {
-                return ResponseModel.BadRequest("Phần trăm giảm giá phải lớn hơn 0 và nhỏ hơn 100");
+                return ResponseModel.BadRequest("Phần trăm giảm giá phải từ 5% đến 50%");
             }
 
             if (voucher.MaxDiscount < 0)

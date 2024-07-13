@@ -17,6 +17,7 @@ public class CreateVoucherModel
     public int Quantity { get; set; }
     
     [Required(ErrorMessage = "Percent is required")]
+    [Range(5, 50, ErrorMessage = "Percent must be between 5 and 50")]
     public int Percent { get; set; }
     
     [Range(0, int.MaxValue, ErrorMessage = "Max Discount must be greater than or equal to 0")]
