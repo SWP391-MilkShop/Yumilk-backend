@@ -19,6 +19,7 @@ public class CartService : ICartService
     private readonly ICartDetailRepository _cartDetailRepository;
     private readonly IProductRepository _productRepository;
     private readonly ICustomerRepository _customerRepository;
+    private readonly IVoucherRepository _voucherRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CartService(
@@ -26,13 +27,13 @@ public class CartService : ICartService
         ICartDetailRepository cartDetailRepository,
         IUnitOfWork unitOfWork,
         IProductRepository productRepository,
-        ICustomerRepository customerRepository
-    )
+        ICustomerRepository customerRepository, IVoucherRepository voucherRepository)
     {
         _cartRepository = cartRepository;
         _cartDetailRepository = cartDetailRepository;
         _productRepository = productRepository;
         _customerRepository = customerRepository;
+        _voucherRepository = voucherRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -180,10 +181,21 @@ public class CartService : ICartService
 
     public async Task<ResponseModel> GetCartAsync(Guid customerId, CartQueryModel model)
     {
+        var customer = await _customerRepository.GetCustomersQuery()
+            .Include(c => c.User)
+            .FirstOrDefaultAsync(c => c.UserId == customerId);
+        if (customer!.User.IsBanned)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.Banned);
+        }
+
+        if (!customer.User.IsActive)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
+        }
         var cart = await _cartRepository
             .GetCartQuery()
-            .Where(x => x.CustomerId == customerId)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(x => x.CustomerId == customerId);
         if (cart == null)
         {
             var newCart = new CartModel
@@ -231,14 +243,41 @@ public class CartService : ICartService
             model.Page,
             model.PageSize
         );
+        var totalPrice = pagedList.Items.Sum(x => (x.SalePrice > 0 ? x.SalePrice : x.OriginalPrice) * x.Quantity);
+        var voucherDiscount = 0;
+        if (model.VoucherId != Guid.Empty)
+        {
+            var voucher = await _voucherRepository.GetByIdAsync(model.VoucherId);
+            if (voucher == null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Voucher"));
+            }
+
+            var handleVoucher = DiscountExtension.ApplyVoucher(voucher, totalPrice);
+            if (handleVoucher.StatusCode != 200) return handleVoucher;
+            voucherDiscount = (int)(handleVoucher.Data ?? 0);
+            totalPrice -= voucherDiscount;
+        }
+        var pointDiscount = 0;
+        if (model.IsUsingPoint)
+        {
+            var handlePoint = DiscountExtension.ApplyPoint(customer, totalPrice);
+            if (handlePoint.StatusCode != 200) return handlePoint;
+            pointDiscount = (int)(handlePoint.Data ?? 0);
+            totalPrice -= pointDiscount;
+        }
         var cartModel = new CartModel
         {
             Id = cart.Id,
             CustomerId = cart.CustomerId,
-            TotalPrice = pagedList.Items.Sum(x => (x.SalePrice > 0 ? x.SalePrice : x.OriginalPrice) * x.Quantity),
+            TotalPrice = totalPrice, // tổng tiền sau khi giảm giá
             TotalQuantity = pagedList.Items.Sum(x => x.Quantity),
             TotalGram = pagedList.Items.Sum(x => x.Gram * x.Quantity),
-            CartItems = pagedList
+            CartItems = pagedList,
+            VoucherId = model.VoucherId,
+            IsUsingPoint = model.IsUsingPoint,
+            VoucherDiscount = voucherDiscount,
+            PointDiscount = pointDiscount
         };
         return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", true), cartModel);
     }
