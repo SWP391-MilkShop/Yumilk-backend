@@ -30,5 +30,5 @@ public class UpdateProductModel
     [Range(0, 3, ErrorMessage = "Status must be in range 1-3")]
     public int StatusId { get; set; } = 0;
 
-    public bool IsActive { get; set; } = false;
+    public bool IsActive { get; set; } 
 }
