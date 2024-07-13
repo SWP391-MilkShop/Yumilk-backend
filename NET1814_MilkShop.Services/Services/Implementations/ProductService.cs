@@ -245,7 +245,7 @@ public class ProductService : IProductService
         product.Quantity = model.Quantity ?? product.Quantity;
         product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
         product.SalePrice = model.SalePrice ?? product.SalePrice;
-        product.IsActive = model.IsActive;
+        product.IsActive = model.IsActive ?? product.IsActive;
         // check if product is ordered
         if (product.StatusId != (int)ProductStatusId.OutOfStock)
         {
