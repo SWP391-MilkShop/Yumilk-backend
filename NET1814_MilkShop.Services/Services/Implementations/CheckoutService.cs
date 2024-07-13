@@ -131,6 +131,7 @@ public class CheckoutService : ICheckoutService
         var voucherDiscount = 0;
         // handle voucher
         var totalPrice = GetTotalPrice(cart.CartDetails.ToList());
+        var totalPriceBeforeDiscount = totalPrice;
         if (model.VoucherId != Guid.Empty)
         {
             var voucher = await _voucherRepository.GetByIdAsync(model.VoucherId);
@@ -157,7 +158,7 @@ public class CheckoutService : ICheckoutService
             pointDiscount = (int)handlePoint.Data!;
             totalPrice -= pointDiscount;
             // trừ điểm
-            customer.Point -= pointDiscount; 
+            customer.Point -= pointDiscount;
             _customerRepository.Update(customer);
         }
 
@@ -241,10 +242,11 @@ public class CheckoutService : ICheckoutService
                 CustomerId = orders.CustomerId,
                 FullName = orders.ReceiverName,
                 Email = customer.Email,
-                TotalPrice = orders.TotalPrice, // Tổng tiền sau khi giảm giá 
-                TotalAmount = orders.TotalAmount, // Tổng tiền + ship
-                TotalGram = orders.TotalGram,
+                TotalPriceBeforeDiscount = totalPriceBeforeDiscount, // Tổng tiền trước khi giảm giá 
+                TotalPriceAfterDiscount = orders.TotalPrice, // Tổng tiền sau khi giảm giá
                 ShippingFee = orders.ShippingFee,
+                TotalAmount = orders.TotalAmount, // Tổng tiền sau khi giảm giá + ship
+                TotalGram = orders.TotalGram,
                 Address = orders.Address,
                 PhoneNumber = orders.PhoneNumber,
                 Note = orders.Note,
@@ -341,7 +343,7 @@ public class CheckoutService : ICheckoutService
                 : (product.Product.SalePrice * model.Quantity),
             ShippingFee = model.ShippingFee,
             TotalAmount = product.Product.SalePrice == 0
-                ? (product.Product.OriginalPrice * model.Quantity)
+                ? (product.Product.OriginalPrice * model.Quantity) + model.ShippingFee
                 : (product.Product.SalePrice * model.Quantity) + model.ShippingFee,
             ReceiverName = customerAddress.ReceiverName + "",
             Address =
@@ -397,9 +399,12 @@ public class CheckoutService : ICheckoutService
                 CustomerId = preOrder.CustomerId,
                 FullName = preOrder.ReceiverName,
                 Email = customerEmail,
+                TotalPriceBeforeDiscount = preOrder.TotalPrice, // Tổng tiền trước khi giảm giá
+                TotalPriceAfterDiscount =
+                    preOrder.TotalPrice, // Tổng tiền sau khi giảm giá   (preorder không áp dụng point + voucher)
+                ShippingFee = preOrder.ShippingFee,
                 TotalAmount = preOrder.TotalAmount,
                 TotalGram = preOrder.TotalGram,
-                ShippingFee = preOrder.ShippingFee,
                 Address = preOrder.Address,
                 PhoneNumber = preOrder.PhoneNumber,
                 Note = preOrder.Note,

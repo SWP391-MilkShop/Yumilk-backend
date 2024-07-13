@@ -9,9 +9,10 @@ public class OrderDetailModel
     public string? Address { get; set; }
     public string? Note { get; set; }
     public List<CheckoutOrderDetailModel> OrderDetail { get; set; } = [];
+    public int TotalPriceBeforeDiscount { get; set; }
     public int VoucherDisCount { get; set; }
     public int PointDiscount { get; set; }
-    public int TotalPrice { get; set; }
+    public int TotalPriceAfterDiscount { get; set; }
     public int ShippingFee { get; set; }
     public int TotalAmount { get; set; }
     public string? PaymentMethod { get; set; }

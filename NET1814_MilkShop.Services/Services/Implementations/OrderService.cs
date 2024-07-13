@@ -378,9 +378,11 @@ public class OrderService : IOrderService
             Address = order.Address,
             Note = order.Note,
             OrderDetail = pModel,
+            TotalPriceBeforeDiscount =
+                order.VoucherAmount + order.PointAmount + order.TotalPrice, //tổng tiền trước khi giảm giá
             VoucherDisCount = order.VoucherAmount,
             PointDiscount = order.PointAmount,
-            TotalPrice = order.TotalPrice,
+            TotalPriceAfterDiscount = order.TotalPrice, // tổng tiền sau khi giảm giá
             ShippingFee = order.ShippingFee,
             TotalAmount = order.TotalAmount,
             PaymentMethod = order.PaymentMethod,
@@ -696,9 +698,11 @@ public class OrderService : IOrderService
             Address = order.Address,
             Note = order.Note,
             OrderDetail = pModel,
+            TotalPriceBeforeDiscount =
+                order.VoucherAmount + order.PointAmount + order.TotalPrice, //tổng tiền trước khi giảm giá
             VoucherDisCount = order.VoucherAmount,
             PointDiscount = order.PointAmount,
-            TotalPrice = order.TotalPrice,
+            TotalPriceAfterDiscount = order.TotalPrice, // tổng tiền sau khi giảm giá
             ShippingFee = order.ShippingFee,
             TotalAmount = order.TotalAmount,
             PaymentMethod = order.PaymentMethod,
@@ -745,6 +749,8 @@ public class OrderService : IOrderService
         // Handle order logs
         order.StatusId = (int)OrderStatusId.Delivered;
         AddOrderStatusLog(order.Id, (int)OrderStatusId.Delivered);
+        // Handle payment date
+        order.PaymentDate = DateTime.UtcNow;
         _orderRepository.Update(order);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
@@ -849,7 +855,7 @@ public class OrderService : IOrderService
             .Select(x => new
             {
                 Month = x.Key,
-                Revenue = x.Sum(x => x.TotalPrice)
+                Revenue = x.Sum(o => o.TotalPrice)
             }).ToListAsync();
         return ResponseModel.Success(ResponseConstants.Get("thống kê doanh thu theo tháng", true), revenueByMonth);
     }
