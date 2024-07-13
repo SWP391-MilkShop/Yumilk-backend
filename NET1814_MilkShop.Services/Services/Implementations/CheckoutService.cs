@@ -157,7 +157,7 @@ public class CheckoutService : ICheckoutService
             if (handlePoint.StatusCode != 200) return handlePoint;
             pointDiscount = (int)handlePoint.Data!;
             totalPrice -= pointDiscount;
-            // trừ điểm
+            // trừ xu
             customer.Point -= pointDiscount;
             _customerRepository.Update(customer);
         }
@@ -254,7 +254,7 @@ public class CheckoutService : ICheckoutService
                 CreatedAt = orders.CreatedAt,
                 OrderDetail = ToOrderDetailModel(cartTemp),
                 Message = "Bạn sẽ nhận được " + orders.TotalPrice.ApplyPercentage(1) +
-                          " điểm tích lũy cho đơn hàng này khi đơn hàng được giao thành công!",
+                          " xu cho đơn hàng này khi đơn hàng được giao thành công!",
                 VoucherId = model.VoucherId,
                 IsUsingPoint = model.IsUsingPoint,
                 VoucherDiscount = voucherDiscount,
@@ -420,7 +420,7 @@ public class CheckoutService : ICheckoutService
                     Thumbnail = preOrderDetail.Product.Thumbnail
                 },
                 Message = "Bạn sẽ nhận được " + Math.Round(preOrder.TotalAmount * 0.01) +
-                          " điểm tích lũy cho đơn hàng này!",
+                          " xu cho đơn hàng này!",
                 IsPreorder = preOrder.IsPreorder
             };
             var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);

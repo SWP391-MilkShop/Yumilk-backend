@@ -17,7 +17,7 @@ public static class DiscountExtension
     {
         if (customer.Point < 100)
         {
-            return ResponseModel.BadRequest("Số điểm tích lũy không đủ để sử dụng. Tối thiểu 100 điểm để sử dụng");
+            return ResponseModel.BadRequest("Số xu không đủ để sử dụng. Tối thiểu 100 xu để sử dụng");
         }
 
         var discountPrice = customer.Point;
@@ -27,7 +27,7 @@ public static class DiscountExtension
             discountPrice = halfPrice;
         }
 
-        return ResponseModel.Success("Áp dụng điểm tích lũy thành công", discountPrice);
+        return ResponseModel.Success("Áp dụng xu thành công", discountPrice);
     }
 
     public static ResponseModel ApplyVoucher(Voucher voucher, int totalPrice)
