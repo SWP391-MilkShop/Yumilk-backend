@@ -439,7 +439,7 @@ public class OrderService : IOrderService
             var cancelResult = await _paymentService.CancelPaymentLink(order.Id);
             if (cancelResult.StatusCode == 200)
             {
-                message = "Hủy link thanh toán thành công và ";
+                message = "link thanh toán thành công và ";
             }
         }
 
@@ -631,12 +631,17 @@ public class OrderService : IOrderService
             return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
         }
 
+        if (order.StatusId == (int)OrderStatusId.Cancelled)
+        {
+            return ResponseModel.BadRequest("Đơn hàng đã bị hủy từ trước");
+        }
+
         if (order.PaymentMethod == "PAYOS")
         {
             var cancelResult = await _paymentService.CancelPaymentLink(order.Id);
             if (cancelResult.StatusCode == 200)
             {
-                message = "Hủy link thanh toán và ";
+                message = "link thanh toán và ";
             }
         }
 
