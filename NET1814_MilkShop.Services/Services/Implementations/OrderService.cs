@@ -805,9 +805,8 @@ public class OrderService : IOrderService
         var orders = await _orderRepository.GetOrderQuery()
             .Where(o => o.CreatedAt >= from && o.CreatedAt <= to && o.StatusId != (int)OrderStatusId.Cancelled)
             .ToListAsync();
-
         // order per day of week (theo thứ)
-        var orderPerDayOfWeek = orders
+        /*var orderPerDayOfWeek = orders
             .GroupBy(o => o.CreatedAt.DayOfWeek)
             .Select(x => new OrderStatsPerDate
             {
@@ -823,7 +822,30 @@ public class OrderService : IOrderService
                     _ => ""
                 },
                 Count = x.Count()
-            }).OrderBy(x => x.DateTime).ToList();
+            }).OrderBy(x => x.DateTime).ToList();*/
+        var daysOfWeek = new Dictionary<DayOfWeek, string>
+        {
+            { DayOfWeek.Monday, "Thứ 2" },
+            { DayOfWeek.Tuesday, "Thứ 3" },
+            { DayOfWeek.Wednesday, "Thứ 4" },
+            { DayOfWeek.Thursday, "Thứ 5" },
+            { DayOfWeek.Friday, "Thứ 6" },
+            { DayOfWeek.Saturday, "Thứ 7" },
+            { DayOfWeek.Sunday, "Chủ nhật" }
+        };
+
+        var ordersGroupedByDay = orders
+            .GroupBy(o => o.CreatedAt.DayOfWeek)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var orderPerDayOfWeek = daysOfWeek
+            .Select(d => new OrderStatsPerDate
+            {
+                DateTime = d.Value,
+                Count = ordersGroupedByDay.ContainsKey(d.Key) ? ordersGroupedByDay[d.Key] : 0
+            })
+            .OrderBy(x => x.DateTime)
+            .ToList();
 
         // order per date (theo ngày)
         var orderPerDay = orders
