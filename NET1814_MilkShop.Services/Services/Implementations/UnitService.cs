@@ -51,6 +51,7 @@ public class UnitService : IUnitService
         {
             Id = u.Id,
             Name = u.Name,
+            Gram = u.Gram,
             Description = u.Description!,
             IsActive = u.IsActive
         });
@@ -75,6 +76,7 @@ public class UnitService : IUnitService
         {
             Id = id,
             Name = unit.Name,
+            Gram = unit.Gram,
             Description = unit.Description!,
             IsActive = unit.IsActive
         };
