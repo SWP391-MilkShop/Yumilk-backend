@@ -1,3 +1,4 @@
+using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using Net.payOS;
 using Net.payOS.Types;
@@ -97,12 +98,14 @@ public class PaymentService : IPaymentService
             }
 
             var orderCode = existOrder.OrderCode.Value;
+            return ResponseModel.Error(
+                "Đã có lỗi xảy ra trong quá trình lấy thông tin link thanh toán. ClientId:" + _configuration["PayOS:ClientId"] +
+                " ApiKey:" + _configuration["PayOS:ApiKey"] + "Checksum: " + _configuration["PayOS:CheckSumKey"]
+            );
             var paymentLinkInformation = await _payOs.getPaymentLinkInformation(orderCode);
-            if (paymentLinkInformation.status == "ERROR")
+            if (paymentLinkInformation.status == "Error")
             {
-                return ResponseModel.Error(
-                    "Đã có lỗi xảy ra trong quá trình lấy thông tin link thanh toán"
-                );
+
             }
 
             return ResponseModel.Success(
