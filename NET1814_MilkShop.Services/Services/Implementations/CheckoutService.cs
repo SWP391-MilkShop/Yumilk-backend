@@ -104,7 +104,7 @@ public class CheckoutService : ICheckoutService
                         $"Số lượng sản phẩm bạn mua ({c.Quantity}) đã vượt quá số lượng sản phẩm còn lại của cửa hàng ({c.Product.Quantity}). Vui lòng kiểm tra lại giỏ hàng của quý khách!"
                 });
             }
-            else if (c.Product.StatusId is (int)ProductStatusId.OutOfStock or (int)ProductStatusId.Preorder)
+            else if (c.Product.StatusId is (int)ProductStatusId.OutOfStock or (int)ProductStatusId.Preordered)
             {
                 unavailableItems.Add(new CheckoutQuantityResponseModel
                 {
@@ -302,7 +302,7 @@ public class CheckoutService : ICheckoutService
         }
 
         var product = await _preorderProductRepository.GetByProductIdAsync(model.ProductId);
-        if (product == null || product.Product.StatusId != (int)ProductStatusId.Preorder)
+        if (product == null || product.Product.StatusId != (int)ProductStatusId.Preordered)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm") +
                                             " hoặc sản phẩm đang không trong quá trình Pre-order");

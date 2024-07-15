@@ -58,7 +58,7 @@ public class CartService : ICartService
         }
 
         // Check if product is in pre-order status
-        if (product.StatusId == (int)ProductStatusId.Preorder)
+        if (product.StatusId == (int)ProductStatusId.Preordered)
         {
             return ResponseModel.BadRequest(ResponseConstants.NoPreorderCart);
         }
@@ -143,7 +143,7 @@ public class CartService : ICartService
             }
 
             // Check if product is in pre-order status
-            if (cartDetail.Product.StatusId == (int)ProductStatusId.Preorder)
+            if (cartDetail.Product.StatusId == (int)ProductStatusId.Preordered)
             {
                 _cartDetailRepository.Remove(cartDetail);
                 messages.Add($"Sản phẩm {cartDetail.Product.Name} đang trong chế độ đặt trước");
