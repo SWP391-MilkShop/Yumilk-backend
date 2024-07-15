@@ -193,6 +193,7 @@ public class CartService : ICartService
         {
             return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
         }
+
         var cart = await _cartRepository
             .GetCartQuery()
             .FirstOrDefaultAsync(x => x.CustomerId == customerId);
@@ -211,7 +212,7 @@ public class CartService : ICartService
             };
             return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", true), newCart);
         }
-        
+
         var searchTerm = StringExtension.Normalize(model.SearchTerm) ?? "";
         var cartDetailQuery = _cartDetailRepository
             .GetCartDetailQuery()
@@ -247,6 +248,7 @@ public class CartService : ICartService
         var totalPriceAfterDiscount = totalPrice;
         var voucherDiscount = 0;
         var voucherMessage = "";
+        var voucherDiscountPercent = 0;
         if (model.VoucherId != Guid.Empty)
         {
             var voucher = await _voucherRepository.GetByIdAsync(model.VoucherId);
@@ -255,12 +257,14 @@ public class CartService : ICartService
                 return ResponseModel.BadRequest(ResponseConstants.NotFound("Voucher"));
             }
 
+            voucherDiscountPercent = voucher.Percent;
             var handleVoucher = DiscountExtension.ApplyVoucher(voucher, totalPriceAfterDiscount);
             // if (handleVoucher.StatusCode != 200) return handleVoucher;
             voucherDiscount = (int)(handleVoucher.Data ?? 0);
             voucherMessage = handleVoucher.Message;
             totalPriceAfterDiscount -= voucherDiscount;
         }
+
         var pointDiscount = 0;
         var pointMessage = "";
         if (model.IsUsingPoint)
@@ -271,6 +275,7 @@ public class CartService : ICartService
             pointMessage = handlePoint.Message;
             totalPriceAfterDiscount -= pointDiscount;
         }
+
         var cartModel = new CartModel
         {
             Id = cart.Id,
@@ -282,6 +287,7 @@ public class CartService : ICartService
             CartItems = pagedList,
             VoucherId = model.VoucherId,
             IsUsingPoint = model.IsUsingPoint,
+            VoucherDiscountPercent = voucherDiscountPercent,
             VoucherDiscount = voucherDiscount,
             PointDiscount = pointDiscount,
             VoucherMessage = voucherMessage,

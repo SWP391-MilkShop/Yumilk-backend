@@ -14,6 +14,8 @@ public class CartModel
     public Guid VoucherId { get; set; }
 
     public bool IsUsingPoint { get; set; }
+    
+    public int VoucherDiscountPercent { get; set; }
 
     public int VoucherDiscount { get; set; }
 
