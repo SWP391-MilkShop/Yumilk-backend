@@ -11,7 +11,7 @@
     <PackageReference Include="FirebaseAdmin" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="payOS" Version="1.0.5" />
+    <PackageReference Include="payOS" Version="1.0.6" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.9.0" />
   </ItemGroup>
 
