@@ -85,7 +85,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
     {
         var order = await _query.Include(x => x.OrderDetails).ThenInclude(k => k.Product)
             .FirstOrDefaultAsync(x => x.Id == orderId);
-        return order!.OrderDetails.Any(o => o.Product.StatusId == (int)ProductStatusId.Preorder);
+        return order!.OrderDetails.Any(o => o.Product.StatusId == (int)ProductStatusId.Preordered);
     }
 
     public async Task<Order?> GetByIdIncludeCustomerAsync(Guid id)

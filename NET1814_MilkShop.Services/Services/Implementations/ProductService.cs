@@ -65,7 +65,7 @@ public class ProductService : IProductService
         var minPrice = queryModel.MinPrice;
         var maxPrice = queryModel.MaxPrice;
         var query = _productRepository.GetProductsQuery(true, true);
-        if (queryModel.StatusIds.Contains((int)ProductStatusId.Preorder))
+        if (queryModel.StatusIds.Contains((int)ProductStatusId.Preordered))
         {
             query = query.Include(p => p.PreorderProduct);
         }
@@ -171,14 +171,14 @@ public class ProductService : IProductService
             IsActive = false, // default is unpublished
             Thumbnail = model.Thumbnail
         };
-        if (model.StatusId is (int)ProductStatusId.Preorder or (int)ProductStatusId.OutOfStock)
+        if (model.StatusId is (int)ProductStatusId.Preordered or (int)ProductStatusId.OutOfStock)
         {
             // set quantity to 0 if status is preorder or out of stock
             product.Quantity = 0;
         }
 
         //add preorder product if status is preordered
-        if (model.StatusId == (int)ProductStatusId.Preorder)
+        if (model.StatusId == (int)ProductStatusId.Preordered)
         {
             var preorderProduct = new PreorderProduct
             {
@@ -211,7 +211,7 @@ public class ProductService : IProductService
         if (product == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
 
         var existingPreorder = await _preorderProductRepository.GetByIdAsync(id);
-        if (model.StatusId == (int)ProductStatusId.Preorder)
+        if (model.StatusId == (int)ProductStatusId.Preordered)
         {
             if (existingPreorder == null)
             {
@@ -267,7 +267,7 @@ public class ProductService : IProductService
             var validateCommonResponse = ValidateCommon(product.SalePrice, product.OriginalPrice, product.Quantity,
                 product.StatusId, model.Thumbnail);
             if (validateCommonResponse != null) return validateCommonResponse;
-            if (product.StatusId == (int)ProductStatusId.Preorder)
+            if (product.StatusId == (int)ProductStatusId.Preordered)
             {
                 var validatePreorderProduct = ValidatePreorderProduct(existingPreorder!, product);
                 if (validatePreorderProduct != null) return validatePreorderProduct;

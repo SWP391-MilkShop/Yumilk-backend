@@ -20,6 +20,6 @@ public enum RoleId
 public enum ProductStatusId
 {
     Selling = 1,
-    Preorder = 2, //move out of product
+    Preordered = 2, //move out of product
     OutOfStock = 3
 }
