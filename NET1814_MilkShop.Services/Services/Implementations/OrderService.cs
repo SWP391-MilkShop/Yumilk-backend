@@ -215,12 +215,12 @@ public class OrderService : IOrderService
                 };
                 _orderLogRepository.Add(cancelLog);
                 break;
-            case (int)OrderStatusId.Preorder:
+            case (int)OrderStatusId.Preordered:
                 var preorderLog = new OrderLog
                 {
                     OrderId = orderId,
-                    NewStatusId = (int)OrderStatusId.Preorder,
-                    StatusName = OrderStatusId.Preorder.ToString(),
+                    NewStatusId = (int)OrderStatusId.Preordered,
+                    StatusName = OrderStatusId.Preordered.ToString(),
                 };
                 _orderLogRepository.Add(preorderLog);
                 break;
@@ -515,7 +515,7 @@ public class OrderService : IOrderService
                 }
 
                 break;
-            case (int)OrderStatusId.Preorder:
+            case (int)OrderStatusId.Preordered:
                 if (model.StatusId != (int)OrderStatusId.Shipped)
                 {
                     return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
@@ -534,7 +534,7 @@ public class OrderService : IOrderService
         if (model.StatusId == (int)OrderStatusId.Shipped)
         {
             // Check if the order is a preorder and needs stock updates
-            if (order.StatusId == (int)OrderStatusId.Preorder)
+            if (order.StatusId == (int)OrderStatusId.Preordered)
             {
                 foreach (var o in order.OrderDetails)
                 {

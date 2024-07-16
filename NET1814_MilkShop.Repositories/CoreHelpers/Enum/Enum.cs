@@ -7,7 +7,7 @@ public enum OrderStatusId
     Shipped = 3,
     Delivered = 4,
     Cancelled = 5,
-    Preorder = 6,
+    Preordered = 6,
 }
 
 public enum RoleId
