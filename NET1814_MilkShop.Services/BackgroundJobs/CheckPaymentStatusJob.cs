@@ -148,13 +148,13 @@ public class CheckPaymentStatusJob : IJob
                 foreach (var orderDetail in order.OrderDetails)
                 {
                     var product = await _productRepository.GetByIdNoIncludeAsync(orderDetail.ProductId);
-                    if (product!.OrderDetails.Any(x => x.Product.StatusId == (int)OrderStatusId.Preordered))
+                    if (order.IsPreorder)
                     {
-                        product.Quantity -= orderDetail.Quantity;
+                        product!.Quantity -= orderDetail.Quantity;
                     }
                     else
                     {
-                        product.Quantity += orderDetail.Quantity;
+                        product!.Quantity += orderDetail.Quantity;
                     }
 
                     _productRepository.Update(product);

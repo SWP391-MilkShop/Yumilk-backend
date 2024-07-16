@@ -1,4 +1,5 @@
 using System.Configuration;
+using Google.Apis.Logging;
 using Microsoft.Extensions.Configuration;
 using Net.payOS;
 using Net.payOS.Types;
@@ -13,8 +14,9 @@ public class PaymentService : IPaymentService
     private readonly PayOS _payOs;
     private readonly IConfiguration _configuration;
     private readonly IOrderRepository _orderRepository;
+    private readonly ILogger _logger;
 
-    public PaymentService(IConfiguration configuration, IOrderRepository orderRepository)
+    public PaymentService(IConfiguration configuration, IOrderRepository orderRepository,ILogger logger)
     {
         _configuration = configuration;
         _orderRepository = orderRepository;
@@ -23,6 +25,7 @@ public class PaymentService : IPaymentService
             _configuration["PayOS:ApiKey"]!,
             _configuration["PayOS:CheckSumKey"]!
         );
+        _logger = logger;
     }
 
     public async Task<ResponseModel> CreatePaymentLink(int orderCode)
@@ -113,6 +116,7 @@ public class PaymentService : IPaymentService
         }
         catch (Exception ex)
         {
+            _logger.Info(ex.Message);
             return ResponseModel.Error(ex.Message);
         }
     }
