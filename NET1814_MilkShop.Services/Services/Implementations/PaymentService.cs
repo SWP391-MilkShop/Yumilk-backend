@@ -1,5 +1,5 @@
 using System.Configuration;
-using Google.Apis.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Net.payOS;
 using Net.payOS.Types;
@@ -116,7 +116,7 @@ public class PaymentService : IPaymentService
         }
         catch (Exception ex)
         {
-            _logger.Info(ex.Message);
+            _logger.LogInformation(ex.Message);
             return ResponseModel.Error(ex.Message);
         }
     }
