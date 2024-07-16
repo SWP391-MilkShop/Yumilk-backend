@@ -383,6 +383,7 @@ public class OrderService : IOrderService
             VoucherDiscount = order.VoucherAmount,
             PointDiscount = order.PointAmount,
             TotalPriceAfterDiscount = order.TotalPrice, // tổng tiền sau khi giảm giá
+            RecievingPoint = order.TotalPrice.ApplyPercentage(1),
             ShippingFee = order.ShippingFee,
             TotalAmount = order.TotalAmount,
             PaymentMethod = order.PaymentMethod,
@@ -708,6 +709,7 @@ public class OrderService : IOrderService
             VoucherDiscount = order.VoucherAmount,
             PointDiscount = order.PointAmount,
             TotalPriceAfterDiscount = order.TotalPrice, // tổng tiền sau khi giảm giá
+            RecievingPoint = order.TotalPrice.ApplyPercentage(1),
             ShippingFee = order.ShippingFee,
             TotalAmount = order.TotalAmount,
             PaymentMethod = order.PaymentMethod,

@@ -13,6 +13,7 @@ public class OrderDetailModel
     public int VoucherDiscount { get; set; }
     public int PointDiscount { get; set; }
     public int TotalPriceAfterDiscount { get; set; }
+    public int RecievingPoint { get; set; }
     public int ShippingFee { get; set; }
     public int TotalAmount { get; set; }
     public string? PaymentMethod { get; set; }
