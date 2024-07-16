@@ -97,7 +97,7 @@ public class PaymentService : IPaymentService
                 return ResponseModel.BadRequest("Không tìm thấy mã đơn hàng thanh toán");
             }
 
-            var orderCode = existOrder.OrderCode.Value;
+            var orderCode = (long)existOrder.OrderCode;
             var paymentLinkInformation = await _payOs.getPaymentLinkInformation(orderCode);
             if (paymentLinkInformation.status == "Error")
             {
