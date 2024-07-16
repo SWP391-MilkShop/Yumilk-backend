@@ -14,9 +14,9 @@ public class PaymentService : IPaymentService
     private readonly PayOS _payOs;
     private readonly IConfiguration _configuration;
     private readonly IOrderRepository _orderRepository;
-    private readonly ILogger _logger;
+    private readonly ILogger<PaymentService> _logger;
 
-    public PaymentService(IConfiguration configuration, IOrderRepository orderRepository,ILogger logger)
+    public PaymentService(IConfiguration configuration, IOrderRepository orderRepository,ILogger<PaymentService> logger)
     {
         _configuration = configuration;
         _orderRepository = orderRepository;
