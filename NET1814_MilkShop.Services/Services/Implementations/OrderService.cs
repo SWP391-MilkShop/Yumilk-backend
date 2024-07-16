@@ -291,8 +291,8 @@ public class OrderService : IOrderService
         #region sort
 
         query = "desc".Equals(model.SortOrder?.ToLower())
-            ? query.OrderBy(x => x.StatusId).ThenByDescending(GetSortProperty(model))
-            : query.OrderBy(x => x.StatusId).ThenBy(GetSortProperty(model));
+            ? query.OrderByDescending(GetSortProperty(model)).ThenBy(x => x.StatusId)
+            : query.OrderBy(GetSortProperty(model)).ThenBy(x => x.StatusId);
 
         #endregion
 
