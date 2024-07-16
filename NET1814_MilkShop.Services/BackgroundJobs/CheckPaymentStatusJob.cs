@@ -73,10 +73,10 @@ public class CheckPaymentStatusJob : IJob
                             "OrderId {OrderId} code {OrderCode} is in {shipping} status",
                             order.Id, order.OrderCode.Value, OrderStatusId.Shipping.ToString());
                         continue;
-                    case (int)OrderStatusId.Preorder:
+                    case (int)OrderStatusId.Preordered:
                         _logger.LogInformation(
                             "OrderId {OrderId} code {OrderCode} is in {preorder} status",
-                            order.Id, order.OrderCode.Value, OrderStatusId.Preorder.ToString());
+                            order.Id, order.OrderCode.Value, OrderStatusId.Preordered.ToString());
                         continue;
                 }*/
 
@@ -109,12 +109,12 @@ public class CheckPaymentStatusJob : IJob
                     if (existOrder.IsPreorder)
                     {
                         _logger.LogInformation("Order {OrderId} has preorder product", order.Id);
-                        existOrder.StatusId = (int)OrderStatusId.Preorder; //Preorder
+                        existOrder.StatusId = (int)OrderStatusId.Preordered; //Preordered
                         var orderLog = new OrderLog
                         {
                             OrderId = existOrder.Id,
-                            NewStatusId = (int)OrderStatusId.Preorder,
-                            StatusName = OrderStatusId.Preorder.ToString(),
+                            NewStatusId = (int)OrderStatusId.Preordered,
+                            StatusName = OrderStatusId.Preordered.ToString(),
                         };
                         _orderLogRepository.Add(orderLog);
                     }
@@ -148,7 +148,7 @@ public class CheckPaymentStatusJob : IJob
                 foreach (var orderDetail in order.OrderDetails)
                 {
                     var product = await _productRepository.GetByIdNoIncludeAsync(orderDetail.ProductId);
-                    if (product!.OrderDetails.Any(x => x.Product.StatusId == (int)OrderStatusId.Preorder))
+                    if (product!.OrderDetails.Any(x => x.Product.StatusId == (int)OrderStatusId.Preordered))
                     {
                         product.Quantity -= orderDetail.Quantity;
                     }
