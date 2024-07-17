@@ -8,9 +8,12 @@ namespace NET1814_MilkShop.Repositories.Data.Entities;
 public class ReportType : IAuditableEntity
 {
     [Key] public int Id { get; set; }
-    [Column(TypeName = "nvarchar(255)")] public string Name { get; set; } = null!;
-    
-    [Column(TypeName = "nvarchar(2000)")] public string? Description { get; set; }
+
+    [Column("name", TypeName = "nvarchar(255)")]
+    public string Name { get; set; } = null!;
+
+    [Column("description", TypeName = "nvarchar(2000)")]
+    public string? Description { get; set; }
 
     public ICollection<Report> Reports { get; set; } = [];
 

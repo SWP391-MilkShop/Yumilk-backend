@@ -11,8 +11,12 @@ public class ProductReview : IAuditableEntity
     [Required] [Column("customer_id")] public Guid CustomerId { get; set; }
     [Required] [Column("product_id")] public Guid ProductId { get; set; }
     [Required] [Column("order_id")] public Guid OrderId { get; set; }
-    [MaxLength(255)] public string Review { get; set; } = "";
-    public int Rating { get; set; }
+
+    [MaxLength(255)]
+    [Column("review", TypeName = "nvarchar(255)")]
+    public string Review { get; set; } = "";
+
+    [Column("rating")] public int Rating { get; set; }
     [Column("is_active")] public bool IsActive { get; set; } = true;
 
     [Column("created_at", TypeName = "datetime2")]

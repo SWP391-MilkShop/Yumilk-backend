@@ -10,9 +10,11 @@ public class Voucher : IAuditableEntity
     [Key] public Guid Id { get; set; }
 
     // Mã voucher tối đa 10 ký tự
-    [Column(TypeName = "nvarchar(10)")] public string Code { get; set; } = null!;
+    [Column("code", TypeName = "nvarchar(10)")]
+    public string Code { get; set; } = null!;
 
-    [Column(TypeName = "nvarchar(2000)")] public string Description { get; set; } = null!;
+    [Column("description", TypeName = "nvarchar(2000)")]
+    public string Description { get; set; } = null!;
 
     [Column("start_date", TypeName = "datetime2")]
     public DateTime StartDate { get; set; }
@@ -21,13 +23,13 @@ public class Voucher : IAuditableEntity
     public DateTime EndDate { get; set; }
 
     // Số lượng voucher còn lại
-    public int Quantity { get; set; }
+    [Column("quantity")] public int Quantity { get; set; }
 
-    // Phần trăm giảm giá
-    public int Percent { get; set; }
+    // Phần trăm giảm 
+    [Column("percent")] public int Percent { get; set; }
 
     [Column("is_active")] public bool IsActive { get; set; }
-    
+
     // Giá trị đơn hàng tối thiểu để sử dụng voucher
     [Column("min_price_condition")] public int MinPriceCondition { get; set; }
 
