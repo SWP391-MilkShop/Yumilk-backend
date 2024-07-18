@@ -5,6 +5,8 @@ using Net.payOS.Types;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Repositories.Interfaces;
 using NET1814_MilkShop.Services.Services.Interfaces;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace NET1814_MilkShop.Services.Services.Implementations;
 
@@ -13,9 +15,13 @@ public class PaymentService : IPaymentService
     private readonly PayOS _payOs;
     private readonly IConfiguration _configuration;
     private readonly IOrderRepository _orderRepository;
+    private readonly HttpClient _client;
 
-    public PaymentService(IConfiguration configuration, IOrderRepository orderRepository)
+    public PaymentService(IConfiguration configuration,
+        IOrderRepository orderRepository,
+        HttpClient client)
     {
+        _client = client;
         _configuration = configuration;
         _orderRepository = orderRepository;
         _payOs ??= new PayOS(
@@ -82,7 +88,7 @@ public class PaymentService : IPaymentService
         }
     }
 
-    public async Task<ResponseModel> GetPaymentLinkInformation(Guid orderId)
+    /*public async Task<ResponseModel> GetPaymentLinkInformation(Guid orderId)
     {
         try
         {
@@ -115,7 +121,53 @@ public class PaymentService : IPaymentService
         {
             return ResponseModel.Error(ex.Message);
         }
-    }
+    }*/
+    
+    public async Task<ResponseModel> GetPaymentLinkInformation(Guid orderId)
+   {
+       try
+       {
+           var existOrder = await _orderRepository.GetByIdNoIncludeAsync(orderId);
+           if (existOrder is null)
+           {
+               return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
+           }
+
+           if (existOrder.OrderCode is null)
+           {
+               return ResponseModel.BadRequest("Không tìm thấy mã đơn hàng thanh toán");
+           }
+
+           var orderCode = (long)existOrder.OrderCode;
+           _client.DefaultRequestHeaders.Add("x-client-id", _configuration["PayOS:ClientId"]);
+           _client.DefaultRequestHeaders.Add("x-api-key", _configuration["PayOS:ApiKey"]);
+           var response =
+               await _client.GetAsync("https://api-merchant.payos.vn/v2/payment-requests/"+ orderCode) ;
+           // Read the response content
+           var responseContent = await response.Content.ReadAsStringAsync();
+           var responseBodyJson = JObject.Parse(responseContent);
+           var code = responseBodyJson["code"]?.ToString();
+           var data = responseBodyJson["data"]?.ToString();
+           if (code == null && code != "00")
+           {
+               return ResponseModel.Error("Có lỗi trong quá trình lấy dữ liệu thông tin thanh toán");
+           }
+
+           if (data == null)
+           {
+               return ResponseModel.Error("Không tồn tại thông tin thanh toán");
+           }
+           var payOsData = JsonConvert.DeserializeObject<PaymentLinkInformation>(data);
+           return ResponseModel.Success(
+               "Lấy thông tin link thanh toán thành công",
+               payOsData
+           );
+       }
+       catch (Exception ex)
+       {
+           return ResponseModel.Error(ex.Message);
+       }
+   }
 
     public async Task<ResponseModel> CancelPaymentLink(Guid orderId)
     {
