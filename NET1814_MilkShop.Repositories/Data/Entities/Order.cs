@@ -28,16 +28,19 @@ public class Order : IAuditableEntity
     [Column("receiver_name", TypeName = "nvarchar(255)")]
     public string ReceiverName { get; set; } = null!;
 
+    [Column("address", TypeName = "nvarchar(2000)")]
     public string Address { get; set; } = null!;
 
     [Column("district_id")] public int DistrictId { get; set; }
 
     [Column("ward_code", TypeName = "nvarchar(255)")]
     [StringLength(255)]
-    public string WardCode { get; set; }
+    public string WardCode { get; set; } = null!;
 
+    [Column("phone_number", TypeName = "nvarchar(20)")]
     public string PhoneNumber { get; set; } = null!;
 
+    [Column("note", TypeName = "nvarchar(max)")]
     public string? Note { get; set; }
 
     [Column("payment_method", TypeName = "varchar(255)")]
@@ -57,9 +60,8 @@ public class Order : IAuditableEntity
 
     [Column("email", TypeName = "nvarchar(255)")]
     public string? Email { get; set; }
-    
-    [Column("is_preorder")]
-    public bool IsPreorder { get; set; }
+
+    [Column("is_preorder")] public bool IsPreorder { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }

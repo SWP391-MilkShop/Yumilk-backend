@@ -8,8 +8,7 @@ public class CartDetail : IAuditableEntity
 {
     public int CartId { get; set; }
     public Guid ProductId { get; set; }
-
-    public int Quantity { get; set; }
+    [Column("quantity")] public int Quantity { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }

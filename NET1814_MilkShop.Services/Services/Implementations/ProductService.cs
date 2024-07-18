@@ -287,10 +287,12 @@ public class ProductService : IProductService
     {
         var product = await _productRepository.GetByIdNoIncludeAsync(id);
         if (product == null) return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
-        var isOrdered = await _orderDetailRepository.CheckActiveOrderProduct(id);
+        // check if product is ordered
+        var isOrdered = await _orderDetailRepository.GetOrderDetailQuery().FirstOrDefaultAsync(od =>
+            od.ProductId == id) != null;
         if (isOrdered)
         {
-            return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
+            return ResponseModel.BadRequest(ResponseConstants.DeleteOrderedProduct);
         }
 
         var preorderProduct = await _preorderProductRepository.GetByIdAsync(id);
@@ -464,7 +466,7 @@ public class ProductService : IProductService
             Thumbnail = product.Thumbnail,
             AverageRating = product.ProductReviews.IsNullOrEmpty()
                 ? 0
-                : product.ProductReviews.Average(pr => (double)pr.Rating),
+                : Math.Round(product.ProductReviews.Average(pr => (double)pr.Rating), 1),
             RatingCount = product.ProductReviews.Count,
             OrderCount = orderDetails.IsNullOrEmpty() ? 0 : orderDetails.Sum(od => od.Quantity),
             IsActive = product.IsActive,
@@ -494,7 +496,7 @@ public class ProductService : IProductService
             "saleprice" => p => p.SalePrice == 0 ? p.OriginalPrice : p.SalePrice,
             "quantity" => p => p.Quantity,
             "createdat" => p => p.CreatedAt,
-            "rating" => p => p.ProductReviews.Average(pr => (double)pr.Rating),
+            "rating" => p => Math.Round(p.ProductReviews.Average(pr => (double)pr.Rating), 1),
             "ordercount" => p => p.OrderDetails.Sum(od => od.Quantity),
             _ => product => product.Id
         };
@@ -564,7 +566,7 @@ public class ProductService : IProductService
             return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
         if (preorderProduct.MaxPreOrderQuantity <= 0)
             return ResponseModel.BadRequest(ResponseConstants.InvalidMaxPreOrderQuantity);
-        if(preorderProduct.ExpectedPreOrderDays <= 0)
+        if (preorderProduct.ExpectedPreOrderDays <= 0)
             return ResponseModel.BadRequest(ResponseConstants.InvalidExpectedPreOrderDays);
         if (product.Quantity >= preorderProduct.MaxPreOrderQuantity)
             return ResponseModel.BadRequest("Số lượng đặt trước tối đa phải lớn hơn số lượng hiện có");

@@ -20,21 +20,23 @@ public class VoucherController : Controller
     }
 
     [HttpGet("api/vouchers")]
-    [Authorize(AuthenticationSchemes = "Access")]
+    // [Authorize(AuthenticationSchemes = "Access")]
     public async Task<IActionResult> GetVouchersAsync([FromQuery] VoucherQueryModel model)
     {
         _logger.Information("Get vouchers");
         var response = await _voucherService.GetVouchersAsync(model);
         return ResponseExtension.Result(response);
     }
+
     [HttpGet("api/vouchers/{id}")]
     [Authorize(AuthenticationSchemes = "Access")]
-    public async Task<IActionResult> GetVoucherAsync(Guid id)
+    public async Task<IActionResult> GetVoucherByIdAsync(Guid id)
     {
         _logger.Information($"Get voucher {id}");
         var response = await _voucherService.GetByIdAsync(id);
         return ResponseExtension.Result(response);
     }
+
     [HttpGet("api/vouchers/code/{code}")]
     [Authorize(AuthenticationSchemes = "Access")]
     public async Task<IActionResult> GetVoucherByCodeAsync(string code)
@@ -43,6 +45,7 @@ public class VoucherController : Controller
         var response = await _voucherService.GetByCodeAsync(code);
         return ResponseExtension.Result(response);
     }
+
     [HttpPost("api/vouchers")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> CreateVoucherAsync([FromBody] CreateVoucherModel model)
@@ -51,6 +54,7 @@ public class VoucherController : Controller
         var response = await _voucherService.CreateVoucherAsync(model);
         return ResponseExtension.Result(response);
     }
+
     [HttpPatch("api/vouchers/{id}")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> UpdateVoucherAsync(Guid id, [FromBody] UpdateVoucherModel model)
@@ -59,6 +63,7 @@ public class VoucherController : Controller
         var response = await _voucherService.UpdateVoucherAsync(id, model);
         return ResponseExtension.Result(response);
     }
+
     /// <summary>
     /// Soft delete voucher by id
     /// </summary>
