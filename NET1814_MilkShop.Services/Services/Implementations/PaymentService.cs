@@ -86,19 +86,19 @@ public class PaymentService : IPaymentService
     {
         try
         {
-            //var existOrder = await _orderRepository.GetByIdNoIncludeAsync(orderId);
-            //if (existOrder is null)
-            //{
-            //    return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
-            //}
+            var existOrder = await _orderRepository.GetByIdNoIncludeAsync(orderId);
+            if (existOrder is null)
+            {
+                return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
+            }
 
-            //if (existOrder.OrderCode is null)
-            //{
-            //    return ResponseModel.BadRequest("Không tìm thấy mã đơn hàng thanh toán");
-            //}
+            if (existOrder.OrderCode is null)
+            {
+                return ResponseModel.BadRequest("Không tìm thấy mã đơn hàng thanh toán");
+            }
 
-            //var orderCode = (long)existOrder.OrderCode;
-            var paymentLinkInformation = await _payOs.getPaymentLinkInformation(3404565);
+            var orderCode = (long)existOrder.OrderCode;
+            var paymentLinkInformation = await _payOs.getPaymentLinkInformation(orderCode);
             if (paymentLinkInformation.status == "Error")
             {
                 return ResponseModel.Error(

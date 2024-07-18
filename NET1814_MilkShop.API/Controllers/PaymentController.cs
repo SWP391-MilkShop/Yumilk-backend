@@ -12,9 +12,9 @@ public class PaymentController : ControllerBase
     private readonly IPaymentService _paymentService;
     private readonly ILogger _logger;
 
-    public PaymentController(IServiceProvider serviceProvider, ILogger logger)
+    public PaymentController(IPaymentService serviceProvider, ILogger logger)
     {
-        _paymentService = serviceProvider.GetRequiredService<IPaymentService>();
+        _paymentService = serviceProvider;
         _logger = logger;
     }
 
