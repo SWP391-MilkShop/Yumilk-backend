@@ -147,22 +147,20 @@ public class PaymentService : IPaymentService
            var responseContent = await response.Content.ReadAsStringAsync();
            var responseBodyJson = JObject.Parse(responseContent);
            var code = responseBodyJson["code"]?.ToString();
-           var data = responseBodyJson["data"]?.ToString();
-           string paymentLinkResSignature = SignatureControl.CreateSignatureFromObj(responseBodyJson, _configuration["PayOS:CheckSumKey"]!);
-           if (paymentLinkResSignature != responseBodyJson["signature"]!.ToString())
-           {
-               return ResponseModel.Error("Signature không hợp lệ: paymentLinkResSignature(our server):"
-                   + paymentLinkResSignature+"\nPayOSSignature:"+responseBodyJson["signature"] + "\nchecksum:"+_configuration["PayOS:CheckSumKey"]);
-           }
-               
            if (code == null && code != "00")
            {
                return ResponseModel.Error("Có lỗi trong quá trình lấy dữ liệu thông tin thanh toán");
            }
-
+           var data = responseBodyJson["data"]?.ToString();
            if (data == null)
            {
                return ResponseModel.Error("Không tồn tại thông tin thanh toán");
+           }
+           string paymentLinkResSignature = SignatureControl.CreateSignatureFromObj(JObject.Parse(data), _configuration["PayOS:CheckSumKey"]!);
+           if (paymentLinkResSignature != responseBodyJson["signature"]!.ToString())
+           {
+               return ResponseModel.Error("Signature không hợp lệ: paymentLinkResSignature(our server):"
+                   + paymentLinkResSignature+"\nPayOSSignature:"+responseBodyJson["signature"] + "\nchecksum:"+_configuration["PayOS:CheckSumKey"]);
            }
            var payOsData = JsonConvert.DeserializeObject<PaymentLinkInformation>(data);
            return ResponseModel.Success(
