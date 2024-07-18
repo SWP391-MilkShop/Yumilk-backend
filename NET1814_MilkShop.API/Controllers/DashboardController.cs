@@ -53,7 +53,7 @@ public class DashboardController : Controller
     /// <returns></returns>
     [HttpGet]
     [Route("orders/stats")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetOrderStats([FromQuery] OrderStatsQueryModel queryModel)
     {
         _logger.Information("Get order stats");
@@ -99,7 +99,7 @@ public class DashboardController : Controller
     /// <returns></returns>
     [HttpGet]
     [Route("products/stats")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetProductStats([FromQuery] ProductStatsQueryModel queryModel)
     {
         _logger.Information("Get product stats");
@@ -116,7 +116,7 @@ public class DashboardController : Controller
     /// <returns></returns>
     [HttpGet]
     [Route("customers/stats")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetCustomersStats([FromQuery] CustomersStatsQueryModel queryModel)
     {
         _logger.Information("Get users stats");
@@ -162,7 +162,7 @@ public class DashboardController : Controller
 
     [HttpGet]
     [Route("payment/stats/payment-methods")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetPaymentMethodStats()
     {
         _logger.Information("Get payment method stats");
@@ -177,7 +177,7 @@ public class DashboardController : Controller
     /// <returns></returns>
     [HttpGet]
     [Route("orders/stats/orders-by-date")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetOrdersStatsByDate([FromQuery] OrderStatsQueryModel model)
     {
         _logger.Information("Get orders stats by date");
@@ -192,7 +192,7 @@ public class DashboardController : Controller
     /// <returns></returns>
     [HttpGet]
     [Route("customers/stats/{year}/returning-customers")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetReturnCustomersStats(int year)
     {
         _logger.Information("Get customers return stats by year");
@@ -207,7 +207,7 @@ public class DashboardController : Controller
     /// <returns></returns>
     [HttpGet]
     [Route("orders/stats/{year}/revenue-by-month")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetRevenueByMonth(int year)
     {
         _logger.Information("Get revenue by month");
@@ -217,7 +217,7 @@ public class DashboardController : Controller
 
     [HttpGet]
     [Route("customers/stats/total-purchase")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetTotalPurchase()
     {
         _logger.Information("Get total purchase");
@@ -227,7 +227,7 @@ public class DashboardController : Controller
 
     [HttpGet]
     [Route("customers/{id}/stats/{year}/total-purchase/")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetTotalPurchaseByCustomer(Guid id, int year)
     {
         _logger.Information("Get total purchase by customer");
