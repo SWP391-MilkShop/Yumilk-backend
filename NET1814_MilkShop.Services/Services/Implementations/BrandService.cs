@@ -121,6 +121,7 @@ public class BrandService : IBrandService
         {
             Name = model.Name,
             Description = model.Description,
+            Logo = model.Logo,
             IsActive = true
         };
         _brandRepository.Add(entity);
@@ -152,6 +153,9 @@ public class BrandService : IBrandService
         existingBrand.Description = string.IsNullOrEmpty(model.Description)
             ? existingBrand.Description
             : model.Description;
+        existingBrand.Logo = string.IsNullOrEmpty(model.Logo)
+            ? existingBrand.Logo
+            : model.Logo;
         existingBrand.IsActive = model.IsActive;
         _brandRepository.Update(existingBrand);
         var result = await _unitOfWork.SaveChangesAsync();
