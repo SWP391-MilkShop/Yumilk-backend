@@ -1,4 +1,3 @@
-using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using Net.payOS;
 using Net.payOS.Types;
@@ -153,7 +152,7 @@ public class PaymentService : IPaymentService
            if (paymentLinkResSignature != responseBodyJson["signature"]!.ToString())
            {
                return ResponseModel.Error("Signature không hợp lệ: paymentLinkResSignature(our server):"
-                   + paymentLinkResSignature+"\nPayOSSignature:"+responseBodyJson["signature"]);
+                   + paymentLinkResSignature+"\nPayOSSignature:"+responseBodyJson["signature"] + "\nchecksum:"+_configuration["PayOS:CheckSumKey"]);
            }
                
            if (code == null && code != "00")
