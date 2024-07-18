@@ -2,7 +2,6 @@ using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using Net.payOS;
 using Net.payOS.Types;
-using Net.payOS.Utils;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Repositories.Interfaces;
 using NET1814_MilkShop.Services.Services.Interfaces;
@@ -149,13 +148,6 @@ public class PaymentService : IPaymentService
            var responseBodyJson = JObject.Parse(responseContent);
            var code = responseBodyJson["code"]?.ToString();
            var data = responseBodyJson["data"]?.ToString();
-           string paymentLinkResSignature = SignatureControl.CreateSignatureFromObj(responseBodyJson, _configuration["PayOS:CheckSumKey"]!);
-           if (paymentLinkResSignature != responseBodyJson["signature"]!.ToString())
-           {
-               return ResponseModel.Error("Signature không hợp lệ: paymentLinkResSignature(our server):"
-                   + paymentLinkResSignature+"\nPayOSSignature:"+responseBodyJson["signature"]);
-           }
-               
            if (code == null && code != "00")
            {
                return ResponseModel.Error("Có lỗi trong quá trình lấy dữ liệu thông tin thanh toán");
