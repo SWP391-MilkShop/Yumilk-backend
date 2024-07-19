@@ -519,7 +519,7 @@ public class OrderService : IOrderService
             case (int)OrderStatusId.Preordered:
                 if (model.StatusId != (int)OrderStatusId.Shipped)
                 {
-                    return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái giao hàng");
+                    return ResponseModel.BadRequest("Đơn hàng đặt trước chỉ có thể chuyển sang trạng thái đang giao");
                 }
 
                 break;
