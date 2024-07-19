@@ -260,11 +260,11 @@ public sealed class CustomerService : ICustomerService
             where firstorder.CreatedAt.Date != secondorder.CreatedAt.Date
             // Tính toán quý dựa trên tháng của CreatedAt
             group new { firstorder.CreatedAt, firstorder.CustomerId } by new
-                { Quarter = (firstorder.CreatedAt.Month - 1) / 3 + 1 }
+                { Quarter = "Q" + ((firstorder.CreatedAt.Month - 1) / 3 + 1) + "' " + year }
             into g
             select new
             {
-                g.Key.Quarter, // Quý 3 tháng (4 quý)
+                g.Key.Quarter, // 1 = Quý 3 tháng (4 quý)
                 DistinctCustomerCount =
                     g.Select(x => x.CustomerId).Distinct()
                         .Count() // Số lượng khách hàng quay trở lại mua hàng trong mỗi quý
