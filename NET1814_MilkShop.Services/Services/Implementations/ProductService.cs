@@ -64,7 +64,7 @@ public class ProductService : IProductService
 
         var minPrice = queryModel.MinPrice;
         var maxPrice = queryModel.MaxPrice;
-        var query = _productRepository.GetProductsQuery(true, true);
+        var query = _productRepository.GetProductsQuery(false, true);
         if (queryModel.StatusIds.Contains((int)ProductStatusId.Preordered))
         {
             query = query.Include(p => p.PreorderProduct);
@@ -99,18 +99,68 @@ public class ProductService : IProductService
 
         #endregion
 
+        //projection
+        var projection = query.Select(p => new
+        {
+            Product = p,
+            AverageRating = p.ProductReviews.Any(pr => pr.IsActive)
+                ? p.ProductReviews.Where(pr => pr.IsActive).Average(pr => (double)pr.Rating)
+                : 0,
+            RatingCount = p.ProductReviews.Count(pr => pr.IsActive),
+            OrderCount = p.OrderDetails.Where(od => od.Order.StatusId == (int)OrderStatusId.Delivered)
+                .Sum(od => od.Quantity)
+        });
+
         #region Sort
 
-        if ("desc".Equals(queryModel.SortOrder?.ToLower()))
-            query = query.OrderByDescending(GetSortProperty(queryModel.SortColumn));
-        else
-            query = query.OrderBy(GetSortProperty(queryModel.SortColumn));
+        var sortColumn = queryModel.SortColumn ?? "id"; //default is "id"
+        var sortOrder = queryModel.SortOrder ?? "asc"; //default is "asc
+        var sortedQuery = projection;
+        switch (sortColumn.ToLower().Replace(" ", ""))
+        {
+            case "name":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.Product.Name)
+                    : projection.OrderByDescending(p => p.Product.Name);
+                break;
+            case "saleprice":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.Product.SalePrice == 0 ? p.Product.OriginalPrice : p.Product.SalePrice)
+                    : projection.OrderByDescending(p =>
+                        p.Product.SalePrice == 0 ? p.Product.OriginalPrice : p.Product.SalePrice);
+                break;
+            case "quantity":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.Product.Quantity)
+                    : projection.OrderByDescending(p => p.Product.Quantity);
+                break;
+            case "createdat":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.Product.CreatedAt)
+                    : projection.OrderByDescending(p => p.Product.CreatedAt);
+                break;
+            case "rating":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.AverageRating)
+                    : projection.OrderByDescending(p => p.AverageRating);
+                break;
+            case "ordercount":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.OrderCount)
+                    : projection.OrderByDescending(p => p.OrderCount);
+                break;
+            default:
+                sortedQuery = projection.OrderBy(p => p.Product.Id); // Default sorting by Id
+                break;
+        }
 
         #endregion
 
+        var productModelQuery =
+            sortedQuery.Select(p => ToProductModel(p.Product, p.AverageRating, p.RatingCount, p.OrderCount));
+
         #region Pagination
 
-        var productModelQuery = query.Select(p => ToProductModel(p));
         var products = await PagedList<ProductModel>.CreateAsync(
             productModelQuery,
             queryModel.Page,
@@ -131,16 +181,21 @@ public class ProductService : IProductService
     {
         var product = await _productRepository.GetByIdAsync(id, true, true);
         if (product == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
-        // if (product.StatusId != (int)ProductStatusId.Preorder)
-        //     return ResponseModel.Success(
-        //         ResponseConstants.Get("sản phẩm", true),
-        //         ToProductModel(product)
-        //     );
+        var projection = new
+        {
+            Product = product,
+            AverageRating = product.ProductReviews.IsNullOrEmpty()
+                ? 0
+                : product.ProductReviews.Where(pr => pr.IsActive).Average(pr => (double)pr.Rating),
+            RatingCount = product.ProductReviews.Count(pr => pr.IsActive),
+            OrderCount = product.OrderDetails.Where(od => od.Order.StatusId == (int)OrderStatusId.Delivered)
+                .Sum(od => od.Quantity)
+        };
         var preorderProduct = await _preorderProductRepository.GetByIdAsync(id);
         product.PreorderProduct = preorderProduct;
         return ResponseModel.Success(
-            ResponseConstants.Get("sản phẩm đặt trước", true),
-            ToProductModel(product)
+            ResponseConstants.Get("sản phẩm", true),
+            ToProductModel(projection.Product, projection.AverageRating, projection.RatingCount, projection.OrderCount)
         );
     }
 
@@ -346,7 +401,8 @@ public class ProductService : IProductService
                 TotalSold = g.Sum(x => x.Quantity),
                 TotalRevenue = g.Sum(x => x.ItemPrice)
             };
-        var bestSeller = await query.OrderByDescending(x => x.TotalSold).ThenByDescending(x => x.TotalRevenue).Take(5)
+        var bestSeller = await query.OrderByDescending(x => x.TotalSold).ThenByDescending(x => x.TotalRevenue)
+            .Take(5)
             .ToListAsync();
         return bestSeller;
     }
@@ -359,7 +415,8 @@ public class ProductService : IProductService
         if (!isExist) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
 
         var preorderProduct = await _preorderProductRepository.GetByIdAsync(productId);
-        if (preorderProduct == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm đặt trước"));
+        if (preorderProduct == null)
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm đặt trước"));
 
         // update only if there is a value
         preorderProduct.MaxPreOrderQuantity = model.MaxPreOrderQuantity;
@@ -420,8 +477,8 @@ public class ProductService : IProductService
             IsPreOrder = p.PreorderProduct != null,
             AverageRating = p.ProductReviews.IsNullOrEmpty()
                 ? 0
-                : p.ProductReviews.Average(pr => (double)pr.Rating),
-            RatingCount = p.ProductReviews.Count,
+                : p.ProductReviews.Where(pr => pr.IsActive).Average(pr => (double)pr.Rating),
+            RatingCount = p.ProductReviews.Count(pr => pr.IsActive),
             Thumbnail = p.Thumbnail,
             Status = p.ProductStatus!.Name
         });
@@ -442,11 +499,8 @@ public class ProductService : IProductService
         );
     }
 
-    private static ProductModel ToProductModel(Product product)
+    private static ProductModel ToProductModel(Product product, double averageRating, int ratingCount, int orderCount)
     {
-        var orderDetails = product.OrderDetails.IsNullOrEmpty()
-            ? []
-            : product.OrderDetails.Where(od => od.Order.StatusId == (int)OrderStatusId.Delivered).ToList();
         var model = new ProductModel
         {
             Id = product.Id.ToString(),
@@ -464,11 +518,9 @@ public class ProductService : IProductService
             StatusId = product.StatusId,
             Status = product.ProductStatus!.Name,
             Thumbnail = product.Thumbnail,
-            AverageRating = product.ProductReviews.IsNullOrEmpty()
-                ? 0
-                : Math.Round(product.ProductReviews.Average(pr => (double)pr.Rating), 1),
-            RatingCount = product.ProductReviews.Count,
-            OrderCount = orderDetails.IsNullOrEmpty() ? 0 : orderDetails.Sum(od => od.Quantity),
+            AverageRating = Math.Round(averageRating, 1),
+            RatingCount = ratingCount,
+            OrderCount = orderCount,
             IsActive = product.IsActive,
             CreatedAt = product.CreatedAt
         };
@@ -496,8 +548,6 @@ public class ProductService : IProductService
             "saleprice" => p => p.SalePrice == 0 ? p.OriginalPrice : p.SalePrice,
             "quantity" => p => p.Quantity,
             "createdat" => p => p.CreatedAt,
-            "rating" => p => Math.Round(p.ProductReviews.Average(pr => (double)pr.Rating), 1),
-            "ordercount" => p => p.OrderDetails.Sum(od => od.Quantity),
             _ => product => product.Id
         };
     }
