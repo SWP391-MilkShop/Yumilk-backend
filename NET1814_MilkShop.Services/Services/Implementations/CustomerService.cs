@@ -288,7 +288,7 @@ public sealed class CustomerService : ICustomerService
                     .FirstOrDefault(),
                 TotalPurchase = x.Count(),
                 TotalRevenue = (long)x.Sum(o => o.TotalPrice)
-            }).OrderByDescending(x => x.TotalRevenue).ToListAsync();
+            }).OrderByDescending(x => x.TotalRevenue).Take(5).ToListAsync();
         return ResponseModel.Success(ResponseConstants.Get("doanh thu cao nhất của khách hàng đã đặt hàng", true),
             query);
     }
