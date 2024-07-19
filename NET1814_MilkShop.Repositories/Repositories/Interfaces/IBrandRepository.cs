@@ -9,5 +9,6 @@ public interface IBrandRepository
     void Update(Brand b);
     void Delete(Brand b);
     Task<Brand?> GetByIdAsync(int id);
+    Task<Brand?> GetBrandByName(int id, string name);
     Task<Brand?> GetBrandByName(string name);
 }

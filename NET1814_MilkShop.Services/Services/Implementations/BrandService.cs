@@ -141,7 +141,7 @@ public class BrandService : IBrandService
 
         if (!string.IsNullOrEmpty(model.Name))
         {
-            var isExistName = await _brandRepository.GetBrandByName(model.Name);
+            var isExistName = await _brandRepository.GetBrandByName(id, model.Name);
             if (isExistName != null)
             {
                 return ResponseModel.BadRequest(ResponseConstants.Exist("Tên thương hiệu"));

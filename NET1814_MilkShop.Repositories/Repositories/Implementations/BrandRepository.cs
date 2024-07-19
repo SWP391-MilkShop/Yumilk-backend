@@ -17,6 +17,11 @@ public class BrandRepository : Repository<Brand>, IBrandRepository
         return _query;
     }
 
+    public async Task<Brand?> GetBrandByName(int id, string name)
+    {
+        return await _query.FirstOrDefaultAsync(x => x.Name.Equals(name) && x.Id != id);
+    }
+
     public async Task<Brand?> GetBrandByName(string name)
     {
         return await _query.FirstOrDefaultAsync(x => x.Name.Equals(name));
