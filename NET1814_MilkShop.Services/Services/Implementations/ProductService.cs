@@ -64,7 +64,7 @@ public class ProductService : IProductService
 
         var minPrice = queryModel.MinPrice;
         var maxPrice = queryModel.MaxPrice;
-        var query = _productRepository.GetProductsQuery(true, true);
+        var query = _productRepository.GetProductsQuery(false, true);
         if (queryModel.StatusIds.Contains((int)ProductStatusId.Preordered))
         {
             query = query.Include(p => p.PreorderProduct);
@@ -103,9 +103,9 @@ public class ProductService : IProductService
         var projection = query.Select(p => new
         {
             Product = p,
-            AverageRating = p.ProductReviews.IsNullOrEmpty()
-                ? 0
-                : p.ProductReviews.Where(pr => pr.IsActive).Average(pr => (double)pr.Rating),
+            AverageRating = p.ProductReviews.Any(pr => pr.IsActive)
+                ? p.ProductReviews.Where(pr => pr.IsActive).Average(pr => (double)pr.Rating)
+                : 0,
             RatingCount = p.ProductReviews.Count(pr => pr.IsActive),
             OrderCount = p.OrderDetails.Where(od => od.Order.StatusId == (int)OrderStatusId.Delivered)
                 .Sum(od => od.Quantity)
