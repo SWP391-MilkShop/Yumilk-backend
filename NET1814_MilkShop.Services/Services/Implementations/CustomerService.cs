@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
+using NET1814_MilkShop.Repositories.CoreHelpers.Regex;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
@@ -168,17 +168,12 @@ public sealed class CustomerService : ICustomerService
 
         if (!string.IsNullOrWhiteSpace(changeUserInfoModel.PhoneNumber))
         {
-            if (!Regex.IsMatch(changeUserInfoModel.PhoneNumber, @"^([0-9]{10})$"))
+            if (!PhoneNumberRegex.PhoneRegex().IsMatch(changeUserInfoModel.PhoneNumber))
             {
-                /*return new ResponseModel
-                {
-                    Message = "Invalid Phone Number!",
-                    Status = "Error"
-                };*/
                 return ResponseModel.BadRequest(ResponseConstants.InvalidPhoneNumber);
             }
 
-            if (!customer.PhoneNumber.Equals(changeUserInfoModel.PhoneNumber))
+            if (!string.Equals(customer.PhoneNumber, changeUserInfoModel.PhoneNumber))
             {
                 if (await _customerRepository.IsExistPhoneNumberAsync(changeUserInfoModel.PhoneNumber))
                 {

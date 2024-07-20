@@ -1,5 +1,3 @@
-using NET1814_MilkShop.Repositories.Data.Entities;
-
 namespace NET1814_MilkShop.Repositories.Models.ReportModels;
 
 public class ReportDetailModel
