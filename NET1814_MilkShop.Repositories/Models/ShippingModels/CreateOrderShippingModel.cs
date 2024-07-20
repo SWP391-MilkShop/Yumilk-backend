@@ -27,9 +27,10 @@ public class CreateOrderShippingModel
     [JsonProperty("to_ward_code")] public string? ToWardCode { get; set; }
     [JsonProperty("to_district_id")] public int? ToDistrictId { get; set; }
     [JsonProperty("cod_amount")] public int CodAmount { get; set; }
-    [JsonProperty("weight")] public int Weight { get; set; } //Set cứng vì GHN bắt buộc cần Weight :D
+    [JsonProperty("weight")] public int Weight { get; set; } 
     [JsonProperty("service_type_id")] public int ServiceTypeId { get; set; } = 2; //2: E-commerce Delivery
     [JsonProperty("items")] public List<Item>? Items { get; set; }
+    [JsonProperty("pick_shift")] public List<int> PickShift { get; set; } = [4]; //"id":4 pick shift will be at tomorrow afternoon (12h00 - 18h00)",
 }
 
 public class Item
