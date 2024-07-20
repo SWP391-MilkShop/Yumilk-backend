@@ -675,6 +675,11 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Product", b =>
         {
+            // row version
+            b.Property<byte[]>("Version")
+                .HasColumnName("version")
+                .IsRowVersion();
+            
             b.Property<Guid>("Id")
                 .ValueGeneratedOnAdd()
                 .HasColumnType("uniqueidentifier");

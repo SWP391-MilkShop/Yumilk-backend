@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Data;
+using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.Data;
 using NET1814_MilkShop.Repositories.Data.Interfaces;
 using NET1814_MilkShop.Repositories.UnitOfWork.Interfaces;
@@ -26,7 +27,7 @@ public class UnitOfWork : IUnitOfWork
             result = await _context.SaveChangesAsync();
             await dbContextTransaction.CommitAsync();
         }
-        catch (Exception)
+        catch (DBConcurrencyException)
         {
             //Log Exception Handling message
             result = -1;
