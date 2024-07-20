@@ -445,6 +445,10 @@ public class AppDbContext : DbContext
                 .HasColumnType("nvarchar(255)")
                 .HasColumnName("ward_code");
 
+            b.Property<byte[]>("Version")
+                .HasColumnName("version")
+                .IsRowVersion();
+
             b.HasKey("Id");
 
             b.HasIndex("CustomerId");
@@ -670,7 +674,7 @@ public class AppDbContext : DbContext
 
             b.HasKey("ProductId");
 
-            b.ToTable("preorder_product", null as string);
+            b.ToTable("preorder_products", null as string);
         });
 
         modelBuilder.Entity("NET1814_MilkShop.Repositories.Data.Entities.Product", b =>
@@ -679,7 +683,7 @@ public class AppDbContext : DbContext
             b.Property<byte[]>("Version")
                 .HasColumnName("version")
                 .IsRowVersion();
-            
+
             b.Property<Guid>("Id")
                 .ValueGeneratedOnAdd()
                 .HasColumnType("uniqueidentifier");

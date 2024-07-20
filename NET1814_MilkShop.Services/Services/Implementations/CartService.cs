@@ -98,7 +98,8 @@ public class CartService : ICartService
         {
             if (cartItem.Quantity + model.Quantity > product.Quantity)
             {
-                return ResponseModel.BadRequest(ResponseConstants.NotEnoughQuantity);
+                return ResponseModel.BadRequest(
+                    $"Bạn đã có sẵn {cartItem.Quantity} sản phẩm {product.Name} trong giỏ hàng");
             }
 
             cartItem.Quantity += model.Quantity;

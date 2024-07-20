@@ -72,6 +72,8 @@ public class Order : IAuditableEntity
     [Column("deleted_at", TypeName = "datetime2")]
     public DateTime? DeletedAt { get; set; }
 
+    [Timestamp] public byte[]? Version { get; set; }
+
     public virtual Customer? Customer { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];

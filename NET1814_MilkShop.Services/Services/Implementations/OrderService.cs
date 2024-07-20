@@ -669,6 +669,7 @@ public class OrderService : IOrderService
             _productRepository.Update(o.Product);
         }
 
+        // _unitOfWork.Detach(order);
         _orderRepository.Update(order);
         var res = await _unitOfWork.SaveChangesAsync();
         if (res > 0)
