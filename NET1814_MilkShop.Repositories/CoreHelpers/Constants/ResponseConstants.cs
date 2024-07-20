@@ -245,4 +245,6 @@ public static class ResponseConstants
     public const string CartIsEmpty = "Giỏ hàng của bạn hiện tại đang rỗng!";
 
     #endregion
+
+    public const string ConcurrencyError = "Dữ liệu đã bị thay đổi bởi người dùng khác, vui lòng thử lại";
 }
