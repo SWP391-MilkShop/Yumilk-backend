@@ -3,6 +3,7 @@ namespace NET1814_MilkShop.Repositories.Models.OrderModels;
 public class OrderDetailModel
 {
     public Guid Id { get; set; }
+    public Guid? CustomerId { get; set; }
     public string? ReceiverName { get; set; }
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
