@@ -343,11 +343,12 @@ public class ProductService : IProductService
         var product = await _productRepository.GetByIdNoIncludeAsync(id);
         if (product == null) return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
         // check if product is ordered
-        var isOrdered = await _orderDetailRepository.GetOrderDetailQuery().FirstOrDefaultAsync(od =>
-            od.ProductId == id) != null;
+        // var isOrdered = await _orderDetailRepository.GetOrderDetailQuery().FirstOrDefaultAsync(od =>
+        //     od.ProductId == id) != null;
+        var isOrdered = await _orderDetailRepository.CheckActiveOrderProduct(id);
         if (isOrdered)
         {
-            return ResponseModel.BadRequest(ResponseConstants.DeleteOrderedProduct);
+            return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
         }
 
         var preorderProduct = await _preorderProductRepository.GetByIdAsync(id);
