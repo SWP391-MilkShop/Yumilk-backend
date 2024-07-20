@@ -533,19 +533,6 @@ public class OrderService : IOrderService
         }
 
         int result;
-        if (model.StatusId == (int)OrderStatusId.Cancelled && order.PointAmount != 0)
-        {
-            var customer = await _customerRepository.GetCustomersQuery()
-                .FirstOrDefaultAsync(x => x.UserId == order.CustomerId);
-            if (customer == null)
-            {
-                return ResponseModel.BadRequest(ResponseConstants.NotFound("Khách hàng"));
-            }
-
-            customer.Point += order.PointAmount;
-            _customerRepository.Update(customer);
-        }
-
         if (model.StatusId == (int)OrderStatusId.Shipped)
         {
             // Check if the order is a preorder and needs stock updates
@@ -561,6 +548,7 @@ public class OrderService : IOrderService
 
                     _productRepository.Update(o.Product);
                 }
+
                 // Save changes if stock was updated
                 var stockUpdateResult = await _unitOfWork.SaveChangesAsync();
                 if (stockUpdateResult <= 0)
@@ -568,6 +556,7 @@ public class OrderService : IOrderService
                     return ResponseModel.Error("Không thể cập nhật số lượng sản phẩm trong kho");
                 }
             }
+
             _unitOfWork.Detach(order); // detach order to prevent tracking
             // order code and shipping status is already updated in the shipping service
             var orderShipping = await _shippingService.CreateOrderShippingAsync(id);
@@ -657,6 +646,19 @@ public class OrderService : IOrderService
             {
                 message = "link thanh toán và ";
             }
+        }
+
+        if (order.PointAmount != 0)
+        {
+            var customer = await _customerRepository.GetCustomersQuery()
+                .FirstOrDefaultAsync(x => x.UserId == order.CustomerId);
+            if (customer == null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Khách hàng"));
+            }
+
+            customer.Point += order.PointAmount;
+            _customerRepository.Update(customer);
         }
 
         order.StatusId = (int)OrderStatusId.Cancelled;
