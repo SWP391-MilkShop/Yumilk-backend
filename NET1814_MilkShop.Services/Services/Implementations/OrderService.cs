@@ -372,6 +372,7 @@ public class OrderService : IOrderService
         var detail = new OrderDetailModel
         {
             Id = order.Id,
+            CustomerId = order.CustomerId,
             ReceiverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
             Email = order.Email,
             PhoneNumber = order.PhoneNumber,
@@ -532,6 +533,19 @@ public class OrderService : IOrderService
         }
 
         int result;
+        if (model.StatusId == (int)OrderStatusId.Cancelled && order.PointAmount != 0)
+        {
+            var customer = await _customerRepository.GetCustomersQuery()
+                .FirstOrDefaultAsync(x => x.UserId == order.CustomerId);
+            if (customer == null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Khách hàng"));
+            }
+
+            customer.Point += order.PointAmount;
+            _customerRepository.Update(customer);
+        }
+
         if (model.StatusId == (int)OrderStatusId.Shipped)
         {
             // Check if the order is a preorder and needs stock updates
@@ -698,6 +712,7 @@ public class OrderService : IOrderService
         var detail = new OrderDetailModel
         {
             Id = order.Id,
+            CustomerId = order.CustomerId,
             ReceiverName = order.ReceiverName, //order.RecieverName (do chua update db nen chua co)
             PhoneNumber = order.PhoneNumber,
             Email = order.Email,
