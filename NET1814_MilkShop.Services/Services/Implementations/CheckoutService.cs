@@ -187,7 +187,7 @@ public class CheckoutService : ICheckoutService
             Note = model.Note,
             PaymentMethod = model.PaymentMethod,
             StatusId = (int)OrderStatusId.Pending,
-            OrderCode = model.PaymentMethod == "COD" ? null : await GenerateOrderCode(),
+            TransactionCode = model.PaymentMethod == "COD" ? null : await GenerateOrderCode(),
             TotalGram = GetTotalGram(cart.CartDetails.ToList()),
             Email = customer.Email,
             VoucherAmount = voucherDiscount,
@@ -270,7 +270,7 @@ public class CheckoutService : ICheckoutService
             };
             if (model.PaymentMethod == "PAYOS")
             {
-                var paymentLink = await _paymentService.CreatePaymentLink(orders.OrderCode!.Value);
+                var paymentLink = await _paymentService.CreatePaymentLink(orders.TransactionCode!.Value);
                 if (paymentLink.Status == "Error")
                 {
                     return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));
@@ -367,7 +367,7 @@ public class CheckoutService : ICheckoutService
             Note = model.Note,
             PaymentMethod = "PAYOS",
             StatusId = (int)OrderStatusId.Pending,
-            OrderCode = await GenerateOrderCode(),
+            TransactionCode = await GenerateOrderCode(),
             TotalGram = product.Product.Unit!.Gram * model.Quantity,
             Email = customerEmail,
             IsPreorder = true // set is preorder = true
@@ -430,7 +430,7 @@ public class CheckoutService : ICheckoutService
                           " xu cho đơn hàng này!",
                 IsPreorder = preOrder.IsPreorder
             };
-            var paymentLink = await _paymentService.CreatePaymentLink(preOrder.OrderCode.Value);
+            var paymentLink = await _paymentService.CreatePaymentLink(preOrder.TransactionCode.Value);
             if (paymentLink.Status == "Error")
             {
                 return ResponseModel.Error(ResponseConstants.Create("đơn hàng", false));

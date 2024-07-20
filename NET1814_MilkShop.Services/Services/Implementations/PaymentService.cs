@@ -38,7 +38,7 @@ public class PaymentService : IPaymentService
         try
         {
             var order = await _orderRepository.GetByCodeAsync(orderCode);
-            if (order is null || order.OrderCode is null)
+            if (order is null || order.TransactionCode is null)
             {
                 return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
             }
@@ -68,7 +68,7 @@ public class PaymentService : IPaymentService
             var description = $"{orderCode} Shipfee: {order.ShippingFee}đ";
             var expiredAt = (int)DateTimeOffset.UtcNow.AddMinutes(5).ToUnixTimeSeconds();
             var paymentData = new PaymentData(
-                (long)order.OrderCode,
+                (long)order.TransactionCode,
                 order.TotalAmount,
                 description,
                 items,
@@ -135,12 +135,12 @@ public class PaymentService : IPaymentService
                 return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
             }
 
-            if (existOrder.OrderCode is null)
+            if (existOrder.TransactionCode is null)
             {
                 return ResponseModel.BadRequest("Không tìm thấy mã đơn hàng thanh toán");
             }
 
-            var orderCode = (long)existOrder.OrderCode;
+            var orderCode = (long)existOrder.TransactionCode;
             var response =
                 await _client.GetAsync("https://api-merchant.payos.vn/v2/payment-requests/" + orderCode);
             // Read the response content
@@ -180,12 +180,12 @@ public class PaymentService : IPaymentService
                 return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
             }
 
-            if (existOrder.OrderCode is null)
+            if (existOrder.TransactionCode is null)
             {
                 return ResponseModel.BadRequest("Không tìm thấy mã đơn hàng thanh toán");
             }
 
-            var orderCode = existOrder.OrderCode.Value;
+            var orderCode = existOrder.TransactionCode.Value;
             var cancelPaymentLink = await _payOs.cancelPaymentLink(orderCode);
             return cancelPaymentLink.status == "ERROR"
                 ? ResponseModel.Error("Hủy link thanh toán thất bại")

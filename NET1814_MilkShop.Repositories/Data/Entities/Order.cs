@@ -45,9 +45,11 @@ public class Order : IAuditableEntity
 
     [Column("payment_method", TypeName = "varchar(255)")]
     public string? PaymentMethod { get; set; }
-
-    [Column("order_code", TypeName = "int")]
-    public int? OrderCode { get; set; }
+    /// <summary>
+    /// Order code 
+    /// </summary>
+    [Column("transaction_code", TypeName = "int")]
+    public int? TransactionCode { get; set; }
 
     [Column("shipping_code", TypeName = "nvarchar(255)")]
     [StringLength(255)]

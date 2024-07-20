@@ -50,7 +50,7 @@ public class CheckPaymentStatusJob : IJob
         {
             try
             {
-                if (order.OrderCode == null)
+                if (order.TransactionCode == null)
                 {
                     _logger.LogInformation("Order code is null for order {OrderId}", order.Id);
                     continue;
@@ -83,7 +83,7 @@ public class CheckPaymentStatusJob : IJob
                 //Gọi API lấy payment status của PayOS
                 await Task.Delay(300); //Tranh request qua nhieu trong thoi gian ngan tranh bi block
                 var paymentStatus = await _paymentService.GetPaymentLinkInformation(order.Id);
-                _logger.LogInformation($"OrderId:{order.Id} code:{order.OrderCode.Value} --> " + paymentStatus.Message);
+                _logger.LogInformation($"OrderId:{order.Id} code:{order.TransactionCode.Value} --> " + paymentStatus.Message);
                 
                 //Neu bi loi thi tam thoi skip qua order do
                 if (paymentStatus.StatusCode == 500)

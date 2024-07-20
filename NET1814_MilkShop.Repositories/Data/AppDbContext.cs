@@ -384,9 +384,9 @@ public class AppDbContext : DbContext
             b.Property<string>("Note")
                 .HasColumnType("nvarchar(max)");
 
-            b.Property<int?>("OrderCode")
+            b.Property<int?>("TransactionCode")
                 .HasColumnType("int")
-                .HasColumnName("order_code");
+                .HasColumnName("transaction_code");
 
             b.Property<DateTime?>("PaymentDate")
                 .HasColumnType("datetime2")

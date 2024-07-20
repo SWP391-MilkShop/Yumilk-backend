@@ -41,7 +41,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
             .ThenInclude(o => o.User)
             .Include(o => o.OrderDetails)
             .ThenInclude(o => o.Product)
-            .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
+            .FirstOrDefaultAsync(o => o.TransactionCode == orderCode);
     }
 
     public async Task<Order?> GetByIdNoIncludeAsync(Guid id)
@@ -55,7 +55,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
     {
         return await _query
             .Include(o => o.OrderDetails)
-            .Where(x => x.OrderCode != null && (x.StatusId == (int)OrderStatusId.Pending))
+            .Where(x => x.TransactionCode != null && (x.StatusId == (int)OrderStatusId.Pending))
             .ToListAsync();
     }
 
@@ -73,7 +73,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
 
     public async Task<bool> IsExistOrderCode(int id)
     {
-        return await _query.AnyAsync(x => x.OrderCode == id);
+        return await _query.AnyAsync(x => x.TransactionCode == id);
     }
 
     public void Add(OrderDetail orderDetail)
