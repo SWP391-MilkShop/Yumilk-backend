@@ -365,7 +365,7 @@ public class CheckoutService : ICheckoutService
             Email = customerEmail,
             IsPreorder = true // set is preorder = true
         };
-        var orderLog = new OrderLog()
+        var orderLog = new OrderLog
         {
             OrderId = preOrder.Id,
             NewStatusId = (int)OrderStatusId.Pending,

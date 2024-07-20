@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.API.CoreHelpers.ActionFilters;
 using NET1814_MilkShop.API.CoreHelpers.Extensions;
-using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.ReportModels;
 using NET1814_MilkShop.Repositories.Models.ReportTypeModels;
 using NET1814_MilkShop.Services.Services.Interfaces;

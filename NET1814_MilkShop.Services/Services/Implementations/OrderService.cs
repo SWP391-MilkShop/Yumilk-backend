@@ -561,7 +561,6 @@ public class OrderService : IOrderService
 
                     _productRepository.Update(o.Product);
                 }
-
                 // Save changes if stock was updated
                 var stockUpdateResult = await _unitOfWork.SaveChangesAsync();
                 if (stockUpdateResult <= 0)
@@ -569,7 +568,7 @@ public class OrderService : IOrderService
                     return ResponseModel.Error("Không thể cập nhật số lượng sản phẩm trong kho");
                 }
             }
-
+            _unitOfWork.Detach(order); // detach order to prevent tracking
             // order code and shipping status is already updated in the shipping service
             var orderShipping = await _shippingService.CreateOrderShippingAsync(id);
             if (orderShipping.StatusCode != 200)

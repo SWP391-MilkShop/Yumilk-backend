@@ -64,7 +64,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
@@ -108,7 +108,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
@@ -172,7 +172,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
@@ -272,7 +272,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<string>("Address")
                 .HasColumnType("nvarchar(2000)")
@@ -509,7 +509,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
@@ -549,7 +549,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
@@ -761,7 +761,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
@@ -831,7 +831,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
@@ -870,7 +870,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
@@ -925,7 +925,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
@@ -1007,7 +1007,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
@@ -1040,7 +1040,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
@@ -1073,7 +1073,7 @@ public class AppDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("Id").UseIdentityColumn();
 
             b.Property<DateTime>("CreatedAt")
                 .HasColumnType("datetime2")
