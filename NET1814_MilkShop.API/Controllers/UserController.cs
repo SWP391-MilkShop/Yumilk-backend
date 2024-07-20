@@ -87,7 +87,7 @@ public class UserController : ControllerBase
     /// <returns></returns>
     [HttpGet]
     [Route("customers")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     [ServiceFilter(typeof(UserExistsFilter))]
     public async Task<IActionResult> GetCustomers([FromQuery] CustomerQueryModel request)
     {

@@ -162,7 +162,7 @@ public class DashboardController : Controller
 
     [HttpGet]
     [Route("payment/stats/payment-methods")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
     public async Task<IActionResult> GetPaymentMethodStats()
     {
         _logger.Information("Get payment method stats");
@@ -192,7 +192,7 @@ public class DashboardController : Controller
     /// <returns></returns>
     [HttpGet]
     [Route("customers/stats/{year}/returning-customers")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
     public async Task<IActionResult> GetReturnCustomersStats(int year)
     {
         _logger.Information("Get customers return stats by year");
@@ -207,7 +207,7 @@ public class DashboardController : Controller
     /// <returns></returns>
     [HttpGet]
     [Route("orders/stats/{year}/revenue-by-month")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
     public async Task<IActionResult> GetRevenueByMonth(int year)
     {
         _logger.Information("Get revenue by month");
