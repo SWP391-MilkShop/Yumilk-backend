@@ -39,6 +39,9 @@ public class Product : IAuditableEntity
     [Column("is_active")]
     public bool IsActive { get; set; }
 
+    [Timestamp]
+    public byte[] Version { get; set; }
+
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
 

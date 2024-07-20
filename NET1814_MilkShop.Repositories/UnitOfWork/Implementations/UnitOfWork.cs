@@ -27,7 +27,7 @@ public class UnitOfWork : IUnitOfWork
             result = await _context.SaveChangesAsync();
             await dbContextTransaction.CommitAsync();
         }
-        catch (DBConcurrencyException)
+        catch (Exception)
         {
             //Log Exception Handling message
             result = -1;
