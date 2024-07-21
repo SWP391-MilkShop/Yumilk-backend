@@ -53,4 +53,4 @@ jobs:
           app-name: 'milkshop'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C09378D4D4CB4C2FA968188CA4672DB8 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B16542B114794F108C28D36CDEF0DB62 }}
