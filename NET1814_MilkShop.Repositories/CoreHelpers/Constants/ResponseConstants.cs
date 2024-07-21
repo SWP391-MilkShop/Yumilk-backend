@@ -195,9 +195,15 @@ public static class ResponseConstants
         return result ? $"Tải {name} lên thành công" : $"Tải {name} lên không thành công";
     }
 
+    public static string InUsed(string name)
+    {
+        return $"Không thể xóa {name} đang được sử dụng trong sản phẩm";
+    }
+
     public const string InvalidUrl = "Url không hợp lệ";
     public const string InvalidFilterDate = "Ngày bắt đầu phải trước hoặc trùng với ngày kết thúc";
     public const string InvalidFromDate = "Ngày bắt đầu không thể lớn hơn ngày hiện tại";
+    public const string InvalidExpectedPreOrderDays = "Số ngày dự kiến phải lớn hơn 0";
 
     public const string UserNotActive =
         "Tài khoản của bạn chưa được kích hoạt. Vui lòng kích hoạt tài khoản để tiến hành thanh toán";
@@ -221,6 +227,7 @@ public static class ResponseConstants
     public const string NotInPreOrder = "Sản phẩm đang không trong quá trình Pre-order";
     public const string ProductOrdered = "Sản phẩm đang trong quá trình đặt hàng";
     public const string InvalidMaxPreOrderQuantity = "Số lượng đặt hàng tối đa phải lớn hơn 0";
+    public const string DeleteOrderedProduct = "Không thể xóa sản phẩm đã được đặt hàng";
 
     #endregion
 
@@ -243,4 +250,6 @@ public static class ResponseConstants
     public const string CartIsEmpty = "Giỏ hàng của bạn hiện tại đang rỗng!";
 
     #endregion
+
+    public const string ConcurrencyError = "Dữ liệu đã bị thay đổi bởi người dùng khác, vui lòng thử lại";
 }

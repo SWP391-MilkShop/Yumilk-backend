@@ -1,9 +1,12 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Net.payOS;
 using Net.payOS.Types;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Repositories.Interfaces;
 using NET1814_MilkShop.Services.Services.Interfaces;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace NET1814_MilkShop.Services.Services.Implementations;
 
@@ -12,16 +15,22 @@ public class PaymentService : IPaymentService
     private readonly PayOS _payOs;
     private readonly IConfiguration _configuration;
     private readonly IOrderRepository _orderRepository;
+    private readonly HttpClient _client;
 
-    public PaymentService(IConfiguration configuration, IOrderRepository orderRepository)
+    public PaymentService(IConfiguration configuration,
+        IOrderRepository orderRepository,
+        HttpClient client)
     {
+        _client = client;
         _configuration = configuration;
         _orderRepository = orderRepository;
-        _payOs = new PayOS(
+        _payOs ??= new PayOS(
             _configuration["PayOS:ClientId"]!,
             _configuration["PayOS:ApiKey"]!,
             _configuration["PayOS:CheckSumKey"]!
         );
+        _client.DefaultRequestHeaders.Add("x-client-id", _configuration["PayOS:ClientId"]);
+        _client.DefaultRequestHeaders.Add("x-api-key", _configuration["PayOS:ApiKey"]);
     }
 
     public async Task<ResponseModel> CreatePaymentLink(int orderCode)
@@ -29,7 +38,7 @@ public class PaymentService : IPaymentService
         try
         {
             var order = await _orderRepository.GetByCodeAsync(orderCode);
-            if (order is null || order.OrderCode is null)
+            if (order is null || order.TransactionCode is null)
             {
                 return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
             }
@@ -57,9 +66,9 @@ public class PaymentService : IPaymentService
             var customerEmail = order.Customer?.Email;
             var customerPhone = order.Customer?.PhoneNumber;
             var description = $"{orderCode} Shipfee: {order.ShippingFee}đ";
-            var expiredAt = (int)DateTimeOffset.UtcNow.AddMinutes(15).ToUnixTimeSeconds();
+            var expiredAt = (int)DateTimeOffset.UtcNow.AddMinutes(5).ToUnixTimeSeconds();
             var paymentData = new PaymentData(
-                (long)order.OrderCode,
+                (long)order.TransactionCode,
                 order.TotalAmount,
                 description,
                 items,
@@ -81,11 +90,11 @@ public class PaymentService : IPaymentService
         }
     }
 
-    public async Task<ResponseModel> GetPaymentLinkInformation(Guid orderId)
+    /*public async Task<ResponseModel> GetPaymentLinkInformation(Guid orderId)
     {
         try
         {
-            var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(orderId);
+            var existOrder = await _orderRepository.GetByIdNoIncludeAsync(orderId);
             if (existOrder is null)
             {
                 return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
@@ -96,9 +105,9 @@ public class PaymentService : IPaymentService
                 return ResponseModel.BadRequest("Không tìm thấy mã đơn hàng thanh toán");
             }
 
-            var orderCode = existOrder.OrderCode.Value;
+            var orderCode = (long)existOrder.OrderCode;
             var paymentLinkInformation = await _payOs.getPaymentLinkInformation(orderCode);
-            if (paymentLinkInformation.status == "ERROR")
+            if (paymentLinkInformation.status == "Error")
             {
                 return ResponseModel.Error(
                     "Đã có lỗi xảy ra trong quá trình lấy thông tin link thanh toán"
@@ -114,24 +123,69 @@ public class PaymentService : IPaymentService
         {
             return ResponseModel.Error(ex.Message);
         }
+    }*/
+
+    public async Task<ResponseModel> GetPaymentLinkInformation(Guid orderId)
+    {
+        try
+        {
+            var existOrder = await _orderRepository.GetByIdNoIncludeAsync(orderId);
+            if (existOrder is null)
+            {
+                return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
+            }
+
+            if (existOrder.TransactionCode is null)
+            {
+                return ResponseModel.BadRequest("Không tìm thấy mã đơn hàng thanh toán");
+            }
+
+            var orderCode = (long)existOrder.TransactionCode;
+            var response =
+                await _client.GetAsync("https://api-merchant.payos.vn/v2/payment-requests/" + orderCode);
+            // Read the response content
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var responseBodyJson = JObject.Parse(responseContent);
+            var code = responseBodyJson["code"]?.ToString();
+            var data = responseBodyJson["data"]?.ToString();
+            if (code == null && code != "00")
+            {
+                return ResponseModel.Error("Có lỗi trong quá trình lấy dữ liệu thông tin thanh toán");
+            }
+
+            if (data.IsNullOrEmpty())
+            {
+                return ResponseModel.Error("Không tồn tại thông tin thanh toán");
+            }
+
+            var payOsData = JsonConvert.DeserializeObject<PaymentLinkInformation>(data);
+            return ResponseModel.Success(
+                "Lấy thông tin link thanh toán thành công",
+                payOsData
+            );
+        }
+        catch (Exception ex)
+        {
+            return ResponseModel.Error(ex.Message);
+        }
     }
 
     public async Task<ResponseModel> CancelPaymentLink(Guid orderId)
     {
         try
         {
-            var existOrder = await _orderRepository.GetByIdNoInlcudeAsync(orderId);
+            var existOrder = await _orderRepository.GetByIdNoIncludeAsync(orderId);
             if (existOrder is null)
             {
                 return ResponseModel.BadRequest("Không tìm thấy đơn hàng");
             }
 
-            if (existOrder.OrderCode is null)
+            if (existOrder.TransactionCode is null)
             {
                 return ResponseModel.BadRequest("Không tìm thấy mã đơn hàng thanh toán");
             }
 
-            var orderCode = existOrder.OrderCode.Value;
+            var orderCode = existOrder.TransactionCode.Value;
             var cancelPaymentLink = await _payOs.cancelPaymentLink(orderCode);
             return cancelPaymentLink.status == "ERROR"
                 ? ResponseModel.Error("Hủy link thanh toán thất bại")

@@ -64,8 +64,8 @@ public class ProductService : IProductService
 
         var minPrice = queryModel.MinPrice;
         var maxPrice = queryModel.MaxPrice;
-        var query = _productRepository.GetProductsQuery(true, true);
-        if (queryModel.StatusIds.Contains((int)ProductStatusId.Preorder))
+        var query = _productRepository.GetProductsQuery(false, true);
+        if (queryModel.StatusIds.Contains((int)ProductStatusId.Preordered))
         {
             query = query.Include(p => p.PreorderProduct);
         }
@@ -99,18 +99,68 @@ public class ProductService : IProductService
 
         #endregion
 
+        //projection
+        var projection = query.Select(p => new
+        {
+            Product = p,
+            AverageRating = p.ProductReviews.Any(pr => pr.IsActive)
+                ? p.ProductReviews.Where(pr => pr.IsActive).Average(pr => (double)pr.Rating)
+                : 0,
+            RatingCount = p.ProductReviews.Count(pr => pr.IsActive),
+            OrderCount = p.OrderDetails.Where(od => od.Order.StatusId == (int)OrderStatusId.Delivered)
+                .Sum(od => od.Quantity)
+        });
+
         #region Sort
 
-        if ("desc".Equals(queryModel.SortOrder?.ToLower()))
-            query = query.OrderByDescending(GetSortProperty(queryModel.SortColumn));
-        else
-            query = query.OrderBy(GetSortProperty(queryModel.SortColumn));
+        var sortColumn = queryModel.SortColumn ?? "id"; //default is "id"
+        var sortOrder = queryModel.SortOrder ?? "asc"; //default is "asc
+        var sortedQuery = projection;
+        switch (sortColumn.ToLower().Replace(" ", ""))
+        {
+            case "name":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.Product.Name)
+                    : projection.OrderByDescending(p => p.Product.Name);
+                break;
+            case "saleprice":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.Product.SalePrice == 0 ? p.Product.OriginalPrice : p.Product.SalePrice)
+                    : projection.OrderByDescending(p =>
+                        p.Product.SalePrice == 0 ? p.Product.OriginalPrice : p.Product.SalePrice);
+                break;
+            case "quantity":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.Product.Quantity)
+                    : projection.OrderByDescending(p => p.Product.Quantity);
+                break;
+            case "createdat":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.Product.CreatedAt)
+                    : projection.OrderByDescending(p => p.Product.CreatedAt);
+                break;
+            case "rating":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.AverageRating)
+                    : projection.OrderByDescending(p => p.AverageRating);
+                break;
+            case "ordercount":
+                sortedQuery = sortOrder.ToLower() == "asc"
+                    ? projection.OrderBy(p => p.OrderCount)
+                    : projection.OrderByDescending(p => p.OrderCount);
+                break;
+            default:
+                sortedQuery = projection.OrderBy(p => p.Product.Id); // Default sorting by Id
+                break;
+        }
 
         #endregion
 
+        var productModelQuery =
+            sortedQuery.Select(p => ToProductModel(p.Product, p.AverageRating, p.RatingCount, p.OrderCount));
+
         #region Pagination
 
-        var productModelQuery = query.Select(p => ToProductModel(p));
         var products = await PagedList<ProductModel>.CreateAsync(
             productModelQuery,
             queryModel.Page,
@@ -131,16 +181,21 @@ public class ProductService : IProductService
     {
         var product = await _productRepository.GetByIdAsync(id, true, true);
         if (product == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
-        // if (product.StatusId != (int)ProductStatusId.Preorder)
-        //     return ResponseModel.Success(
-        //         ResponseConstants.Get("sản phẩm", true),
-        //         ToProductModel(product)
-        //     );
+        var projection = new
+        {
+            Product = product,
+            AverageRating = product.ProductReviews.IsNullOrEmpty()
+                ? 0
+                : product.ProductReviews.Where(pr => pr.IsActive).Average(pr => (double)pr.Rating),
+            RatingCount = product.ProductReviews.Count(pr => pr.IsActive),
+            OrderCount = product.OrderDetails.Where(od => od.Order.StatusId == (int)OrderStatusId.Delivered)
+                .Sum(od => od.Quantity)
+        };
         var preorderProduct = await _preorderProductRepository.GetByIdAsync(id);
         product.PreorderProduct = preorderProduct;
         return ResponseModel.Success(
-            ResponseConstants.Get("sản phẩm đặt trước", true),
-            ToProductModel(product)
+            ResponseConstants.Get("sản phẩm", true),
+            ToProductModel(projection.Product, projection.AverageRating, projection.RatingCount, projection.OrderCount)
         );
     }
 
@@ -171,14 +226,14 @@ public class ProductService : IProductService
             IsActive = false, // default is unpublished
             Thumbnail = model.Thumbnail
         };
-        if (model.StatusId is (int)ProductStatusId.Preorder or (int)ProductStatusId.OutOfStock)
+        if (model.StatusId is (int)ProductStatusId.Preordered or (int)ProductStatusId.OutOfStock)
         {
             // set quantity to 0 if status is preorder or out of stock
             product.Quantity = 0;
         }
 
         //add preorder product if status is preordered
-        if (model.StatusId == (int)ProductStatusId.Preorder)
+        if (model.StatusId == (int)ProductStatusId.Preordered)
         {
             var preorderProduct = new PreorderProduct
             {
@@ -211,7 +266,7 @@ public class ProductService : IProductService
         if (product == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
 
         var existingPreorder = await _preorderProductRepository.GetByIdAsync(id);
-        if (model.StatusId == (int)ProductStatusId.Preorder)
+        if (model.StatusId == (int)ProductStatusId.Preordered)
         {
             if (existingPreorder == null)
             {
@@ -245,9 +300,9 @@ public class ProductService : IProductService
         product.Quantity = model.Quantity ?? product.Quantity;
         product.OriginalPrice = model.OriginalPrice ?? product.OriginalPrice;
         product.SalePrice = model.SalePrice ?? product.SalePrice;
-        product.IsActive = model.IsActive;
+        product.IsActive = model.IsActive ?? product.IsActive;
         // check if product is ordered
-        if (product.StatusId != (int)ProductStatusId.OutOfStock && product.IsActive)
+        if (product.StatusId != (int)ProductStatusId.OutOfStock)
         {
             if (model.StatusId != 0 && product.StatusId != model.StatusId)
             {
@@ -267,9 +322,9 @@ public class ProductService : IProductService
             var validateCommonResponse = ValidateCommon(product.SalePrice, product.OriginalPrice, product.Quantity,
                 product.StatusId, model.Thumbnail);
             if (validateCommonResponse != null) return validateCommonResponse;
-            if (product.StatusId == (int)ProductStatusId.Preorder)
+            if (product.StatusId == (int)ProductStatusId.Preordered)
             {
-                var validatePreorderProduct = ValidatePreorderProduct(existingPreorder!);
+                var validatePreorderProduct = ValidatePreorderProduct(existingPreorder!, product);
                 if (validatePreorderProduct != null) return validatePreorderProduct;
             }
         }
@@ -287,6 +342,9 @@ public class ProductService : IProductService
     {
         var product = await _productRepository.GetByIdNoIncludeAsync(id);
         if (product == null) return ResponseModel.Success(ResponseConstants.NotFound("Sản phẩm"), null);
+        // check if product is ordered
+        // var isOrdered = await _orderDetailRepository.GetOrderDetailQuery().FirstOrDefaultAsync(od =>
+        //     od.ProductId == id) != null;
         var isOrdered = await _orderDetailRepository.CheckActiveOrderProduct(id);
         if (isOrdered)
         {
@@ -320,14 +378,34 @@ public class ProductService : IProductService
         //get total products sold per category
         var categories = _categoryRepository.GetCategoriesQuery();
         var statsPerCategory = await GetCategoryStats(categories, orderDetails, parentId);
+        var bestSeller = await GetBestSellerProductAsync(orderDetails);
         var stats = new ProductStatsModel
         {
             TotalSold = await orderDetails.SumAsync(o => o.Quantity),
             TotalRevenue = await orderDetails.SumAsync(o => o.ItemPrice),
             StatsPerBrand = statsPerBrand,
-            StatsPerCategory = statsPerCategory
+            StatsPerCategory = statsPerCategory,
+            BestSellers = bestSeller
         };
         return ResponseModel.Success(ResponseConstants.Get("thống kê sản phẩm", true), stats);
+    }
+
+    private async Task<List<BestSellerModel>> GetBestSellerProductAsync(IQueryable<OrderDetail> orderDetails)
+    {
+        var query = from order in orderDetails
+            group order by new { order.Product.Id, order.Product.Name }
+            into g
+            select new BestSellerModel
+            {
+                Id = g.Key.Id,
+                Name = g.Key.Name,
+                TotalSold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.ItemPrice)
+            };
+        var bestSeller = await query.OrderByDescending(x => x.TotalSold).ThenByDescending(x => x.TotalRevenue)
+            .Take(5)
+            .ToListAsync();
+        return bestSeller;
     }
 
     public async Task<ResponseModel> UpdatePreorderProductAsync(Guid productId, UpdatePreorderProductModel model)
@@ -338,7 +416,8 @@ public class ProductService : IProductService
         if (!isExist) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
 
         var preorderProduct = await _preorderProductRepository.GetByIdAsync(productId);
-        if (preorderProduct == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm đặt trước"));
+        if (preorderProduct == null)
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm đặt trước"));
 
         // update only if there is a value
         preorderProduct.MaxPreOrderQuantity = model.MaxPreOrderQuantity;
@@ -399,8 +478,8 @@ public class ProductService : IProductService
             IsPreOrder = p.PreorderProduct != null,
             AverageRating = p.ProductReviews.IsNullOrEmpty()
                 ? 0
-                : p.ProductReviews.Average(pr => (double)pr.Rating),
-            RatingCount = p.ProductReviews.Count,
+                : p.ProductReviews.Where(pr => pr.IsActive).Average(pr => (double)pr.Rating),
+            RatingCount = p.ProductReviews.Count(pr => pr.IsActive),
             Thumbnail = p.Thumbnail,
             Status = p.ProductStatus!.Name
         });
@@ -421,12 +500,9 @@ public class ProductService : IProductService
         );
     }
 
-    private static ProductModel ToProductModel(Product product)
+    private static ProductModel ToProductModel(Product product, double averageRating, int ratingCount, int orderCount)
     {
-        var orderDetails = product.OrderDetails.IsNullOrEmpty()
-            ? []
-            : product.OrderDetails.Where(od => od.Order.StatusId == (int)OrderStatusId.Delivered).ToList();
-        var model = new ProductModel()
+        var model = new ProductModel
         {
             Id = product.Id.ToString(),
             Name = product.Name,
@@ -443,11 +519,9 @@ public class ProductService : IProductService
             StatusId = product.StatusId,
             Status = product.ProductStatus!.Name,
             Thumbnail = product.Thumbnail,
-            AverageRating = product.ProductReviews.IsNullOrEmpty()
-                ? 0
-                : product.ProductReviews.Average(pr => (double)pr.Rating),
-            RatingCount = product.ProductReviews.Count,
-            OrderCount = orderDetails.IsNullOrEmpty() ? 0 : orderDetails.Sum(od => od.Quantity),
+            AverageRating = Math.Round(averageRating, 1),
+            RatingCount = ratingCount,
+            OrderCount = orderCount,
             IsActive = product.IsActive,
             CreatedAt = product.CreatedAt
         };
@@ -475,8 +549,6 @@ public class ProductService : IProductService
             "saleprice" => p => p.SalePrice == 0 ? p.OriginalPrice : p.SalePrice,
             "quantity" => p => p.Quantity,
             "createdat" => p => p.CreatedAt,
-            "rating" => p => p.ProductReviews.Average(pr => (double)pr.Rating),
-            "ordercount" => p => p.OrderDetails.Sum(od => od.Quantity),
             _ => product => product.Id
         };
     }
@@ -531,21 +603,24 @@ public class ProductService : IProductService
         if (salePrice > originalPrice) return ResponseModel.BadRequest(ResponseConstants.InvalidSalePrice);
         if (statusId == (int)ProductStatusId.Selling && quantity == 0)
             return ResponseModel.BadRequest(ResponseConstants.InvalidQuantity);
-
-        if (statusId == (int)ProductStatusId.Preorder && quantity != 0)
-            return ResponseModel.BadRequest(ResponseConstants.NoQuantityPreorder);
-
+        if (quantity < 0) return ResponseModel.BadRequest(ResponseConstants.InvalidQuantity);
+        // if (statusId == (int)ProductStatusId.Preorder && quantity != 0)
+        //     return ResponseModel.BadRequest(ResponseConstants.NoQuantityPreorder);
         return null;
     }
 
-    private static ResponseModel? ValidatePreorderProduct(PreorderProduct preorderProduct)
+    private static ResponseModel? ValidatePreorderProduct(PreorderProduct preorderProduct, Product product)
     {
-        if(preorderProduct.StartDate < DateTime.Now)
-            return ResponseModel.BadRequest("Ngày bắt đầu không thể nhỏ hơn ngày hiện tại");
+        // if(preorderProduct.StartDate < DateTime.UtcNow)
+        //     return ResponseModel.BadRequest("Ngày bắt đầu không thể nhỏ hơn ngày hiện tại");
         if (preorderProduct.StartDate > preorderProduct.EndDate)
             return ResponseModel.BadRequest(ResponseConstants.InvalidFilterDate);
         if (preorderProduct.MaxPreOrderQuantity <= 0)
             return ResponseModel.BadRequest(ResponseConstants.InvalidMaxPreOrderQuantity);
+        if (preorderProduct.ExpectedPreOrderDays <= 0)
+            return ResponseModel.BadRequest(ResponseConstants.InvalidExpectedPreOrderDays);
+        if (product.Quantity >= preorderProduct.MaxPreOrderQuantity)
+            return ResponseModel.BadRequest("Số lượng đặt trước tối đa phải lớn hơn số lượng hiện có");
         return null;
     }
 

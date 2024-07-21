@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
+using NET1814_MilkShop.Repositories.CoreHelpers.Regex;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
 using NET1814_MilkShop.Repositories.Models.UserModels;
@@ -18,11 +18,14 @@ public sealed class CustomerService : ICustomerService
 {
     private readonly ICustomerRepository _customerRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrderRepository _orderRepository;
 
-    public CustomerService(ICustomerRepository customerRepository, IUnitOfWork unitOfWork)
+    public CustomerService(ICustomerRepository customerRepository, IUnitOfWork unitOfWork,
+        IOrderRepository orderRepository)
     {
         _customerRepository = customerRepository;
         _unitOfWork = unitOfWork;
+        _orderRepository = orderRepository;
     }
 
     private static CustomerModel ToCustomerModel(Customer customer, User user)
@@ -39,7 +42,8 @@ public sealed class CustomerService : ICustomerService
             Role = user.Role!.Name,
             ProfilePictureUrl = customer.ProfilePictureUrl,
             IsActive = user.IsActive,
-            IsBanned = user.IsBanned
+            IsBanned = user.IsBanned,
+            Point = customer.Point
         };
     }
 
@@ -164,17 +168,12 @@ public sealed class CustomerService : ICustomerService
 
         if (!string.IsNullOrWhiteSpace(changeUserInfoModel.PhoneNumber))
         {
-            if (!Regex.IsMatch(changeUserInfoModel.PhoneNumber, @"^([0-9]{10})$"))
+            if (!PhoneNumberRegex.PhoneRegex().IsMatch(changeUserInfoModel.PhoneNumber))
             {
-                /*return new ResponseModel
-                {
-                    Message = "Invalid Phone Number!",
-                    Status = "Error"
-                };*/
                 return ResponseModel.BadRequest(ResponseConstants.InvalidPhoneNumber);
             }
 
-            if (!customer.PhoneNumber.Equals(changeUserInfoModel.PhoneNumber))
+            if (!string.Equals(customer.PhoneNumber, changeUserInfoModel.PhoneNumber))
             {
                 if (await _customerRepository.IsExistPhoneNumberAsync(changeUserInfoModel.PhoneNumber))
                 {
@@ -245,6 +244,71 @@ public sealed class CustomerService : ICustomerService
     {
         return await _customerRepository.IsExistEmailAsync(email);
     }
+
+    public async Task<ResponseModel> GetReturnCustomerStatsAsync(int year)
+    {
+        // get all orders that have been delivered in year
+        var orders = _orderRepository.GetOrderQuery()
+            .Where(x => x.CreatedAt.Year == year && x.StatusId == (int)OrderStatusId.Delivered);
+        var query = from firstorder in orders
+            join secondorder in orders on firstorder.CustomerId equals secondorder.CustomerId
+            where firstorder.CreatedAt.Date != secondorder.CreatedAt.Date
+            // Tính toán quý dựa trên tháng của CreatedAt
+            group new { firstorder.CreatedAt, firstorder.CustomerId } by new
+                { Quarter = "Q" + ((firstorder.CreatedAt.Month - 1) / 3 + 1) + "' " + year }
+            into g
+            select new
+            {
+                g.Key.Quarter, // 1 = Quý 3 tháng (4 quý)
+                DistinctCustomerCount =
+                    g.Select(x => x.CustomerId).Distinct()
+                        .Count() // Số lượng khách hàng quay trở lại mua hàng trong mỗi quý
+            };
+        var result = await query.ToListAsync();
+        return ResponseModel.Success(
+            ResponseConstants.Get("khách hàng trở lại", result.Count > 0),
+            result
+        );
+    }
+
+    public async Task<ResponseModel> GetTotalPurchaseAsync()
+    {
+        var orders = _orderRepository.GetOrderQuery();
+        var query = await orders.Where(x => x.StatusId == (int)OrderStatusId.Delivered)
+            .GroupBy(x => x.CustomerId)
+            .Select(x => new
+            {
+                CustomerId = x.Key,
+                CustomerName = x.Select(o => o.Customer!.User.FirstName + " " + o.Customer.User.LastName)
+                    .FirstOrDefault(),
+                TotalPurchase = x.Count(),
+                TotalRevenue = (long)x.Sum(o => o.TotalPrice)
+            }).OrderByDescending(x => x.TotalRevenue).Take(5).ToListAsync();
+        return ResponseModel.Success(ResponseConstants.Get("doanh thu cao nhất của khách hàng đã đặt hàng", true),
+            query);
+    }
+
+    public async Task<ResponseModel> GetTotalPurchaseByCustomerAsync(Guid id, int year)
+    {
+        var isExistCustomer = await _customerRepository.IsExistAsync(id);
+        if (!isExistCustomer)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("Khách hàng"));
+        }
+
+        var orders = _orderRepository.GetOrderQuery();
+        var query = await orders.Where(x =>
+                x.CustomerId == id && x.StatusId == (int)OrderStatusId.Delivered && x.CreatedAt.Year == year)
+            .GroupBy(x => x.CustomerId)
+            .Select(x => new
+            {
+                CustomerId = x.Key,
+                TotalPurchase = x.Count(),
+                TotalRevenue = x.Sum(o => o.TotalPrice)
+            }).ToListAsync();
+        return ResponseModel.Success(ResponseConstants.Get("doanh thu của khách hàng", true), query);
+    }
+
 
     /*public async Task<bool> IsCustomerExistAsync(string email, string phoneNumber)
     {

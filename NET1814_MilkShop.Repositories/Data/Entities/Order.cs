@@ -13,6 +13,12 @@ public class Order : IAuditableEntity
 
     public int TotalPrice { get; set; }
 
+    [Column("voucher_amount", TypeName = "int")]
+    public int VoucherAmount { get; set; }
+
+    [Column("point_amount", TypeName = "int")]
+    public int PointAmount { get; set; }
+
     public int ShippingFee { get; set; }
 
     public int TotalAmount { get; set; } // TotalPrice + ShippingFee
@@ -22,23 +28,28 @@ public class Order : IAuditableEntity
     [Column("receiver_name", TypeName = "nvarchar(255)")]
     public string ReceiverName { get; set; } = null!;
 
+    [Column("address", TypeName = "nvarchar(2000)")]
     public string Address { get; set; } = null!;
 
     [Column("district_id")] public int DistrictId { get; set; }
 
     [Column("ward_code", TypeName = "nvarchar(255)")]
     [StringLength(255)]
-    public string WardCode { get; set; }
+    public string WardCode { get; set; } = null!;
 
+    [Column("phone_number", TypeName = "nvarchar(20)")]
     public string PhoneNumber { get; set; } = null!;
 
+    [Column("note", TypeName = "nvarchar(max)")]
     public string? Note { get; set; }
 
     [Column("payment_method", TypeName = "varchar(255)")]
     public string? PaymentMethod { get; set; }
-
-    [Column("order_code", TypeName = "int")]
-    public int? OrderCode { get; set; }
+    /// <summary>
+    /// Order code 
+    /// </summary>
+    [Column("transaction_code", TypeName = "int")]
+    public int? TransactionCode { get; set; }
 
     [Column("shipping_code", TypeName = "nvarchar(255)")]
     [StringLength(255)]
@@ -52,6 +63,8 @@ public class Order : IAuditableEntity
     [Column("email", TypeName = "nvarchar(255)")]
     public string? Email { get; set; }
 
+    [Column("is_preorder")] public bool IsPreorder { get; set; }
+
     [Column("created_at", TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }
 
@@ -61,9 +74,13 @@ public class Order : IAuditableEntity
     [Column("deleted_at", TypeName = "datetime2")]
     public DateTime? DeletedAt { get; set; }
 
+    [Timestamp] public byte[]? Version { get; set; }
+
     public virtual Customer? Customer { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
 
     public virtual OrderStatus? Status { get; set; }
+
+    public virtual ICollection<OrderLog> OrderLogs { get; set; } = [];
 }

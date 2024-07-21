@@ -17,6 +17,8 @@ public class PostModel
     public string? MetaDescription { get; set; }
 
     public bool IsActive { get; set; }
+    
+    public string? Thumbnail { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

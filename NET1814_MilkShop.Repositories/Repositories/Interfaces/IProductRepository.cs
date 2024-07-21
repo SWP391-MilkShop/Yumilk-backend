@@ -44,4 +44,7 @@ public interface IProductRepository
     void Delete(Product product);
     Task<bool> IsExistAsync(Guid id);
     Task<Product?> GetByIdIncludePreorder(Guid id);
+    Task<bool> IsExistIdByBrand(int id);
+    Task<bool> IsExistIdByUnit(int id);
+    Task<bool> IsExistIdByCategory(int id);
 }

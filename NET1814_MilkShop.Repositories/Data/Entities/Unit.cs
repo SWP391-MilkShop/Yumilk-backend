@@ -10,8 +10,10 @@ public class Unit : IAuditableEntity
 {
     [Key] public int Id { get; set; }
 
+    [Column("name", TypeName = "nvarchar(255)")]
     public string Name { get; set; } = null!;
 
+    [Column("description", TypeName = "nvarchar(2000)")]
     public string? Description { get; set; }
 
     [Column("gram")] public int Gram { get; set; }

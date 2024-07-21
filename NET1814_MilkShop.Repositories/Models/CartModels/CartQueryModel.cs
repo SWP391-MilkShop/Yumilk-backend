@@ -6,4 +6,8 @@ public class CartQueryModel : QueryModel
     /// Sort by product name, price (default is name)
     /// </summary>
     public new string? SortColumn { get; set; }
+    
+    public Guid VoucherId { get; set; } = Guid.Empty;
+
+    public bool IsUsingPoint { get; set; } = false;
 }

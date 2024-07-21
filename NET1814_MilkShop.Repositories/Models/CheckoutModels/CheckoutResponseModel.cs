@@ -8,7 +8,11 @@ public class CheckoutResponseModel
     public string? FullName { get; set; }
 
     public string? Email { get; set; }
+
+    public int TotalPriceBeforeDiscount { get; set; }
+
     public int TotalAmount { get; set; }
+    public int TotalPriceAfterDiscount { get; set; }
 
     public int TotalGram { get; set; }
     public int ShippingFee { get; set; }
@@ -19,4 +23,13 @@ public class CheckoutResponseModel
     public DateTime CreatedAt { get; set; }
     public string? CheckoutUrl { get; set; }
     public object? OrderDetail { get; set; }
+    public string? Message { get; set; }
+
+    public Guid VoucherId { get; set; }
+
+    public bool IsUsingPoint { get; set; }
+
+    public int VoucherDiscount { get; set; }
+    public int PointDiscount { get; set; }
+    public bool IsPreorder { get; set; }
 }

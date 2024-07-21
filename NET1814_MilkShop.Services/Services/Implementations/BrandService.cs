@@ -13,12 +13,14 @@ namespace NET1814_MilkShop.Services.Services.Implementations;
 public class BrandService : IBrandService
 {
     private readonly IBrandRepository _brandRepository;
+    private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public BrandService(IBrandRepository brandRepository, IUnitOfWork unitOfWork)
+    public BrandService(IBrandRepository brandRepository, IUnitOfWork unitOfWork, IProductRepository productRepository)
     {
         _brandRepository = brandRepository;
         _unitOfWork = unitOfWork;
+        _productRepository = productRepository;
     }
 
     public async Task<ResponseModel> GetBrandsAsync(BrandQueryModel queryModel)
@@ -121,6 +123,7 @@ public class BrandService : IBrandService
         {
             Name = model.Name,
             Description = model.Description,
+            Logo = model.Logo,
             IsActive = true
         };
         _brandRepository.Add(entity);
@@ -140,7 +143,7 @@ public class BrandService : IBrandService
 
         if (!string.IsNullOrEmpty(model.Name))
         {
-            var isExistName = await _brandRepository.GetBrandByName(model.Name);
+            var isExistName = await _brandRepository.GetBrandByName(id, model.Name);
             if (isExistName != null)
             {
                 return ResponseModel.BadRequest(ResponseConstants.Exist("Tên thương hiệu"));
@@ -152,6 +155,9 @@ public class BrandService : IBrandService
         existingBrand.Description = string.IsNullOrEmpty(model.Description)
             ? existingBrand.Description
             : model.Description;
+        existingBrand.Logo = string.IsNullOrEmpty(model.Logo)
+            ? existingBrand.Logo
+            : model.Logo;
         existingBrand.IsActive = model.IsActive;
         _brandRepository.Update(existingBrand);
         var result = await _unitOfWork.SaveChangesAsync();
@@ -170,7 +176,11 @@ public class BrandService : IBrandService
         {
             return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
         }
-
+        var isCurrentlyInUsed = await _productRepository.IsExistIdByBrand(id);
+        if (isCurrentlyInUsed)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.InUsed("thương hiệu"));
+        }
         _brandRepository.Delete(isExist);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)

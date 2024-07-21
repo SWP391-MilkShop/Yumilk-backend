@@ -19,6 +19,7 @@ public class CartService : ICartService
     private readonly ICartDetailRepository _cartDetailRepository;
     private readonly IProductRepository _productRepository;
     private readonly ICustomerRepository _customerRepository;
+    private readonly IVoucherRepository _voucherRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CartService(
@@ -26,13 +27,13 @@ public class CartService : ICartService
         ICartDetailRepository cartDetailRepository,
         IUnitOfWork unitOfWork,
         IProductRepository productRepository,
-        ICustomerRepository customerRepository
-    )
+        ICustomerRepository customerRepository, IVoucherRepository voucherRepository)
     {
         _cartRepository = cartRepository;
         _cartDetailRepository = cartDetailRepository;
         _productRepository = productRepository;
         _customerRepository = customerRepository;
+        _voucherRepository = voucherRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -57,7 +58,7 @@ public class CartService : ICartService
         }
 
         // Check if product is in pre-order status
-        if (product.StatusId == (int)ProductStatusId.Preorder)
+        if (product.StatusId == (int)ProductStatusId.Preordered)
         {
             return ResponseModel.BadRequest(ResponseConstants.NoPreorderCart);
         }
@@ -97,7 +98,8 @@ public class CartService : ICartService
         {
             if (cartItem.Quantity + model.Quantity > product.Quantity)
             {
-                return ResponseModel.BadRequest(ResponseConstants.NotEnoughQuantity);
+                return ResponseModel.BadRequest(
+                    $"Bạn đã có sẵn {cartItem.Quantity} sản phẩm {product.Name} trong giỏ hàng");
             }
 
             cartItem.Quantity += model.Quantity;
@@ -142,7 +144,7 @@ public class CartService : ICartService
             }
 
             // Check if product is in pre-order status
-            if (cartDetail.Product.StatusId == (int)ProductStatusId.Preorder)
+            if (cartDetail.Product.StatusId == (int)ProductStatusId.Preordered)
             {
                 _cartDetailRepository.Remove(cartDetail);
                 messages.Add($"Sản phẩm {cartDetail.Product.Name} đang trong chế độ đặt trước");
@@ -180,10 +182,22 @@ public class CartService : ICartService
 
     public async Task<ResponseModel> GetCartAsync(Guid customerId, CartQueryModel model)
     {
+        var customer = await _customerRepository.GetCustomersQuery()
+            .Include(c => c.User)
+            .FirstOrDefaultAsync(c => c.UserId == customerId);
+        if (customer!.User.IsBanned)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.Banned);
+        }
+
+        if (!customer.User.IsActive)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.UserNotActive);
+        }
+
         var cart = await _cartRepository
             .GetCartQuery()
-            .Where(x => x.CustomerId == customerId)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(x => x.CustomerId == customerId);
         if (cart == null)
         {
             var newCart = new CartModel
@@ -231,14 +245,54 @@ public class CartService : ICartService
             model.Page,
             model.PageSize
         );
+        var totalPrice = pagedList.Items.Sum(x => (x.SalePrice > 0 ? x.SalePrice : x.OriginalPrice) * x.Quantity);
+        var totalPriceAfterDiscount = totalPrice;
+        var voucherDiscount = 0;
+        var voucherMessage = "";
+        var voucherDiscountPercent = 0;
+        if (model.VoucherId != Guid.Empty)
+        {
+            var voucher = await _voucherRepository.GetByIdAsync(model.VoucherId);
+            if (voucher == null)
+            {
+                return ResponseModel.BadRequest(ResponseConstants.NotFound("Voucher"));
+            }
+
+            voucherDiscountPercent = voucher.Percent;
+            var handleVoucher = DiscountExtension.ApplyVoucher(voucher, totalPriceAfterDiscount);
+            // if (handleVoucher.StatusCode != 200) return handleVoucher;
+            voucherDiscount = (int)(handleVoucher.Data ?? 0);
+            voucherMessage = handleVoucher.Message;
+            totalPriceAfterDiscount -= voucherDiscount;
+        }
+
+        var pointDiscount = 0;
+        var pointMessage = "";
+        if (model.IsUsingPoint)
+        {
+            var handlePoint = DiscountExtension.ApplyPoint(customer, totalPriceAfterDiscount);
+            // if (handlePoint.StatusCode != 200) return handlePoint;
+            pointDiscount = (int)(handlePoint.Data ?? 0);
+            pointMessage = handlePoint.Message;
+            totalPriceAfterDiscount -= pointDiscount;
+        }
+
         var cartModel = new CartModel
         {
             Id = cart.Id,
             CustomerId = cart.CustomerId,
-            TotalPrice = pagedList.Items.Sum(x => (x.SalePrice > 0 ? x.SalePrice : x.OriginalPrice) * x.Quantity),
+            TotalPrice = totalPrice, // tổng tiền trước khi giảm giá
+            TotalPriceAfterDiscount = totalPriceAfterDiscount, // tổng tiền sau khi giảm giá
             TotalQuantity = pagedList.Items.Sum(x => x.Quantity),
             TotalGram = pagedList.Items.Sum(x => x.Gram * x.Quantity),
-            CartItems = pagedList
+            CartItems = pagedList,
+            VoucherId = model.VoucherId,
+            IsUsingPoint = model.IsUsingPoint,
+            VoucherDiscountPercent = voucherDiscountPercent,
+            VoucherDiscount = voucherDiscount,
+            PointDiscount = pointDiscount,
+            VoucherMessage = voucherMessage,
+            PointMessage = pointMessage
         };
         return ResponseModel.Success(ResponseConstants.Get("giỏ hàng", true), cartModel);
     }

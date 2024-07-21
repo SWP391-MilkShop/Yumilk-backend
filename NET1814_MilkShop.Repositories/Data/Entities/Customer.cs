@@ -11,6 +11,8 @@ public class Customer : IAuditableEntity
 
     [Column(TypeName = "nvarchar(20)")] public string? PhoneNumber { get; set; }
 
+    [Column("point")] public int Point { get; set; }
+
     [Column(TypeName = "nvarchar(255)")] public string? Email { get; set; }
 
     [Column(TypeName = "nvarchar(255)")] public string? GoogleId { get; set; }

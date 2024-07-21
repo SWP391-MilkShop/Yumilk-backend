@@ -9,7 +9,7 @@ public class OrderDetail : IAuditableEntity
     public Guid OrderId { get; set; }
 
     public Guid ProductId { get; set; }
-
+    [Column("quantity")]
     public int Quantity { get; set; }
 
     public int UnitPrice { get; set; }

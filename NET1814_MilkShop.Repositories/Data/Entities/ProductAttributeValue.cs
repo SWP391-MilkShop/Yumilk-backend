@@ -10,6 +10,7 @@ public class ProductAttributeValue : IAuditableEntity
 
     public int AttributeId { get; set; }
 
+    [Column("value", TypeName = "nvarchar(2000)")]
     public string? Value { get; set; }
 
     [Column("created_at", TypeName = "datetime2")]

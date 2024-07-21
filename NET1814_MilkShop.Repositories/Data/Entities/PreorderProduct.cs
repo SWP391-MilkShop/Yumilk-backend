@@ -4,7 +4,7 @@ using NET1814_MilkShop.Repositories.Data.Interfaces;
 
 namespace NET1814_MilkShop.Repositories.Data.Entities;
 
-[Table("preorder_product")]
+[Table("preorder_products")]
 public class PreorderProduct : IAuditableEntity
 {
     [Column("product_id")]

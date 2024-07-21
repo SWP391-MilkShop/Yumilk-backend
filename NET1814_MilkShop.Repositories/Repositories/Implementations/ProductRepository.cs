@@ -50,6 +50,13 @@ public sealed class ProductRepository : Repository<Product>, IProductRepository
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public async Task<bool> IsExistIdByBrand(int id) =>
+        await _query.AnyAsync(x=> x.BrandId == id);
+    public async Task<bool> IsExistIdByUnit(int id) =>
+        await _query.AnyAsync(x=> x.UnitId == id);
+    public async Task<bool> IsExistIdByCategory(int id) =>
+        await _query.AnyAsync(x=> x.CategoryId == id);
+
     public IQueryable<Product> GetProductQueryNoInclude()
     {
         return _query;

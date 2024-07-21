@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using NET1814_MilkShop.Repositories.CoreHelpers.Regex;
 using NET1814_MilkShop.Repositories.CoreHelpers.Validation;
 
 namespace NET1814_MilkShop.Repositories.Models.UserModels;
@@ -16,7 +17,9 @@ public class SignUpModel
 
     [Required(ErrorMessage = "Phone number is required!")]
     [DataType(DataType.PhoneNumber, ErrorMessage = "Invalid Phone Number!")]
-    [RegularExpression(@"^(0|\+84)(3|5|7|8|9)\d{8}$", ErrorMessage = "Invalid Phone Number!")]
+    // [RegularExpression(@"^(0|\+84)(3|5|7|8|9)\d{8}$", ErrorMessage = "Invalid Phone Number!")]
+    // new regex
+    [RegularExpression(PhoneNumberRegex.Pattern, ErrorMessage = "Invalid Phone Number!")]
     public string PhoneNumber { get; set; } = null!;
 
     [

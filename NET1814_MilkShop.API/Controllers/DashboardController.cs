@@ -61,6 +61,12 @@ public class DashboardController : Controller
         return ResponseExtension.Result(response);
     }
 
+    /// <summary>
+    /// Chuyen trang thai sang PROCESSING, SHIPPED
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
     [HttpPatch]
     [Route("orders/{id}/status")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
@@ -68,6 +74,21 @@ public class DashboardController : Controller
     {
         _logger.Information("Update order status");
         var response = await _orderService.UpdateOrderStatusAsync(id, model);
+        return ResponseExtension.Result(response);
+    }
+
+    /// <summary>
+    /// Chuyen trang thai don hang sang da giao
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [HttpPatch]
+    [Route("orders/{id}/status/delivered")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> UpdateOrderStatusDelivered(Guid id)
+    {
+        _logger.Information("Update order status to delivered");
+        var response = await _orderService.UpdateOrderStatusDeliveredAsync(id);
         return ResponseExtension.Result(response);
     }
 
@@ -102,6 +123,15 @@ public class DashboardController : Controller
         var res = await _customerService.GetCustomersStatsAsync(queryModel);
         return ResponseExtension.Result(res);
     }
+    // [HttpGet]
+    // [Route("customers/{id}/stats")]
+    // [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    // public async Task<IActionResult> GetCustomerStats(Guid id)
+    // {
+    //     _logger.Information("Get user stats");
+    //     var res = await _customerService.GetCustomersStatsByIdAsync(id);
+    //     return ResponseExtension.Result(res);
+    // }
 
     /// <summary>
     /// Admin and Staff have full permission to cancel order (PREORDER, PROCESSING, SHIPPING).
@@ -127,6 +157,81 @@ public class DashboardController : Controller
     {
         _logger.Information("Get order detail history");
         var res = await _orderService.GetOrderHistoryDetailDashBoardAsync(id);
+        return ResponseExtension.Result(res);
+    }
+
+    [HttpGet]
+    [Route("payment/stats/payment-methods")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    public async Task<IActionResult> GetPaymentMethodStats()
+    {
+        _logger.Information("Get payment method stats");
+        var res = await _orderService.GetPaymentMethodStats();
+        return ResponseExtension.Result(res);
+    }
+
+    /// <summary>
+    /// tổng đơn hàng đặt trong thứ ngày tháng
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("orders/stats/orders-by-date")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> GetOrdersStatsByDate([FromQuery] OrderStatsQueryModel model)
+    {
+        _logger.Information("Get orders stats by date");
+        var res = await _orderService.GetOrdersStatsByDateAsync(model);
+        return ResponseExtension.Result(res);
+    }
+
+    /// <summary>
+    /// khách hàng quay trở lại mua hàng theo quý trong năm
+    /// </summary>
+    /// <param name="year"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("customers/stats/{year}/returning-customers")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    public async Task<IActionResult> GetReturnCustomersStats(int year)
+    {
+        _logger.Information("Get customers return stats by year");
+        var res = await _customerService.GetReturnCustomerStatsAsync(year);
+        return ResponseExtension.Result(res);
+    }
+
+    /// <summary>
+    ///  Get revenue by each month, enter a year to get revenue by month
+    /// </summary>
+    /// <param name="year"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("orders/stats/{year}/revenue-by-month")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
+    public async Task<IActionResult> GetRevenueByMonth(int year)
+    {
+        _logger.Information("Get revenue by month");
+        var res = await _orderService.GetRevenueByMonthAsync(year);
+        return ResponseExtension.Result(res);
+    }
+
+    [HttpGet]
+    [Route("customers/stats/total-purchase")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> GetTotalPurchase()
+    {
+        _logger.Information("Get total purchase");
+        var res = await _customerService.GetTotalPurchaseAsync();
+        return ResponseExtension.Result(res);
+    }
+
+    [HttpGet]
+    [Route("customers/{id}/stats/{year}/total-purchase/")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    public async Task<IActionResult> GetTotalPurchaseByCustomer(Guid id, int year)
+    {
+        _logger.Information("Get total purchase by customer");
+        var res = await _customerService.GetTotalPurchaseByCustomerAsync(id, year);
         return ResponseExtension.Result(res);
     }
 }

@@ -30,10 +30,11 @@ public interface IOrderRepository
     void Update(Order order);
     void AddRange(IEnumerable<OrderDetail> list);
     Task<Order?> GetByCodeAsync(int orderCode);
-    Task<Order?> GetByIdNoInlcudeAsync(Guid id);
+    Task<Order?> GetByIdNoIncludeAsync(Guid id);
     Task<List<Order>?> GetAllCodeAsync();
     Task<Order?> GetByOrderIdAsync(Guid orderId, bool include);
     Task<bool> IsExistOrderCode(int id);
     void Add(OrderDetail orderDetail);
     Task<bool> IsExistPreorderProductAsync(Guid orderId);
+    Task<Order?> GetByIdIncludeCustomerAsync(Guid id);
 }

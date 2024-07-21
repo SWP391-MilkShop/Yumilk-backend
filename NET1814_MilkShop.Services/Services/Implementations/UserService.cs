@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using NET1814_MilkShop.Repositories.CoreHelpers.Constants;
 using NET1814_MilkShop.Repositories.Data.Entities;
 using NET1814_MilkShop.Repositories.Models;
@@ -229,7 +230,8 @@ public sealed class UserService : IUserService
 
     public async Task<ResponseModel> UpdateUserAsync(Guid id, UpdateUserModel model)
     {
-        var user = await _userRepository.GetByIdAsync(id);
+        var user = await _userRepository.GetUsersQuery()
+            .Include(u => u.Role).FirstOrDefaultAsync(x => x.Id == id);
         if (user == null)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Người dùng"), null);

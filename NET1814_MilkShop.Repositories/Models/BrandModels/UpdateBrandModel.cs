@@ -6,5 +6,7 @@ public class UpdateBrandModel
 
     public string? Description { get; set; } = null;
 
+    public string? Logo { get; set; }
+
     public bool IsActive { get; set; } = true;
 }

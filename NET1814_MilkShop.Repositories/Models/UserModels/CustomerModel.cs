@@ -13,4 +13,5 @@ public class CustomerModel
     public string? GoogleId { get; set; }
     public bool? IsActive { get; set; }
     public bool IsBanned { get; set; }
+    public int Point { get; set; }
 }
