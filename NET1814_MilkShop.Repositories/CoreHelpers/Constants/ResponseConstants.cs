@@ -195,6 +195,11 @@ public static class ResponseConstants
         return result ? $"Tải {name} lên thành công" : $"Tải {name} lên không thành công";
     }
 
+    public static string InUsed(string name)
+    {
+        return $"Không thể xóa {name} đang được sử dụng trong sản phẩm";
+    }
+
     public const string InvalidUrl = "Url không hợp lệ";
     public const string InvalidFilterDate = "Ngày bắt đầu phải trước hoặc trùng với ngày kết thúc";
     public const string InvalidFromDate = "Ngày bắt đầu không thể lớn hơn ngày hiện tại";

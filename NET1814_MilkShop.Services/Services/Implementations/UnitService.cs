@@ -14,12 +14,14 @@ namespace NET1814_MilkShop.Services.Services.Implementations;
 public class UnitService : IUnitService
 {
     private readonly IUnitRepository _unitRepository;
+    private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public UnitService(IUnitRepository unitRepository, IUnitOfWork unitOfWork)
+    public UnitService(IUnitRepository unitRepository, IUnitOfWork unitOfWork, IProductRepository productRepository)
     {
         _unitRepository = unitRepository;
         _unitOfWork = unitOfWork;
+        _productRepository = productRepository;
     }
 
     public async Task<ResponseModel> GetUnitsAsync(UnitQueryModel request)
@@ -94,12 +96,8 @@ public class UnitService : IUnitService
         };
         _unitRepository.Add(unit);
         var result = await _unitOfWork.SaveChangesAsync();
-        if (result > 0)
-        {
-            return ResponseModel.Success(ResponseConstants.Create("đơn vị", true), createUnitModel);
-        }
-
-        return ResponseModel.Error(ResponseConstants.Create("đơn vị", false));
+        return result > 0 ? ResponseModel.Success(ResponseConstants.Create("đơn vị", true), createUnitModel) 
+            : ResponseModel.Error(ResponseConstants.Create("đơn vị", false));
     }
 
     public async Task<ResponseModel> UpdateUnitAsync(int id, UpdateUnitModel unitModel)
@@ -132,12 +130,8 @@ public class UnitService : IUnitService
 
         _unitRepository.Update(isExistUnit);
         var result = await _unitOfWork.SaveChangesAsync();
-        if (result > 0)
-        {
-            return ResponseModel.Success(ResponseConstants.Update("đơn vị", true), unitModel);
-        }
-
-        return ResponseModel.Error(ResponseConstants.Update("đơn vị", false));
+        return result > 0 ? ResponseModel.Success(ResponseConstants.Update("đơn vị", true), unitModel)
+            : ResponseModel.Error(ResponseConstants.Update("đơn vị", false));
     }
 
     public async Task<ResponseModel> DeleteUnitAsync(int id)
@@ -145,17 +139,17 @@ public class UnitService : IUnitService
         var isExistUnit = await _unitRepository.GetExistIsActiveId(id);
         if (isExistUnit == null)
         {
-            return ResponseModel.Success(ResponseConstants.NotFound("đơn vị"), null);
+            return ResponseModel.BadRequest(ResponseConstants.NotFound("đơn vị"), null);
         }
-
+        var isInUsed = await _productRepository.IsExistIdByUnit(id);
+        if (isInUsed)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.InUsed("Đơn vị"));
+        }
         _unitRepository.Delete(isExistUnit);
         var result = await _unitOfWork.SaveChangesAsync();
-        if (result > 0)
-        {
-            return ResponseModel.Success(ResponseConstants.Delete("đơn vị", true), null);
-        }
-
-        return ResponseModel.Error(ResponseConstants.Delete("đơn vị", false));
+        return result > 0 ? ResponseModel.Success(ResponseConstants.Delete("đơn vị", true), null)
+            : ResponseModel.Error(ResponseConstants.Delete("đơn vị", false));
     }
 
     /// <summary>
