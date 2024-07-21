@@ -24,7 +24,7 @@ public class PostController : Controller
     [HttpGet]
     public async Task<IActionResult> GetPosts([FromQuery] PostQueryModel queryModel)
     {
-        _logger.Information("Get posts");
+        _logger.Information("Get posts log");
         var response = await _postService.GetPostsAsync(queryModel);
         return ResponseExtension.Result(response);
     }
