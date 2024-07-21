@@ -15,12 +15,14 @@ namespace NET1814_MilkShop.Services.Services.Implementations;
 public class CategoryService : ICategoryService
 {
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CategoryService(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork)
+    public CategoryService(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork, IProductRepository productRepository)
     {
         _categoryRepository = categoryRepository;
         _unitOfWork = unitOfWork;
+        _productRepository = productRepository;
     }
 
     public async Task<ResponseModel> CreateCategoryAsync(CreateCategoryModel model)
@@ -77,7 +79,11 @@ public class CategoryService : ICategoryService
         {
             return ResponseModel.BadRequest("Không thể xóa danh mục này vì có danh mục con thuộc danh mục này");
         }
-
+        var isInUsed = await _productRepository.IsExistIdByCategory(id);
+        if (isInUsed)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.InUsed("Đơn vị"));
+        }
         category.DeletedAt = DateTime.Now;
         _categoryRepository.Update(category);
         var result = await _unitOfWork.SaveChangesAsync();
@@ -200,11 +206,7 @@ public class CategoryService : ICategoryService
         existingCategory.IsActive = model.IsActive;
         _categoryRepository.Update(existingCategory);
         var result = await _unitOfWork.SaveChangesAsync();
-        if (result > 0)
-        {
-            return ResponseModel.Success(ResponseConstants.Update("danh mục", true), null);
-        }
-
-        return ResponseModel.Error(ResponseConstants.Update("danh mục", false));
+        return result > 0 ? ResponseModel.Success(ResponseConstants.Update("danh mục", true), null) 
+            : ResponseModel.Error(ResponseConstants.Update("danh mục", false));
     }
 }
