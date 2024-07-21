@@ -13,12 +13,14 @@ namespace NET1814_MilkShop.Services.Services.Implementations;
 public class BrandService : IBrandService
 {
     private readonly IBrandRepository _brandRepository;
+    private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public BrandService(IBrandRepository brandRepository, IUnitOfWork unitOfWork)
+    public BrandService(IBrandRepository brandRepository, IUnitOfWork unitOfWork, IProductRepository productRepository)
     {
         _brandRepository = brandRepository;
         _unitOfWork = unitOfWork;
+        _productRepository = productRepository;
     }
 
     public async Task<ResponseModel> GetBrandsAsync(BrandQueryModel queryModel)
@@ -174,7 +176,11 @@ public class BrandService : IBrandService
         {
             return ResponseModel.Success(ResponseConstants.NotFound("Thương hiệu"), null);
         }
-
+        var isCurrentlyInUsed = await _productRepository.IsExistIdByBrand(id);
+        if (isCurrentlyInUsed)
+        {
+            return ResponseModel.BadRequest(ResponseConstants.InUsed("thương hiệu"));
+        }
         _brandRepository.Delete(isExist);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
