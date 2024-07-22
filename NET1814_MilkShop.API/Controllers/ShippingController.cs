@@ -86,15 +86,16 @@ public class ShippingController : ControllerBase
     }
 
     /// <summary>
-    ///     Get order detail by our Guid orderId (not ghn shippingCode)
+    ///     Get tracking order ghn by our Guid orderId (not ghn shippingCode)
+    ///     Get tracking log from GHN service
     /// </summary>
     /// <param name="orderId"></param>
     /// <returns></returns>
-    [HttpGet("order/detail/{orderId}")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    [HttpGet("order/tracking/{orderId}")]
+    [Authorize(AuthenticationSchemes = "Access")]
     public async Task<IActionResult> GetOrderDetail(Guid orderId)
     {
-        _logger.Information("Get shipping order detail");
+        _logger.Information("Get shipping order logs");
         var response = await _shippingService.GetOrderDetailAsync(orderId);
         return ResponseExtension.Result(response);
     }

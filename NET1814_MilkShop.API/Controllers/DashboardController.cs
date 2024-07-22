@@ -177,6 +177,7 @@ public class DashboardController : Controller
 
     /// <summary>
     /// Lấy tỉ lệ sử dụng payment method COD với PAYOS
+    /// Tính dựa trên đơn hàng có order status = delivered
     /// </summary>
     /// <returns></returns>
     [HttpGet]
@@ -191,6 +192,7 @@ public class DashboardController : Controller
 
     /// <summary>
     /// tổng đơn hàng đặt trong thứ ngày tháng
+    /// Tính dựa trên ngày đặt hàng (Created_at) và có order status != Cancelled
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
@@ -205,7 +207,8 @@ public class DashboardController : Controller
     }
 
     /// <summary>
-    /// khách hàng quay trở lại mua hàng theo quý trong năm
+    /// khách hàng quay trở lại mua hàng theo quý trong năm (Q1: 1-3, Q2: 4-6, Q3: 7-9, Q4: 10-12)
+    /// Tính dựa trên đơn hàng có orderstatus = delivered
     /// </summary>
     /// <param name="year"></param>
     /// <returns></returns>
