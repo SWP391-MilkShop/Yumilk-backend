@@ -559,13 +559,11 @@ public class OrderService : IOrderService
 
             _unitOfWork.Detach(order); // detach order to prevent tracking
             // order code and shipping status is already updated in the shipping service
-            var orderShipping = await _shippingService.CreateOrderShippingAsync(id);
-            if (orderShipping.StatusCode != 200)
-            {
-                return orderShipping;
-            }
-
-            return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), orderShipping.Data);
+            // var orderShipping = await _shippingService.CreateOrderShippingAsync(id);
+            // if (orderShipping.StatusCode != 200)
+            // {
+            //     return orderShipping;
+            // }
         }
 
         order.StatusId = model.StatusId;

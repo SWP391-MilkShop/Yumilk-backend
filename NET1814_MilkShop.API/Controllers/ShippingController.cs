@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NET1814_MilkShop.API.CoreHelpers.Extensions;
 using NET1814_MilkShop.Repositories.Models.ShippingModels;
@@ -63,6 +64,7 @@ public class ShippingController : ControllerBase
     /// <param name="orderId"></param>
     /// <returns></returns>
     [HttpPost("order/create/{orderId}")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> CreateOrder(Guid orderId)
     {
         _logger.Information("Create shipping order");
@@ -89,6 +91,7 @@ public class ShippingController : ControllerBase
     /// <param name="orderId"></param>
     /// <returns></returns>
     [HttpGet("order/detail/{orderId}")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> GetOrderDetail(Guid orderId)
     {
         _logger.Information("Get shipping order detail");
@@ -102,6 +105,7 @@ public class ShippingController : ControllerBase
     /// <param name="orderId"></param>
     /// <returns></returns>
     [HttpPost("order/cancel/{orderId}")]
+    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> CancelOrder(Guid orderId)
     {
         _logger.Information("Cancel shipping order");

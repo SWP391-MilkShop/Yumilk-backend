@@ -123,7 +123,7 @@ public class VoucherService : IVoucherService
         voucher.StartDate = model.StartDate ?? voucher.StartDate;
         voucher.EndDate = model.EndDate ?? voucher.EndDate;
         voucher.Quantity = model.Quantity ?? voucher.Quantity;
-        if(model.Percent is > 50 or < 5)
+        if (model.Percent is > 50 or < 5)
         {
             return ResponseModel.BadRequest("Phần trăm giảm giá phải từ 5% đến 50%");
         }
