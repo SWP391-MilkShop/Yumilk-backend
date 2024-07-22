@@ -21,6 +21,13 @@ public class PostController : Controller
         _logger = logger;
     }
 
+    /// <summary>
+    /// Get all post information
+    /// Search by title, content, meta title, meta description
+    /// Sort by title, created at (default is modified at)
+    /// </summary>
+    /// <param name="queryModel"></param>
+    /// <returns></returns>
     [HttpGet]
     public async Task<IActionResult> GetPosts([FromQuery] PostQueryModel queryModel)
     {
@@ -28,6 +35,13 @@ public class PostController : Controller
         var response = await _postService.GetPostsAsync(queryModel);
         return ResponseExtension.Result(response);
     }
+    
+    /// <summary>
+    /// Get particular post by id
+    /// Check exist post by postId
+    /// </summary>
+    /// <param name="postId"></param>
+    /// <returns></returns>
     [HttpGet("{postId}")]
     public async Task<IActionResult> GetPost(Guid postId)
     {
@@ -35,6 +49,13 @@ public class PostController : Controller
         var response = await _postService.GetPostByIdAsync(postId);
         return ResponseExtension.Result(response);
     }
+    
+    /// <summary>
+    /// Create post by admin or staff
+    /// Check exist author (admin/staff) by id, check role of author (not customer), check format link url of thumbnail
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>
     [HttpPost]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     [ServiceFilter(typeof(UserExistsFilter))]
@@ -46,6 +67,14 @@ public class PostController : Controller
         return ResponseExtension.Result(res);
     }
 
+    /// <summary>
+    /// Update paricular post by postid (Admin/Staff)
+    /// Check exist post, check exist user, check permission of user (Only admin or actual author can update post)
+    /// Check format link url of thumbnail
+    /// </summary>
+    /// <param name="postId"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
     [HttpPatch("{postId}")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     [ServiceFilter(typeof(UserExistsFilter))]
@@ -60,6 +89,7 @@ public class PostController : Controller
     /// <summary>
     /// Only admin can delete post
     /// A staff can unpublish a post using UpdatePost
+    /// Check exist post by postId,
     /// </summary>
     /// <param name="postId"></param>
     /// <returns></returns>

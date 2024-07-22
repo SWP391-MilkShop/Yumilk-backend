@@ -24,6 +24,8 @@ public class ImageController : Controller
 
     /// <summary>
     /// Get image by image hash (id)
+    /// Add ClientId of Imgure in header
+    /// 200 (Thành công) 400 (Yêu cầu không hợp lệ) 404 (Không tìm thấy) 500 (Lỗi server)
     /// </summary>
     /// <param name="imageHash"></param>
     /// <returns></returns>
@@ -37,6 +39,9 @@ public class ImageController : Controller
 
     /// <summary>
     /// Upload image to Imgur
+    /// Add ClientId of Imgure in header
+    /// Require an image (IFormFile)
+    /// 200 (Thành công) 400 (Yêu cầu không hợp lệ) 404 (Không tìm thấy) 500 (Lỗi server)
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
