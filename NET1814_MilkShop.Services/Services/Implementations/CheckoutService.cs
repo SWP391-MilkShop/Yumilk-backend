@@ -320,7 +320,7 @@ public class CheckoutService : ICheckoutService
         {
             return ResponseModel.BadRequest(ResponseConstants.NotInPreOrder);
         }
-
+        // nếu số lượng sản phẩm mua + số lượng đã đặt > số lượng sản phẩm tối đa cho phép
         if (model.Quantity + product.Product.Quantity > product.MaxPreOrderQuantity)
         {
             var resp = new CheckoutQuantityResponseModel

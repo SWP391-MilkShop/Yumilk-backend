@@ -22,7 +22,14 @@ public class CheckoutController : ControllerBase
     }
 
     /// <summary>
-    /// checkout order
+    /// Chặn tài khoản chưa kích hoạt hoặc bị khóa
+    /// <para>Chặn nếu cart ko có item, item vượt quá số lượng, item ko còn trạng thái selling</para>
+    /// <para>Yêu cầu phải có địa chỉ</para>
+    /// <para>Apply Voucher (nếu có, validate đk sử dụng, trừ quantity voucher)</para>
+    /// <para>Apply Point (nếu có, point > 100, point max = 50% total price (đã trừ voucher)</para>
+    /// <para>Xóa cart details, trừ quantity sản phẩm trong kho, thêm order log</para>
+    /// <para>Nếu là PAYOS thì tạo payment link</para>
+    /// <para>Gửi mail xác nhận đơn hàng</para>
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
@@ -38,7 +45,8 @@ public class CheckoutController : ControllerBase
     }
 
     /// <summary>
-    /// checkout preorder
+    /// Handle tương tự checkout
+    /// <para>Chặn nếu quantity đặt đã vượt quá số lượng đặt trước tối đa cho phép</para>
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
