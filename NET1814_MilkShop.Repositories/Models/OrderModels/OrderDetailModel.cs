@@ -24,4 +24,6 @@ public class OrderDetailModel
     public object? PaymentData { get; set; }
     public List<OrderLogsModel?> Logs { get; set; }
     public bool IsPreorder { get; set; }
+
+    public string? ShippingCode { get; set; }
 }

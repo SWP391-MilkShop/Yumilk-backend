@@ -392,9 +392,10 @@ public class OrderService : IOrderService
             CreatedAt = order.CreatedAt,
             PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
             Logs = orderStatusLogs,
-            IsPreorder = order.IsPreorder
+            IsPreorder = order.IsPreorder,
+            ShippingCode = order.ShippingCode
         };
-        if (order.StatusId == (int)OrderStatusId.Shipped)
+        if (order is { StatusId: (int)OrderStatusId.Shipped or (int)OrderStatusId.Delivered, ShippingCode: not null })
         {
             var orderDetail = await _shippingService.GetOrderDetailAsync(orderId);
             if (orderDetail.StatusCode != 200)
@@ -732,9 +733,10 @@ public class OrderService : IOrderService
             CreatedAt = order.CreatedAt,
             PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
             Logs = orderStatusLogs,
-            IsPreorder = order.IsPreorder
+            IsPreorder = order.IsPreorder,
+            ShippingCode = order.ShippingCode
         };
-        if (order.StatusId == (int)OrderStatusId.Shipped)
+        if (order is { StatusId: (int)OrderStatusId.Shipped or (int)OrderStatusId.Delivered, ShippingCode: not null })
         {
             var orderDetail = await _shippingService.GetOrderDetailAsync(orderId);
             if (orderDetail.StatusCode != 200)
