@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace NET1814_MilkShop.Repositories.Models.ShippingModels;
 
@@ -37,6 +38,12 @@ public class CalculateFeeData
     public int Total { get; set; }
     public int ServiceFee { get; set; }
     public int InsuranceFee { get; set; }
+}
+
+public class ResponseLogData
+{
+    [JsonProperty("tracking_logs")]
+    public List<TrackingLog> Logs { get; set; } = [];
 }
 
 public class OrderResponseData
@@ -83,10 +90,8 @@ public class OrderDetailInformation
     [JsonProperty("is_cod_transferred")] public bool IsCodTransferred { get; set; }
     [JsonProperty("is_cod_collected")] public bool IsCodCollected { get; set; }
     [JsonProperty("cod_failed_amount")] public int CodFailedAmount { get; set; }
-
     [JsonProperty("cod_failed_collect_date")]
     public object? CodFailedCollectDate { get; set; }
-
     [JsonProperty("required_note")] public string? RequiredNote { get; set; }
     [JsonProperty("content")] public string? Content { get; set; }
     [JsonProperty("note")] public string? Note { get; set; }
@@ -100,6 +105,18 @@ public class Log
 {
     [JsonProperty("status")] public string? Status { get; set; }
     [JsonProperty("updated_date")] public string? UpdatedDate { get; set; }
+}
+
+public class TrackingLog
+{
+    [JsonProperty("order_code")]
+    public string ShippingCode { get; set; }
+    [JsonProperty("status")]
+    public string Status { get; set; }
+    [JsonProperty("status_name")]
+    public string StatusName { get; set; }
+    [JsonProperty("action_at")]
+    public string ActionStatus { get; set; }
 }
 
 public class ExpectedDeliveryTime
