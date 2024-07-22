@@ -92,7 +92,7 @@ public class ShippingController : ControllerBase
     /// <param name="orderId"></param>
     /// <returns></returns>
     [HttpGet("order/tracking/{orderId}")]
-    [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
+    [Authorize(AuthenticationSchemes = "Access")]
     public async Task<IActionResult> GetOrderDetail(Guid orderId)
     {
         _logger.Information("Get shipping order logs");
