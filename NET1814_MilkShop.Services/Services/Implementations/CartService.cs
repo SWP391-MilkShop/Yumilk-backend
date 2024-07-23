@@ -99,7 +99,7 @@ public class CartService : ICartService
             if (cartItem.Quantity + model.Quantity > product.Quantity)
             {
                 return ResponseModel.BadRequest(
-                    $"Bạn đã có sẵn {cartItem.Quantity} sản phẩm {product.Name} trong giỏ hàng");
+                    $"Số lượng thêm vào đã vượt quá số lượng tồn kho. Số lượng hiện có trong giỏ hàng: {cartItem.Quantity}");
             }
 
             cartItem.Quantity += model.Quantity;
@@ -135,7 +135,7 @@ public class CartService : ICartService
                 continue;
             }
 
-            if (cartDetail.Product.StatusId == (int)ProductStatusId.OutOfStock)
+            if (cartDetail.Product.StatusId == (int)ProductStatusId.OutOfStock || cartDetail.Product.Quantity == 0)
             {
                 _cartDetailRepository.Remove(cartDetail);
                 messages.Add($"Sản phẩm {cartDetail.Product.Name} đã hết hàng");
