@@ -404,8 +404,8 @@ public class OrderService : IOrderService
             }
 
             var json = JsonConvert.SerializeObject(orderDetail.Data);
-            var shippingData = JsonConvert.DeserializeObject<ExpectedDeliveryTime>(json);
-            var expectedDeliveryDate = shippingData!.DeliveryTime;
+            var shippingData = JsonConvert.DeserializeObject<ResponseLogData>(json);
+            var expectedDeliveryDate = shippingData!.OrderInfo?.DeliveryTime;
             detail.ExpectedDeliveryDate = expectedDeliveryDate;
         }
 
@@ -745,8 +745,8 @@ public class OrderService : IOrderService
             }
 
             var json = JsonConvert.SerializeObject(orderDetail.Data);
-            var shippingData = JsonConvert.DeserializeObject<ExpectedDeliveryTime>(json);
-            var expectedDeliveryDate = shippingData!.DeliveryTime;
+            var shippingData = JsonConvert.DeserializeObject<ResponseLogData>(json);
+            var expectedDeliveryDate = shippingData!.OrderInfo?.DeliveryTime;
             detail.ExpectedDeliveryDate = expectedDeliveryDate;
         }
 
