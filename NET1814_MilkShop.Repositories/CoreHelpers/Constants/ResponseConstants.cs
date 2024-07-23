@@ -195,6 +195,11 @@ public static class ResponseConstants
         return result ? $"Tải {name} lên thành công" : $"Tải {name} lên không thành công";
     }
 
+    /// <summary>
+    /// $"Không thể xóa {name} đang được sử dụng trong sản phẩm"
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
     public static string InUsed(string name)
     {
         return $"Không thể xóa {name} đang được sử dụng trong sản phẩm";
