@@ -116,14 +116,14 @@ public class ProductController : Controller
         return ResponseExtension.Result(response);
     }
 
-   /// <summary>
-   /// Add product
-   /// Required name (shorter than 255 character) quantity (larger than 0) , originnal and sale price (>0), brand, unit, category, status id in 1-3
-   /// Check exist brand, unit, category, check unique name, check validate thumbnail url
-   /// set quantity to 0 if status is preorder or out of stock, add preorder product if status is preordered
-   /// </summary>
-   /// <param name="model"></param>
-   /// <returns></returns>
+    /// <summary>
+    /// Add product
+    /// Required name (shorter than 255 character) quantity (larger than 0) , originnal and sale price (>0), brand, unit, category, status id in 1-3
+    /// Check exist brand, unit, category, check unique name, check validate thumbnail url
+    /// set quantity to 0 if status is preorder or out of stock, add preorder product if status is preordered
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>
     [HttpPost]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
     public async Task<IActionResult> CreateProduct([FromBody] CreateProductModel model)
@@ -255,7 +255,7 @@ public class ProductController : Controller
     #region Unit
 
     /// <summary>
-    ///     Get all units search by name and description, unit status, sort by name, description (default is id ascending)
+    ///     Get all units search by name and description, unit status, sort by name, description (default is gram ascending)
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>

@@ -96,7 +96,8 @@ public class UnitService : IUnitService
         };
         _unitRepository.Add(unit);
         var result = await _unitOfWork.SaveChangesAsync();
-        return result > 0 ? ResponseModel.Success(ResponseConstants.Create("đơn vị", true), createUnitModel) 
+        return result > 0
+            ? ResponseModel.Success(ResponseConstants.Create("đơn vị", true), createUnitModel)
             : ResponseModel.Error(ResponseConstants.Create("đơn vị", false));
     }
 
@@ -130,7 +131,8 @@ public class UnitService : IUnitService
 
         _unitRepository.Update(isExistUnit);
         var result = await _unitOfWork.SaveChangesAsync();
-        return result > 0 ? ResponseModel.Success(ResponseConstants.Update("đơn vị", true), unitModel)
+        return result > 0
+            ? ResponseModel.Success(ResponseConstants.Update("đơn vị", true), unitModel)
             : ResponseModel.Error(ResponseConstants.Update("đơn vị", false));
     }
 
@@ -141,14 +143,17 @@ public class UnitService : IUnitService
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("đơn vị"), null);
         }
+
         var isInUsed = await _productRepository.IsExistIdByUnit(id);
         if (isInUsed)
         {
             return ResponseModel.BadRequest(ResponseConstants.InUsed("Đơn vị"));
         }
+
         _unitRepository.Delete(isExistUnit);
         var result = await _unitOfWork.SaveChangesAsync();
-        return result > 0 ? ResponseModel.Success(ResponseConstants.Delete("đơn vị", true), null)
+        return result > 0
+            ? ResponseModel.Success(ResponseConstants.Delete("đơn vị", true), null)
             : ResponseModel.Error(ResponseConstants.Delete("đơn vị", false));
     }
 
@@ -162,8 +167,10 @@ public class UnitService : IUnitService
         return request.SortColumn?.ToLower().Replace(" ", "") switch
         {
             "name" => unit => unit.Name,
+            "gram" => unit => unit.Gram,
+            "id" => unit => unit.Id,
             "description" => unit => unit.Description!,
-            _ => unit => unit.Id
+            _ => unit => unit.Gram
         };
     }
 }
