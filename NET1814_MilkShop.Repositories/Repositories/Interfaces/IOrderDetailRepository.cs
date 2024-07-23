@@ -16,4 +16,6 @@ public interface IOrderDetailRepository
     /// <param name="productId"></param>
     /// <returns></returns>
     Task<bool> CheckActiveOrderProduct(Guid productId);
+
+    Task<List<Order>> GetActiveOrdersByProductId(Guid productId);
 }

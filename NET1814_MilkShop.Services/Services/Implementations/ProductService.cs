@@ -302,17 +302,18 @@ public class ProductService : IProductService
         product.SalePrice = model.SalePrice ?? product.SalePrice;
         product.IsActive = model.IsActive ?? product.IsActive;
         // check if product is ordered
-        if (product.StatusId != (int)ProductStatusId.OutOfStock)
-        {
-            if (model.StatusId != 0 && product.StatusId != model.StatusId)
-            {
-                var isOrdered = await _orderDetailRepository.CheckActiveOrderProduct(id);
-                if (isOrdered)
-                {
-                    return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
-                }
-            }
-        }
+
+        // if (product.StatusId != (int)ProductStatusId.OutOfStock)
+        // {
+        //     if (model.StatusId != 0 && product.StatusId != model.StatusId)
+        //     {
+        //         var isOrdered = await _orderDetailRepository.CheckActiveOrderProduct(id);
+        //         if (isOrdered)
+        //         {
+        //             return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
+        //         }
+        //     }
+        // }
 
         product.StatusId = model.StatusId == 0 ? product.StatusId : model.StatusId;
 
@@ -322,8 +323,19 @@ public class ProductService : IProductService
             var validateCommonResponse = ValidateCommon(product.SalePrice, product.OriginalPrice, product.Quantity,
                 product.StatusId, model.Thumbnail);
             if (validateCommonResponse != null) return validateCommonResponse;
+            var activeOrders = await _orderDetailRepository.GetActiveOrdersByProductId(product.Id);
+            if (product.StatusId == (int)ProductStatusId.Selling && activeOrders.Any(o => o.IsPreorder))
+            {
+                return ResponseModel.BadRequest("Sản phẩm đang được đặt trước, không thể đổi trạng thái");
+            }
+
             if (product.StatusId == (int)ProductStatusId.Preordered)
             {
+                if (activeOrders.Any(o => !o.IsPreorder))
+                {
+                    return ResponseModel.BadRequest("Sản phẩm đang được bán, không thể đổi trạng thái");
+                }
+
                 var validatePreorderProduct = ValidatePreorderProduct(existingPreorder!, product);
                 if (validatePreorderProduct != null) return validatePreorderProduct;
             }
@@ -393,15 +405,15 @@ public class ProductService : IProductService
     private async Task<List<BestSellerModel>> GetBestSellerProductAsync(IQueryable<OrderDetail> orderDetails)
     {
         var query = from order in orderDetails
-                    group order by new { order.Product.Id, order.Product.Name }
+            group order by new { order.Product.Id, order.Product.Name }
             into g
-                    select new BestSellerModel
-                    {
-                        Id = g.Key.Id,
-                        Name = g.Key.Name,
-                        TotalSold = g.Sum(x => x.Quantity),
-                        TotalRevenue = g.Sum(x => x.ItemPrice)
-                    };
+            select new BestSellerModel
+            {
+                Id = g.Key.Id,
+                Name = g.Key.Name,
+                TotalSold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.ItemPrice)
+            };
         var bestSeller = await query.OrderByDescending(x => x.TotalSold).ThenByDescending(x => x.TotalRevenue)
             .Take(5)
             .ToListAsync();
@@ -621,6 +633,11 @@ public class ProductService : IProductService
             return ResponseModel.BadRequest(ResponseConstants.InvalidExpectedPreOrderDays);
         if (product.Quantity >= preorderProduct.MaxPreOrderQuantity)
             return ResponseModel.BadRequest("Số lượng đặt trước tối đa phải lớn hơn số lượng hiện có");
+        if (product.SalePrice <= 0)
+        {
+            return ResponseModel.BadRequest("Giá sale phải lớn hơn 0");
+        }
+
         return null;
     }
 
@@ -639,19 +656,19 @@ public class ProductService : IProductService
             }).ToList();
         var allChildCategoryIds = categoriesList.SelectMany(c => c.childCategoryIds).ToList();
         var query = from c in categories
-                        // join ... into ... from ... in ... DefaultIfEmpty() to perform left join
-                        // include all categories even if there is no order detail
-                    join od in orderDetails on c.Id equals od.Product.CategoryId into categoryOrderDetails
-                    from cod in categoryOrderDetails.DefaultIfEmpty()
-                    where allChildCategoryIds.Contains(c.Id)
-                    group new { cod.Quantity, cod.ItemPrice } by c.Id
+            // join ... into ... from ... in ... DefaultIfEmpty() to perform left join
+            // include all categories even if there is no order detail
+            join od in orderDetails on c.Id equals od.Product.CategoryId into categoryOrderDetails
+            from cod in categoryOrderDetails.DefaultIfEmpty()
+            where allChildCategoryIds.Contains(c.Id)
+            group new { cod.Quantity, cod.ItemPrice } by c.Id
             into g
-                    select new
-                    {
-                        Id = g.Key,
-                        TotalSold = g.Sum(x => x.Quantity),
-                        TotalRevenue = g.Sum(x => x.ItemPrice)
-                    };
+            select new
+            {
+                Id = g.Key,
+                TotalSold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.ItemPrice)
+            };
         var dataList = await query.ToListAsync();
         var categoryStatsList = categoriesList.Select(c => new CategoryBrandStats
         {
@@ -666,18 +683,18 @@ public class ProductService : IProductService
         IQueryable<OrderDetail> orderDetails)
     {
         var query = from b in brands
-                        // join ... into ... from ... in ... DefaultIfEmpty() to perform left join
-                        // include all brands even if there is no order detail
-                    join od in orderDetails on b.Id equals od.Product.BrandId into brandOrderDetails
-                    from bod in brandOrderDetails.DefaultIfEmpty()
-                    group new { bod.Quantity, bod.ItemPrice } by b.Name
+            // join ... into ... from ... in ... DefaultIfEmpty() to perform left join
+            // include all brands even if there is no order detail
+            join od in orderDetails on b.Id equals od.Product.BrandId into brandOrderDetails
+            from bod in brandOrderDetails.DefaultIfEmpty()
+            group new { bod.Quantity, bod.ItemPrice } by b.Name
             into g
-                    select new CategoryBrandStats
-                    {
-                        Name = g.Key,
-                        TotalSold = g.Sum(x => x.Quantity),
-                        TotalRevenue = g.Sum(x => x.Quantity * x.ItemPrice)
-                    };
+            select new CategoryBrandStats
+            {
+                Name = g.Key,
+                TotalSold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.Quantity * x.ItemPrice)
+            };
         List<CategoryBrandStats> brandStatsList = await query.ToListAsync();
         return brandStatsList;
     }

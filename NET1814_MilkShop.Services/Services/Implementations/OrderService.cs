@@ -404,8 +404,8 @@ public class OrderService : IOrderService
             }
 
             var json = JsonConvert.SerializeObject(orderDetail.Data);
-            var shippingData = JsonConvert.DeserializeObject<ExpectedDeliveryTime>(json);
-            var expectedDeliveryDate = shippingData!.DeliveryTime;
+            var shippingData = JsonConvert.DeserializeObject<ResponseLogData>(json);
+            var expectedDeliveryDate = shippingData!.OrderInfo?.DeliveryTime;
             detail.ExpectedDeliveryDate = expectedDeliveryDate;
         }
 
@@ -745,8 +745,8 @@ public class OrderService : IOrderService
             }
 
             var json = JsonConvert.SerializeObject(orderDetail.Data);
-            var shippingData = JsonConvert.DeserializeObject<ExpectedDeliveryTime>(json);
-            var expectedDeliveryDate = shippingData!.DeliveryTime;
+            var shippingData = JsonConvert.DeserializeObject<ResponseLogData>(json);
+            var expectedDeliveryDate = shippingData!.OrderInfo?.DeliveryTime;
             detail.ExpectedDeliveryDate = expectedDeliveryDate;
         }
 
@@ -774,7 +774,10 @@ public class OrderService : IOrderService
         order.StatusId = (int)OrderStatusId.Delivered;
         AddOrderStatusLog(order.Id, (int)OrderStatusId.Delivered);
         // Handle payment date
-        order.PaymentDate = DateTime.UtcNow;
+        if (order.PaymentMethod == "COD")
+        {
+            order.PaymentDate = DateTime.UtcNow;
+        }
         _orderRepository.Update(order);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)
