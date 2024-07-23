@@ -25,4 +25,14 @@ public class OrderDetailRepository : Repository<OrderDetail>, IOrderDetailReposi
                             && (od.Order.StatusId != (int)OrderStatusId.Delivered
                                 && od.Order.StatusId != (int)OrderStatusId.Cancelled));
     }
+
+    public Task<List<Order>> GetActiveOrdersByProductId(Guid productId)
+    {
+        return _query.Include(od => od.Order)
+            .Where(od => od.ProductId == productId
+                         && (od.Order.StatusId != (int)OrderStatusId.Delivered
+                             && od.Order.StatusId != (int)OrderStatusId.Cancelled))
+            .Select(od => od.Order)
+            .ToListAsync();
+    }
 }
