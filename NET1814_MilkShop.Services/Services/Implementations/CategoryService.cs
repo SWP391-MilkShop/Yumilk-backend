@@ -18,7 +18,8 @@ public class CategoryService : ICategoryService
     private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CategoryService(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork, IProductRepository productRepository)
+    public CategoryService(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork,
+        IProductRepository productRepository)
     {
         _categoryRepository = categoryRepository;
         _unitOfWork = unitOfWork;
@@ -61,29 +62,26 @@ public class CategoryService : ICategoryService
 
     public async Task<ResponseModel> DeleteCategoryAsync(int id)
     {
-        var query = _categoryRepository.GetCategoriesQuery()
-            .Include(x => x.Products)
-            .Include(x => x.SubCategories).AsQueryable();
-        var category = await query.FirstOrDefaultAsync(x => x.Id == id);
+        var categories = await _categoryRepository.GetCategoriesQuery().ToListAsync();
+        var category = categories.FirstOrDefault(x => x.Id == id);
         if (category == null)
         {
             return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
         }
 
-        if (category.Products.Any())
-        {
-            return ResponseModel.BadRequest("Không thể xóa danh mục này vì có sản phẩm thuộc danh mục này");
-        }
-
-        if (category.SubCategories.Any())
-        {
-            return ResponseModel.BadRequest("Không thể xóa danh mục này vì có danh mục con thuộc danh mục này");
-        }
+        // Check if category is in used by any product
         var isInUsed = await _productRepository.IsExistIdByCategory(id);
         if (isInUsed)
         {
-            return ResponseModel.BadRequest(ResponseConstants.InUsed("Đơn vị"));
+            return ResponseModel.BadRequest(ResponseConstants.InUsed("danh mục"));
         }
+
+        var children = _categoryRepository.GetChildCategoryIds(id, categories);
+        if (children.Count > 1) // the children included the category itself
+        {
+            return ResponseModel.BadRequest("Danh mục này có danh mục con");
+        }
+
         category.DeletedAt = DateTime.Now;
         _categoryRepository.Update(category);
         var result = await _unitOfWork.SaveChangesAsync();
@@ -172,6 +170,7 @@ public class CategoryService : ICategoryService
         {
             return ResponseModel.Success(ResponseConstants.NotFound("Danh mục"), null);
         }
+
         if (model.ParentId != 0)
         {
             var categories = await _categoryRepository.GetCategoriesQuery().ToListAsync();
@@ -179,12 +178,15 @@ public class CategoryService : ICategoryService
             {
                 return ResponseModel.BadRequest("Danh mục cha không tồn tại");
             }
+
             if (_categoryRepository.IsAncestorOf(model.ParentId, id, categories))
             {
                 return ResponseModel.BadRequest("Danh mục cha này là danh mục con của danh mục hiện tại");
             }
+
             existingCategory.ParentId = model.ParentId;
         }
+
         if (!string.IsNullOrEmpty(model.Name))
         {
             // Check if category name is changed
@@ -206,7 +208,8 @@ public class CategoryService : ICategoryService
         existingCategory.IsActive = model.IsActive;
         _categoryRepository.Update(existingCategory);
         var result = await _unitOfWork.SaveChangesAsync();
-        return result > 0 ? ResponseModel.Success(ResponseConstants.Update("danh mục", true), null) 
+        return result > 0
+            ? ResponseModel.Success(ResponseConstants.Update("danh mục", true), null)
             : ResponseModel.Error(ResponseConstants.Update("danh mục", false));
     }
 }

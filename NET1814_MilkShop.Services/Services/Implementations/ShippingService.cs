@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using NET1814_MilkShop.Repositories.CoreHelpers.Enum;
@@ -31,6 +32,7 @@ public class ShippingService : IShippingService
         _shopId = configuration["GHN:ShopId"];
         _client = client;
         _client.DefaultRequestHeaders.Add("Token", _token);
+        _client.DefaultRequestHeaders.Add("User-Agent", "Yumilk App");
         _orderRepository = orderRepository;
         _orderLogRepository = orderLogRepository;
         _unitOfWork = unitOfWork;
@@ -295,14 +297,22 @@ public class ShippingService : IShippingService
         }
 
         var orderCode = order.ShippingCode;
-        var response =
-            await _client.GetAsync(
-                $"https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail?order_code={orderCode}");
+        var url = "https://dev-online-gateway.ghn.vn/order-tracking/public-api/client/tracking-logs";
+        var request = new
+        {
+            order_code = orderCode
+        };
+
+        var json = JsonConvert.SerializeObject(request);
+        // Create the content for the POST request
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        // Send the POST request
+        var response = await _client.PostAsync(url, content);
 
         var responseContent = await response.Content.ReadAsStringAsync();
 
         var responseModel =
-            JsonConvert.DeserializeObject<ShippingResponseModel<OrderDetailInformation>>(responseContent);
+            JsonConvert.DeserializeObject<ShippingResponseModel<ResponseLogData>>(responseContent);
 
         switch (response.StatusCode)
         {

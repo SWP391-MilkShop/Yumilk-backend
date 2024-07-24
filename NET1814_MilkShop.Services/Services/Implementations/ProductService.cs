@@ -302,17 +302,18 @@ public class ProductService : IProductService
         product.SalePrice = model.SalePrice ?? product.SalePrice;
         product.IsActive = model.IsActive ?? product.IsActive;
         // check if product is ordered
-        if (product.StatusId != (int)ProductStatusId.OutOfStock)
-        {
-            if (model.StatusId != 0 && product.StatusId != model.StatusId)
-            {
-                var isOrdered = await _orderDetailRepository.CheckActiveOrderProduct(id);
-                if (isOrdered)
-                {
-                    return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
-                }
-            }
-        }
+
+        // if (product.StatusId != (int)ProductStatusId.OutOfStock)
+        // {
+        //     if (model.StatusId != 0 && product.StatusId != model.StatusId)
+        //     {
+        //         var isOrdered = await _orderDetailRepository.CheckActiveOrderProduct(id);
+        //         if (isOrdered)
+        //         {
+        //             return ResponseModel.BadRequest(ResponseConstants.ProductOrdered);
+        //         }
+        //     }
+        // }
 
         product.StatusId = model.StatusId == 0 ? product.StatusId : model.StatusId;
 
@@ -322,8 +323,19 @@ public class ProductService : IProductService
             var validateCommonResponse = ValidateCommon(product.SalePrice, product.OriginalPrice, product.Quantity,
                 product.StatusId, model.Thumbnail);
             if (validateCommonResponse != null) return validateCommonResponse;
+            var activeOrders = await _orderDetailRepository.GetActiveOrdersByProductId(product.Id);
+            if (product.StatusId == (int)ProductStatusId.Selling && activeOrders.Any(o => o.IsPreorder))
+            {
+                return ResponseModel.BadRequest("Sản phẩm đang được đặt trước, không thể đổi trạng thái");
+            }
+
             if (product.StatusId == (int)ProductStatusId.Preordered)
             {
+                if (activeOrders.Any(o => !o.IsPreorder))
+                {
+                    return ResponseModel.BadRequest("Sản phẩm đang được bán, không thể đổi trạng thái");
+                }
+
                 var validatePreorderProduct = ValidatePreorderProduct(existingPreorder!, product);
                 if (validatePreorderProduct != null) return validatePreorderProduct;
             }
@@ -621,6 +633,11 @@ public class ProductService : IProductService
             return ResponseModel.BadRequest(ResponseConstants.InvalidExpectedPreOrderDays);
         if (product.Quantity >= preorderProduct.MaxPreOrderQuantity)
             return ResponseModel.BadRequest("Số lượng đặt trước tối đa phải lớn hơn số lượng hiện có");
+        if (product.SalePrice <= 0)
+        {
+            return ResponseModel.BadRequest("Giá sale phải lớn hơn 0");
+        }
+
         return null;
     }
 

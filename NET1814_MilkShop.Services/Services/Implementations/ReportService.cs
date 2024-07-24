@@ -24,7 +24,8 @@ public class ReportService : IReportService
     private readonly IUnitOfWork _unitOfWork;
 
     public ReportService(IUnitOfWork unitOfWork, IReportRepository reportRepository,
-        IReportTypeRepository reportTypeRepository, IUserRepository userRepository, IProductRepository productRepository)
+        IReportTypeRepository reportTypeRepository, IUserRepository userRepository,
+        IProductRepository productRepository)
     {
         _unitOfWork = unitOfWork;
         _reportRepository = reportRepository;
@@ -121,15 +122,23 @@ public class ReportService : IReportService
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Loại báo cáo"));
         }
+
         var isExistProduct = await _productRepository.IsExistAsync(model.ProductId);
-        if(!isExistProduct)
+        if (!isExistProduct)
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Sản phẩm"));
         }
+
         var user = await _userRepository.GetByIdAsync(userId);
         if (user is not { RoleId: (int)RoleId.Customer })
         {
             return ResponseModel.BadRequest(ResponseConstants.NotFound("Khách hàng"));
+        }
+
+        var isExistReport = await _reportRepository.IsExistAsync(userId, model.ProductId, model.ReportTypeId);
+        if (isExistReport)
+        {
+            return ResponseModel.BadRequest("Bạn đã báo cáo về sản phẩm này rồi");
         }
 
         var report = new Report

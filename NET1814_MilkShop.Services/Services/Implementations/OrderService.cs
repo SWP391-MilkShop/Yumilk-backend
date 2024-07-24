@@ -392,9 +392,10 @@ public class OrderService : IOrderService
             CreatedAt = order.CreatedAt,
             PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
             Logs = orderStatusLogs,
-            IsPreorder = order.IsPreorder
+            IsPreorder = order.IsPreorder,
+            ShippingCode = order.ShippingCode
         };
-        if (order.StatusId == (int)OrderStatusId.Shipped)
+        if (order is { StatusId: (int)OrderStatusId.Shipped or (int)OrderStatusId.Delivered, ShippingCode: not null })
         {
             var orderDetail = await _shippingService.GetOrderDetailAsync(orderId);
             if (orderDetail.StatusCode != 200)
@@ -403,8 +404,8 @@ public class OrderService : IOrderService
             }
 
             var json = JsonConvert.SerializeObject(orderDetail.Data);
-            var shippingData = JsonConvert.DeserializeObject<ExpectedDeliveryTime>(json);
-            var expectedDeliveryDate = shippingData!.DeliveryTime;
+            var shippingData = JsonConvert.DeserializeObject<ResponseLogData>(json);
+            var expectedDeliveryDate = shippingData!.OrderInfo?.DeliveryTime;
             detail.ExpectedDeliveryDate = expectedDeliveryDate;
         }
 
@@ -559,13 +560,11 @@ public class OrderService : IOrderService
 
             _unitOfWork.Detach(order); // detach order to prevent tracking
             // order code and shipping status is already updated in the shipping service
-            var orderShipping = await _shippingService.CreateOrderShippingAsync(id);
-            if (orderShipping.StatusCode != 200)
-            {
-                return orderShipping;
-            }
-
-            return ResponseModel.Success(ResponseConstants.Update("trạng thái đơn hàng", true), orderShipping.Data);
+            // var orderShipping = await _shippingService.CreateOrderShippingAsync(id);
+            // if (orderShipping.StatusCode != 200)
+            // {
+            //     return orderShipping;
+            // }
         }
 
         order.StatusId = model.StatusId;
@@ -734,9 +733,10 @@ public class OrderService : IOrderService
             CreatedAt = order.CreatedAt,
             PaymentData = order.PaymentMethod == "PAYOS" ? await GetInformation(order) : null,
             Logs = orderStatusLogs,
-            IsPreorder = order.IsPreorder
+            IsPreorder = order.IsPreorder,
+            ShippingCode = order.ShippingCode
         };
-        if (order.StatusId == (int)OrderStatusId.Shipped)
+        if (order is { StatusId: (int)OrderStatusId.Shipped or (int)OrderStatusId.Delivered, ShippingCode: not null })
         {
             var orderDetail = await _shippingService.GetOrderDetailAsync(orderId);
             if (orderDetail.StatusCode != 200)
@@ -745,8 +745,8 @@ public class OrderService : IOrderService
             }
 
             var json = JsonConvert.SerializeObject(orderDetail.Data);
-            var shippingData = JsonConvert.DeserializeObject<ExpectedDeliveryTime>(json);
-            var expectedDeliveryDate = shippingData!.DeliveryTime;
+            var shippingData = JsonConvert.DeserializeObject<ResponseLogData>(json);
+            var expectedDeliveryDate = shippingData!.OrderInfo?.DeliveryTime;
             detail.ExpectedDeliveryDate = expectedDeliveryDate;
         }
 
@@ -774,7 +774,10 @@ public class OrderService : IOrderService
         order.StatusId = (int)OrderStatusId.Delivered;
         AddOrderStatusLog(order.Id, (int)OrderStatusId.Delivered);
         // Handle payment date
-        order.PaymentDate = DateTime.UtcNow;
+        if (order.PaymentMethod == "COD")
+        {
+            order.PaymentDate = DateTime.UtcNow;
+        }
         _orderRepository.Update(order);
         var result = await _unitOfWork.SaveChangesAsync();
         if (result > 0)

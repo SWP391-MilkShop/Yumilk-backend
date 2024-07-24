@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace NET1814_MilkShop.Repositories.Models.ShippingModels;
 
@@ -37,6 +38,13 @@ public class CalculateFeeData
     public int Total { get; set; }
     public int ServiceFee { get; set; }
     public int InsuranceFee { get; set; }
+}
+
+public class ResponseLogData
+{
+    [JsonProperty("tracking_logs")] public List<TrackingLog> Logs { get; set; } = [];
+
+    [JsonProperty("order_info")] public ExpectedDeliveryTime? OrderInfo { get; set; }
 }
 
 public class OrderResponseData
@@ -100,6 +108,14 @@ public class Log
 {
     [JsonProperty("status")] public string? Status { get; set; }
     [JsonProperty("updated_date")] public string? UpdatedDate { get; set; }
+}
+
+public class TrackingLog
+{
+    [JsonProperty("order_code")] public string ShippingCode { get; set; }
+    [JsonProperty("status")] public string Status { get; set; }
+    [JsonProperty("status_name")] public string StatusName { get; set; }
+    [JsonProperty("action_at")] public string ActionStatus { get; set; }
 }
 
 public class ExpectedDeliveryTime

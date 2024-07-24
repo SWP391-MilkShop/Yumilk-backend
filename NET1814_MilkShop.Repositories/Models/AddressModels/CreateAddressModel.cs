@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using NET1814_MilkShop.Repositories.CoreHelpers.Regex;
 
 namespace NET1814_MilkShop.Repositories.Models.AddressModels;
 
@@ -8,6 +9,7 @@ public class CreateAddressModel
     public string? ReceiverName { get; set; }
 
     [Required(ErrorMessage = "Receiver phone is required")]
+    [RegularExpression(PhoneNumberRegex.Pattern, ErrorMessage = "Invalid Phone Number!")]
     public string? ReceiverPhone { get; set; }
 
     [Required(ErrorMessage = "ProvinceId is required")]

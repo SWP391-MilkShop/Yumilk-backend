@@ -34,7 +34,7 @@ public class UserController : ControllerBase
     #region User
 
     /// <summary>
-    /// create user (admin)
+    /// Create user only by Admin role, the created user role will be from 1-2 and will automatically set isActive to true without any further verification
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
@@ -48,7 +48,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Get all users (admin)
+    /// Get all users by Admin role filter by roleId Ex. 1,2,3 or 1, 2 or 3 searchTerm will search by username, firstname, lastname 
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
@@ -63,7 +63,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Update specific user (admin)
+    /// Update IsBanned only by Admin role
     /// </summary>
     /// <param name="id"></param>
     /// <param name="model"></param>
@@ -81,7 +81,7 @@ public class UserController : ControllerBase
     #region Customer
 
     /// <summary>
-    /// Get all customer (admin)
+    /// Get all customer (admin) searchTerm will search by firstName and lastName, sort by createdAt,isActive,email,firstName,lastName
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
@@ -97,7 +97,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Get customer by id (admin)
+    /// Get customer by id by Admin and Staff role, If id does not exist return Bad request
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
@@ -117,7 +117,7 @@ public class UserController : ControllerBase
     #region Account
 
     /// <summary>
-    /// get current user (profile info)
+    /// Get current customer info (profile info), Admin or Staff will not have a profile info
     /// </summary>
     /// <returns></returns>
     [HttpGet]
@@ -134,7 +134,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Only Customer can change profile info?
+    /// Only Customer can change profile info
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
@@ -152,7 +152,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// change password
+    /// User if logged in can change password validation for password is required with 8 character length, contain at least 1 uppercase, 1 lowercase, 1 number, 1 special character
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
@@ -170,7 +170,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// change username
+    /// User when logged in can change username, when change password is required
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
@@ -198,6 +198,11 @@ public class UserController : ControllerBase
     //     return ResponseExtension.Result(response);
     // }
     
+    /// <summary>
+    /// Get customer addresses default address will be on top
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     [HttpGet]
     [Route("users/{userId}/addresses")]
     [Authorize(AuthenticationSchemes = "Access")]
@@ -211,7 +216,9 @@ public class UserController : ControllerBase
 
     /// <summary>
     /// Feature only available for Customer role,
-    /// max 3 addresses and cannot set first address to non-default
+    /// max 3 addresses and cannot set first address to non-default, first address will be default after the first address others will be non-default,
+    /// WardCode, DistrictId, ProvinceId from GHN service
+    /// PhoneNumber must be valid (Vietnamese phone number)
     /// </summary>
     /// <returns></returns>
     [HttpPost]
@@ -231,7 +238,9 @@ public class UserController : ControllerBase
 
     /// <summary>
     /// Feature only available for Customer role,
-    /// if customer has only 1 address then cannot set it to non-default
+    /// If customer has only 1 address then cannot set it to non-default otherwise customer can set any address to default
+    /// PhoneNumber must be valid (Vietnamese phone number)
+    /// WardCode, DistrictId, ProvinceId from GHN service
     /// </summary>
     /// <returns></returns>
     [HttpPatch]
@@ -251,7 +260,7 @@ public class UserController : ControllerBase
 
     /// <summary>
     /// feature only available for Customer role,
-    /// cannot delete with address that is default
+    /// cannot delete address that is default otherwise customer can delete any address (soft delete)
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
@@ -272,7 +281,7 @@ public class UserController : ControllerBase
     #region OrderHistory
 
     /// <summary>
-    /// customer get all order history
+    /// Get all order history by customer id, filter by totalamount, paymentdate, orderid, searchTerm will search by product name
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="model"></param>
@@ -301,11 +310,11 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// get order detail history
+    /// Get customer order history detail by order id
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="id"></param>
-    /// <returns></returns>
+    /// <returns>Order detail with payment data if customer paid through PayOS system and order log that has been recorded when order status changed</returns>
 
     // [HttpGet("/api/customer/orders/{id}")]
     // [Authorize(AuthenticationSchemes = "Access", Roles = "3")]
@@ -329,7 +338,7 @@ public class UserController : ControllerBase
     }
     
     /// <summary>
-    /// cancel order
+    /// Cancel order by Customer role, customer can only cancel when order status is in pending and processing status
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>

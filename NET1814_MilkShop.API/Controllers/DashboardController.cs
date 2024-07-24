@@ -27,6 +27,13 @@ public class DashboardController : Controller
         _customerService = customerService;
     }
 
+    /// <summary>
+    /// Filter theo thời gian, isPreorder, OrderStatus, PaymentMethod, Email, TotalAmount
+    /// <para>Sort mặc định theo status asc, created date desc</para>
+    /// <para>Nếu có shipping code, fetch data từ API GHN để lấy ngày nhận hàng dự kiến</para>
+    /// </summary>
+    /// <param name="queryModel"></param>
+    /// <returns></returns>
     [HttpGet]
     [Route("/api/dashboard/orders")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
@@ -34,11 +41,6 @@ public class DashboardController : Controller
     {
         _logger.Information("Get all orders");
         var response = await _orderService.GetOrderAsync(queryModel);
-        /*if (response.Status == "Error")
-        {
-            return BadRequest(response);
-        }
-        return Ok(response);*/
         return ResponseExtension.Result(response);
     }
 
@@ -62,7 +64,9 @@ public class DashboardController : Controller
     }
 
     /// <summary>
-    /// Chuyen trang thai sang PROCESSING, SHIPPED
+    /// PENDING -> PROCESSING -> SHIPPED
+    /// <para>PREORDER - SHIPPED (cập nhật trừ số lượng đặt hàng)</para>
+    /// <para>Chặn các case còn lại</para>
     /// </summary>
     /// <param name="id"></param>
     /// <param name="model"></param>
@@ -78,7 +82,9 @@ public class DashboardController : Controller
     }
 
     /// <summary>
-    /// Chuyen trang thai don hang sang da giao
+    /// Chuyển từ SHIPPED sang DELIVERED
+    /// <para>Cộng point cho user = total price * 1% </para>
+    /// <para>Thêm order log, cập nhật payment date cho order COD</para>
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
@@ -94,6 +100,7 @@ public class DashboardController : Controller
 
     /// <summary>
     /// Get product stats (total sold, revenue per brand, category)
+    /// <para>List 5 sp best sellers (total sold, revenue) order by total sold desc then by total revenue desc</para>
     /// </summary>
     /// <param name="queryModel"></param>
     /// <returns></returns>
@@ -109,7 +116,7 @@ public class DashboardController : Controller
 
     /// <summary>
     /// Get users stats
-    /// Total customers,
+    /// Total new customers,
     /// Total customers who have bought any product
     /// </summary>
     /// <param name="queryModel"></param>
@@ -135,8 +142,11 @@ public class DashboardController : Controller
 
     /// <summary>
     /// Admin and Staff have full permission to cancel order (PREORDER, PROCESSING, SHIPPING).
-    /// If an order is already in shipping, preorder status (order has been created in GHN),
-    /// Admin or Staff must manually cancel shipping order in GHN.
+    /// <para>If an order is already in shipping, preorder status (order has been created in GHN),</para>
+    /// <para>Admin or Staff must manually cancel shipping order in GHN.</para>
+    /// <para>Nếu payment method là PAYOS, hủy link thanh toán</para>
+    /// <para>Trả point nếu có sử dụng point</para>
+    /// <para>Cập nhật quantity product khi hủy đơn hàng</para>
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
@@ -150,6 +160,11 @@ public class DashboardController : Controller
         return ResponseExtension.Result(response);
     }
 
+    /// <summary>
+    /// Lấy chi tiết đơn hàng + order log, lấy log GHN (nếu có)
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet]
     [Route("orders/{id}")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
@@ -160,6 +175,11 @@ public class DashboardController : Controller
         return ResponseExtension.Result(res);
     }
 
+    /// <summary>
+    /// Lấy tỉ lệ sử dụng payment method COD với PAYOS
+    /// Tính dựa trên đơn hàng có order status = delivered
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     [Route("payment/stats/payment-methods")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1")]
@@ -172,6 +192,7 @@ public class DashboardController : Controller
 
     /// <summary>
     /// tổng đơn hàng đặt trong thứ ngày tháng
+    /// Tính dựa trên ngày đặt hàng (Created_at) và có order status != Cancelled
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
@@ -186,7 +207,8 @@ public class DashboardController : Controller
     }
 
     /// <summary>
-    /// khách hàng quay trở lại mua hàng theo quý trong năm
+    /// khách hàng quay trở lại mua hàng theo quý trong năm (Q1: 1-3, Q2: 4-6, Q3: 7-9, Q4: 10-12)
+    /// Tính dựa trên đơn hàng có orderstatus = delivered
     /// </summary>
     /// <param name="year"></param>
     /// <returns></returns>
@@ -215,6 +237,10 @@ public class DashboardController : Controller
         return ResponseExtension.Result(res);
     }
 
+    /// <summary>
+    /// Lấy 5 khách hàng mua nhiều nhất theo giá trị đơn hàng
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     [Route("customers/stats/total-purchase")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]
@@ -225,6 +251,12 @@ public class DashboardController : Controller
         return ResponseExtension.Result(res);
     }
 
+    /// <summary>
+    /// Lấy số lượng đơn hàng và tổng giá trị đơn hàng của khách hàng theo năm
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="year"></param>
+    /// <returns></returns>
     [HttpGet]
     [Route("customers/{id}/stats/{year}/total-purchase/")]
     [Authorize(AuthenticationSchemes = "Access", Roles = "1,2")]

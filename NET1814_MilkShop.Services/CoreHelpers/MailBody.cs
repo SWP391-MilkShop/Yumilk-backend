@@ -532,7 +532,7 @@ public static class MailBody
         );
         body = body.Replace("{{support_url}}", "https://milkshop.azurewebsites.net/api");
         body = body.Replace("[Product Name]", "Yumilk shop");
-        body = body.Replace("[Company Name, LLC]", "Yumilk");
+        body = body.Replace("[Company Name, LLC]", "Yumilk Shop");
         body = body.Replace("[Team]", "Yumilk Team");
         return body;
     }
@@ -1065,7 +1065,7 @@ public static class MailBody
         body = body.Replace("{{support_url}}", "https://milkshop.azurewebsites.net/api");
         body = body.Replace("[Product Name]", "Yumilk shop");
         body = body.Replace("[Team]", "Yumilk Team");
-        body = body.Replace("[Company Name, LLC]", "Yumilk");
+        body = body.Replace("[Company Name, LLC]", "Yumilk Shop");
         return body;
     }
 
@@ -1545,8 +1545,6 @@ public static class MailBody
                                 <table class=""body-sub"" role=""presentation"">
                                   <tr>
                                     <td>
-        <p class=""f-fallback sub"">Nếu bạn gặp sự cố với nút ở trên, sao chép và dán URL dưới đây vào trình duyệt web của bạn.</p>
-        <p class=""f-fallback sub"">{{action_url}}</p>
                                     </td>
                                   </tr>
                                 </table>
@@ -1562,9 +1560,8 @@ public static class MailBody
                           <tr>
                             <td class=""content-cell"" align=""center"">
                               <p class=""f-fallback sub align-center"">
-                                [Company Name, LLC]
-                                <br>1234 Street Rd.
-                                <br>Suite 1234
+                                 [Yumilk Shop]
+                                <br>Khu CNC, Thành phố Thủ Đức, Thành Phố Hồ Chí Minh.        
                               </p>
                             </td>
                           </tr>
@@ -2059,9 +2056,7 @@ public static class MailBody
                                 <!-- Sub copy -->
                                 <table class=""body-sub"" role=""presentation"">
                                   <tr>
-                                    <td>
-        <p class=""f-fallback sub"">Nếu bạn gặp sự cố với nút ở trên, sao chép và dán URL dưới đây vào trình duyệt web của bạn.</p>
-        <p class=""f-fallback sub"">{{action_url}}</p>
+                                    <td>      
                                     </td>
                                   </tr>
                                 </table>
@@ -2077,9 +2072,8 @@ public static class MailBody
                           <tr>
                             <td class=""content-cell"" align=""center"">
                               <p class=""f-fallback sub align-center"">
-                                [Company Name, LLC]
-                                <br>1234 Street Rd.
-                                <br>Suite 1234
+                                [Yumilk Shop]
+                                <br>Khu CNC, Thành phố Thủ Đức, Thành Phố Hồ Chí Minh.
                               </p>
                             </td>
                           </tr>
@@ -2575,8 +2569,6 @@ public static class MailBody
                                 <table class=""body-sub"" role=""presentation"">
                                   <tr>
                                     <td>
-        <p class=""f-fallback sub"">Nếu bạn gặp sự cố với nút ở trên, sao chép và dán URL dưới đây vào trình duyệt web của bạn.</p>
-        <p class=""f-fallback sub"">{{action_url}}</p>
                                     </td>
                                   </tr>
                                 </table>
@@ -2592,9 +2584,8 @@ public static class MailBody
                           <tr>
                             <td class=""content-cell"" align=""center"">
                               <p class=""f-fallback sub align-center"">
-                                [Company Name, LLC]
-                                <br>1234 Street Rd.
-                                <br>Suite 1234
+                                [Yumilk Shop]
+                                <br>Khu CNC, Thành phố Thủ Đức, Thành Phố Hồ Chí Minh.                               
                               </p>
                             </td>
                           </tr>

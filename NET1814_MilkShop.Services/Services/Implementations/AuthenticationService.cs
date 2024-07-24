@@ -198,25 +198,19 @@ public sealed class AuthenticationService : IAuthenticationService
     )
     {
         var customer = await _customerRepository.GetByEmailAsync(request.Email);
-        if (customer != null)
-        {
-            string token = _jwtTokenExtension.CreateVerifyCode();
-            customer.User.ResetPasswordCode = token;
-            _userRepository.Update(customer.User);
-            var result = await _unitOfWork.SaveChangesAsync();
-            if (result > 0)
-            {
-                var verifyToken = _jwtTokenExtension.CreateJwtToken(
-                    customer.User,
-                    TokenType.Reset
-                );
-                await _emailService.SendPasswordResetEmailAsync(customer.Email, verifyToken,
-                    customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
-                return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
-            }
-        }
-
-        return ResponseModel.BadRequest(ResponseConstants.NotFound("Email"));
+        if (customer == null) return ResponseModel.BadRequest(ResponseConstants.NotFound("Email"));
+        var token = _jwtTokenExtension.CreateVerifyCode();
+        customer.User.ResetPasswordCode = token;
+        _userRepository.Update(customer.User);
+        var result = await _unitOfWork.SaveChangesAsync();
+        if (result <= 0) return ResponseModel.Error("Có lỗi xảy ra trong quá trình reset mật khẩu");
+        var verifyToken = _jwtTokenExtension.CreateJwtToken(
+            customer.User,
+            TokenType.Reset
+        );
+        await _emailService.SendPasswordResetEmailAsync(customer.Email, verifyToken,
+            customer.User.FirstName); //Có link token ở header nhưng phải tự nhập ở swagger để change pass
+        return ResponseModel.Success(ResponseConstants.ResetPasswordLink, null);
     }
 
     public async Task<ResponseModel> ResetPasswordAsync(ResetPasswordModel request)
@@ -366,6 +360,7 @@ public sealed class AuthenticationService : IAuthenticationService
         User tempUser;
         var userEmail = decodedToken.Claims["email"].ToString();
         var isExistUser = await _customerRepository.GetByEmailAsync(userEmail!);
+        string message = "";
         if (isExistUser == null) // nếu chưa tồn tại người dùng thì tự động đăng ký
         {
             var userFullName = decodedToken.Claims["name"].ToString()!.Trim();
@@ -408,6 +403,7 @@ public sealed class AuthenticationService : IAuthenticationService
             _customerRepository.Add(customerGoogle);
             // gửi email username và password cho người dùng
             await _emailService.SendGoogleAccountAsync(userEmail!, userFullName, username, password);
+            message = "\nTên đăng nhập và mật khẩu đã được gửi vào email của bạn";
         }
         else // đã tồn tại gmail trong hệ thống
         {
@@ -430,6 +426,7 @@ public sealed class AuthenticationService : IAuthenticationService
 
                 isExistUser.GoogleId = googleId;
                 _userRepository.Update(isExistUser.User);
+                message = "\nTài khoản Google đã được liên kết với tài khoản của bạn";
             }
             else if (isExistUser.GoogleId != googleId)
             {
@@ -465,6 +462,6 @@ public sealed class AuthenticationService : IAuthenticationService
             responseLogin.GoogleId = customer.GoogleId;
         }
 
-        return ResponseModel.Success(ResponseConstants.Login(true), responseLogin);
+        return ResponseModel.Success(ResponseConstants.Login(true) + message, responseLogin);
     }
 }
